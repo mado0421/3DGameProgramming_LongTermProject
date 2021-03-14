@@ -30,3 +30,11 @@
 *.exe
 *.out
 *.app
+
+# x64/Debug 나 Debug 폴더 안 보고 싶어서
+*.tlog
+*.recipe
+*.log
+*.res
+*.idb
+*.pdb
