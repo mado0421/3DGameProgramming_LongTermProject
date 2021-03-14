@@ -50,13 +50,13 @@ public:
 private:
 	void SomethingSecret();
 public:
-	float 					m_fTime;
-	string 					m_strName;
+	float 			m_fTime;
+	string 			m_strName;
 protected:
-	XMFLOAT4X4 				m_xmf4x4World;
-	Other* 					m_pOther;
-	Other** 				m_ppOther;
-	vector<Other> 			m_vecOther;
+	XMFLOAT4X4 		m_xmf4x4World;
+	Other* 			m_pOther;
+	Other** 			m_ppOther;
+	vector<Other> 		m_vecOther;
 	unordered_map<Other> 	m_uomOther;		
 }
 
