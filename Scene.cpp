@@ -7,6 +7,7 @@
 #include "Framework.h"
 #include "Texture.h"
 #include "Light.h"
+#include "Importer.h"
 
 void Scene::Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
@@ -31,14 +32,25 @@ void Scene::Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12Graphics
 	// 텍스쳐도 128개 정도면 충분할 것.
 	CreateDescriptorHeap();
 
-	int nObject = 27;
-	for (int i = 0; i < nObject; i++) {
-		Object* tempObj = new Object(m_pd3dDevice, m_pd3dCommandList);
-		tempObj->CreateCBV(m_pd3dDevice, m_d3dCbvCPUDescriptorStartHandle);
-		tempObj->SetCbvGpuHandle(m_d3dCbvGPUDescriptorStartHandle);
-		tempObj->Move(XMFLOAT3(150 * (i % 3), 150 * ((i%9)/3), 150 * (i / 9)));
+	ObjectDataImporter objDataImporter;
+	vector<OBJECT_DESC> vecObjDesc = objDataImporter.Load("Data/ObjectData.txt");
+
+	for (int i = 0; i < vecObjDesc.size(); i++) {
+		Object* tempObj = new Object(m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
+		
+		tempObj->Move(vecObjDesc[i].position);
 		m_vecObject.push_back(tempObj);
 	}
+
+	//int nObject = 27;
+	//for (int i = 0; i < nObject; i++) {
+	//	Object* tempObj = new Object(m_pd3dDevice, m_pd3dCommandList);
+	//	tempObj->CreateCBV(m_pd3dDevice, m_d3dCbvCPUDescriptorStartHandle);
+	//	tempObj->SetCbvGpuHandle(m_d3dCbvGPUDescriptorStartHandle);
+	//	tempObj->Move(XMFLOAT3(150 * (i % 3), 150 * ((i%9)/3), 150 * (i / 9)));
+	//	m_vecObject.push_back(tempObj);
+	//}
+ 
 	//{
 	//	Object* tempObj = new Object(m_pd3dDevice, m_pd3dCommandList);
 	//	tempObj->CreateCBV(m_pd3dDevice, m_d3dCbvCPUDescriptorStartHandle);
@@ -76,18 +88,13 @@ void Scene::Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12Graphics
 	//}
 
 	for (int i = 0; i < 3; i++) {
-		DebugWindowObject* temp = new DebugWindowObject(m_pd3dDevice, m_pd3dCommandList);
-		temp->CreateCBV(m_pd3dDevice, m_d3dCbvCPUDescriptorStartHandle);
-		temp->SetCbvGpuHandle(m_d3dCbvGPUDescriptorStartHandle);
-
+		DebugWindowObject* temp = new DebugWindowObject(m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
 		temp->Move(XMFLOAT3(-0.5f * i, 1, 0));
 
 		m_vecDebugWindow.push_back(temp);
 	}
 
-	DebugWindowObject* tempScreen = new DebugWindowObject(m_pd3dDevice, m_pd3dCommandList, true);
-	tempScreen->CreateCBV(m_pd3dDevice, m_d3dCbvCPUDescriptorStartHandle);
-	tempScreen->SetCbvGpuHandle(m_d3dCbvGPUDescriptorStartHandle);
+	DebugWindowObject* tempScreen = new DebugWindowObject(m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle, true);
 	m_vecDebugWindow.push_back(tempScreen);
 
 
@@ -295,7 +302,7 @@ void Scene::Update(float fTimeElapsed)
 	m_pCamera->Update(fTimeElapsed);
 	m_lightMng->SetPos(camLightIdx, m_pCamera->GetPosition());
 	m_lightMng->SetDir(camLightIdx, m_pCamera->GetLook());
-	for (int i = 0; i < m_vecObject.size(); i++) m_vecObject[i]->Rotate(XMFLOAT3(30.0f * fTimeElapsed, 30.0f * fTimeElapsed, 30.0f * fTimeElapsed));
+	//for (int i = 0; i < m_vecObject.size(); i++) m_vecObject[i]->Rotate(XMFLOAT3(30.0f * fTimeElapsed, 30.0f * fTimeElapsed, 30.0f * fTimeElapsed));
 	//for (int i = 0; i < m_vecObject.size(); i++) m_vecObject[i]->Rotate(XMFLOAT3(30.0f * fTimeElapsed, 0, 0));
 }
 void Scene::Input(UCHAR* pKeyBuffer, float fTimeElapsed)

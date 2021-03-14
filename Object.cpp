@@ -2,7 +2,10 @@
 #include "Object.h"
 #include "Mesh.h"
 
-Object::Object(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+Object::Object(
+	ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+	D3D12_CPU_DESCRIPTOR_HANDLE& d3dCbvCPUDescriptorStartHandle,
+	D3D12_GPU_DESCRIPTOR_HANDLE& d3dCbvGPUDescriptorStartHandle)
 {
 	m_xmf4x4World	= Matrix4x4::Identity();
 	m_pMesh			= new Mesh(pd3dDevice, pd3dCommandList);
@@ -11,6 +14,9 @@ Object::Object(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandL
 
 	m_pd3dCBResource = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes,
 		D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
+
+	CreateCBV(pd3dDevice, d3dCbvCPUDescriptorStartHandle);
+	SetCbvGpuHandle(d3dCbvGPUDescriptorStartHandle);
 }
 
 void Object::Update(float fTimeElapsed)
@@ -76,8 +82,12 @@ void Object::Rotate(const XMFLOAT3 angle)
 	m_xmf4x4World._31 = xmf3Look.x;		m_xmf4x4World._32 = xmf3Look.y;		m_xmf4x4World._33 = xmf3Look.z;
 }
 
-DebugWindowObject::DebugWindowObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, bool bIsPass2Screen)
-	: Object(pd3dDevice, pd3dCommandList)
+DebugWindowObject::DebugWindowObject(
+	ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+	D3D12_CPU_DESCRIPTOR_HANDLE& d3dCbvCPUDescriptorStartHandle,
+	D3D12_GPU_DESCRIPTOR_HANDLE& d3dCbvGPUDescriptorStartHandle, 
+	bool bIsPass2Screen)
+	: Object(pd3dDevice, pd3dCommandList, d3dCbvCPUDescriptorStartHandle, d3dCbvGPUDescriptorStartHandle)
 {
 	m_xmf4x4World = Matrix4x4::Identity();
 	m_pDWMesh = new DebugWindowMesh(pd3dDevice, pd3dCommandList, bIsPass2Screen);
@@ -86,6 +96,9 @@ DebugWindowObject::DebugWindowObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 
 	m_pd3dCBResource = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes,
 		D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
+
+	CreateCBV(pd3dDevice, d3dCbvCPUDescriptorStartHandle);
+	SetCbvGpuHandle(d3dCbvGPUDescriptorStartHandle);
 }
 
 void DebugWindowObject::Render(ID3D12GraphicsCommandList* pd3dCommandList)

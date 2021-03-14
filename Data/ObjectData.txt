@@ -1,0 +1,8 @@
+#Object
+
+{ position 0 0 0 }
+{ position 100 0 0 }
+{ position 0 100 0 }
+{ position 100 100 0 }
+
+#End
