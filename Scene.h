@@ -6,6 +6,7 @@ class Object;
 class DebugWindowObject;
 class Camera;
 class RenderToTextureClass;
+class ShadowMapRenderer;
 class Framework;
 class Texture;
 class LightManager;
@@ -25,6 +26,9 @@ protected:
 
 private:
 	RenderToTextureClass*						m_pRTTClass;
+
+	ShadowMapRenderer*							m_pShadowMapRenderer;
+
 	vector<DebugWindowObject*>					m_vecDebugWindow;
 	vector<Object*>								m_vecObject;
 	Camera*										m_pCamera;

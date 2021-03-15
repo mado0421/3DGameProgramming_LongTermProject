@@ -51,6 +51,9 @@
     <Filter Include="소스 파일\FileIO">
       <UniqueIdentifier>{3039cdb3-d862-4227-aaeb-b83d276ad2d0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\RenderToTexture">
+      <UniqueIdentifier>{f2caca0c-ddaa-487a-a0e8-e4066f1afbd7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Resource.h">
@@ -99,9 +102,6 @@
     <ClInclude Include="Vertex.h">
       <Filter>소스 파일\Object\Mesh</Filter>
     </ClInclude>
-    <ClInclude Include="RenderToTextureClass.h">
-      <Filter>소스 파일\framework</Filter>
-    </ClInclude>
     <ClInclude Include="Shadow.h">
       <Filter>소스 파일\Light\Shadow</Filter>
     </ClInclude>
@@ -113,6 +113,12 @@
     </ClInclude>
     <ClInclude Include="Importer.h">
       <Filter>소스 파일\FileIO</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderToTextureClass.h">
+      <Filter>소스 파일\RenderToTexture</Filter>
+    </ClInclude>
+    <ClInclude Include="d3dUtil.h">
+      <Filter>소스 파일</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -150,9 +156,6 @@
     <ClCompile Include="Vertex.cpp">
       <Filter>소스 파일\Object\Mesh</Filter>
     </ClCompile>
-    <ClCompile Include="RenderToTextureClass.cpp">
-      <Filter>소스 파일\framework</Filter>
-    </ClCompile>
     <ClCompile Include="Shadow.cpp">
       <Filter>소스 파일\Light\Shadow</Filter>
     </ClCompile>
@@ -164,6 +167,12 @@
     </ClCompile>
     <ClCompile Include="Importer.cpp">
       <Filter>소스 파일\FileIO</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderToTextureClass.cpp">
+      <Filter>소스 파일\RenderToTexture</Filter>
+    </ClCompile>
+    <ClCompile Include="d3dUtil.cpp">
+      <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -194,5 +203,8 @@
     <None Include="Light.hlsli">
       <Filter>소스 파일\HLSL</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="Data\ObjectData.txt" />
   </ItemGroup>
 </Project>

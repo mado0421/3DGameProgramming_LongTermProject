@@ -19,6 +19,13 @@ Camera::Camera()
 	, m_xmf3LookAtWorld(XMFLOAT3(0.0f, 0.0f, 0.0f))
 	, m_xmfTime(0)
 {
+	m_xmf4x4Texture = Matrix4x4::Identity();
+	m_xmf4x4Texture.m[0][0] = 0.5f;
+	m_xmf4x4Texture.m[1][1] = -0.5f;
+	m_xmf4x4Texture.m[2][2] = 1.0f;
+	m_xmf4x4Texture.m[3][3] = 1.0f;
+	m_xmf4x4Texture.m[0][3] = 0.5f;
+	m_xmf4x4Texture.m[1][3] = 0.5f;
 
 }
 
@@ -98,6 +105,7 @@ void Camera::UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList)
 	XMStoreFloat4x4(&m_pcbMappedCamera->m_xmf4x4Projection, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4Projection)));
 	XMStoreFloat4x4(&m_pcbMappedCamera->m_xmf4x4ViewInv, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4ViewInv)));
 	XMStoreFloat4x4(&m_pcbMappedCamera->m_xmf4x4ProjectionInv, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4ProjectionInv)));
+	XMStoreFloat4x4(&m_pcbMappedCamera->m_xmf4x4Texture, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4Texture)));
 
 	::memcpy(&m_pcbMappedCamera->m_xmf3Position, &m_xmf3Position, sizeof(XMFLOAT3));
 	::memcpy(&m_pcbMappedCamera->m_xmfTime, &m_xmfTime, sizeof(float));

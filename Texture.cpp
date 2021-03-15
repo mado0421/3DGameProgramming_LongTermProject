@@ -29,7 +29,8 @@ void Texture::LoadFromFile(
 void Texture::CreateEmptyTexture(
 	ID3D12Device* pd3dDevice, UINT width, UINT height, 
 	D3D12_CPU_DESCRIPTOR_HANDLE& cpuHandle,
-	D3D12_GPU_DESCRIPTOR_HANDLE& gpuHandle)
+	D3D12_GPU_DESCRIPTOR_HANDLE& gpuHandle,
+	UINT nArraySize)
 {
 	HRESULT hr = E_FAIL;
 
@@ -37,7 +38,7 @@ void Texture::CreateEmptyTexture(
 	desc.Width					= width;
 	desc.Height					= height;
 	desc.MipLevels				= 1;
-	desc.DepthOrArraySize		= 1;
+	desc.DepthOrArraySize		= nArraySize;
 	desc.Format					= DXGI_FORMAT_R32G32B32A32_FLOAT;
 	desc.Flags					= D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
 	desc.SampleDesc.Count		= 1;
@@ -63,7 +64,6 @@ ID3D12Resource* Texture::GetTexture()
 {
 	return m_pd3dTexture;
 }
-
 D3D12_GPU_DESCRIPTOR_HANDLE Texture::GetGpuHandle()
 {
 	return m_d3dSrvGPUDescriptorHandle;
@@ -76,13 +76,14 @@ void DepthTexture::CreateEmptyDSB(
 	D3D12_GPU_DESCRIPTOR_HANDLE& gpuHandle,
 	UINT nArraySize)
 {
+	try{
+
+	HRESULT hr;
+
+
 	D3D12_RESOURCE_DESC d3dResourceDesc;
 	d3dResourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
-	d3dResourceDesc.DepthOrArraySize = 1;
-	if (nArraySize) {
-		d3dResourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
-		d3dResourceDesc.DepthOrArraySize = nArraySize;
-	}
+	d3dResourceDesc.DepthOrArraySize = nArraySize;
 	d3dResourceDesc.Alignment = 0;
 	d3dResourceDesc.Width = width;
 	d3dResourceDesc.Height = height;
@@ -106,46 +107,84 @@ void DepthTexture::CreateEmptyDSB(
 	d3dClearValue.DepthStencil.Depth	= 1.0f;
 	d3dClearValue.DepthStencil.Stencil	= 0;
 
-	pd3dDevice->CreateCommittedResource(&d3dHeapProperties, D3D12_HEAP_FLAG_NONE, &d3dResourceDesc, 
-		D3D12_RESOURCE_STATE_COPY_DEST, &d3dClearValue, __uuidof(ID3D12Resource), (void**)&m_pd3dTexture);
-	// 여기까지 일단 DepthStencilBuffer는 만들었음
-	/*
-		책보니까 여기서 DEPTH_STENCIL이 아니라 GENERIC_READ로 만들었음.
-	
-	*/
-	
-	D3D12_DEPTH_STENCIL_VIEW_DESC d3dDepthStencilViewDesc;
-	::ZeroMemory(&d3dDepthStencilViewDesc, sizeof(D3D12_DEPTH_STENCIL_VIEW_DESC));
-	d3dDepthStencilViewDesc.Format			= DXGI_FORMAT_D24_UNORM_S8_UINT;
-	d3dDepthStencilViewDesc.ViewDimension	= D3D12_DSV_DIMENSION_TEXTURE2D;
-	if (nArraySize) d3dDepthStencilViewDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2DARRAY; 
-	d3dDepthStencilViewDesc.Flags			= D3D12_DSV_FLAG_NONE;
+	ThrowIfFailed(pd3dDevice->CreateCommittedResource(&d3dHeapProperties, D3D12_HEAP_FLAG_NONE, &d3dResourceDesc,
+		D3D12_RESOURCE_STATE_COPY_DEST, &d3dClearValue, __uuidof(ID3D12Resource), (void**)&m_pd3dTexture));
 
-	pd3dDevice->CreateDepthStencilView(m_pd3dTexture, NULL, depthStencilHeapCpuHandle);
-	//// 이건 DSV를 만든거구요. 이거 할 때 DepthStencilDescriptorHeap 주소 필요해서
-	//// 받아와서 씀
-	//
-	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
-	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	srvDesc.Format					= DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
-	srvDesc.ViewDimension			= D3D12_SRV_DIMENSION_TEXTURE2D;
-	if (nArraySize) srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-	srvDesc.Texture2D.MostDetailedMip = 0;
-	srvDesc.Texture2D.MipLevels		= 1;
-	srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
-	srvDesc.Texture2D.PlaneSlice	= 0;
+	if (1 < nArraySize) {
+		for (int i = 0; i < nArraySize; i++) {
 
-	pd3dDevice->CreateShaderResourceView(m_pd3dTexture, &srvDesc, cpuHandle);
+			D3D12_TEX2D_ARRAY_DSV texArray;
+			texArray.MipSlice			= 0;
+			texArray.FirstArraySlice	= i;
+			texArray.ArraySize			= 1;
 
-	//D3D12_RESOURCE_DESC d3dResourceDesc = m_pd3dTexture->GetDesc();
-	//D3D12_SHADER_RESOURCE_VIEW_DESC d3dShaderResourceViewDesc
-	//	= GetShaderResourceViewDesc(d3dResourceDesc, RESOURCE_TEXTURE2D);
-	//pd3dDevice->CreateShaderResourceView(m_pd3dTexture, &d3dShaderResourceViewDesc, cpuHandle);
+			D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc;
+			dsvDesc.Format				= DXGI_FORMAT_D24_UNORM_S8_UINT;
+			dsvDesc.ViewDimension		= D3D12_DSV_DIMENSION_TEXTURE2DARRAY;
+			dsvDesc.Texture2DArray		= texArray;
+			dsvDesc.Flags				= D3D12_DSV_FLAG_NONE;
+
+			pd3dDevice->CreateDepthStencilView(m_pd3dTexture, &dsvDesc, depthStencilHeapCpuHandle);
+			depthStencilHeapCpuHandle.ptr += gnCbvSrvDescriptorIncrementSize;
+		}
+		D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+		srvDesc.Shader4ComponentMapping			= D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+		srvDesc.Format							= DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+		srvDesc.ViewDimension					= D3D12_SRV_DIMENSION_TEXTURE2DARRAY;
+		srvDesc.Texture2DArray.ArraySize = nArraySize;
+		srvDesc.Texture2DArray.FirstArraySlice = 0;
+		srvDesc.Texture2DArray.MipLevels = 1;
+		srvDesc.Texture2DArray.MostDetailedMip = 0;
+		srvDesc.Texture2DArray.PlaneSlice = 0;
+		srvDesc.Texture2DArray.ResourceMinLODClamp = 0.0f;
+
+		pd3dDevice->CreateShaderResourceView(m_pd3dTexture, &srvDesc, cpuHandle);
+		cpuHandle.ptr += gnCbvSrvDescriptorIncrementSize;
+	}
+	else {
+		D3D12_TEX2D_DSV tex;
+		tex.MipSlice = 0;
+
+		D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc;
+		dsvDesc.Format			= DXGI_FORMAT_D24_UNORM_S8_UINT;
+		dsvDesc.ViewDimension	= D3D12_DSV_DIMENSION_TEXTURE2D;
+		dsvDesc.Texture2D		= tex;
+		dsvDesc.Flags			= D3D12_DSV_FLAG_NONE;
+
+		pd3dDevice->CreateDepthStencilView(m_pd3dTexture, &dsvDesc, depthStencilHeapCpuHandle);
+		depthStencilHeapCpuHandle.ptr += gnCbvSrvDescriptorIncrementSize;
+
+		D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+		srvDesc.Shader4ComponentMapping			= D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+		srvDesc.Format							= DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+		srvDesc.ViewDimension					= D3D12_SRV_DIMENSION_TEXTURE2D;
+		srvDesc.Texture2D.MostDetailedMip		= 0;
+		srvDesc.Texture2D.MipLevels				= 1;
+		srvDesc.Texture2D.ResourceMinLODClamp	= 0.0f;
+		srvDesc.Texture2D.PlaneSlice			= 0;
+
+		pd3dDevice->CreateShaderResourceView(m_pd3dTexture, &srvDesc, cpuHandle);
+		cpuHandle.ptr += gnCbvSrvDescriptorIncrementSize;
+	}
+	//D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+	//srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	//srvDesc.Format					= DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+	//srvDesc.ViewDimension			= D3D12_SRV_DIMENSION_TEXTURE2D;
+	//if (1 < nArraySize) srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2DARRAY;
+	//srvDesc.Texture2D.MostDetailedMip = 0;
+	//srvDesc.Texture2D.MipLevels		= 1;
+	//srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
+	//srvDesc.Texture2D.PlaneSlice	= 0;
+
+	//pd3dDevice->CreateShaderResourceView(m_pd3dTexture, &srvDesc, cpuHandle);
+	//cpuHandle.ptr += gnCbvSrvDescriptorIncrementSize;
 
 	m_d3dSrvGPUDescriptorHandle = gpuHandle;
-	cpuHandle.ptr += gnCbvSrvDescriptorIncrementSize;
 	gpuHandle.ptr += gnCbvSrvDescriptorIncrementSize;
-	// 여기까진 됨
-	// SRV 만들면 실행 안 됨
-	//CreateSRV(pd3dDevice, cpuHandle, gpuHandle);
+
+	}
+	catch (DxException& e) {
+		MessageBox(nullptr, e.ToString().c_str(), L"HR Failed", MB_OK);
+		return ;
+	}
 }

@@ -15,6 +15,11 @@ Light를 추가하거나? 끄거나? 거리에 따라?
 가까우면 켜고??
 */
 
+constexpr UINT SpotLightShadowIdxIncrement			= 1;
+constexpr UINT PointLightShadowIdxIncrement			= 6;
+constexpr UINT DirectionalLightShadowIdxIncrement	= 3;
+constexpr UINT MAXSHADOWIDX = 64;
+
 typedef enum LIGHTTYPE {
 	LIGHT_POINT			= (UINT)1,
 	LIGHT_SPOT			= (UINT)2,
@@ -28,10 +33,13 @@ struct CB_LIGHT_INFO {
 	XMFLOAT3	position;
 	float		spotPower;
 	UINT		type;
-	bool		enable;
+	UINT		shadowIdx;
+	bool		isEnable;
 	bool		padding0;
 	short		padding1;
-	XMFLOAT2	padding2 = XMFLOAT2(0,0);
+	bool		isShadow;
+	bool		padding2;
+	short		padding3;
 };
 
 class LightManager {
@@ -47,21 +55,34 @@ public:
 		XMFLOAT3 pos		= XMFLOAT3(0,0,0),
 		XMFLOAT2 falloff	= XMFLOAT2(300.0f, 500.0f));
 	UINT AddDirectionalLight(
-		XMFLOAT3 color		= XMFLOAT3(0.0f, 1.0f, 0.0f),
+		XMFLOAT3 color		= XMFLOAT3(0.1f, 0.1f, 0.1f),
 		XMFLOAT3 dir		= XMFLOAT3(0, -1, 0));
 	UINT AddSpotLight(
 		XMFLOAT3 color		= XMFLOAT3(0.0f, 0.0f, 1.0f),
 		XMFLOAT3 pos		= XMFLOAT3(0, 0, -300),
 		XMFLOAT3 dir		= XMFLOAT3(0, 0, 1),
-		XMFLOAT2 falloff	= XMFLOAT2(200.0f, 500.0f));
+		XMFLOAT2 falloff	= XMFLOAT2(200.0f, 500.0f),
+		float spotPower		= 1.0f,
+		bool isShadow		= false);
 
 	void SetColor(UINT idx, const XMFLOAT3 color)		{ m_vLightInfo[idx].color = color; }
 	void SetPos(UINT idx, const XMFLOAT3 pos)			{ m_vLightInfo[idx].position = pos; }
 	void SetFalloff(UINT idx, const XMFLOAT2 falloff)	{ m_vLightInfo[idx].falloffStart = falloff.x; m_vLightInfo[idx].falloffEnd = falloff.y; }
 	void SetDir(UINT idx, const XMFLOAT3 dir)			{ m_vLightInfo[idx].direction = dir; }
 
+	XMFLOAT3 GetPosition(UINT idx) { return m_vLightInfo[idx].position; }
+	XMFLOAT3 GetDirection(UINT idx) { return m_vLightInfo[idx].direction; }
+	vector<UINT> GetOnShadowLightIndices() {
+		vector<UINT> result;
+		for (int i = 0; i < m_vLightInfo.size(); i++) {
+			if (m_vLightInfo[i].isShadow) result.push_back(i);
+		}
+		return result;
+	}
+
 private:
 	UINT						m_nMaxLight = 64;
+	UINT						m_nCurrShadowIdx = 0;
 	D3D12_GPU_DESCRIPTOR_HANDLE m_d3dCbvGPUDescriptorHandle;
 	ID3D12Resource*				m_pd3dCBResource;
 	CB_LIGHT_INFO*				m_pCBMappedlightInfo;

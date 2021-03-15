@@ -1,19 +1,6 @@
 #include "stdafx.h"
 #include "Light.h"
 
-//void Light::UploadToGpu(ID3D12GraphicsCommandList* pd3dCommandList)
-//{
-//	pd3dCommandList->SetGraphicsRootDescriptorTable(ROOTSIGNATUREOBJECTIDX, m_d3dCbvGPUDescriptorHandle);
-//	UINT ncbElementBytes = ((sizeof(CB_LIGHT_INFO) + 255) & ~255);
-//	memset(m_pCBMappedlightInfo, NULL, ncbElementBytes);
-//	//XMStoreFloat4(&m_pCBMappedlightInfo->m_xmf4Diffuse,		XMLoadFloat4(&m_LightInfo.m_xmf4Diffuse));
-//	//XMStoreFloat4(&m_pCBMappedlightInfo->m_xmf4Specular,	XMLoadFloat4(&m_LightInfo.m_xmf4Specular));
-//	//XMStoreFloat4(&m_pCBMappedlightInfo->m_xmf4Ambient,		XMLoadFloat4(&m_LightInfo.m_xmf4Ambient));
-//	//XMStoreFloat3(&m_pCBMappedlightInfo->m_xmf3Position,	XMLoadFloat3(&m_LightInfo.m_xmf3Position));
-//	//XMStoreFloat(&m_pCBMappedlightInfo->m_fRange,			XMLoadFloat(&m_LightInfo.m_fRange));
-//	//XMStoreFloat3(&m_pCBMappedlightInfo->m_xmf3Direction, XMLoadFloat3(&m_LightInfo.m_xmf3Direction));
-//	//XMStoreFloat(&m_pCBMappedlightInfo->m_fFalloff, XMLoadFloat(&m_LightInfo.m_fFalloff));
-//}
 
 void LightManager::Update(XMFLOAT3 camPos)
 {
@@ -33,6 +20,9 @@ void LightManager::UploadLightInfoToGpu(ID3D12GraphicsCommandList* pd3dCommandLi
 		m_pCBMappedlightInfo[i].position		= m_vLightInfo[i].position;
 		m_pCBMappedlightInfo[i].spotPower		= m_vLightInfo[i].spotPower;
 		m_pCBMappedlightInfo[i].type			= m_vLightInfo[i].type;
+		m_pCBMappedlightInfo[i].shadowIdx		= m_vLightInfo[i].shadowIdx;
+		m_pCBMappedlightInfo[i].isEnable		= m_vLightInfo[i].isEnable;
+		m_pCBMappedlightInfo[i].isShadow		= m_vLightInfo[i].isShadow;
 	}
 
 }
@@ -64,6 +54,7 @@ UINT LightManager::AddPointLight(XMFLOAT3 color, XMFLOAT3 pos, XMFLOAT2 falloff)
 {
 	CB_LIGHT_INFO light;
 	memset(&light, NULL, sizeof(CB_LIGHT_INFO));
+	light.isEnable		= true;
 	light.type			= LIGHTTYPE::LIGHT_POINT;
 	light.color			= color;
 	light.position		= pos;
@@ -81,8 +72,9 @@ UINT LightManager::AddDirectionalLight(XMFLOAT3 color, XMFLOAT3 dir)
 {
 	CB_LIGHT_INFO light;
 	memset(&light, NULL, sizeof(CB_LIGHT_INFO));
+	light.isEnable		= true;
 	light.type			= LIGHTTYPE::LIGHT_DIRECTIONAL;
-	light.direction		= dir;
+	light.direction		= Vector3::Normalize(dir);
 	light.color			= color;
 	if (m_vLightInfo.size() < m_nMaxLight) {
 		m_vLightInfo.push_back(light);
@@ -92,16 +84,24 @@ UINT LightManager::AddDirectionalLight(XMFLOAT3 color, XMFLOAT3 dir)
 	return m_nMaxLight;
 }
 
-UINT LightManager::AddSpotLight(XMFLOAT3 color, XMFLOAT3 pos, XMFLOAT3 dir, XMFLOAT2 falloff)
+UINT LightManager::AddSpotLight(XMFLOAT3 color, XMFLOAT3 pos, XMFLOAT3 dir, XMFLOAT2 falloff, float spotPower, bool isShadow)
 {
 	CB_LIGHT_INFO light;
 	memset(&light, NULL, sizeof(CB_LIGHT_INFO));
+	light.isEnable		= true;
 	light.type			= LIGHTTYPE::LIGHT_SPOT;
 	light.color			= color;
-	light.direction		= dir;
+	light.direction		= Vector3::Normalize( dir );
 	light.position		= pos;
 	light.falloffStart	= falloff.x;
 	light.falloffEnd	= falloff.y;
+	light.spotPower		= spotPower;
+	if (isShadow && (m_nCurrShadowIdx + SpotLightShadowIdxIncrement) < MAXSHADOWIDX) {
+		light.isShadow	= true;
+		light.shadowIdx = m_nCurrShadowIdx;
+		m_nCurrShadowIdx += SpotLightShadowIdxIncrement;
+	}
+
 	if (m_vLightInfo.size() < m_nMaxLight) {
 		m_vLightInfo.push_back(light);
 		return m_vLightInfo.size() - 1;

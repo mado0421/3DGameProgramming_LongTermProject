@@ -8,10 +8,12 @@ public:
 		const wchar_t* pszFileName,
 		D3D12_CPU_DESCRIPTOR_HANDLE& cpuHandle,
 		D3D12_GPU_DESCRIPTOR_HANDLE& gpuHandle);
+
 	void CreateEmptyTexture(
 		ID3D12Device* pd3dDevice, UINT width, UINT height, 
 		D3D12_CPU_DESCRIPTOR_HANDLE& cpuHandle,
-		D3D12_GPU_DESCRIPTOR_HANDLE& gpuHandle);
+		D3D12_GPU_DESCRIPTOR_HANDLE& gpuHandle,
+		UINT nArraySize = 1);
 
 	ID3D12Resource* GetTexture();
 	D3D12_GPU_DESCRIPTOR_HANDLE GetGpuHandle();
@@ -33,6 +35,6 @@ public:
 		D3D12_CPU_DESCRIPTOR_HANDLE depthStencilHeapCpuHandle,
 		D3D12_CPU_DESCRIPTOR_HANDLE& cpuHandle,
 		D3D12_GPU_DESCRIPTOR_HANDLE& gpuHandle,
-		UINT nArraySize = 0);
+		UINT nArraySize = 1);
 
 };

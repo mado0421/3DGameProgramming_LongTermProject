@@ -53,3 +53,15 @@ protected:
 
 
 };
+
+class ShadowPSO : public PipelineStateObject
+{
+public:
+	ShadowPSO(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dRootSignature);
+protected:
+	virtual D3D12_SHADER_BYTECODE		CreatePixelShader(ID3DBlob** ppd3dShaderBlob);
+	virtual D3D12_SHADER_BYTECODE		CreateVertexShader(ID3DBlob** ppd3dShaderBlob);
+	virtual D3D12_DEPTH_STENCIL_DESC	CreateDepthStencilState();
+
+
+};

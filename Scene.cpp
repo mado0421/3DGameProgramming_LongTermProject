@@ -50,42 +50,6 @@ void Scene::Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12Graphics
 	//	tempObj->Move(XMFLOAT3(150 * (i % 3), 150 * ((i%9)/3), 150 * (i / 9)));
 	//	m_vecObject.push_back(tempObj);
 	//}
- 
-	//{
-	//	Object* tempObj = new Object(m_pd3dDevice, m_pd3dCommandList);
-	//	tempObj->CreateCBV(m_pd3dDevice, m_d3dCbvCPUDescriptorStartHandle);
-	//	tempObj->SetCbvGpuHandle(m_d3dCbvGPUDescriptorStartHandle);
-	//	tempObj->Move(XMFLOAT3(0, 0, 0));
-	//	m_vecObject.push_back(tempObj);
-	//}
-	//{
-	//	Object* tempObj = new Object(m_pd3dDevice, m_pd3dCommandList);
-	//	tempObj->CreateCBV(m_pd3dDevice, m_d3dCbvCPUDescriptorStartHandle);
-	//	tempObj->SetCbvGpuHandle(m_d3dCbvGPUDescriptorStartHandle);
-	//	tempObj->Move(XMFLOAT3(0, 100, 0));
-	//	m_vecObject.push_back(tempObj);
-	//}
-	//{
-	//	Object* tempObj = new Object(m_pd3dDevice, m_pd3dCommandList);
-	//	tempObj->CreateCBV(m_pd3dDevice, m_d3dCbvCPUDescriptorStartHandle);
-	//	tempObj->SetCbvGpuHandle(m_d3dCbvGPUDescriptorStartHandle);
-	//	tempObj->Move(XMFLOAT3(100, 100, 0));
-	//	m_vecObject.push_back(tempObj);
-	//}
-	//{
-	//	Object* tempObj = new Object(m_pd3dDevice, m_pd3dCommandList);
-	//	tempObj->CreateCBV(m_pd3dDevice, m_d3dCbvCPUDescriptorStartHandle);
-	//	tempObj->SetCbvGpuHandle(m_d3dCbvGPUDescriptorStartHandle);
-	//	tempObj->Move(XMFLOAT3(100, 0, 0));
-	//	m_vecObject.push_back(tempObj);
-	//}
-	//{
-	//	Object* tempObj = new Object(m_pd3dDevice, m_pd3dCommandList);
-	//	tempObj->CreateCBV(m_pd3dDevice, m_d3dCbvCPUDescriptorStartHandle);
-	//	tempObj->SetCbvGpuHandle(m_d3dCbvGPUDescriptorStartHandle);
-	//	tempObj->Move(XMFLOAT3(300, 300, 300));
-	//	m_vecObject.push_back(tempObj);
-	//}
 
 	for (int i = 0; i < 3; i++) {
 		DebugWindowObject* temp = new DebugWindowObject(m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
@@ -102,6 +66,9 @@ void Scene::Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12Graphics
 	m_pRTTClass = new RenderToTextureClass();
 	m_pRTTClass->Init(m_pd3dDevice, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle, 2);
 
+	m_pShadowMapRenderer = new ShadowMapRenderer();
+	m_pShadowMapRenderer->Init(m_pd3dDevice, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle, 32);
+
 	Texture* temp = new Texture();
 	temp->LoadFromFile(m_pd3dDevice, m_pd3dCommandList, L"test.dds", m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
 	m_uomTextures["Test"] = temp;
@@ -111,9 +78,12 @@ void Scene::Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12Graphics
 
 	m_lightMng->AddDirectionalLight();
 	m_lightMng->AddPointLight();
-	camLightIdx = m_lightMng->AddSpotLight();
-	m_lightMng->SetFalloff(camLightIdx, XMFLOAT2(500.0f, 510.0f));
-	m_lightMng->SetColor(camLightIdx, XMFLOAT3(1.0f, 1.0f, 0.8f));
+	//camLightIdx = m_lightMng->AddSpotLight();
+	camLightIdx = m_lightMng->AddSpotLight(
+		XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT3(150, 500, -200), XMFLOAT3(0, -1, -1), XMFLOAT2(600, 700), 0.5f, true);
+	//m_lightMng->AddSpotLight(XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT3(0, 0, -200), XMFLOAT3(0, 0, 1), XMFLOAT2(500, 510));
+	//m_lightMng->SetFalloff(camLightIdx, XMFLOAT2(500.0f, 510.0f));
+	//m_lightMng->SetColor(camLightIdx, XMFLOAT3(1.0f, 1.0f, 0.8f));
 
 	CreatePSO();
 }
@@ -121,7 +91,7 @@ void Scene::Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12Graphics
 ID3D12RootSignature* Scene::CreateRootSignature()
 {
 	ID3D12RootSignature* pd3dGraphicsRootSignature = NULL;
-	D3D12_DESCRIPTOR_RANGE d3dDescriptorRange[5];
+	D3D12_DESCRIPTOR_RANGE d3dDescriptorRange[6];
 
 	d3dDescriptorRange[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_CBV;
 	d3dDescriptorRange[0].NumDescriptors = 1;
@@ -153,7 +123,13 @@ ID3D12RootSignature* Scene::CreateRootSignature()
 	d3dDescriptorRange[4].RegisterSpace = 0;
 	d3dDescriptorRange[4].OffsetInDescriptorsFromTableStart = 0;
 
-	D3D12_ROOT_PARAMETER pd3dRootParameters[6];
+	d3dDescriptorRange[5].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	d3dDescriptorRange[5].NumDescriptors = 1;
+	d3dDescriptorRange[5].BaseShaderRegister = 6;
+	d3dDescriptorRange[5].RegisterSpace = 0;
+	d3dDescriptorRange[5].OffsetInDescriptorsFromTableStart = 0;
+
+	D3D12_ROOT_PARAMETER pd3dRootParameters[7];
 
 	//Camera
 	pd3dRootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
@@ -191,28 +167,47 @@ ID3D12RootSignature* Scene::CreateRootSignature()
 	pd3dRootParameters[5].DescriptorTable.pDescriptorRanges = &d3dDescriptorRange[4];
 	pd3dRootParameters[5].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
-	D3D12_STATIC_SAMPLER_DESC d3dSamplerDesc;
-	::ZeroMemory(&d3dSamplerDesc, sizeof(D3D12_STATIC_SAMPLER_DESC));
-	d3dSamplerDesc.Filter = D3D12_FILTER_ANISOTROPIC;
-	d3dSamplerDesc.AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-	d3dSamplerDesc.AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-	d3dSamplerDesc.AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-	d3dSamplerDesc.MipLODBias = 0;
-	d3dSamplerDesc.MaxAnisotropy = 1;
-	d3dSamplerDesc.ComparisonFunc = D3D12_COMPARISON_FUNC_ALWAYS;
-	d3dSamplerDesc.MinLOD = 0;
-	d3dSamplerDesc.MaxLOD = D3D12_FLOAT32_MAX;
-	d3dSamplerDesc.ShaderRegister = 0;
-	d3dSamplerDesc.RegisterSpace = 0;
-	d3dSamplerDesc.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+	//ShadowMap TextureArray
+	pd3dRootParameters[6].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	pd3dRootParameters[6].DescriptorTable.NumDescriptorRanges = 1;
+	pd3dRootParameters[6].DescriptorTable.pDescriptorRanges = &d3dDescriptorRange[5];
+	pd3dRootParameters[6].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+
+	D3D12_STATIC_SAMPLER_DESC d3dSamplerDesc[2];
+	::ZeroMemory(&d3dSamplerDesc, sizeof(D3D12_STATIC_SAMPLER_DESC) * 2);
+	d3dSamplerDesc[0].Filter = D3D12_FILTER_ANISOTROPIC;
+	d3dSamplerDesc[0].AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+	d3dSamplerDesc[0].AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+	d3dSamplerDesc[0].AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+	d3dSamplerDesc[0].MipLODBias = 0;
+	d3dSamplerDesc[0].MaxAnisotropy = 1;
+	d3dSamplerDesc[0].ComparisonFunc = D3D12_COMPARISON_FUNC_ALWAYS;
+	d3dSamplerDesc[0].MinLOD = 0;
+	d3dSamplerDesc[0].MaxLOD = D3D12_FLOAT32_MAX;
+	d3dSamplerDesc[0].ShaderRegister = 0;
+	d3dSamplerDesc[0].RegisterSpace = 0;
+	d3dSamplerDesc[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+
+	d3dSamplerDesc[1].Filter = D3D12_FILTER_ANISOTROPIC;
+	d3dSamplerDesc[1].AddressU = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+	d3dSamplerDesc[1].AddressV = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+	d3dSamplerDesc[1].AddressW = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+	d3dSamplerDesc[1].MipLODBias = 0;
+	d3dSamplerDesc[1].MaxAnisotropy = 16;
+	d3dSamplerDesc[1].ComparisonFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+	d3dSamplerDesc[1].MinLOD = 0;
+	d3dSamplerDesc[1].MaxLOD = D3D12_FLOAT32_MAX;
+	d3dSamplerDesc[1].ShaderRegister = 1;
+	d3dSamplerDesc[1].RegisterSpace = 0;
+	d3dSamplerDesc[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
 	D3D12_ROOT_SIGNATURE_FLAGS d3dRootSignatureFlags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT | D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS | D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS | D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS;
 	D3D12_ROOT_SIGNATURE_DESC d3dRootSignatureDesc;
 	::ZeroMemory(&d3dRootSignatureDesc, sizeof(D3D12_ROOT_SIGNATURE_DESC));
 	d3dRootSignatureDesc.NumParameters = _countof(pd3dRootParameters);
 	d3dRootSignatureDesc.pParameters = pd3dRootParameters;
-	d3dRootSignatureDesc.NumStaticSamplers = 1;
-	d3dRootSignatureDesc.pStaticSamplers = &d3dSamplerDesc;
+	d3dRootSignatureDesc.NumStaticSamplers = 2;
+	d3dRootSignatureDesc.pStaticSamplers = &d3dSamplerDesc[0];
 	d3dRootSignatureDesc.Flags = d3dRootSignatureFlags;
 
 	ID3DBlob* pd3dSignatureBlob = NULL;
@@ -232,7 +227,8 @@ void Scene::PrevPassRender()
 	::ZeroMemory(&d3dResourceBarrier, sizeof(D3D12_RESOURCE_BARRIER));
 	d3dResourceBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
 	d3dResourceBarrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-	d3dResourceBarrier.Transition.pResource = m_pRTTClass->m_pDepthStencilTexture->GetTexture();
+	
+	d3dResourceBarrier.Transition.pResource = m_pRTTClass->GetDepthTexture()->GetTexture();
 	d3dResourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_GENERIC_READ;
 	d3dResourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_DEPTH_WRITE;
 	d3dResourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
@@ -240,7 +236,7 @@ void Scene::PrevPassRender()
 
 	m_pRTTClass->ReadyToPrevPassRender(m_pd3dCommandList);
 
-	d3dResourceBarrier.Transition.pResource = m_pRTTClass->m_pDepthStencilTexture->GetTexture();
+	d3dResourceBarrier.Transition.pResource = m_pRTTClass->GetDepthTexture()->GetTexture();
 	d3dResourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_DEPTH_WRITE;
 	d3dResourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_GENERIC_READ;
 	m_pd3dCommandList->ResourceBarrier(1, &d3dResourceBarrier);
@@ -256,6 +252,27 @@ void Scene::PrevPassRender()
 
 	m_pd3dCommandList->SetGraphicsRootDescriptorTable(ROOTSIGNATURETEXTUREIDX, m_uomTextures["Test"]->GetGpuHandle());
 	for (int i = 0; i < m_vecObject.size(); i++) m_vecObject[i]->Render(m_pd3dCommandList);
+
+
+
+
+	XMFLOAT3 prevPos		= m_pCamera->GetPosition();
+	XMFLOAT3 prevLookVector = m_pCamera->GetLook();
+
+	m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["Shadow"]);
+	vector<UINT> onShadowLightIdx = m_lightMng->GetOnShadowLightIndices();
+	for (int i = 0; i < onShadowLightIdx.size(); i++) {
+		m_pShadowMapRenderer->ReadyToPrevPassRender(m_pd3dCommandList, i);
+		m_pCamera->SetPosition(m_lightMng->GetPosition(onShadowLightIdx[i]));
+		m_pCamera->SetLookAt(Vector3::Add(m_lightMng->GetPosition(onShadowLightIdx[i]), m_lightMng->GetDirection(onShadowLightIdx[i])));
+		m_pCamera->UpdateShaderVariables(m_pd3dCommandList);
+
+		for (int i = 0; i < m_vecObject.size(); i++) m_vecObject[i]->Render(m_pd3dCommandList);
+	}
+
+	m_pCamera->SetPosition(prevPos);
+	m_pCamera->SetLookAt(Vector3::Add(prevPos, prevLookVector));
+
 }
 void Scene::Render()
 {
@@ -276,6 +293,7 @@ void Scene::Render()
 	m_pd3dCommandList->SetGraphicsRootDescriptorTable(2, m_pRTTClass->GetSRVGpuHandle(0));
 	m_pd3dCommandList->SetGraphicsRootDescriptorTable(3, m_pRTTClass->GetSRVGpuHandle(1));
 	m_pd3dCommandList->SetGraphicsRootDescriptorTable(4, m_pRTTClass->GetDSVGpuHandle());
+	m_pd3dCommandList->SetGraphicsRootDescriptorTable(6, m_pShadowMapRenderer->GetDSVGpuHandle());
 	m_vecDebugWindow[3]->Render(m_pd3dCommandList);
 
 
@@ -300,8 +318,9 @@ void Scene::Render()
 void Scene::Update(float fTimeElapsed)
 {
 	m_pCamera->Update(fTimeElapsed);
-	m_lightMng->SetPos(camLightIdx, m_pCamera->GetPosition());
-	m_lightMng->SetDir(camLightIdx, m_pCamera->GetLook());
+	//m_lightMng->SetPos(camLightIdx, m_pCamera->GetPosition());
+	//m_lightMng->SetDir(camLightIdx, m_pCamera->GetLook());
+	// 
 	//for (int i = 0; i < m_vecObject.size(); i++) m_vecObject[i]->Rotate(XMFLOAT3(30.0f * fTimeElapsed, 30.0f * fTimeElapsed, 30.0f * fTimeElapsed));
 	//for (int i = 0; i < m_vecObject.size(); i++) m_vecObject[i]->Rotate(XMFLOAT3(30.0f * fTimeElapsed, 0, 0));
 }
@@ -346,14 +365,16 @@ void Scene::Input(UCHAR* pKeyBuffer, float fTimeElapsed)
 
 void Scene::CreatePSO()
 {
-	PipelineStateObject tempPSO = PipelineStateObject(m_pd3dDevice, m_pd3dRootSignature);
-	DebugWindowPSO tempDebugWindowPSO = DebugWindowPSO(m_pd3dDevice, m_pd3dRootSignature);
-	DepthDebugPSO tempDepthWindowPSO = DepthDebugPSO(m_pd3dDevice, m_pd3dRootSignature);
-	Pass2PSO tempPass2PSO = Pass2PSO(m_pd3dDevice, m_pd3dRootSignature);
+	PipelineStateObject tempPSO			= PipelineStateObject(m_pd3dDevice, m_pd3dRootSignature);
+	DebugWindowPSO tempDebugWindowPSO	= DebugWindowPSO(m_pd3dDevice, m_pd3dRootSignature);
+	DepthDebugPSO tempDepthWindowPSO	= DepthDebugPSO(m_pd3dDevice, m_pd3dRootSignature);
+	Pass2PSO tempPass2PSO				= Pass2PSO(m_pd3dDevice, m_pd3dRootSignature);
+	ShadowPSO shadowPso					= ShadowPSO(m_pd3dDevice, m_pd3dRootSignature);
 	m_uomPipelineStates["Default"]	= tempPSO.GetPipelineState();
 	m_uomPipelineStates["Debug"]	= tempDebugWindowPSO.GetPipelineState();
 	m_uomPipelineStates["Depth"]	= tempDepthWindowPSO.GetPipelineState();
 	m_uomPipelineStates["Pass2"]	= tempPass2PSO.GetPipelineState();
+	m_uomPipelineStates["Shadow"]	= shadowPso.GetPipelineState();
 }
 void Scene::CreateDescriptorHeap() 
 {
