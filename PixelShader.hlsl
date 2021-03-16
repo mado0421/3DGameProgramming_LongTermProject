@@ -28,7 +28,7 @@ void ShadowMap(VS_OUTPUT input) {
 }
 
 float4 DeferredShading(VS_OUTPUT input) : SV_TARGET {
-	float3 worldPos			= WorldPosFromDepth(input.uv);
+	float3 worldPos			= WorldPosFromLinearDepth(input.uv);
 	float3 color			= gtxtTexture1.Sample(gSamplerState, input.uv).xyz;
 	float3 vNormal			= gtxtTexture2.Sample(gSamplerState, input.uv).xyz * 2.0f - 1.0f;
 

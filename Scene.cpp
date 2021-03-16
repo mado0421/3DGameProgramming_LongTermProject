@@ -80,7 +80,7 @@ void Scene::Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12Graphics
 	m_lightMng->AddPointLight();
 	//camLightIdx = m_lightMng->AddSpotLight();
 	camLightIdx = m_lightMng->AddSpotLight(
-		XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT3(150, 500, -200), XMFLOAT3(0, -1, -1), XMFLOAT2(600, 700), 0.5f, true);
+		XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT3(150, 500, -200), XMFLOAT3(0, -1, 1), XMFLOAT2(600, 700), 0.5f, true);
 	//m_lightMng->AddSpotLight(XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT3(0, 0, -200), XMFLOAT3(0, 0, 1), XMFLOAT2(500, 510));
 	//m_lightMng->SetFalloff(camLightIdx, XMFLOAT2(500.0f, 510.0f));
 	//m_lightMng->SetColor(camLightIdx, XMFLOAT3(1.0f, 1.0f, 0.8f));
@@ -259,19 +259,45 @@ void Scene::PrevPassRender()
 	XMFLOAT3 prevPos		= m_pCamera->GetPosition();
 	XMFLOAT3 prevLookVector = m_pCamera->GetLook();
 
+
 	m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["Shadow"]);
 	vector<UINT> onShadowLightIdx = m_lightMng->GetOnShadowLightIndices();
 	for (int i = 0; i < onShadowLightIdx.size(); i++) {
+		/* 
+		* 카메라를 광원 공간으로 옮기고
+		* 이전 뷰 변환 행렬과 투영 행렬은 저장해 둔 뒤에
+		* 새로 뷰 변환 행렬과 투영 행렬을 만들고
+		* (투영 행렬은 바뀌는게 없음? 아마도)
+		* 그걸 조명에 전달해주고
+		* 카메라는 업데이트
+		* 조명에선 텍스처 행렬 곱해서 올리기
+		*/
 		m_pShadowMapRenderer->ReadyToPrevPassRender(m_pd3dCommandList, i);
 		m_pCamera->SetPosition(m_lightMng->GetPosition(onShadowLightIdx[i]));
 		m_pCamera->SetLookAt(Vector3::Add(m_lightMng->GetPosition(onShadowLightIdx[i]), m_lightMng->GetDirection(onShadowLightIdx[i])));
+		m_pCamera->SetViewportsAndScissorRects(m_pd3dCommandList);
 		m_pCamera->UpdateShaderVariables(m_pd3dCommandList);
+
+		XMFLOAT3 temp = m_pCamera->GetPosition();
+		temp = m_pCamera->GetLook();
+
+		m_lightMng->SetLightSpaceVPT(onShadowLightIdx[i], m_pCamera->GetViewMatrix(), m_pCamera->GetProjectionMatrix());
 
 		for (int i = 0; i < m_vecObject.size(); i++) m_vecObject[i]->Render(m_pd3dCommandList);
 	}
 
+	m_pShadowMapRenderer->ReadyToPrevPassRender(m_pd3dCommandList, 0);
+	m_pCamera->SetPosition(m_lightMng->GetPosition(2));
+	m_pCamera->SetLookAt(Vector3::Add(m_lightMng->GetPosition(2), m_lightMng->GetDirection(2)));
+	m_pCamera->SetViewportsAndScissorRects(m_pd3dCommandList);
+	m_pCamera->UpdateShaderVariables(m_pd3dCommandList);
+	m_lightMng->SetLightSpaceVPT(2, m_pCamera->GetViewMatrix(), m_pCamera->GetProjectionMatrix());
+
+	for (int i = 0; i < m_vecObject.size(); i++) m_vecObject[i]->Render(m_pd3dCommandList);
+
 	m_pCamera->SetPosition(prevPos);
-	m_pCamera->SetLookAt(Vector3::Add(prevPos, prevLookVector));
+	m_pCamera->SetLookAt(prevLookVector);
+
 
 }
 void Scene::Render()
@@ -288,36 +314,47 @@ void Scene::Render()
 
 	//===========================================================================================================
 	// 2Pass Screen Render
-	m_lightMng->UploadLightInfoToGpu(m_pd3dCommandList);
-	m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["Pass2"]);
-	m_pd3dCommandList->SetGraphicsRootDescriptorTable(2, m_pRTTClass->GetSRVGpuHandle(0));
-	m_pd3dCommandList->SetGraphicsRootDescriptorTable(3, m_pRTTClass->GetSRVGpuHandle(1));
-	m_pd3dCommandList->SetGraphicsRootDescriptorTable(4, m_pRTTClass->GetDSVGpuHandle());
-	m_pd3dCommandList->SetGraphicsRootDescriptorTable(6, m_pShadowMapRenderer->GetDSVGpuHandle());
-	m_vecDebugWindow[3]->Render(m_pd3dCommandList);
+
+	//XMFLOAT3 prevPos = m_pCamera->GetPosition();
+	//XMFLOAT3 prevLookVector = m_pCamera->GetLook();
+
+	//m_pCamera->SetPosition(XMFLOAT3(300, 500, -100));
+	//m_pCamera->SetLookAt(XMFLOAT3(0,0,0));
+
+	//m_pCamera->SetViewportsAndScissorRects(m_pd3dCommandList);
+	//m_pCamera->UpdateShaderVariables(m_pd3dCommandList);
 
 
+	//m_lightMng->UploadLightInfoToGpu(m_pd3dCommandList);
+	//m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["Pass2"]);
+	//m_pd3dCommandList->SetGraphicsRootDescriptorTable(2, m_pRTTClass->GetSRVGpuHandle(0));
+	//m_pd3dCommandList->SetGraphicsRootDescriptorTable(3, m_pRTTClass->GetSRVGpuHandle(1));
+	//m_pd3dCommandList->SetGraphicsRootDescriptorTable(4, m_pRTTClass->GetDSVGpuHandle());
+	//m_pd3dCommandList->SetGraphicsRootDescriptorTable(6, m_pShadowMapRenderer->GetDSVGpuHandle());
+	////m_vecDebugWindow[3]->Render(m_pd3dCommandList);
 
+
+	//m_pCamera->SetPosition(prevPos);
+	//m_pCamera->SetLookAt(prevLookVector);
 
 
 	//===========================================================================================================
 	// DebugWindow Render
 	if (test) {
+		m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["Debug"]);
+		m_pd3dCommandList->SetGraphicsRootDescriptorTable(ROOTSIGNATURETEXTUREIDX, m_pRTTClass->GetSRVGpuHandle(0));
+		m_vecDebugWindow[0]->Render(m_pd3dCommandList);
+		m_pd3dCommandList->SetGraphicsRootDescriptorTable(ROOTSIGNATURETEXTUREIDX, m_pRTTClass->GetSRVGpuHandle(1));
+		m_vecDebugWindow[1]->Render(m_pd3dCommandList);
 
-	m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["Debug"]);
-	m_pd3dCommandList->SetGraphicsRootDescriptorTable(ROOTSIGNATURETEXTUREIDX, m_pRTTClass->GetSRVGpuHandle(0));
-	m_vecDebugWindow[0]->Render(m_pd3dCommandList);
-	m_pd3dCommandList->SetGraphicsRootDescriptorTable(ROOTSIGNATURETEXTUREIDX, m_pRTTClass->GetSRVGpuHandle(1));
-	m_vecDebugWindow[1]->Render(m_pd3dCommandList);
-	
-	m_pd3dCommandList->SetGraphicsRootDescriptorTable(4, m_pRTTClass->GetDSVGpuHandle());
-	m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["Depth"]);
-	m_vecDebugWindow[2]->Render(m_pd3dCommandList);
+		m_pd3dCommandList->SetGraphicsRootDescriptorTable(4, m_pRTTClass->GetDSVGpuHandle());
+		m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["Depth"]);
+		m_vecDebugWindow[2]->Render(m_pd3dCommandList);
 	}
 }
 void Scene::Update(float fTimeElapsed)
 {
-	m_pCamera->Update(fTimeElapsed);
+	//m_pCamera->Update(fTimeElapsed);
 	//m_lightMng->SetPos(camLightIdx, m_pCamera->GetPosition());
 	//m_lightMng->SetDir(camLightIdx, m_pCamera->GetLook());
 	// 

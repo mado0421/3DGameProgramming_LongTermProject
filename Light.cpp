@@ -23,6 +23,7 @@ void LightManager::UploadLightInfoToGpu(ID3D12GraphicsCommandList* pd3dCommandLi
 		m_pCBMappedlightInfo[i].shadowIdx		= m_vLightInfo[i].shadowIdx;
 		m_pCBMappedlightInfo[i].isEnable		= m_vLightInfo[i].isEnable;
 		m_pCBMappedlightInfo[i].isShadow		= m_vLightInfo[i].isShadow;
+		XMStoreFloat4x4(&m_pCBMappedlightInfo[i].xmf4x4lightSpaceViewProjTex, XMMatrixTranspose(XMLoadFloat4x4(&m_vLightInfo[i].xmf4x4lightSpaceViewProjTex)));
 	}
 
 }

@@ -37,21 +37,31 @@ float3 BlinnPhong(float3 lightColor, float3 vToLight, float3 vNormal, float3 vTo
 	return (matColor + specAlbedo) * lightColor;
 }
 
-float CalcShadowFactor(Light l, float4 pos) {
-	pos.xyz /= pos.w;
-	float2 uv;
+float CalcShadowFactor(Light l, float3 worldPos) {
 
-	uv.x = pos.x / 2.0f + 0.5f;
-	uv.y = pos.y / 2.0f + 0.5f;
+	float4 lightScreenSpacePos = mul(float4(worldPos, 1.0f), l.mtxLightSpaceVPT);
+	lightScreenSpacePos.xyz /= lightScreenSpacePos.w;
+	float depth = gtxtDepthArray.Sample(gShadowSamplerState, float3(lightScreenSpacePos.xy, l.shadowIdx)).r;
+	float linearDepth = CalcWFromDepth(depth);
 
-	if ((saturate(uv.x) == uv.x) && (saturate(uv.y) == uv.y)) {
-		
-		float shadowDepth = gtxtDepthArray.Sample(gShadowSamplerState, float3(uv, l.shadowIdx)).r;
-		if (pos.z - 1.0f < shadowDepth) {
-			return 1;
-		}
+	if (lightScreenSpacePos.z < linearDepth) {
+		return 1.0f;
 	}
-	return 0;
+
+	return 0.0f;
+
+	//pos.xyz /= pos.w;
+	//float2 uv;
+	//uv.x = pos.x / 2.0f + 0.5f;
+	//uv.y = pos.y / 2.0f + 0.5f;
+	//if ((saturate(uv.x) == uv.x) && (saturate(uv.y) == uv.y)) {
+	//	
+	//	float shadowDepth = gtxtDepthArray.Sample(gShadowSamplerState, float3(uv, l.shadowIdx)).r;
+	//	if (pos.z - 1.0f < shadowDepth) {
+	//		return 1;
+	//	}
+	//}
+	//return 0;
 }
 
 float3 CalcDirectionalLight(Light l, float3 matColor, float3 vNormal, float3 vToCam) {
@@ -96,8 +106,8 @@ float3 CalcSpotLight(Light l, float3 matColor, float3 pos, float3 vNormal, float
 
 	if (l.isShadow) {
 
-	float shadowFactor = CalcShadowFactor(l, float4(pos, 1.0f));
-	lightColor *= shadowFactor;
+		float shadowFactor = CalcShadowFactor(l, pos);
+		lightColor *= shadowFactor;
 	}
 
 	return BlinnPhong(lightColor, vToLight, vNormal, vToCam, matColor);

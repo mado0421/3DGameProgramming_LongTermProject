@@ -26,6 +26,7 @@ typedef enum LIGHTTYPE {
 	LIGHT_DIRECTIONAL	= (UINT)3
 };
 struct CB_LIGHT_INFO {
+	XMFLOAT4X4	xmf4x4lightSpaceViewProjTex;
 	XMFLOAT3	color;
 	float		falloffStart;
 	XMFLOAT3	direction;
@@ -40,6 +41,27 @@ struct CB_LIGHT_INFO {
 	bool		isShadow;
 	bool		padding2;
 	short		padding3;
+};
+
+class Light {
+public:
+	UINT		m_uLightType;
+	bool		m_bIsEnable;
+
+	XMFLOAT3	m_xmf3LightColor;
+	XMFLOAT3	m_xmf3Position;
+	XMFLOAT3	m_xmf3Direction;
+	
+	float		m_fFalloffStart;
+	float		m_fFalloffEnd;
+	float		m_fSpotPower;
+	
+	bool		m_bIsShadow;
+	UINT		m_uShadowIdx;
+	XMFLOAT4X4	m_xmf4x4lightSpaceViewProjTex;
+
+
+public:
 };
 
 class LightManager {
@@ -78,6 +100,17 @@ public:
 			if (m_vLightInfo[i].isShadow) result.push_back(i);
 		}
 		return result;
+	}
+
+	void SetLightSpaceVPT(UINT lightIdx, XMFLOAT4X4 xmf4x4View, XMFLOAT4X4 xmf4x4Proj) {
+
+		XMFLOAT4X4 texture = {
+			0.5f,		0,		0,		0,
+			0,		-0.5f,		0,		0,
+			0,			0,	 1.0f,		0,
+			0.5f,	 0.5f,		0,		1.0f};
+		m_vLightInfo[lightIdx].xmf4x4lightSpaceViewProjTex = Matrix4x4::Multiply(Matrix4x4::Multiply(xmf4x4View, xmf4x4Proj), texture);
+
 	}
 
 private:

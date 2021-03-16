@@ -4,6 +4,7 @@
 * 
 * ============================================================*/
 struct Light {
+	matrix	mtxLightSpaceVPT;
 	float3	color;
 	float	falloffStart;
 	float3	direction;
@@ -66,7 +67,7 @@ float CalcWFromDepth(float depth) {
 	float w = gmtxProjection._m32 / (depth - gmtxProjection._m22);
 	return w;
 }
-float3 WorldPosFromDepth(float2 uv) {
+float3 WorldPosFromLinearDepth(float2 uv) {
 	float depth = gtxtTexture3.Sample(gSamplerState, uv).r;
 	float w = CalcWFromDepth(depth);
 	float4 result = float4(uv * 2.0f - 1.0f, depth, 1);
@@ -74,5 +75,5 @@ float3 WorldPosFromDepth(float2 uv) {
 	result *= w;
 	result = mul(result, gmtxProjectionInv);
 	result = mul(result, gmtxViewInv);
-	return result;
+	return result.xyz;
 }
