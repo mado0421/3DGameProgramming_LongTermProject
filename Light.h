@@ -18,7 +18,7 @@ Light를 추가하거나? 끄거나? 거리에 따라?
 constexpr UINT SpotLightShadowIdxIncrement			= 1;
 constexpr UINT PointLightShadowIdxIncrement			= 6;
 constexpr UINT DirectionalLightShadowIdxIncrement	= 3;
-constexpr UINT MAXSHADOWIDX = 64;
+constexpr UINT MAXSHADOWIDX							= 64;
 
 typedef enum LIGHTTYPE {
 	LIGHT_POINT			= (UINT)1,
@@ -26,7 +26,7 @@ typedef enum LIGHTTYPE {
 	LIGHT_DIRECTIONAL	= (UINT)3
 };
 struct CB_LIGHT_INFO {
-	XMFLOAT4X4	xmf4x4lightSpaceViewProjTex;
+	XMFLOAT4X4	xmf4x4lightSpaceViewProj;
 	XMFLOAT3	color;
 	float		falloffStart;
 	XMFLOAT3	direction;
@@ -43,7 +43,9 @@ struct CB_LIGHT_INFO {
 	short		padding3;
 };
 
-class Light {
+struct Light {
+public:
+	Light();
 public:
 	UINT		m_uLightType;
 	bool		m_bIsEnable;
@@ -58,10 +60,7 @@ public:
 	
 	bool		m_bIsShadow;
 	UINT		m_uShadowIdx;
-	XMFLOAT4X4	m_xmf4x4lightSpaceViewProjTex;
-
-
-public:
+	XMFLOAT4X4	m_xmf4x4lightSpaceViewProj;
 };
 
 class LightManager {
@@ -101,17 +100,7 @@ public:
 		}
 		return result;
 	}
-
-	void SetLightSpaceVPT(UINT lightIdx, XMFLOAT4X4 xmf4x4View, XMFLOAT4X4 xmf4x4Proj) {
-
-		XMFLOAT4X4 texture = {
-			0.5f,		0,		0,		0,
-			0,		-0.5f,		0,		0,
-			0,			0,	 1.0f,		0,
-			0.5f,	 0.5f,		0,		1.0f};
-		m_vLightInfo[lightIdx].xmf4x4lightSpaceViewProjTex = Matrix4x4::Multiply(Matrix4x4::Multiply(xmf4x4View, xmf4x4Proj), texture);
-
-	}
+	UINT GetShadowIdx(UINT idx) { return m_vLightInfo[idx].shadowIdx; }
 
 private:
 	UINT						m_nMaxLight = 64;
@@ -121,5 +110,6 @@ private:
 	CB_LIGHT_INFO*				m_pCBMappedlightInfo;
 
 	vector<CB_LIGHT_INFO>		m_vLightInfo;
+	vector<Light>				m_vLight;
 
 };

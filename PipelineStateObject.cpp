@@ -376,7 +376,7 @@ D3D12_SHADER_BYTECODE ShadowPSO::CreatePixelShader(ID3DBlob** ppd3dShaderBlob)
 
 D3D12_SHADER_BYTECODE ShadowPSO::CreateVertexShader(ID3DBlob** ppd3dShaderBlob)
 {
-	return(CompileShaderFromFile(L"VertexShader.hlsl", "main", "vs_5_1", ppd3dShaderBlob));
+	return(CompileShaderFromFile(L"VertexShader.hlsl", "Shadow", "vs_5_1", ppd3dShaderBlob));
 
 }
 
@@ -400,4 +400,23 @@ D3D12_DEPTH_STENCIL_DESC ShadowPSO::CreateDepthStencilState()
 	d3dDepthStencilDesc.BackFace.StencilFunc = D3D12_COMPARISON_FUNC_NEVER;
 
 	return(d3dDepthStencilDesc);
+}
+
+D3D12_RASTERIZER_DESC ShadowPSO::CreateRasterizerState()
+{
+	D3D12_RASTERIZER_DESC d3dRasterizerDesc;
+	::ZeroMemory(&d3dRasterizerDesc, sizeof(D3D12_RASTERIZER_DESC));
+	d3dRasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
+	d3dRasterizerDesc.CullMode = D3D12_CULL_MODE_BACK;
+	d3dRasterizerDesc.FrontCounterClockwise = TRUE;
+	d3dRasterizerDesc.DepthBias = 100000;
+	d3dRasterizerDesc.DepthBiasClamp = 0.0f;
+	d3dRasterizerDesc.SlopeScaledDepthBias = 1.0f;
+	d3dRasterizerDesc.DepthClipEnable = TRUE;
+	d3dRasterizerDesc.MultisampleEnable = FALSE;
+	d3dRasterizerDesc.AntialiasedLineEnable = FALSE;
+	d3dRasterizerDesc.ForcedSampleCount = 0;
+	d3dRasterizerDesc.ConservativeRaster = D3D12_CONSERVATIVE_RASTERIZATION_MODE_OFF;
+
+	return(d3dRasterizerDesc);
 }

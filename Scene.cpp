@@ -11,27 +11,27 @@
 
 void Scene::Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	//m_pFramework		= pFramework;
+	/*========================================================================
+	* 주요 변수 초기화
+	*=======================================================================*/
 	m_pd3dDevice		= pd3dDevice;
 	m_pd3dCommandList	= pd3dCommandList;
 	m_pd3dRootSignature = CreateRootSignature();
 
-	// 카메라 설정
+	/*========================================================================
+	* 카메라 설정
+	*=======================================================================*/
 	m_pCamera = new FollowCamera();
-	m_pCamera->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 	m_pCamera->SetPosition(XMFLOAT3(0, 0, -200));
 	m_pCamera->SetLookAt(XMFLOAT3(0, 0, 0));
 
-	// heap 생성을 하려면 미리 서술자를 몇 개나 생성할 지 알아야 하기 때문에
-	// obj 개수도 중요하지만 srv에 들어갈 texture 개수도 중요함..
-	// 미리 몇 개 만들지 알 수 있으면 그걸 정해두고 힙 생성을 하겠는데
-	// 만약 동적으로 리소스 로드&언로드를 한다면?
-	// 그럴 경우에는 힙을 미리 한도를 걸어두고 만드는 것도 방법일 수 있음
-	// (예를 들어, obj는 몇 개, 투사체는 몇 개, 텍스쳐는 몇 개 제한을 둔다던지)
-	// 좋다, 제한을 두자. 오브젝트와 투사체, 레벨 등을 다 합쳐서 1,024개 정도면 될 듯.
-	// 텍스쳐도 128개 정도면 충분할 것.
 	CreateDescriptorHeap();
+	CreatePassInfoShaderResource();
 
+
+	/*========================================================================
+	* Pass 1 전용 오브젝트 데이터 로드 및 생성
+	*=======================================================================*/
 	ObjectDataImporter objDataImporter;
 	vector<OBJECT_DESC> vecObjDesc = objDataImporter.Load("Data/ObjectData.txt");
 
@@ -42,15 +42,10 @@ void Scene::Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12Graphics
 		m_vecObject.push_back(tempObj);
 	}
 
-	//int nObject = 27;
-	//for (int i = 0; i < nObject; i++) {
-	//	Object* tempObj = new Object(m_pd3dDevice, m_pd3dCommandList);
-	//	tempObj->CreateCBV(m_pd3dDevice, m_d3dCbvCPUDescriptorStartHandle);
-	//	tempObj->SetCbvGpuHandle(m_d3dCbvGPUDescriptorStartHandle);
-	//	tempObj->Move(XMFLOAT3(150 * (i % 3), 150 * ((i%9)/3), 150 * (i / 9)));
-	//	m_vecObject.push_back(tempObj);
-	//}
 
+	/*========================================================================
+	* Pass 2 전용 디버그 윈도우 생성
+	*=======================================================================*/
 	for (int i = 0; i < 3; i++) {
 		DebugWindowObject* temp = new DebugWindowObject(m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
 		temp->Move(XMFLOAT3(-0.5f * i, 1, 0));
@@ -58,33 +53,43 @@ void Scene::Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12Graphics
 		m_vecDebugWindow.push_back(temp);
 	}
 
+	/*========================================================================
+	* Pass 2 전용 전체 화면 사각형
+	*=======================================================================*/
 	DebugWindowObject* tempScreen = new DebugWindowObject(m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle, true);
 	m_vecDebugWindow.push_back(tempScreen);
 
 
 
+	/*========================================================================
+	* RenderToTexture 클래스 생성
+	*=======================================================================*/
 	m_pRTTClass = new RenderToTextureClass();
 	m_pRTTClass->Init(m_pd3dDevice, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle, 2);
 
 	m_pShadowMapRenderer = new ShadowMapRenderer();
 	m_pShadowMapRenderer->Init(m_pd3dDevice, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle, 32);
 
+	/*========================================================================
+	* 일반 텍스처 로드
+	*=======================================================================*/
 	Texture* temp = new Texture();
 	temp->LoadFromFile(m_pd3dDevice, m_pd3dCommandList, L"test.dds", m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
 	m_uomTextures["Test"] = temp;
 
+	/*========================================================================
+	* 광원 생성
+	*=======================================================================*/
 	m_lightMng = new LightManager();
 	m_lightMng->Init(m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
 
 	m_lightMng->AddDirectionalLight();
 	m_lightMng->AddPointLight();
-	//camLightIdx = m_lightMng->AddSpotLight();
-	camLightIdx = m_lightMng->AddSpotLight(
-		XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT3(150, 500, -200), XMFLOAT3(0, -1, 1), XMFLOAT2(600, 700), 0.5f, true);
-	//m_lightMng->AddSpotLight(XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT3(0, 0, -200), XMFLOAT3(0, 0, 1), XMFLOAT2(500, 510));
-	//m_lightMng->SetFalloff(camLightIdx, XMFLOAT2(500.0f, 510.0f));
-	//m_lightMng->SetColor(camLightIdx, XMFLOAT3(1.0f, 1.0f, 0.8f));
+	camLightIdx = m_lightMng->AddSpotLight(XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT3(150, 500, -200), XMFLOAT3(0, -1, 1), XMFLOAT2(600, 700), 0.5f, true);
 
+	/*========================================================================
+	* PSO 생성
+	*=======================================================================*/
 	CreatePSO();
 }
 
@@ -222,6 +227,39 @@ ID3D12RootSignature* Scene::CreateRootSignature()
 
 void Scene::PrevPassRender()
 {
+	/*========================================================================
+	* 루트 시그니처, 디스크립터 힙, 파이프라인 스테이트, 메쉬 토폴로지 설정
+	*=======================================================================*/
+	m_pd3dCommandList->SetGraphicsRootSignature(m_pd3dRootSignature);
+	m_pd3dCommandList->SetDescriptorHeaps(1, &m_pd3dCbvSrvDescriptorHeap);
+	m_pd3dCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+
+	/*========================================================================
+	* PassInfo 설정
+	*=======================================================================*/
+	m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
+	m_pCamera->SetViewportsAndScissorRects(m_pd3dCommandList);
+	UpdatePassInfoAboutCamera();
+
+	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbPassInfo->GetGPUVirtualAddress();
+	m_pd3dCommandList->SetGraphicsRootConstantBufferView(ROOTSIGNATURECAMERAIDX, d3dGpuVirtualAddress);
+
+	XMFLOAT4X4 texture = {
+	0.5f,		0,		0,		0,
+	0,		-0.5f,		0,		0,
+	0,			0,	 1.0f,		0,
+	0.5f,	 0.5f,		0,	 1.0f };
+	UINT passIdx = 0;
+	XMStoreFloat4x4(&m_pcbMappedPassInfo->m_xmf4x4TextureTransform, XMMatrixTranspose(XMLoadFloat4x4(&texture)));
+	::memcpy(&m_pcbMappedPassInfo->m_xmf3CameraPosition, &passIdx, sizeof(UINT));
+
+
+
+
+	/*========================================================================
+	* Pass 1. 메쉬 렌더 To Color, Normal, Depth
+	*=======================================================================*/
 	//DSV의 상태를 DEPTH_WRITE에서 GENERIC_READ로 변경해줬다가 다시 DEPTH_WRITE로 변경해줄 것.
 	D3D12_RESOURCE_BARRIER d3dResourceBarrier;
 	::ZeroMemory(&d3dResourceBarrier, sizeof(D3D12_RESOURCE_BARRIER));
@@ -241,27 +279,20 @@ void Scene::PrevPassRender()
 	d3dResourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_GENERIC_READ;
 	m_pd3dCommandList->ResourceBarrier(1, &d3dResourceBarrier);
 
-
-	m_pd3dCommandList->SetGraphicsRootSignature(m_pd3dRootSignature);
-	m_pd3dCommandList->SetDescriptorHeaps(1, &m_pd3dCbvSrvDescriptorHeap);
 	m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["Default"]);
-	m_pd3dCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);	// 원래 Mesh::Render()에 있던 함수를 빼옴
-
-	m_pCamera->SetViewportsAndScissorRects(m_pd3dCommandList);
-	m_pCamera->UpdateShaderVariables(m_pd3dCommandList);
-
 	m_pd3dCommandList->SetGraphicsRootDescriptorTable(ROOTSIGNATURETEXTUREIDX, m_uomTextures["Test"]->GetGpuHandle());
 	for (int i = 0; i < m_vecObject.size(); i++) m_vecObject[i]->Render(m_pd3dCommandList);
 
 
-
-
-	XMFLOAT3 prevPos		= m_pCamera->GetPosition();
-	XMFLOAT3 prevLookVector = m_pCamera->GetLook();
-
-
+	/*========================================================================
+	* Pass 1. 광원 렌더
+	*=======================================================================*/
 	m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["Shadow"]);
 	vector<UINT> onShadowLightIdx = m_lightMng->GetOnShadowLightIndices();
+	m_pCamera->SetViewport(0, 0, 256, 256, 0.0f, 1.0f);
+	m_pCamera->SetViewportsAndScissorRects(m_pd3dCommandList);
+
+	m_lightMng->UploadLightInfoToGpu(m_pd3dCommandList);
 	for (int i = 0; i < onShadowLightIdx.size(); i++) {
 		/* 
 		* 카메라를 광원 공간으로 옮기고
@@ -271,75 +302,65 @@ void Scene::PrevPassRender()
 		* 그걸 조명에 전달해주고
 		* 카메라는 업데이트
 		* 조명에선 텍스처 행렬 곱해서 올리기
+		* 
+		* 위의 방법이 안되는걸 일단 현상은 확인함.
+		* 언제까지고 안되는걸 붙잡고 있을 수는 없으니까.
+		* 광원별 뷰변환 행렬과 투영변환 행렬을 광원 초기화 시점에 생성하고(그림자를 쓴다면)
+		* 그럼 광원 정보를 올려둬야 함.
+		* m_lightMng->UploadLightInfoToGpu(m_pd3dCommandList);
+		* 이게 업로드를 해주는거니까 이걸 여기서 해주면 그만일 듯.
+		* 
+		* 아니지 렌더할 때 이게 몇 번째 광원인지 알 수 있어야 하거나
+		* 아니면 렌더할 때 idx번째 광원의 행렬을 미리 업로드 해둬야 쓰지.
+		* 
+		* 카메라의 뷰포트와 시저렉트만 다시 설정하자.
+		* Zf랑 Zn 같은건 괜찮은데
+		* 
 		*/
+
+		// PassInfo.m_uIdx에 지금 몇 번째 그림자 맵에 접근해야 하는지 알려줌.
+		UINT shadowIdx = onShadowLightIdx[i];
+		::memcpy(&m_pcbMappedPassInfo->m_uIdx, &shadowIdx, sizeof(UINT));
+
 		m_pShadowMapRenderer->ReadyToPrevPassRender(m_pd3dCommandList, i);
-		m_pCamera->SetPosition(m_lightMng->GetPosition(onShadowLightIdx[i]));
-		m_pCamera->SetLookAt(Vector3::Add(m_lightMng->GetPosition(onShadowLightIdx[i]), m_lightMng->GetDirection(onShadowLightIdx[i])));
-		m_pCamera->SetViewportsAndScissorRects(m_pd3dCommandList);
-		m_pCamera->UpdateShaderVariables(m_pd3dCommandList);
-
-		XMFLOAT3 temp = m_pCamera->GetPosition();
-		temp = m_pCamera->GetLook();
-
-		m_lightMng->SetLightSpaceVPT(onShadowLightIdx[i], m_pCamera->GetViewMatrix(), m_pCamera->GetProjectionMatrix());
-
 		for (int i = 0; i < m_vecObject.size(); i++) m_vecObject[i]->Render(m_pd3dCommandList);
 	}
-
-	m_pShadowMapRenderer->ReadyToPrevPassRender(m_pd3dCommandList, 0);
-	m_pCamera->SetPosition(m_lightMng->GetPosition(2));
-	m_pCamera->SetLookAt(Vector3::Add(m_lightMng->GetPosition(2), m_lightMng->GetDirection(2)));
-	m_pCamera->SetViewportsAndScissorRects(m_pd3dCommandList);
-	m_pCamera->UpdateShaderVariables(m_pd3dCommandList);
-	m_lightMng->SetLightSpaceVPT(2, m_pCamera->GetViewMatrix(), m_pCamera->GetProjectionMatrix());
-
-	for (int i = 0; i < m_vecObject.size(); i++) m_vecObject[i]->Render(m_pd3dCommandList);
-
-	m_pCamera->SetPosition(prevPos);
-	m_pCamera->SetLookAt(prevLookVector);
 
 
 }
 void Scene::Render()
 {
+	/*========================================================================
+	* 루트 시그니처, 디스크립터 힙, 메쉬 토폴로지 설정
+	* 
+	* 근데 PrevRender에서 했던 설정값이 저장되진 않을까?
+	*=======================================================================*/
 	m_pd3dCommandList->SetGraphicsRootSignature(m_pd3dRootSignature);				
 	m_pd3dCommandList->SetDescriptorHeaps(1, &m_pd3dCbvSrvDescriptorHeap);			
-	m_pd3dCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);	// 원래 Mesh::Render()에 있던 함수를 빼옴
+	m_pd3dCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
+	/*========================================================================
+	* PassInfo 설정
+	*=======================================================================*/
+	m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
 	m_pCamera->SetViewportsAndScissorRects(m_pd3dCommandList);
-	m_pCamera->UpdateShaderVariables(m_pd3dCommandList);
-
-	//m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["Default"]);
-	//for (int i = 0; i < m_vecObject.size(); i++) m_vecObject[i]->Render(m_pd3dCommandList);
-
-	//===========================================================================================================
-	// 2Pass Screen Render
-
-	//XMFLOAT3 prevPos = m_pCamera->GetPosition();
-	//XMFLOAT3 prevLookVector = m_pCamera->GetLook();
-
-	//m_pCamera->SetPosition(XMFLOAT3(300, 500, -100));
-	//m_pCamera->SetLookAt(XMFLOAT3(0,0,0));
-
-	//m_pCamera->SetViewportsAndScissorRects(m_pd3dCommandList);
-	//m_pCamera->UpdateShaderVariables(m_pd3dCommandList);
+	UpdatePassInfoAboutCamera();
 
 
-	//m_lightMng->UploadLightInfoToGpu(m_pd3dCommandList);
-	//m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["Pass2"]);
-	//m_pd3dCommandList->SetGraphicsRootDescriptorTable(2, m_pRTTClass->GetSRVGpuHandle(0));
-	//m_pd3dCommandList->SetGraphicsRootDescriptorTable(3, m_pRTTClass->GetSRVGpuHandle(1));
-	//m_pd3dCommandList->SetGraphicsRootDescriptorTable(4, m_pRTTClass->GetDSVGpuHandle());
-	//m_pd3dCommandList->SetGraphicsRootDescriptorTable(6, m_pShadowMapRenderer->GetDSVGpuHandle());
-	////m_vecDebugWindow[3]->Render(m_pd3dCommandList);
+	/*========================================================================
+	* Pass 2. 스크린 렌더
+	*=======================================================================*/
+	m_lightMng->UploadLightInfoToGpu(m_pd3dCommandList);
+	m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["Pass2"]);
+	m_pd3dCommandList->SetGraphicsRootDescriptorTable(2, m_pRTTClass->GetSRVGpuHandle(0));
+	m_pd3dCommandList->SetGraphicsRootDescriptorTable(3, m_pRTTClass->GetSRVGpuHandle(1));
+	m_pd3dCommandList->SetGraphicsRootDescriptorTable(4, m_pRTTClass->GetDSVGpuHandle());
+	m_pd3dCommandList->SetGraphicsRootDescriptorTable(6, m_pShadowMapRenderer->GetDSVGpuHandle());
+	m_vecDebugWindow[3]->Render(m_pd3dCommandList);
 
-
-	//m_pCamera->SetPosition(prevPos);
-	//m_pCamera->SetLookAt(prevLookVector);
-
-
-	//===========================================================================================================
-	// DebugWindow Render
+	/*========================================================================
+	* Pass 2. Debug Window 렌더
+	*=======================================================================*/
 	if (test) {
 		m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["Debug"]);
 		m_pd3dCommandList->SetGraphicsRootDescriptorTable(ROOTSIGNATURETEXTUREIDX, m_pRTTClass->GetSRVGpuHandle(0));
@@ -354,12 +375,10 @@ void Scene::Render()
 }
 void Scene::Update(float fTimeElapsed)
 {
-	//m_pCamera->Update(fTimeElapsed);
-	//m_lightMng->SetPos(camLightIdx, m_pCamera->GetPosition());
-	//m_lightMng->SetDir(camLightIdx, m_pCamera->GetLook());
-	// 
-	//for (int i = 0; i < m_vecObject.size(); i++) m_vecObject[i]->Rotate(XMFLOAT3(30.0f * fTimeElapsed, 30.0f * fTimeElapsed, 30.0f * fTimeElapsed));
-	//for (int i = 0; i < m_vecObject.size(); i++) m_vecObject[i]->Rotate(XMFLOAT3(30.0f * fTimeElapsed, 0, 0));
+	m_pCamera->Update(fTimeElapsed);
+
+	m_fCurrentTime += fTimeElapsed;
+	::memcpy(&m_pcbMappedPassInfo->m_xmfCurrentTime, &m_fCurrentTime, sizeof(float));
 }
 void Scene::Input(UCHAR* pKeyBuffer, float fTimeElapsed)
 {
@@ -413,8 +432,40 @@ void Scene::CreatePSO()
 	m_uomPipelineStates["Pass2"]	= tempPass2PSO.GetPipelineState();
 	m_uomPipelineStates["Shadow"]	= shadowPso.GetPipelineState();
 }
+void Scene::UpdatePassInfoAboutCamera()
+{
+	XMFLOAT4X4 xmf4x4Temp;
+
+	xmf4x4Temp = m_pCamera->GetViewMatrix();
+	XMStoreFloat4x4(&m_pcbMappedPassInfo->m_xmf4x4CameraView,			XMMatrixTranspose(XMLoadFloat4x4(&xmf4x4Temp)));
+	xmf4x4Temp = Matrix4x4::Inverse(xmf4x4Temp);
+	XMStoreFloat4x4(&m_pcbMappedPassInfo->m_xmf4x4CameraViewInv,		XMMatrixTranspose(XMLoadFloat4x4(&xmf4x4Temp)));
+
+	xmf4x4Temp = m_pCamera->GetProjectionMatrix();
+	XMStoreFloat4x4(&m_pcbMappedPassInfo->m_xmf4x4CameraProjection,		XMMatrixTranspose(XMLoadFloat4x4(&xmf4x4Temp)));
+	xmf4x4Temp = Matrix4x4::Inverse(xmf4x4Temp);
+	XMStoreFloat4x4(&m_pcbMappedPassInfo->m_xmf4x4CameraProjectionInv,	XMMatrixTranspose(XMLoadFloat4x4(&xmf4x4Temp)));
+
+	::memcpy(&m_pcbMappedPassInfo->m_xmf3CameraPosition, &m_pCamera->GetPosition(), sizeof(XMFLOAT3));
+
+
+}
+void Scene::CreatePassInfoShaderResource()
+{
+	UINT ncbElementBytes = ((sizeof(CB_PASS_INFO) + 255) & ~255); //256의 배수
+	m_pd3dcbPassInfo = ::CreateBufferResource(m_pd3dDevice, m_pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
+	m_pd3dcbPassInfo->Map(0, NULL, (void**)&m_pcbMappedPassInfo);
+}
 void Scene::CreateDescriptorHeap() 
 {
+	// heap 생성을 하려면 미리 서술자를 몇 개나 생성할 지 알아야 하기 때문에
+	// obj 개수도 중요하지만 srv에 들어갈 texture 개수도 중요함..
+	// 미리 몇 개 만들지 알 수 있으면 그걸 정해두고 힙 생성을 하겠는데
+	// 만약 동적으로 리소스 로드&언로드를 한다면?
+	// 그럴 경우에는 힙을 미리 한도를 걸어두고 만드는 것도 방법일 수 있음
+	// (예를 들어, obj는 몇 개, 투사체는 몇 개, 텍스쳐는 몇 개 제한을 둔다던지)
+	// 좋다, 제한을 두자. 오브젝트와 투사체, 레벨 등을 다 합쳐서 1,024개 정도면 될 듯.
+	// 텍스쳐도 128개 정도면 충분할 것.
 	D3D12_DESCRIPTOR_HEAP_DESC d3dDescriptorHeapDesc;
 	d3dDescriptorHeapDesc.NumDescriptors = MAXNUMCBV + MAXNUMSRV;
 	d3dDescriptorHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
@@ -432,4 +483,13 @@ void Scene::CreateDescriptorHeap()
 	m_d3dSrvCPUDescriptorStartHandle.ptr = m_d3dCbvCPUDescriptorStartHandle.ptr + (::gnCbvSrvDescriptorIncrementSize * MAXNUMCBV);
 	m_d3dSrvGPUDescriptorStartHandle.ptr = m_d3dCbvGPUDescriptorStartHandle.ptr + (::gnCbvSrvDescriptorIncrementSize * MAXNUMCBV);
 
+}
+
+void Scene::Release()
+{
+	if (m_pd3dcbPassInfo)
+	{
+		m_pd3dcbPassInfo->Unmap(0, NULL);
+		m_pd3dcbPassInfo->Release();
+	}
 }

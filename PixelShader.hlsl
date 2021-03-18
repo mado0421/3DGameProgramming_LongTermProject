@@ -33,8 +33,16 @@ float4 DeferredShading(VS_OUTPUT input) : SV_TARGET {
 	float3 vNormal			= gtxtTexture2.Sample(gSamplerState, input.uv).xyz * 2.0f - 1.0f;
 
 	//float test				= gtxtDepthArray.Sample(gSamplerState, float3(input.uv, 0.0f)).x;
-
 	//return float4(test, 0.0f, 0.0f, 1.0f);
+
+	//float4 lightSpaceWorldPos = mul(float4(worldPos, 1.0f), gLightArray[2].mtxLightSpaceVP);
+	//float test = CalcWFromDepth(lightSpaceWorldPos.z);
+
+	//if (test < worldPos.z) return float4(1, 0, 0, 1.0f);
+	//return float4(0, 0, 0, 1.0f);
+	//float lightSpaceDepth = gtxtDepthArray.Sample(gShadowSamplerState, float3(lightSpaceWorldPos.xy, gLightArray[2].shadowIdx)).r;
+
+	//return float4(lightSpaceWorldPos.z * 0.001, 0, 0, 1.0f);
 
 	float3 vToCam			= normalize(gvCameraPosition - worldPos);
 

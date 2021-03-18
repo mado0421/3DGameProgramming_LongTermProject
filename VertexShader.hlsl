@@ -26,8 +26,7 @@ VS_OUTPUT Shadow(VS_INPUT input)
 	VS_OUTPUT output;
 
 	output.positionW = (float3)mul(float4(input.position, 1.0f), gmtxGameObject);
-	output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
-	output.projTex = mul(output.position, gmtxTexture);
+	output.position = mul(float4(output.positionW, 1.0f), gLightArray[gPassIdx].mtxLightSpaceVP);
 
 	return output;
 }

@@ -34,27 +34,13 @@ protected:
 	XMFLOAT4X4			m_xmf4x4Projection;
 	XMFLOAT4X4			m_xmf4x4ViewInv;
 	XMFLOAT4X4			m_xmf4x4ProjectionInv;
-	XMFLOAT4X4			m_xmf4x4Texture;
 
 	D3D12_VIEWPORT		m_d3dViewport;
 	D3D12_RECT			m_d3dScissorRect;
 
-	ID3D12Resource		*m_pd3dcbCamera = NULL;
-	VS_CB_CAMERA_INFO	*m_pcbMappedCamera = NULL;
-
-
-	//==========================
-	//test
-
-	float m_xmfTime;
-
 public:
 	Camera();
 	virtual ~Camera();
-
-	virtual void CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList);
-	virtual void ReleaseShaderVariables();
-	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList);
 
 	virtual void SetViewportsAndScissorRects(ID3D12GraphicsCommandList *pd3dCommandList);
 	void SetViewport(int xTopLeft, int yTopLeft, int nWidth, int nHeight, float fMinZ = 0.0f, float fMaxZ = 1.0f);
@@ -75,8 +61,9 @@ public:
 	XMFLOAT3& GetUp()		{ return(m_xmf3Up); }
 	XMFLOAT3& GetLook()		{ return(m_xmf3Look); }
 
-	//	void SetOffset(XMFLOAT3 xmf3Offset) { m_xmf3Offset = xmf3Offset; }
-	void SetOffset(const XMFLOAT3& xmf3Offset) { m_xmf3Offset = xmf3Offset; m_xmf3Position.x += xmf3Offset.x; m_xmf3Position.y += xmf3Offset.y; m_xmf3Position.z += xmf3Offset.z; }
+	void SetOffset(const XMFLOAT3& xmf3Offset) {
+		m_xmf3Offset = xmf3Offset; m_xmf3Position.x += xmf3Offset.x; m_xmf3Position.y += xmf3Offset.y; m_xmf3Position.z += xmf3Offset.z; 
+	}
 	void SetOffset(const XMFLOAT3& xmf3Offset, const XMFLOAT3& objPos) { 
 		m_xmf3Offset = xmf3Offset; 
 		m_xmf3Position = Vector3::Add(objPos, xmf3Offset);
@@ -124,7 +111,7 @@ public:
 		//m_xmf4x4World._31 = xmf3Look.x;		m_xmf4x4World._32 = xmf3Look.y;		m_xmf4x4World._33 = m_xmf3Look.z;
 	
 	}
-	virtual void Update(float fTimeElapsed) { }
+	virtual void Update(float fTimeElapsed);
 	virtual void SetLookAt(const XMFLOAT3& xmf3LookAt) { }
 
 public:

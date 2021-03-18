@@ -282,3 +282,6 @@ inline D3D12_SHADER_RESOURCE_VIEW_DESC GetShaderResourceViewDesc(D3D12_RESOURCE_
 	}
 	return(d3dShaderResourceViewDesc);
 }
+
+
+

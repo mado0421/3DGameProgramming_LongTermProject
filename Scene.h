@@ -11,6 +11,18 @@ class Framework;
 class Texture;
 class LightManager;
 
+struct CB_PASS_INFO {
+	XMFLOAT4X4	m_xmf4x4CameraView;
+	XMFLOAT4X4	m_xmf4x4CameraProjection;
+	XMFLOAT4X4	m_xmf4x4CameraViewInv;
+	XMFLOAT4X4	m_xmf4x4CameraProjectionInv;
+	XMFLOAT4X4	m_xmf4x4TextureTransform;
+	XMFLOAT3	m_xmf3CameraPosition;
+	float		m_xmfCurrentTime;
+	UINT		m_uIdx;
+};
+
+
 class Scene
 {
 protected:
@@ -38,11 +50,14 @@ protected:
 	unordered_map<string, Texture*>				m_uomTextures;
 	LightManager*								m_lightMng;
 
-	//Framework*					m_pFramework;
+	ID3D12Resource*								m_pd3dcbPassInfo;
+	CB_PASS_INFO*								m_pcbMappedPassInfo;
+
+	float m_fCurrentTime = 0;
 public:
 
-	//ID3D12Resource*				m_pDSBResource;
-	//void MakeDSBSRV(ID3D12Resource* resource);
+
+
 	bool test = false;
 	UINT camLightIdx = 0;
 
@@ -53,6 +68,8 @@ public:
 	virtual void Update(float fTimeElapsed);
 	virtual void Input(UCHAR* pKeyBuffer, float fTimeElapsed);
 
+	virtual void Release();
+
 protected:
 	virtual ID3D12RootSignature* CreateRootSignature();
 	virtual void CreateDescriptorHeap();
@@ -60,5 +77,8 @@ protected:
 	virtual void CreateSRV() {}
 	virtual void CreatePSO();
 
+
+	void CreatePassInfoShaderResource();
+	void UpdatePassInfoAboutCamera();
 };
 

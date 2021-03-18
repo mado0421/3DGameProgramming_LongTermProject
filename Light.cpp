@@ -23,7 +23,7 @@ void LightManager::UploadLightInfoToGpu(ID3D12GraphicsCommandList* pd3dCommandLi
 		m_pCBMappedlightInfo[i].shadowIdx		= m_vLightInfo[i].shadowIdx;
 		m_pCBMappedlightInfo[i].isEnable		= m_vLightInfo[i].isEnable;
 		m_pCBMappedlightInfo[i].isShadow		= m_vLightInfo[i].isShadow;
-		XMStoreFloat4x4(&m_pCBMappedlightInfo[i].xmf4x4lightSpaceViewProjTex, XMMatrixTranspose(XMLoadFloat4x4(&m_vLightInfo[i].xmf4x4lightSpaceViewProjTex)));
+		XMStoreFloat4x4(&m_pCBMappedlightInfo[i].xmf4x4lightSpaceViewProj, XMMatrixTranspose(XMLoadFloat4x4(&m_vLightInfo[i].xmf4x4lightSpaceViewProj)));
 	}
 
 }
@@ -87,6 +87,22 @@ UINT LightManager::AddDirectionalLight(XMFLOAT3 color, XMFLOAT3 dir)
 
 UINT LightManager::AddSpotLight(XMFLOAT3 color, XMFLOAT3 pos, XMFLOAT3 dir, XMFLOAT2 falloff, float spotPower, bool isShadow)
 {
+
+	//Light l;
+	//l.m_bIsEnable = true;
+	//l.m_uLightType = LIGHTTYPE::LIGHT_SPOT;
+	//l.m_xmf3LightColor = color;
+	//l.m_xmf3Direction = Vector3::Normalize(dir);
+	//l.m_xmf3Position = pos;
+	//l.m_fFalloffStart = falloff.x;
+	//l.m_fFalloffEnd = falloff.y;
+	//l.m_fSpotPower = spotPower;
+	//if (isShadow) {
+	//	l.m_bIsShadow = true;
+	//	l.m_uShadowIdx = m_nCurrShadowIdx;
+	//	m_nCurrShadowIdx += SpotLightShadowIdxIncrement;
+	//}
+
 	CB_LIGHT_INFO light;
 	memset(&light, NULL, sizeof(CB_LIGHT_INFO));
 	light.isEnable		= true;
@@ -101,6 +117,18 @@ UINT LightManager::AddSpotLight(XMFLOAT3 color, XMFLOAT3 pos, XMFLOAT3 dir, XMFL
 		light.isShadow	= true;
 		light.shadowIdx = m_nCurrShadowIdx;
 		m_nCurrShadowIdx += SpotLightShadowIdxIncrement;
+
+		/*=======================================================================
+		* 먼저 뷰 변환 행렬을 만듦.
+		* 위치랑 보는 방향, Up 벡터
+		* 그 다음 투영 변환 행렬. 이건 다 똑같은거 같음.
+		* 10.0f, 1000.f, ASPECT_RATIO, 60.0f
+		* 
+		* 
+		*/
+		XMFLOAT4X4 xmf4x4View			= Matrix4x4::LookAtLH(pos, Vector3::Add(pos, dir), XMFLOAT3(0,1,0));
+		XMFLOAT4X4 xmf4x4Projection		= Matrix4x4::PerspectiveFovLH(XMConvertToRadians(60.0f), (float)256 / (float)256, 10.0f, 1000.0f);
+		light.xmf4x4lightSpaceViewProj	= Matrix4x4::Multiply(xmf4x4View, xmf4x4Projection);
 	}
 
 	if (m_vLightInfo.size() < m_nMaxLight) {
@@ -109,4 +137,22 @@ UINT LightManager::AddSpotLight(XMFLOAT3 color, XMFLOAT3 pos, XMFLOAT3 dir, XMFL
 	}
 	assert(!"조명 개수 초과!");
 	return m_nMaxLight;
+}
+
+Light::Light()
+{
+	m_uLightType				= 0;
+	m_bIsEnable					= true;
+
+	m_xmf3LightColor			= XMFLOAT3(1.0f, 1.0f, 1.0f);
+	m_xmf3Position				= XMFLOAT3(0.0f, 0.0f, 0.0f);
+	m_xmf3Direction				= XMFLOAT3(0.0f, -1.0f, 0.0f);;
+
+	m_fFalloffStart				= 300.0f;
+	m_fFalloffEnd				= 700.0f;
+	m_fSpotPower				= 1.0f;
+
+	m_bIsShadow					= false;
+	m_uShadowIdx				= 0;
+	m_xmf4x4lightSpaceViewProj	= Matrix4x4::Identity();
 }

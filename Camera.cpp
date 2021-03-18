@@ -13,20 +13,12 @@ Camera::Camera()
 	, m_xmf3Position(XMFLOAT3(0.0f, 0.0f, 0.0f))
 	, m_xmf3Right(XMFLOAT3(1.0f, 0.0f, 0.0f))
 	, m_xmf3Look(XMFLOAT3(0.0f, 0.0f, 1.0f))
+	, m_xmf3Direction(XMFLOAT3(0.0f,0.0f,0.0f))
 	, m_xmf3Up(XMFLOAT3(0.0f, 1.0f, 0.0f))
 	, m_xmf3Offset(XMFLOAT3(0.0f, 0.0f, 0.0f))
 	, m_fTimeLag(0.0f)
 	, m_xmf3LookAtWorld(XMFLOAT3(0.0f, 0.0f, 0.0f))
-	, m_xmfTime(0)
 {
-	m_xmf4x4Texture = Matrix4x4::Identity();
-	m_xmf4x4Texture.m[0][0] = 0.5f;
-	m_xmf4x4Texture.m[1][1] = -0.5f;
-	m_xmf4x4Texture.m[2][2] = 1.0f;
-	m_xmf4x4Texture.m[3][3] = 1.0f;
-	m_xmf4x4Texture.m[0][3] = 0.5f;
-	m_xmf4x4Texture.m[1][3] = 0.5f;
-
 }
 
 Camera::~Camera() {}
@@ -87,38 +79,9 @@ void Camera::RegenerateViewMatrix()
 
 }
 
-void Camera::CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList)
-{
-	UINT ncbElementBytes = ((sizeof(VS_CB_CAMERA_INFO) + 255) & ~255); //256ÀÇ ¹è¼ö
-	m_pd3dcbCamera = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
-
-	m_pd3dcbCamera->Map(0, NULL, (void **)&m_pcbMappedCamera);
-}
-
-void Camera::UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList)
+void Camera::Update(float fTimeElapsed)
 {
 	RegenerateViewMatrix();
-
-	XMStoreFloat4x4(&m_pcbMappedCamera->m_xmf4x4View, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4View)));
-	XMStoreFloat4x4(&m_pcbMappedCamera->m_xmf4x4Projection, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4Projection)));
-	XMStoreFloat4x4(&m_pcbMappedCamera->m_xmf4x4ViewInv, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4ViewInv)));
-	XMStoreFloat4x4(&m_pcbMappedCamera->m_xmf4x4ProjectionInv, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4ProjectionInv)));
-	XMStoreFloat4x4(&m_pcbMappedCamera->m_xmf4x4Texture, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4Texture)));
-
-	::memcpy(&m_pcbMappedCamera->m_xmf3Position, &m_xmf3Position, sizeof(XMFLOAT3));
-	::memcpy(&m_pcbMappedCamera->m_xmfTime, &m_xmfTime, sizeof(float));
-
-	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbCamera->GetGPUVirtualAddress();
-	pd3dCommandList->SetGraphicsRootConstantBufferView(ROOTSIGNATURECAMERAIDX, d3dGpuVirtualAddress);
-}
-
-void Camera::ReleaseShaderVariables()
-{
-	if (m_pd3dcbCamera)
-	{
-		m_pd3dcbCamera->Unmap(0, NULL);
-		m_pd3dcbCamera->Release();
-	}
 }
 
 void Camera::SetViewportsAndScissorRects(ID3D12GraphicsCommandList *pd3dCommandList)
@@ -158,13 +121,12 @@ Object * FollowCamera::GetTarget()
 
 void FollowCamera::Update(float fTimeElapsed)
 {
+	RegenerateViewMatrix();
+
 	Move(Vector3::Multiply(fTimeElapsed, m_xmf3Direction));
 	m_xmf3Direction.x = 0;
 	m_xmf3Direction.y = 0;
 	m_xmf3Direction.z = 0;
-
-
-	m_xmfTime += fTimeElapsed * 100;
 }
 
 void FollowCamera::SetLookAt(const XMFLOAT3 & xmf3LookAt)

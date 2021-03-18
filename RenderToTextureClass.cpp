@@ -3,7 +3,7 @@
 #include "Texture.h"
 
 constexpr int RTTWidth = 1000;
-constexpr int shadowMapWidth = 1000;
+constexpr int shadowMapWidth = 256;
 
 void RenderToTextureClass::Init(ID3D12Device* pd3dDevice, D3D12_CPU_DESCRIPTOR_HANDLE& cpuHandle, D3D12_GPU_DESCRIPTOR_HANDLE& gpuHandle, UINT nTexture)
 {

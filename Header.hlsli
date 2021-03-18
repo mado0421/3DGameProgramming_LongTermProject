@@ -4,7 +4,7 @@
 * 
 * ============================================================*/
 struct Light {
-	matrix	mtxLightSpaceVPT;
+	matrix	mtxLightSpaceVP;
 	float3	color;
 	float	falloffStart;
 	float3	direction;
@@ -19,7 +19,7 @@ struct Light {
 
 SamplerState gSamplerState				: register(s0);
 SamplerState gShadowSamplerState		: register(s1);
-cbuffer cbCameraInfo					: register(b0)
+cbuffer cbPassInfo						: register(b0)
 {
 	matrix		gmtxView				: packoffset(c0);
 	matrix		gmtxProjection			: packoffset(c4);
@@ -28,6 +28,7 @@ cbuffer cbCameraInfo					: register(b0)
 	matrix		gmtxTexture				: packoffset(c16);
 	float3		gvCameraPosition		: packoffset(c20);
 	float		gfTime					: packoffset(c20.w);
+	int			gPassIdx				: packoffset(c21);
 };
 cbuffer cbGameObjectInfo				: register(b1)
 {

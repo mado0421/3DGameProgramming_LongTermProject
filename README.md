@@ -36,6 +36,10 @@
   - Texture를 ShaderResource로 사용하여 두 번째 Pass에서 worldPos, normal, color 정보 언패킹하기
   - 언패킹한 정보를 바탕으로 조명 계산하기
 
+### 2021.03.18
+<img src="https://user-images.githubusercontent.com/21697638/111553756-58535f80-87c8-11eb-95b5-4fb1c6bab7a7.png" width="40%" height="40%"></img>
+
+
 ## 코드 작성 규칙
 ```c++
 // 클래스 작성 규칙

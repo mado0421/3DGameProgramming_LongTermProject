@@ -38,17 +38,37 @@ float3 BlinnPhong(float3 lightColor, float3 vToLight, float3 vNormal, float3 vTo
 }
 
 float CalcShadowFactor(Light l, float3 worldPos) {
+	//float3 vToLight = l.position - worldPos;
+	//float d = length(vToLight);
 
-	float4 lightScreenSpacePos = mul(float4(worldPos, 1.0f), l.mtxLightSpaceVPT);
-	lightScreenSpacePos.xyz /= lightScreenSpacePos.w;
-	float depth = gtxtDepthArray.Sample(gShadowSamplerState, float3(lightScreenSpacePos.xy, l.shadowIdx)).r;
-	float linearDepth = CalcWFromDepth(depth);
+	//float4 lightSpaceWorldPos = mul(float4(worldPos, 1.0f), l.mtxLightSpaceVP);
+	//float lightSpaceDepth = gtxtDepthArray.Sample(gShadowSamplerState, float3(lightSpaceWorldPos.xy, l.shadowIdx)).r;
+	//float w = CalcWFromDepth(lightSpaceDepth);
+	//if (w < d - (500 + gfTime)) return 1.0f;
+	//return 0.0f;
 
-	if (lightScreenSpacePos.z < linearDepth) {
-		return 1.0f;
-	}
 
+	float4 temp = mul(float4(worldPos, 1.0f), l.mtxLightSpaceVP);
+	temp /= temp.w;
+	temp = mul(temp, gmtxTexture);
+	float depth = gtxtDepthArray.Sample(gShadowSamplerState, float3(temp.xy, l.shadowIdx)).r;
+	if (temp.z < depth) return 1.0f;
 	return 0.0f;
+
+
+
+
+
+
+
+	//float4 lightScreenSpacePos = mul(float4(worldPos, 1.0f), l.mtxLightSpaceVP);
+	//lightScreenSpacePos.xyz /= lightScreenSpacePos.w;
+	//float depth = gtxtDepthArray.Sample(gShadowSamplerState, float3(lightScreenSpacePos.xy, l.shadowIdx)).r;
+	//float linearDepth = CalcWFromDepth(depth);
+	//if (lightScreenSpacePos.z < linearDepth) {
+	//	return 1.0f;
+	//}
+	//return 0.0f;
 
 	//pos.xyz /= pos.w;
 	//float2 uv;
