@@ -84,8 +84,9 @@ void Scene::Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12Graphics
 	m_lightMng->Init(m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
 
 	m_lightMng->AddDirectionalLight();
-	m_lightMng->AddPointLight();
-	camLightIdx = m_lightMng->AddSpotLight(XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT3(150, 500, -200), XMFLOAT3(0, -1, 1), XMFLOAT2(600, 700), 0.5f, true);
+	m_lightMng->AddPointLight(XMFLOAT3(0.0f, 0.0f, 0.5f), XMFLOAT3(300.0f, 300.0f, 300.0f), XMFLOAT2(300.0f, 500.0f));
+	m_lightMng->AddSpotLight(XMFLOAT3(0.5f, 0.0f, 0.0f), XMFLOAT3(150, 500, 400), XMFLOAT3(0, -1, -1), XMFLOAT2(600, 700), 0.5f, true);
+	m_lightMng->AddSpotLight(XMFLOAT3(0.5f, 0.0f, 0.0f), XMFLOAT3(150, 500, -200), XMFLOAT3(0, -1, 1), XMFLOAT2(600, 700), 0.5f, true);
 
 	/*========================================================================
 	* PSO 생성
@@ -177,6 +178,13 @@ ID3D12RootSignature* Scene::CreateRootSignature()
 	pd3dRootParameters[6].DescriptorTable.NumDescriptorRanges = 1;
 	pd3dRootParameters[6].DescriptorTable.pDescriptorRanges = &d3dDescriptorRange[5];
 	pd3dRootParameters[6].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+
+	////Index 올릴려고 상수 루트서명 만들음..
+	//pd3dRootParameters[7].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
+	//pd3dRootParameters[7].Constants.Num32BitValues = 0;
+	//pd3dRootParameters[7].Constants.ShaderRegister = 7;
+	//pd3dRootParameters[7].Constants.RegisterSpace = 0;
+	//pd3dRootParameters[7].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
 	D3D12_STATIC_SAMPLER_DESC d3dSamplerDesc[2];
 	::ZeroMemory(&d3dSamplerDesc, sizeof(D3D12_STATIC_SAMPLER_DESC) * 2);
@@ -292,39 +300,50 @@ void Scene::PrevPassRender()
 	m_pCamera->SetViewport(0, 0, 256, 256, 0.0f, 1.0f);
 	m_pCamera->SetViewportsAndScissorRects(m_pd3dCommandList);
 
+	UINT shadowIdx;
+
+
 	m_lightMng->UploadLightInfoToGpu(m_pd3dCommandList);
-	for (int i = 0; i < onShadowLightIdx.size(); i++) {
-		/* 
-		* 카메라를 광원 공간으로 옮기고
-		* 이전 뷰 변환 행렬과 투영 행렬은 저장해 둔 뒤에
-		* 새로 뷰 변환 행렬과 투영 행렬을 만들고
-		* (투영 행렬은 바뀌는게 없음? 아마도)
-		* 그걸 조명에 전달해주고
-		* 카메라는 업데이트
-		* 조명에선 텍스처 행렬 곱해서 올리기
-		* 
-		* 위의 방법이 안되는걸 일단 현상은 확인함.
-		* 언제까지고 안되는걸 붙잡고 있을 수는 없으니까.
-		* 광원별 뷰변환 행렬과 투영변환 행렬을 광원 초기화 시점에 생성하고(그림자를 쓴다면)
-		* 그럼 광원 정보를 올려둬야 함.
-		* m_lightMng->UploadLightInfoToGpu(m_pd3dCommandList);
-		* 이게 업로드를 해주는거니까 이걸 여기서 해주면 그만일 듯.
-		* 
-		* 아니지 렌더할 때 이게 몇 번째 광원인지 알 수 있어야 하거나
-		* 아니면 렌더할 때 idx번째 광원의 행렬을 미리 업로드 해둬야 쓰지.
-		* 
-		* 카메라의 뷰포트와 시저렉트만 다시 설정하자.
-		* Zf랑 Zn 같은건 괜찮은데
-		* 
-		*/
+	//for (int i = 0; i < onShadowLightIdx.size(); i++) {
+	//	/* 
+	//	* 카메라를 광원 공간으로 옮기고
+	//	* 이전 뷰 변환 행렬과 투영 행렬은 저장해 둔 뒤에
+	//	* 새로 뷰 변환 행렬과 투영 행렬을 만들고
+	//	* (투영 행렬은 바뀌는게 없음? 아마도)
+	//	* 그걸 조명에 전달해주고
+	//	* 카메라는 업데이트
+	//	* 조명에선 텍스처 행렬 곱해서 올리기
+	//	* 
+	//	* 위의 방법이 안되는걸 일단 현상은 확인함.
+	//	* 언제까지고 안되는걸 붙잡고 있을 수는 없으니까.
+	//	* 광원별 뷰변환 행렬과 투영변환 행렬을 광원 초기화 시점에 생성하고(그림자를 쓴다면)
+	//	* 그럼 광원 정보를 올려둬야 함.
+	//	* m_lightMng->UploadLightInfoToGpu(m_pd3dCommandList);
+	//	* 이게 업로드를 해주는거니까 이걸 여기서 해주면 그만일 듯.
+	//	* 
+	//	* 아니지 렌더할 때 이게 몇 번째 광원인지 알 수 있어야 하거나
+	//	* 아니면 렌더할 때 idx번째 광원의 행렬을 미리 업로드 해둬야 쓰지.
+	//	* 
+	//	* 카메라의 뷰포트와 시저렉트만 다시 설정하자.
+	//	* Zf랑 Zn 같은건 괜찮은데
+	//	* 
+	//	*/
+	//	// PassInfo.m_uIdx에 지금 몇 번째 그림자 맵에 접근해야 하는지 알려줌.
+	//	//UINT shadowIdx = onShadowLightIdx[i];
+	//	m_pShadowMapRenderer->ReadyToPrevPassRender(m_pd3dCommandList, i);
+	//	for (int i = 0; i < m_vecObject.size(); i++) m_vecObject[i]->Render(m_pd3dCommandList);
+	//}
 
-		// PassInfo.m_uIdx에 지금 몇 번째 그림자 맵에 접근해야 하는지 알려줌.
-		UINT shadowIdx = onShadowLightIdx[i];
-		::memcpy(&m_pcbMappedPassInfo->m_uIdx, &shadowIdx, sizeof(UINT));
+	m_pShadowMapRenderer->ReadyToPrevPassRender(m_pd3dCommandList, 0);
+	shadowIdx = 2;
+	::memcpy(&m_pcbMappedPassInfo->m_uIdx, &shadowIdx, sizeof(UINT));
+	for (int i = 0; i < m_vecObject.size(); i++) m_vecObject[i]->Render(m_pd3dCommandList);
 
-		m_pShadowMapRenderer->ReadyToPrevPassRender(m_pd3dCommandList, i);
-		for (int i = 0; i < m_vecObject.size(); i++) m_vecObject[i]->Render(m_pd3dCommandList);
-	}
+
+	m_pShadowMapRenderer->ReadyToPrevPassRender(m_pd3dCommandList, 1);
+	shadowIdx = 3;
+	::memcpy(&m_pcbMappedPassInfo->m_uIdx, &shadowIdx, sizeof(UINT));
+	for (int i = 0; i < m_vecObject.size(); i++) m_vecObject[i]->Render(m_pd3dCommandList);
 
 
 }
@@ -454,7 +473,24 @@ void Scene::CreatePassInfoShaderResource()
 {
 	UINT ncbElementBytes = ((sizeof(CB_PASS_INFO) + 255) & ~255); //256의 배수
 	m_pd3dcbPassInfo = ::CreateBufferResource(m_pd3dDevice, m_pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
-	m_pd3dcbPassInfo->Map(0, NULL, (void**)&m_pcbMappedPassInfo);
+
+
+	D3D12_GPU_VIRTUAL_ADDRESS		d3dGpuVirtualAddress;
+	D3D12_CONSTANT_BUFFER_VIEW_DESC d3dCBVDesc;
+
+	if (nullptr != m_pd3dcbPassInfo) {
+		m_pd3dcbPassInfo->Map(0, NULL, (void**)&m_pcbMappedPassInfo);
+		d3dGpuVirtualAddress = m_pd3dcbPassInfo->GetGPUVirtualAddress();
+		d3dCBVDesc.SizeInBytes = ncbElementBytes;
+		d3dCBVDesc.BufferLocation = d3dGpuVirtualAddress;
+		m_pd3dDevice->CreateConstantBufferView(&d3dCBVDesc, m_d3dCbvCPUDescriptorStartHandle);
+
+		m_d3dCbvCPUDescriptorStartHandle.ptr += gnCbvSrvDescriptorIncrementSize;
+	}
+
+	m_d3dCbvGPUPassInfoHandle = m_d3dCbvGPUDescriptorStartHandle;
+	m_d3dCbvGPUDescriptorStartHandle.ptr += gnCbvSrvDescriptorIncrementSize;
+
 }
 void Scene::CreateDescriptorHeap() 
 {

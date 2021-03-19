@@ -52,6 +52,9 @@ protected:
 
 	ID3D12Resource*								m_pd3dcbPassInfo;
 	CB_PASS_INFO*								m_pcbMappedPassInfo;
+	D3D12_GPU_DESCRIPTOR_HANDLE					m_d3dCbvGPUPassInfoHandle;
+
+	Framework*									m_pFramework;
 
 	float m_fCurrentTime = 0;
 public:

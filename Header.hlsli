@@ -42,6 +42,10 @@ cbuffer cbLightArray					: register(b5)
 	Light gLightArray[64] : packoffset(c0);
 }
 Texture2DArray gtxtDepthArray			: register(t6);
+//cbuffer myBuffer : register(b7) 
+//{
+//	int gIdx;
+//}
 
 
 

@@ -127,7 +127,7 @@ UINT LightManager::AddSpotLight(XMFLOAT3 color, XMFLOAT3 pos, XMFLOAT3 dir, XMFL
 		* 
 		*/
 		XMFLOAT4X4 xmf4x4View			= Matrix4x4::LookAtLH(pos, Vector3::Add(pos, dir), XMFLOAT3(0,1,0));
-		XMFLOAT4X4 xmf4x4Projection		= Matrix4x4::PerspectiveFovLH(XMConvertToRadians(60.0f), (float)256 / (float)256, 10.0f, 1000.0f);
+		XMFLOAT4X4 xmf4x4Projection		= Matrix4x4::PerspectiveFovLH(XMConvertToRadians(90.0f), (float)256 / (float)256, 10.0f, 10000.0f);
 		light.xmf4x4lightSpaceViewProj	= Matrix4x4::Multiply(xmf4x4View, xmf4x4Projection);
 	}
 
