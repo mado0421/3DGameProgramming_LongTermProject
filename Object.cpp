@@ -25,7 +25,7 @@ void Object::Update(float fTimeElapsed)
 
 void Object::Render(ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	pd3dCommandList->SetGraphicsRootDescriptorTable(ROOTSIGNATUREOBJECTIDX, m_d3dCbvGPUDescriptorHandle);
+	pd3dCommandList->SetGraphicsRootDescriptorTable(ROOTSIGNATURE_OBJECTS, m_d3dCbvGPUDescriptorHandle);
 	UINT ncbElementBytes = ((sizeof(CB_OBJECT_INFO) + 255) & ~255);
 	memset(m_pCBMappedObjects, NULL, ncbElementBytes);
 	XMStoreFloat4x4(&m_pCBMappedObjects->xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4World)));
@@ -103,7 +103,7 @@ DebugWindowObject::DebugWindowObject(
 
 void DebugWindowObject::Render(ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	pd3dCommandList->SetGraphicsRootDescriptorTable(ROOTSIGNATUREOBJECTIDX, m_d3dCbvGPUDescriptorHandle);
+	pd3dCommandList->SetGraphicsRootDescriptorTable(ROOTSIGNATURE_OBJECTS, m_d3dCbvGPUDescriptorHandle);
 	UINT ncbElementBytes = ((sizeof(CB_OBJECT_INFO) + 255) & ~255);
 	memset(m_pCBMappedObjects, NULL, ncbElementBytes);
 	XMStoreFloat4x4(&m_pCBMappedObjects->xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4World)));

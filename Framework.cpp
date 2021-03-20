@@ -35,8 +35,8 @@ void Framework::Update()
 	m_pd3dCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
 
 	//======================================
-	// PrevPassRender
-	if (m_pCurrentScene) m_pCurrentScene->PrevPassRender();
+	// RenderPass1
+	if (m_pCurrentScene) m_pCurrentScene->RenderPass1();
 	m_pd3dCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
 	//======================================
 
@@ -45,7 +45,7 @@ void Framework::Update()
 	//m_pd3dCommandList->OMSetRenderTargets(1, &d3dRtvCPUDescriptorHandle, TRUE, NULL);
 
 
-	if (m_pCurrentScene) m_pCurrentScene->Render();
+	if (m_pCurrentScene) m_pCurrentScene->RenderPass2();
 
 	d3dResourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
 	d3dResourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;

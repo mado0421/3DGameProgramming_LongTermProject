@@ -155,10 +155,8 @@
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="PipelineStateObject.h" />
-    <ClInclude Include="RenderToTextureClass.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="Scene.h" />
-    <ClInclude Include="Shadow.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Texture.h" />
@@ -177,9 +175,7 @@
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Object.cpp" />
     <ClCompile Include="PipelineStateObject.cpp" />
-    <ClCompile Include="RenderToTextureClass.cpp" />
     <ClCompile Include="Scene.cpp" />
-    <ClCompile Include="Shadow.cpp" />
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="Timer.cpp" />

@@ -1,22 +1,3 @@
-/*==============================================================
-* 여기서 선언을 먼저 해줘야 함.
-* Light 구조체를 cbuffer 아래서 선언하면 안 됨.
-* 
-* ============================================================*/
-struct Light {
-	matrix	mtxLightSpaceVP;
-	float3	color;
-	float	falloffStart;
-	float3	direction;
-	float	falloffEnd;
-	float3	position;
-	float	spotPower;
-	int		type;
-	int		shadowIdx;
-	bool	isEnable;
-	bool	isShadow;
-};
-
 SamplerState gSamplerState				: register(s0);
 SamplerState gShadowSamplerState		: register(s1);
 cbuffer cbPassInfo						: register(b0)
@@ -34,19 +15,22 @@ cbuffer cbGameObjectInfo				: register(b1)
 {
 	matrix		gmtxGameObject			: packoffset(c0);
 };
-Texture2D gtxtTexture1					: register(t2);
-Texture2D gtxtTexture2					: register(t3);
-Texture2D gtxtTexture3					: register(t4);
-cbuffer cbLightArray					: register(b5) 
+cbuffer cbLightArray					: register(b2) 
 {
-	Light gLightArray[64] : packoffset(c0);
+	matrix	gmtxLightSpaceVP	: packoffset(c0);
+	float3	gvLightColor		: packoffset(c4);
+	float	gfFalloffStart		: packoffset(c4.w);
+	float3	gvLightDirection	: packoffset(c5);
+	float	gfFalloffEnd		: packoffset(c5.w);
+	float3	gvLightPosition		: packoffset(c6);
+	float	gfSpotPower			: packoffset(c6.w);
+	int		gLightType			: packoffset(c7);
+	bool	bIsShadow			: packoffset(c7.y);
 }
-Texture2DArray gtxtDepthArray			: register(t6);
-//cbuffer myBuffer : register(b7) 
-//{
-//	int gIdx;
-//}
-
+Texture2D gtxtColorMap					: register(t3);
+Texture2D gtxtNormalMap					: register(t4);
+Texture2D gtxtDepthMap					: register(t5);
+Texture2DArray gtxtShadowMap			: register(t6);
 
 
 struct VS_INPUT {
@@ -63,7 +47,7 @@ struct VS_OUTPUT {
 	float2 uv		: TEXCOORD0;
 	float4 projTex	: TEXCOORD1;
 };
-struct TEST {
+struct GBuffer {
 	float4 cColor	: SV_TARGET0;
 	float4 cNormal	: SV_TARGET1;
 };
@@ -73,7 +57,7 @@ float CalcWFromDepth(float depth) {
 	return w;
 }
 float3 WorldPosFromLinearDepth(float2 uv) {
-	float depth = gtxtTexture3.Sample(gSamplerState, uv).r;
+	float depth = gtxtDepthMap.Sample(gSamplerState, uv).r;
 	float w = CalcWFromDepth(depth);
 	float4 result = float4(uv * 2.0f - 1.0f, depth, 1);
 	result.y *= -1;

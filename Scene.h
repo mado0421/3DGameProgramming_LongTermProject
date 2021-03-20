@@ -10,6 +10,7 @@ class ShadowMapRenderer;
 class Framework;
 class Texture;
 class LightManager;
+class TextureManager;
 
 struct CB_PASS_INFO {
 	XMFLOAT4X4	m_xmf4x4CameraView;
@@ -36,27 +37,24 @@ protected:
 	D3D12_CPU_DESCRIPTOR_HANDLE	m_d3dSrvCPUDescriptorStartHandle;
 	D3D12_GPU_DESCRIPTOR_HANDLE	m_d3dSrvGPUDescriptorStartHandle;
 
-private:
-	RenderToTextureClass*						m_pRTTClass;
-
-	ShadowMapRenderer*							m_pShadowMapRenderer;
 
 	vector<DebugWindowObject*>					m_vecDebugWindow;
 	vector<Object*>								m_vecObject;
-	Camera*										m_pCamera;
 	unordered_map<string, ID3D12PipelineState*> m_uomPipelineStates;
 
-protected:
-	unordered_map<string, Texture*>				m_uomTextures;
-	LightManager*								m_lightMng;
+	LightManager*								m_LightMng;
+	TextureManager* m_TextureMng;
 
 	ID3D12Resource*								m_pd3dcbPassInfo;
 	CB_PASS_INFO*								m_pcbMappedPassInfo;
 	D3D12_GPU_DESCRIPTOR_HANDLE					m_d3dCbvGPUPassInfoHandle;
 
-	Framework*									m_pFramework;
 
-	float m_fCurrentTime = 0;
+	Framework*									m_pFramework;
+	Camera*										m_pCamera;
+	float										m_fCurrentTime = 0;
+
+
 public:
 
 
@@ -66,8 +64,8 @@ public:
 
 public:
 	virtual void Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
-	virtual void PrevPassRender();
-	virtual void Render();
+	virtual void RenderPass1();
+	virtual void RenderPass2();
 	virtual void Update(float fTimeElapsed);
 	virtual void Input(UCHAR* pKeyBuffer, float fTimeElapsed);
 
