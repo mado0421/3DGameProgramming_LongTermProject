@@ -1,7 +1,7 @@
 // Rf is Fresnel Factor.
 // ex. water (0.02, 0.02, 0.02), gold (1.0, 0.71, 0.29)
-float3 CalcSpecular(float3 Rf, float roughness, float3 cLight, float3 vToLight, float3 vNormal, float3 vToCam) {
-	float3 vHalf = normalize(vToCam + vToLight);
+float3 CalcSpecular(float3 Rf, float roughness, float3 cLight, float3 vToLight, float3 vNormal, float3 vToEye) {
+	float3 vHalf = normalize(vToEye + vToLight);
 	float3 Specular = max(dot(vToLight, vNormal), 0) * cLight;
 	// Fresnel 계산 공식에서 dot(vNormal, vHalf) 값이 음수가 나올 수 있기 때문에 max를 넣어줬음.
 	float3 Fresnel = Rf * ((roughness + 8) / 8) * pow(max(dot(vNormal, vHalf), 0), roughness);
@@ -24,9 +24,9 @@ float3 SchlickFresnel(float3 R0, float3 vNormal, float3 vLight) {
 
 	return reflectPercent;
 }
-float3 BlinnPhong(float3 lightColor, float3 vToLight, float3 vNormal, float3 vToCam, float3 matColor) {
+float3 BlinnPhong(float3 lightColor, float3 vToLight, float3 vNormal, float3 vToEye) {
 	const float m = 0.1f * 256.0f;
-	float3 vHalf = normalize(vToCam + vToLight);
+	float3 vHalf = normalize(vToEye + vToLight);
 
 	float roughnessFactor = (m + 8.0f) * pow(max(dot(vHalf, vNormal), 0.0f), m) / 8.0f;
 	float3 fresnelFactor = SchlickFresnel(float3(0.02f, 0.02f, 0.02f), vHalf, vToLight);
@@ -34,64 +34,64 @@ float3 BlinnPhong(float3 lightColor, float3 vToLight, float3 vNormal, float3 vTo
 	float3 specAlbedo = fresnelFactor * roughnessFactor;
 	specAlbedo = specAlbedo / (specAlbedo + 1.0f);
 
-	return (matColor + specAlbedo) * lightColor;
+	return specAlbedo * lightColor;
 }
-//
-//float CalcShadowFactor(Light l, float3 worldPos) {
-//
-//	float4 temp = mul(float4(worldPos, 1.0f), l.mtxLightSpaceVP);
-//	temp /= temp.w;
-//	temp = mul(temp, gmtxTexture);
-//	float depth = gtxtShadowMap.Sample(gShadowSamplerState, float3(temp.xy, l.shadowIdx)).r;
-//	if (temp.z < depth) return 1.0f;
-//	return 0.0f;
-//}
-//
-//float3 CalcDirectionalLight(Light l, float3 matColor, float3 vNormal, float3 vToCam) {
-//	float3 vToLight = -l.direction;
-//
-//	float ndotl = max(dot(vToLight, vNormal), 0.0f);
-//	float3 lightColor = l.color * ndotl;
-//
-//	return BlinnPhong(lightColor, vToLight, vNormal, vToCam, matColor);
-//}
-//float3 CalcPointLight(Light l, float3 matColor, float3 pos, float3 vNormal, float3 vToCam) {
-//	float3 vToLight = l.position - pos;
-//
-//	float d = length(vToLight);
-//
-//	if (d > l.falloffEnd) return float3(0, 0, 0);
-//
-//	vToLight /= d;
-//
-//	float ndotl = max(dot(vToLight, vNormal), 0.0f);
-//	float3 lightColor = l.color * ndotl;
-//
-//	float att = CalcAttenuation(d, l.falloffStart, l.falloffEnd);
-//	lightColor *= att;
-//
-//	return BlinnPhong(lightColor, vToLight, vNormal, vToCam, matColor);
-//}
-//float3 CalcSpotLight(Light l, float3 matColor, float3 pos, float3 vNormal, float3 vToCam) {
-//	float3 vToLight = l.position - pos;
-//	float d = length(vToLight);
-//	if (d > l.falloffEnd) return float3(0, 0, 0);
-//	vToLight /= d;
-//
-//	float ndotl = max(dot(vToLight, vNormal), 0.0f);
-//	float3 lightColor = l.color * ndotl;
-//
-//	float att = CalcAttenuation(d, l.falloffStart, l.falloffEnd);
-//	lightColor *= att;
-//
-//	float spotFactor = pow(max(dot(-vToLight, l.direction), 0.0f), l.spotPower);
-//	lightColor *= spotFactor;
-//
-//	if (l.isShadow) {
-//
-//		float shadowFactor = CalcShadowFactor(l, pos);
-//		lightColor *= shadowFactor;
-//	}
-//
-//	return BlinnPhong(lightColor, vToLight, vNormal, vToCam, matColor);
-//}
+
+float CalcShadowFactor(float3 worldPos) {
+
+	float4 temp = mul(float4(worldPos, 1.0f), gmtxLightSpaceVP);
+	temp /= temp.w;
+	temp = mul(temp, gmtxTexture);
+	float depth = gtxtShadowMap.Sample(gShadowSamplerState, temp.xy).r;
+	if (temp.z < depth) return 1.0f;
+	return 0.0f;
+}
+
+float3 CalcDirectionalLight(float3 vNormal, float3 vToEye) {
+	float3 vToLight = -gvLightDirection;
+
+	float ndotl = max(dot(vToLight, vNormal), 0.0f);
+	float3 lightColor = gvLightColor * ndotl;
+
+	return BlinnPhong(lightColor, vToLight, vNormal, vToEye);
+}
+float3 CalcPointLight(float3 vPos, float3 vNormal, float3 vToEye) {
+	float3 vToLight = gvLightPosition - vPos;
+
+	float d = length(vToLight);
+
+	if (d > gfFalloffEnd) return float3(0, 0, 0);
+
+	vToLight /= d;
+
+	float ndotl = max(dot(vToLight, vNormal), 0.0f);
+	float3 lightColor = gvLightColor * ndotl;
+
+	float att = CalcAttenuation(d, gfFalloffStart, gfFalloffEnd);
+	lightColor *= att;
+
+	return BlinnPhong(lightColor, vToLight, vNormal, vToEye);
+}
+float3 CalcSpotLight(float3 vPos, float3 vNormal, float3 vToEye) {
+	float3 vToLight = gvLightPosition - vPos;
+	float d = length(vToLight);
+	if (d > gfFalloffEnd) return float3(0, 0, 0);
+	vToLight /= d;
+
+	float ndotl = max(dot(vToLight, vNormal), 0.0f);
+	float3 lightColor = gvLightColor * ndotl;
+
+	float att = CalcAttenuation(d, gfFalloffStart, gfFalloffEnd);
+	lightColor *= att;
+
+	float spotFactor = pow(max(dot(-vToLight, gvLightDirection), 0.0f), gfSpotPower);
+	lightColor *= spotFactor;
+
+	if (gbIsShadow) {
+		float shadowFactor = CalcShadowFactor(vPos);
+		lightColor *= shadowFactor;
+	}
+
+	return lightColor;
+	//return BlinnPhong(lightColor, vToLight, vNormal, vToEye);
+}

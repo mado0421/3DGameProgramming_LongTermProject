@@ -15,7 +15,7 @@ cbuffer cbGameObjectInfo				: register(b1)
 {
 	matrix		gmtxGameObject			: packoffset(c0);
 };
-cbuffer cbLightArray					: register(b2) 
+cbuffer cbLightInfo						: register(b2)
 {
 	matrix	gmtxLightSpaceVP	: packoffset(c0);
 	float3	gvLightColor		: packoffset(c4);
@@ -25,12 +25,12 @@ cbuffer cbLightArray					: register(b2)
 	float3	gvLightPosition		: packoffset(c6);
 	float	gfSpotPower			: packoffset(c6.w);
 	int		gLightType			: packoffset(c7);
-	bool	bIsShadow			: packoffset(c7.y);
+	bool	gbIsShadow			: packoffset(c7.y);
 }
 Texture2D gtxtColorMap					: register(t3);
 Texture2D gtxtNormalMap					: register(t4);
 Texture2D gtxtDepthMap					: register(t5);
-Texture2DArray gtxtShadowMap			: register(t6);
+Texture2D gtxtShadowMap					: register(t6);
 
 
 struct VS_INPUT {

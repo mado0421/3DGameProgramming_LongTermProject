@@ -149,9 +149,16 @@ void Scene::Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12Graphics
 	m_pCamera->SetPosition(XMFLOAT3(0, 0, -200));
 	m_pCamera->SetLookAt(XMFLOAT3(0, 0, 0));
 
+	/*========================================================================
+	* 디스크립터 힙 생성
+	*=======================================================================*/
 	CreateDescriptorHeap();
-	CreatePassInfoShaderResource();
 
+
+	/*========================================================================
+	* PassConstants 생성
+	*=======================================================================*/
+	CreatePassInfoShaderResource();
 
 	/*========================================================================
 	* Pass 1 전용 오브젝트 데이터 로드 및 생성
@@ -186,7 +193,7 @@ void Scene::Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12Graphics
 
 
 	/*========================================================================
-	* RenderToTexture 클래스 생성
+	* 텍스쳐
 	*=======================================================================*/
 	m_TextureMng = new TextureManager(m_pd3dDevice);
 	m_TextureMng->AddDepthBufferTexture("ShadowMap", m_pd3dDevice, 256, 256, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
@@ -198,24 +205,30 @@ void Scene::Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12Graphics
 	/*========================================================================
 	* 광원 생성
 	*=======================================================================*/
+	LightDataImporter lightDataImporter;
+	vector<LIGHT_DESC> vecLightDesc = lightDataImporter.Load("Data/LightData.txt");
+	string shadow("ShadowMap_");
 	m_LightMng = new LightManager();
+	for (int i = 0; i < vecLightDesc.size(); i++) {
+		switch (vecLightDesc[i].lightType)
+		{
+		case LightType::LIGHT_POINT:		m_LightMng->AddPointLight(vecLightDesc[i], m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);		break;
+		case LightType::LIGHT_DIRECTIONAL:	m_LightMng->AddDirectionalLight(vecLightDesc[i], m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);	break;
+		case LightType::LIGHT_SPOT:			m_LightMng->AddSpotLight(vecLightDesc[i], m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);			break;
+		case LightType::LIGHT_NONE:
+		default:
+			break;
+		}
 
-	LIGHT_DESC lightDesc = {};
-	lightDesc.bIsShadow = true;
-	lightDesc.fSpotPower = 0.5f;
-	lightDesc.lightType = LightType::LIGHT_SPOT;
-	lightDesc.xmf2Falloff = XMFLOAT2(500, 700);
-	lightDesc.xmf3Color = XMFLOAT3(0.5, 0, 0);
-	lightDesc.xmf3Direction = XMFLOAT3(0, -1, 1);
-	lightDesc.xmf3Position = XMFLOAT3(200, 500, -500);
-	m_LightMng->AddSpotLight(lightDesc, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
+		if (vecLightDesc[i].bIsShadow) {
+			string temp = to_string(i);
+			temp = shadow + temp;
 
+			m_TextureMng->AddDepthBufferTexture(temp.c_str(), m_pd3dDevice, 256, 256, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
+			m_LightMng->SetShadowMapName(temp.c_str(), i);
+		}
 
-
-	//m_LightMng->AddDirectionalLight();
-	//m_LightMng->AddPointLight(XMFLOAT3(0.0f, 0.0f, 0.5f), XMFLOAT3(300.0f, 300.0f, 300.0f), XMFLOAT2(300.0f, 500.0f));
-	//m_LightMng->AddSpotLight(XMFLOAT3(0.5f, 0.0f, 0.0f), XMFLOAT3(150, 500, 400), XMFLOAT3(0, -1, -1), XMFLOAT2(600, 700), 0.5f, true);
-	//m_LightMng->AddSpotLight(XMFLOAT3(0.5f, 0.0f, 0.0f), XMFLOAT3(150, 500, -200), XMFLOAT3(0, -1, 1), XMFLOAT2(600, 700), 0.5f, true);
+	}
 
 	/*========================================================================
 	* PSO 생성
@@ -322,7 +335,9 @@ void Scene::RenderPass1()
 		if (m_LightMng->GetIsShadow(i)) {
 			m_LightMng->SetShaderResource(m_pd3dCommandList, i);
 
-			D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = m_TextureMng->GetDsvCPUHandle("ShadowMap");
+			
+
+			D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = m_TextureMng->GetDsvCPUHandle(m_LightMng->GetShadowMapName(i).c_str());
 			m_pd3dCommandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
 			m_pd3dCommandList->OMSetRenderTargets(0, NULL, TRUE, &dsvHandle);
 
@@ -350,27 +365,45 @@ void Scene::RenderPass2()
 	/*========================================================================
 	* Pass 2. 스크린 렌더
 	*=======================================================================*/
-	m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["Pass2"]);
+	m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["ColorFromGBuffer"]);
 	m_TextureMng->UseForShaderResource("GBuffer_Color", m_pd3dCommandList, ROOTSIGNATURE_COLOR_TEXTURE);
-	//m_TextureMng->UseForShaderResource("GBuffer_Normal", m_pd3dCommandList, ROOTSIGNATURE_NORMAL_TEXTURE);
-	//m_TextureMng->UseForShaderResource("GBuffer_Depth", m_pd3dCommandList, ROOTSIGNATURE_DEPTH_TEXTURE);
-	//m_TextureMng->UseForShaderResource("ShadowMap", m_pd3dCommandList, ROOTSIGNATURE_SHADOW_TEXTURE);
 	m_vecDebugWindow[3]->Render(m_pd3dCommandList);
+
+
+	/*========================================================================
+	* Pass 2. 광원별 렌더
+	*=======================================================================*/
+	m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["AddLight"]);
+	m_TextureMng->UseForShaderResource("GBuffer_Normal", m_pd3dCommandList, ROOTSIGNATURE_NORMAL_TEXTURE);
+	m_TextureMng->UseForShaderResource("GBuffer_Depth", m_pd3dCommandList, ROOTSIGNATURE_DEPTH_TEXTURE);
+
+	for (UINT i = 0; i < m_LightMng->GetNumLight(); i++) {
+		m_LightMng->SetShaderResource(m_pd3dCommandList, i);
+
+		if (m_LightMng->GetIsShadow(i)) {
+			m_TextureMng->UseForShaderResource(m_LightMng->GetShadowMapName(i).c_str(), m_pd3dCommandList, ROOTSIGNATURE_SHADOW_TEXTURE);
+		}
+
+		m_vecDebugWindow[3]->Render(m_pd3dCommandList);
+	}
 
 	/*========================================================================
 	* Pass 2. Debug Window 렌더
 	*=======================================================================*/
 	if (test) {
-		m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["Debug"]);
+		m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["DebugColor"]);
 		m_TextureMng->UseForShaderResource("GBuffer_Color", m_pd3dCommandList, ROOTSIGNATURE_COLOR_TEXTURE);
 		m_vecDebugWindow[0]->Render(m_pd3dCommandList);
 		m_TextureMng->UseForShaderResource("GBuffer_Normal", m_pd3dCommandList, ROOTSIGNATURE_COLOR_TEXTURE);
 		m_vecDebugWindow[1]->Render(m_pd3dCommandList);
 
 		m_TextureMng->UseForShaderResource("GBuffer_Depth", m_pd3dCommandList, ROOTSIGNATURE_DEPTH_TEXTURE);
-		m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["Depth"]);
+		m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["DebugDepth"]);
 		m_vecDebugWindow[2]->Render(m_pd3dCommandList);
 	}
+
+
+
 }
 void Scene::Update(float fTimeElapsed)
 {
@@ -420,24 +453,23 @@ void Scene::Input(UCHAR* pKeyBuffer, float fTimeElapsed)
 
 void Scene::CreatePSO()
 {
-	PipelineStateObject tempPSO			= PipelineStateObject(m_pd3dDevice, m_pd3dRootSignature);
-	DebugWindowPSO tempDebugWindowPSO	= DebugWindowPSO(m_pd3dDevice, m_pd3dRootSignature);
-	DepthDebugPSO tempDepthWindowPSO	= DepthDebugPSO(m_pd3dDevice, m_pd3dRootSignature);
-	Pass2PSO tempPass2PSO				= Pass2PSO(m_pd3dDevice, m_pd3dRootSignature);
-	ShadowPSO shadowPso					= ShadowPSO(m_pd3dDevice, m_pd3dRootSignature);
-	m_uomPipelineStates["Default"]	= tempPSO.GetPipelineState();
-	m_uomPipelineStates["Debug"]	= tempDebugWindowPSO.GetPipelineState();
-	m_uomPipelineStates["Depth"]	= tempDepthWindowPSO.GetPipelineState();
-	m_uomPipelineStates["Pass2"]	= tempPass2PSO.GetPipelineState();
-	m_uomPipelineStates["Shadow"]	= shadowPso.GetPipelineState();
-
-
 	PackGBufferPSO PackGBufferPso = PackGBufferPSO(m_pd3dDevice, m_pd3dRootSignature);
 	m_uomPipelineStates["PackGBuffer"] = PackGBufferPso.GetPipelineState();
 
 	RenderShadowPSO RenderShadowPso = RenderShadowPSO(m_pd3dDevice, m_pd3dRootSignature);
 	m_uomPipelineStates["RenderShadow"] = RenderShadowPso.GetPipelineState();
 
+	ColorFromGBufferPSO ColorFromGBufferPso = ColorFromGBufferPSO(m_pd3dDevice, m_pd3dRootSignature);
+	m_uomPipelineStates["ColorFromGBuffer"] = ColorFromGBufferPso.GetPipelineState();
+
+	AddLightPSO AddLightPso = AddLightPSO(m_pd3dDevice, m_pd3dRootSignature);
+	m_uomPipelineStates["AddLight"] = AddLightPso.GetPipelineState();
+
+	DebugColorPSO DebugColorPso = DebugColorPSO(m_pd3dDevice, m_pd3dRootSignature);
+	m_uomPipelineStates["DebugColor"] = DebugColorPso.GetPipelineState();
+
+	DebugDepthPSO DebugDepthPso = DebugDepthPSO(m_pd3dDevice, m_pd3dRootSignature);
+	m_uomPipelineStates["DebugDepth"] = DebugDepthPso.GetPipelineState();
 }
 void Scene::UpdatePassInfoAboutCamera()
 {
