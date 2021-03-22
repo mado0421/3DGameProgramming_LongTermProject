@@ -147,8 +147,8 @@ void Scene::Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12Graphics
 	* 카메라 설정
 	*=======================================================================*/
 	m_pCamera = new FollowCamera();
-	m_pCamera->SetPosition(XMFLOAT3(0, 0, -2));
-	m_pCamera->SetLookAt(XMFLOAT3(0, 0, 0));
+	m_pCamera->SetPosition(XMFLOAT3(0, 4, -5));
+	m_pCamera->SetLookAt(XMFLOAT3(0, 1, 0));
 
 	/*========================================================================
 	* 디스크립터 힙 생성
@@ -162,6 +162,16 @@ void Scene::Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12Graphics
 	CreatePassInfoShaderResource();
 
 	/*========================================================================
+	* 텍스쳐
+	*=======================================================================*/
+	m_TextureMng = new TextureManager(m_pd3dDevice);
+	m_TextureMng->AddDepthBufferTexture("GBuffer_Depth", m_pd3dDevice, 1000, 1000, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
+	m_TextureMng->AddRenderTargetTexture("GBuffer_Color", m_pd3dDevice, 1000, 1000, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
+	m_TextureMng->AddRenderTargetTexture("GBuffer_Normal", m_pd3dDevice, 1000, 1000, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
+	m_TextureMng->LoadFromFile("Tex_Test", L"test.dds", m_pd3dDevice, m_pd3dCommandList, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
+	m_TextureMng->LoadFromFile("mech", L"Assets/4legMech-1.dds", m_pd3dDevice, m_pd3dCommandList, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
+
+	/*========================================================================
 	* Pass 1 전용 오브젝트 데이터 로드 및 생성
 	*=======================================================================*/
 	ObjectDataImporter objDataImporter;
@@ -169,12 +179,27 @@ void Scene::Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12Graphics
 	MeshDataImporter meshDataImporter;
 
 
+
 	for (int i = 0; i < vecObjDesc.size(); i++) {
 		if (strcmp(vecObjDesc[i].modelPath.c_str(), "") != 0) {
-
 			vector<MESH_DATA> vecMeshData = meshDataImporter.Load(vecObjDesc[i].modelPath.c_str());
+			//if (vecObjDesc[i].isTextured) {
+			//	m_TextureMng->LoadFromFile(vecObjDesc[i].texturePath.c_str(), CharToWChar( vecObjDesc[i].texturePath.c_str()), m_pd3dDevice, m_pd3dCommandList, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
+			//	for (int i = 0; i < vecMeshData.size(); i++) vecMeshData[i].textureName = vecObjDesc[i].texturePath;
+			//}
 
+			/*
+			* OBJECT_DATA로 texturePath는 얻어옴.
+			* 1. 텍스처 로드하고
+			* 2. Mesh들에 넣어주거나
+			* 아니 근데 그 오브젝트에서 쓸 메쉬를 전부 가져온거 아냐??? 그럼 걍 그 텍스처로 써버려도?
+			* ㅘ연 내가 부분 부분 다른 텍스처를 쓸 일이 있을까??
+			* 아 근데 2개씩 써본 적이 있긴 한데
+			* 혹시 모르니까 메쉬별로 하게 하자.
+			*
+			*/
 			Object* tempObj = new Object(m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle, vecMeshData);
+
 
 			tempObj->Move(vecObjDesc[i].position);
 			m_vecObject.push_back(tempObj);
@@ -206,14 +231,6 @@ void Scene::Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12Graphics
 
 
 
-	/*========================================================================
-	* 텍스쳐
-	*=======================================================================*/
-	m_TextureMng = new TextureManager(m_pd3dDevice);
-	m_TextureMng->AddDepthBufferTexture("GBuffer_Depth", m_pd3dDevice, 1000, 1000, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
-	m_TextureMng->AddRenderTargetTexture("GBuffer_Color", m_pd3dDevice, 1000, 1000, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
-	m_TextureMng->AddRenderTargetTexture("GBuffer_Normal", m_pd3dDevice, 1000, 1000, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
-	m_TextureMng->LoadFromFile("Tex_Test", L"test.dds", m_pd3dDevice, m_pd3dCommandList, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
 
 	/*========================================================================
 	* 광원 생성
@@ -321,7 +338,7 @@ void Scene::RenderPass1()
 	m_pd3dCommandList->OMSetRenderTargets(2, rtvHandle, FALSE, &dsvHandle);
 
 	m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["PackGBuffer"]);
-	m_TextureMng->UseForShaderResource("Tex_Test", m_pd3dCommandList, ROOTSIGNATURE_COLOR_TEXTURE);
+	m_TextureMng->UseForShaderResource("mech", m_pd3dCommandList, ROOTSIGNATURE_COLOR_TEXTURE);
 	for (int i = 0; i < m_vecObject.size(); i++) m_vecObject[i]->Render(m_pd3dCommandList);
 
 	d3dResourceBarrier[0].Transition.pResource = m_TextureMng->GetTextureResource("GBuffer_Depth");

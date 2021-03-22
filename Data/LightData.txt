@@ -1,6 +1,7 @@
 #Light
 
-{ spot color 0.6 0.0 0.0 direction 0 -2 1 position 2 6 -4 falloff 7 12 spotPower 0.3 shadow true }
-{ spot color 0.0 0.2 0.0 direction 1 -1 0 position -2 6 0 falloff 7 17 spotPower 0.6 shadow true }
+{ spot color 0.1 0.0 0.0 direction 0 -2 1 position 2 6 -2 falloff 7 8 spotPower 1 shadow true }
+{ spot color 0.0 0.1 0.0 direction 1 -1 0 position -2 6 0 falloff 7 8 spotPower 1 shadow true }
+{ spot color 0.2 0.2 0.2 direction 0 -1 -0.001 position 0 8 0 falloff 9.1 9.8 spotPower 1 shadow true }
 
 #End

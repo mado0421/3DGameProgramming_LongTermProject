@@ -120,6 +120,8 @@ Mesh::Mesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 	m_strName = meshData.name;
 	meshData.shape.size();
 
+	if (!meshData.textureName.empty()) SetDiffMapName(meshData.textureName.c_str());
+
 	Vertex* pVertices = new Vertex[m_nVertices];
 
 	for (int i = 0; i < m_nVertices; i++) pVertices[i] = meshData.shape[i];

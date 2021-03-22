@@ -79,9 +79,15 @@ vector<OBJECT_DESC> ObjectDataImporter::Load(const char* filePath) {
 
 				getline(ss, token, ' ');
 
-				if (token.compare("position") == 0) { cout << "  - Position :";		 temp.position = IImporter::GetFloat3(ss); }
-				else if (token.compare("rotation") == 0) { cout << "  - Rotation :"; temp.rotation = IImporter::GetFloat3(ss); }
-				else if (token.compare("model") == 0) { cout << "  - Model";		 temp.modelPath = IImporter::GetPath(ss); }
+				if (token.compare("position") == 0) { cout << "  - Position :";		temp.position = IImporter::GetFloat3(ss); }
+				else if (token.compare("rotation") == 0) { cout << "  - Rotation :";temp.rotation = IImporter::GetFloat3(ss); }
+				else if (token.compare("model") == 0) { 
+					cout << "  - Model";		
+					temp.modelPath = IImporter::GetPath(ss);
+					temp.texturePath = IImporter::GetPath(ss);
+					temp.isTextured = true;
+				}
+				else if (token.compare("mesh") == 0) { cout << "  - Mesh";			temp.modelPath = IImporter::GetPath(ss); }
 			}
 			vecObjDesc.push_back(temp);
 			cout << "<New Object End>\n\n";

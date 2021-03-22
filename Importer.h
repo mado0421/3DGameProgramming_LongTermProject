@@ -13,6 +13,7 @@ using SHAPE = vector<Vertex>;
 class MESH_DATA {
 public:
 	string name;
+	string textureName;
 	SHAPE shape;
 };
 struct VertexIdx {
@@ -22,6 +23,8 @@ struct OBJECT_DESC {
 	XMFLOAT3	position		= XMFLOAT3(0, 0, 0);
 	XMFLOAT3	rotation		= XMFLOAT3(0, 0, 0);
 	string		modelPath		= "";
+	string		texturePath		= "";
+	bool isTextured = false;
 };
 
 class IImporter {
