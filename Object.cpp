@@ -8,7 +8,7 @@ Object::Object(
 	D3D12_GPU_DESCRIPTOR_HANDLE& d3dCbvGPUDescriptorStartHandle)
 {
 	m_xmf4x4World	= Matrix4x4::Identity();
-	m_pMesh			= new Mesh(pd3dDevice, pd3dCommandList);
+	Mesh * pMesh			= new Mesh(pd3dDevice, pd3dCommandList);
 
 	UINT ncbElementBytes = ((sizeof(CB_OBJECT_INFO) + 255) & ~255);
 
@@ -17,6 +17,26 @@ Object::Object(
 
 	CreateCBV(pd3dDevice, d3dCbvCPUDescriptorStartHandle);
 	SetCbvGpuHandle(d3dCbvGPUDescriptorStartHandle);
+
+	m_vecMesh.push_back(pMesh);
+}
+
+Object::Object(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, D3D12_CPU_DESCRIPTOR_HANDLE& d3dCbvCPUDescriptorStartHandle, D3D12_GPU_DESCRIPTOR_HANDLE& d3dCbvGPUDescriptorStartHandle, vector<MESH_DATA> vecMeshData)
+{
+	m_xmf4x4World = Matrix4x4::Identity();
+
+	UINT ncbElementBytes = ((sizeof(CB_OBJECT_INFO) + 255) & ~255);
+
+	m_pd3dCBResource = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes,
+		D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
+
+	CreateCBV(pd3dDevice, d3dCbvCPUDescriptorStartHandle);
+	SetCbvGpuHandle(d3dCbvGPUDescriptorStartHandle);
+
+	for (int i = 0; i < vecMeshData.size(); i++) {
+		Mesh* pMesh = new Mesh(pd3dDevice, pd3dCommandList, vecMeshData[i]);
+		m_vecMesh.push_back(pMesh);
+	}
 }
 
 void Object::Update(float fTimeElapsed)
@@ -30,7 +50,7 @@ void Object::Render(ID3D12GraphicsCommandList* pd3dCommandList)
 	memset(m_pCBMappedObjects, NULL, ncbElementBytes);
 	XMStoreFloat4x4(&m_pCBMappedObjects->xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4World)));
 
-	m_pMesh->Render(pd3dCommandList);
+	for (int i = 0; i < m_vecMesh.size(); i++) m_vecMesh[i]->Render(pd3dCommandList);
 }
 
 void Object::SetCbvGpuHandle(D3D12_GPU_DESCRIPTOR_HANDLE& d3dCbvGPUDescriptorStartHandle)

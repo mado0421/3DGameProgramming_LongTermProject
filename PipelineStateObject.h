@@ -29,6 +29,7 @@ protected:
 * - 2 RTV
 * - 1 DSV
 * - DepthTest True
+* - FrontCounterClockwise False
 * - VS_PackGBuffer
 * - PS_PackGBuffer
 *=======================================================================*/
@@ -38,6 +39,7 @@ public:
 	PackGBufferPSO(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dRootSignature) { CreatePipelineState(pd3dDevice, pd3dRootSignature); }
 protected:
 	virtual void CreatePipelineState(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dRootSignature);
+	virtual D3D12_RASTERIZER_DESC		CreateRasterizerState();
 
 	virtual D3D12_SHADER_BYTECODE		CreatePixelShader(ID3DBlob** ppd3dShaderBlob);
 	virtual D3D12_SHADER_BYTECODE		CreateVertexShader(ID3DBlob** ppd3dShaderBlob);
@@ -50,6 +52,7 @@ protected:
 * - 1 DSV
 * - DepthTest True
 * - Set Bias
+* - FrontCounterClockwise True
 * - VS_RenderShadow
 * - PS_RenderShadow
 *=======================================================================*/
@@ -71,6 +74,7 @@ protected:
 * - 1 RTV
 * - 0 DSV
 * - DepthTest False
+* - FrontCounterClockwise True
 * - VS_FlatScreen
 * - PS_ColorFromGBuffer
 *=======================================================================*/
@@ -84,6 +88,7 @@ protected:
 
 	virtual D3D12_DEPTH_STENCIL_DESC	CreateDepthStencilState();
 	virtual D3D12_SHADER_BYTECODE		CreatePixelShader(ID3DBlob** ppd3dShaderBlob);
+	virtual D3D12_RASTERIZER_DESC		CreateRasterizerState();
 	virtual D3D12_SHADER_BYTECODE		CreateVertexShader(ID3DBlob** ppd3dShaderBlob);
 };
 
@@ -94,6 +99,7 @@ protected:
 * - 0 DSV
 * - DepthTest False
 * - Blend True
+* - FrontCounterClockwise True
 * - VS_FlatScreen
 * - PS_AddLight
 *=======================================================================*/
@@ -107,6 +113,7 @@ protected:
 	virtual D3D12_BLEND_DESC			CreateBlendState();
 	virtual D3D12_DEPTH_STENCIL_DESC	CreateDepthStencilState();
 	virtual D3D12_SHADER_BYTECODE		CreatePixelShader(ID3DBlob** ppd3dShaderBlob);
+	virtual D3D12_RASTERIZER_DESC		CreateRasterizerState();
 	virtual D3D12_SHADER_BYTECODE		CreateVertexShader(ID3DBlob** ppd3dShaderBlob);
 };
 
@@ -116,6 +123,7 @@ protected:
 * - 1 RTV
 * - 0 DSV
 * - DepthTest False
+* - FrontCounterClockwise True
 * - VS_FlatScreen
 * - PS_ColorFromGBuffer
 *=======================================================================*/
@@ -124,6 +132,7 @@ class DebugColorPSO : public ColorFromGBufferPSO
 public:
 	DebugColorPSO(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dRootSignature) { CreatePipelineState(pd3dDevice, pd3dRootSignature); }
 protected:
+	virtual D3D12_RASTERIZER_DESC		CreateRasterizerState();
 	virtual D3D12_SHADER_BYTECODE		CreatePixelShader(ID3DBlob** ppd3dShaderBlob);
 };
 
@@ -133,6 +142,7 @@ protected:
 * - 1 RTV
 * - 0 DSV
 * - DepthTest False
+* - FrontCounterClockwise True
 * - VS_FlatScreen
 * - PS_DepthFromGBuffer
 *=======================================================================*/
@@ -141,5 +151,6 @@ class DebugDepthPSO : public ColorFromGBufferPSO
 public:
 	DebugDepthPSO(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dRootSignature) { CreatePipelineState(pd3dDevice, pd3dRootSignature); }
 protected:
+	virtual D3D12_RASTERIZER_DESC		CreateRasterizerState();
 	virtual D3D12_SHADER_BYTECODE		CreatePixelShader(ID3DBlob** ppd3dShaderBlob);
 };

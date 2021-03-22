@@ -1,26 +1,26 @@
 #Object
 
-{ position 0   0 0 }
-{ position 100 0 0 }
-{ position 200 0 0 }
-{ position 300 0 0 }
+{ model Assets/cube.obj position 0 0 0 }
+{ model Assets/cube.obj position 2 0 0 }
+{ model Assets/cube.obj position 4 0 0 }
+{ model Assets/cube.obj position 6 0 0 }
 
-{ position 0   0 100 }
-{ position 100 0 100 }
-{ position 200 0 100 }
-{ position 300 0 100 }
+{ model Assets/cube.obj position 0 0 2 }
+{ model Assets/cube.obj position 2 0 2 }
+{ model Assets/cube.obj position 4 0 2 }
+{ model Assets/cube.obj position 6 0 2 }
 
-{ position 0   0 200 }
-{ position 100 0 200 }
-{ position 200 0 200 }
-{ position 300 0 200 }
+{ model Assets/cube.obj position 0 0 4 }
+{ model Assets/cube.obj position 2 0 4 }
+{ model Assets/cube.obj position 4 0 4 }
+{ model Assets/cube.obj position 6 0 4 }
 
-{ position 0   0 300 }
-{ position 100 0 300 }
-{ position 200 0 300 }
-{ position 300 0 300 }
+{ model Assets/cube.obj position 0 0 6 }
+{ model Assets/cube.obj position 2 0 6 }
+{ model Assets/cube.obj position 4 0 6 }
+{ model Assets/cube.obj position 6 0 6 }
 
-{ position 150 200 50 }
-
+{ model Assets/cube.obj position 3 3 1 }
+{ model Assets/cube.obj position 0 2 0 }
 
 #End

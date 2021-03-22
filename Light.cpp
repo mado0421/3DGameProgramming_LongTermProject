@@ -107,7 +107,7 @@ UINT LightManager::AddSpotLight(LIGHT_DESC desc, ID3D12Device* pd3dDevice, ID3D1
 	temp->m_bIsEnable = true;
 
 	XMFLOAT4X4 xmf4x4View = Matrix4x4::LookAtLH(temp->m_xmf3Position, Vector3::Add(temp->m_xmf3Position, temp->m_xmf3Direction), XMFLOAT3(0, 1, 0));
-	XMFLOAT4X4 xmf4x4Projection = Matrix4x4::PerspectiveFovLH(XMConvertToRadians(90.0f), (float)256 / (float)256, 10.0f, 10000.0f);
+	XMFLOAT4X4 xmf4x4Projection = Matrix4x4::PerspectiveFovLH(XMConvertToRadians(90.0f), (float)256 / (float)256, 0.1f, 1000.0f);
 	temp->m_xmf4x4lightSpaceViewProj = Matrix4x4::Multiply(xmf4x4View, xmf4x4Projection);
 
 	m_vecLight.push_back(temp);

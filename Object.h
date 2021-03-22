@@ -5,6 +5,9 @@ struct CB_OBJECT_INFO {
 };
 class Mesh;
 class DebugWindowMesh;
+class MESH_DATA;
+
+using meshVec = vector<Mesh*>;
 
 class Object
 {
@@ -13,6 +16,11 @@ public:
 		ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, 
 		D3D12_CPU_DESCRIPTOR_HANDLE& d3dCbvCPUDescriptorStartHandle, 
 		D3D12_GPU_DESCRIPTOR_HANDLE& d3dCbvGPUDescriptorStartHandle);
+	Object(
+		ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+		D3D12_CPU_DESCRIPTOR_HANDLE& d3dCbvCPUDescriptorStartHandle,
+		D3D12_GPU_DESCRIPTOR_HANDLE& d3dCbvGPUDescriptorStartHandle,
+		vector<MESH_DATA> vecMeshData);
 
 	virtual void Update(float fTimeElapsed);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList);
@@ -23,7 +31,7 @@ public:
 	void Rotate(const XMFLOAT3 xmf3Vector);
 protected:
 	XMFLOAT4X4					m_xmf4x4World;
-	Mesh*						m_pMesh;
+	meshVec						m_vecMesh;
 	D3D12_GPU_DESCRIPTOR_HANDLE	m_d3dCbvGPUDescriptorHandle;
 	ID3D12Resource*				m_pd3dCBResource;
 	CB_OBJECT_INFO*				m_pCBMappedObjects;

@@ -7,6 +7,7 @@
 #include "Texture.h"
 #include "Light.h"
 #include "Importer.h"
+#include "Vertex.h"
 
 ID3D12RootSignature* Scene::CreateRootSignature()
 {
@@ -146,7 +147,7 @@ void Scene::Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12Graphics
 	* 카메라 설정
 	*=======================================================================*/
 	m_pCamera = new FollowCamera();
-	m_pCamera->SetPosition(XMFLOAT3(0, 0, -200));
+	m_pCamera->SetPosition(XMFLOAT3(0, 0, -2));
 	m_pCamera->SetLookAt(XMFLOAT3(0, 0, 0));
 
 	/*========================================================================
@@ -165,12 +166,25 @@ void Scene::Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12Graphics
 	*=======================================================================*/
 	ObjectDataImporter objDataImporter;
 	vector<OBJECT_DESC> vecObjDesc = objDataImporter.Load("Data/ObjectData.txt");
+	MeshDataImporter meshDataImporter;
+
 
 	for (int i = 0; i < vecObjDesc.size(); i++) {
-		Object* tempObj = new Object(m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
-		
-		tempObj->Move(vecObjDesc[i].position);
-		m_vecObject.push_back(tempObj);
+		if (strcmp(vecObjDesc[i].modelPath.c_str(), "") != 0) {
+
+			vector<MESH_DATA> vecMeshData = meshDataImporter.Load(vecObjDesc[i].modelPath.c_str());
+
+			Object* tempObj = new Object(m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle, vecMeshData);
+
+			tempObj->Move(vecObjDesc[i].position);
+			m_vecObject.push_back(tempObj);
+		}
+		else {
+			Object* tempObj = new Object(m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
+
+			tempObj->Move(vecObjDesc[i].position);
+			m_vecObject.push_back(tempObj);
+		}
 	}
 
 
@@ -196,7 +210,6 @@ void Scene::Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12Graphics
 	* 텍스쳐
 	*=======================================================================*/
 	m_TextureMng = new TextureManager(m_pd3dDevice);
-	m_TextureMng->AddDepthBufferTexture("ShadowMap", m_pd3dDevice, 256, 256, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
 	m_TextureMng->AddDepthBufferTexture("GBuffer_Depth", m_pd3dDevice, 1000, 1000, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
 	m_TextureMng->AddRenderTargetTexture("GBuffer_Color", m_pd3dDevice, 1000, 1000, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
 	m_TextureMng->AddRenderTargetTexture("GBuffer_Normal", m_pd3dDevice, 1000, 1000, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
@@ -224,7 +237,7 @@ void Scene::Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12Graphics
 			string temp = to_string(i);
 			temp = shadow + temp;
 
-			m_TextureMng->AddDepthBufferTexture(temp.c_str(), m_pd3dDevice, 256, 256, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
+			m_TextureMng->AddDepthBufferTexture(temp.c_str(), m_pd3dDevice, 512, 512, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
 			m_LightMng->SetShadowMapName(temp.c_str(), i);
 		}
 
@@ -327,7 +340,7 @@ void Scene::RenderPass1()
 	/*========================================================================
 	* Pass 1. 광원 렌더
 	*=======================================================================*/
-	m_pCamera->SetViewport(0, 0, 256, 256, 0.0f, 1.0f);
+	m_pCamera->SetViewport(0, 0, 512, 512, 0.0f, 1.0f);
 	m_pCamera->SetViewportsAndScissorRects(m_pd3dCommandList);
 	m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["RenderShadow"]);
 
@@ -414,33 +427,33 @@ void Scene::Update(float fTimeElapsed)
 }
 void Scene::Input(UCHAR* pKeyBuffer, float fTimeElapsed)
 {
-	if (pKeyBuffer[KeyCode::_W] & 0xF0) { m_pCamera->MoveForward(200); }
-	if (pKeyBuffer[KeyCode::_A] & 0xF0) { m_pCamera->MoveLeft(200); }
-	if (pKeyBuffer[KeyCode::_S] & 0xF0) { m_pCamera->MoveBackward(200); }
-	if (pKeyBuffer[KeyCode::_D] & 0xF0) { m_pCamera->MoveRight(200); }
-	if (pKeyBuffer[KeyCode::_R] & 0xF0) { m_pCamera->MoveUp(200); }
-	if (pKeyBuffer[KeyCode::_F] & 0xF0) { m_pCamera->MoveDown(200); }
+	if (pKeyBuffer[KeyCode::_W] & 0xF0) { m_pCamera->MoveForward(2); }
+	if (pKeyBuffer[KeyCode::_A] & 0xF0) { m_pCamera->MoveLeft(2); }
+	if (pKeyBuffer[KeyCode::_S] & 0xF0) { m_pCamera->MoveBackward(2); }
+	if (pKeyBuffer[KeyCode::_D] & 0xF0) { m_pCamera->MoveRight(2); }
+	if (pKeyBuffer[KeyCode::_R] & 0xF0) { m_pCamera->MoveUp(2); }
+	if (pKeyBuffer[KeyCode::_F] & 0xF0) { m_pCamera->MoveDown(2); }
 	if (pKeyBuffer[KeyCode::_Q] & 0xF0) { m_pCamera->Rotate(0, -50 * fTimeElapsed, 0); }
 	if (pKeyBuffer[KeyCode::_E] & 0xF0) { m_pCamera->Rotate(0, 50 * fTimeElapsed, 0); }
 	if (pKeyBuffer[KeyCode::_Z] & 0xF0) { m_pCamera->Rotate(50 * fTimeElapsed, 0, 0); }
 	if (pKeyBuffer[KeyCode::_X] & 0xF0) { m_pCamera->Rotate(-50 * fTimeElapsed, 0, 0); }
 
 	if (pKeyBuffer[KeyCode::_1] & 0xF0) {
-		m_pCamera->SetPosition(XMFLOAT3(0, 0, -500));
+		m_pCamera->SetPosition(XMFLOAT3(0, 0, -5));
 		m_pCamera->SetLookAt(XMFLOAT3(0, 0, 0));
 
 	}
 	if (pKeyBuffer[KeyCode::_2] & 0xF0) {
-		m_pCamera->SetPosition(XMFLOAT3(0, 300, -500));
-		m_pCamera->SetLookAt(XMFLOAT3(0, 300, 0));
+		m_pCamera->SetPosition(XMFLOAT3(0, 3, -5));
+		m_pCamera->SetLookAt(XMFLOAT3(0, 3, 0));
 
 	}
 	if (pKeyBuffer[KeyCode::_3] & 0xF0) {
-		m_pCamera->SetPosition(XMFLOAT3(0, 0, 500));
+		m_pCamera->SetPosition(XMFLOAT3(0, 0, 5));
 		m_pCamera->SetLookAt(XMFLOAT3(0, 0, 0));
 	}
 	if (pKeyBuffer[KeyCode::_4] & 0xF0) {
-		m_pCamera->SetPosition(XMFLOAT3(500, 0, 0));
+		m_pCamera->SetPosition(XMFLOAT3(5, 0, 0));
 		m_pCamera->SetLookAt(XMFLOAT3(0, 0, 0));
 	}
 

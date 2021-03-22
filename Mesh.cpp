@@ -6,6 +6,7 @@ Mesh::Mesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	m_nStride = sizeof(Vertex);
 	m_nVertices = 36;
+	m_strName = "";
 
 	Vertex* pVertices = new Vertex[m_nVertices];
 
@@ -102,6 +103,27 @@ Mesh::Mesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 	pVertices[i++] = Vertex(pos[4], normal[5], tangent[5], bitangent[5], uv[11]);
 	pVertices[i++] = Vertex(pos[5], normal[5], tangent[5], bitangent[5], uv[12]);
 
+	m_pd3dVertexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pVertices, m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
+
+	m_d3dVertexBufferView.BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();
+	m_d3dVertexBufferView.StrideInBytes = m_nStride;
+	m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
+
+	delete[]pVertices;
+}
+
+Mesh::Mesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, MESH_DATA meshData)
+{
+	m_nStride = sizeof(Vertex);
+	m_nVertices = meshData.shape.size();
+
+	m_strName = meshData.name;
+	meshData.shape.size();
+
+	Vertex* pVertices = new Vertex[m_nVertices];
+
+	for (int i = 0; i < m_nVertices; i++) pVertices[i] = meshData.shape[i];
+	
 	m_pd3dVertexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pVertices, m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
 
 	m_d3dVertexBufferView.BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();

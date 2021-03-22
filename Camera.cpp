@@ -95,7 +95,7 @@ FollowCamera::FollowCamera() : Camera()
 	SetTimeLag(0.1f);
 	SetOffset(XMFLOAT3(0.0f, 30.0f, -80.0f));	// 플레이어 시점 높이에 따라 정할 필요 있음
 												// 이 부분은 나중에 봐야되니까 적어두자
-	GenerateProjectionMatrix(10.0f, 10000.0f, ASPECT_RATIO, 60.0f);
+	GenerateProjectionMatrix(0.1f, 1000.0f, ASPECT_RATIO, 60.0f);
 
 	SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
 	SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
