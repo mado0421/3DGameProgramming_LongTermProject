@@ -102,20 +102,24 @@ ID3D12RootSignature* Scene::CreateRootSignature()
 	d3dSamplerDesc[0].RegisterSpace = 0;
 	d3dSamplerDesc[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
-	d3dSamplerDesc[1].Filter = D3D12_FILTER_ANISOTROPIC;
+	d3dSamplerDesc[1].Filter = D3D12_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR;
 	d3dSamplerDesc[1].AddressU = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
 	d3dSamplerDesc[1].AddressV = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
 	d3dSamplerDesc[1].AddressW = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+	d3dSamplerDesc[1].BorderColor = D3D12_STATIC_BORDER_COLOR_OPAQUE_BLACK;
 	d3dSamplerDesc[1].MipLODBias = 0;
-	d3dSamplerDesc[1].MaxAnisotropy = 16;
-	d3dSamplerDesc[1].ComparisonFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+	d3dSamplerDesc[1].MaxAnisotropy = 1;
+	d3dSamplerDesc[1].ComparisonFunc = D3D12_COMPARISON_FUNC_LESS;
 	d3dSamplerDesc[1].MinLOD = 0;
 	d3dSamplerDesc[1].MaxLOD = D3D12_FLOAT32_MAX;
 	d3dSamplerDesc[1].ShaderRegister = 1;
 	d3dSamplerDesc[1].RegisterSpace = 0;
 	d3dSamplerDesc[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
-	D3D12_ROOT_SIGNATURE_FLAGS d3dRootSignatureFlags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT | D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS | D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS | D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS;
+	D3D12_ROOT_SIGNATURE_FLAGS d3dRootSignatureFlags
+		= D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT 
+		| D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS
+		| D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS;
 	D3D12_ROOT_SIGNATURE_DESC d3dRootSignatureDesc;
 	::ZeroMemory(&d3dRootSignatureDesc, sizeof(D3D12_ROOT_SIGNATURE_DESC));
 	d3dRootSignatureDesc.NumParameters = _countof(pd3dRootParameters);
@@ -233,7 +237,7 @@ void Scene::Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12Graphics
 
 
 	/*========================================================================
-	* ±¤¿ø »ý¼º
+	* ±¤¿ø°ú ±¤¿øº° ±×¸²ÀÚ ÅØ½ºÃ³ »ý¼º
 	*=======================================================================*/
 	LightDataImporter lightDataImporter;
 	vector<LIGHT_DESC> vecLightDesc = lightDataImporter.Load("Data/LightData.txt");
@@ -242,9 +246,18 @@ void Scene::Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12Graphics
 	for (int i = 0; i < vecLightDesc.size(); i++) {
 		switch (vecLightDesc[i].lightType)
 		{
-		case LightType::LIGHT_POINT:		m_LightMng->AddPointLight(vecLightDesc[i], m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);		break;
-		case LightType::LIGHT_DIRECTIONAL:	m_LightMng->AddDirectionalLight(vecLightDesc[i], m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);	break;
-		case LightType::LIGHT_SPOT:			m_LightMng->AddSpotLight(vecLightDesc[i], m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);			break;
+		case LightType::LIGHT_POINT:		
+			m_LightMng->AddPointLight(vecLightDesc[i], m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);		
+			
+			break;
+		case LightType::LIGHT_DIRECTIONAL:	
+			m_LightMng->AddDirectionalLight(vecLightDesc[i], m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);	
+			
+			break;
+		case LightType::LIGHT_SPOT:			
+			m_LightMng->AddSpotLight(vecLightDesc[i], m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);		
+			
+			break;
 		case LightType::LIGHT_NONE:
 		default:
 			break;
@@ -253,11 +266,24 @@ void Scene::Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12Graphics
 		if (vecLightDesc[i].bIsShadow) {
 			string temp = to_string(i);
 			temp = shadow + temp;
+			switch (vecLightDesc[i].lightType)
+			{
+			case LightType::LIGHT_POINT:
+				m_TextureMng->AddDepthBufferTextureArray(temp.c_str(), 6, m_pd3dDevice, 512, 512, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
 
-			m_TextureMng->AddDepthBufferTexture(temp.c_str(), m_pd3dDevice, 512, 512, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
+				break;
+
+			case LightType::LIGHT_SPOT:
+				m_TextureMng->AddDepthBufferTexture(temp.c_str(), m_pd3dDevice, 512, 512, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
+
+				break;
+			case LightType::LIGHT_DIRECTIONAL:
+			case LightType::LIGHT_NONE:
+			default:
+				break;
+			}
 			m_LightMng->SetShadowMapName(temp.c_str(), i);
 		}
-
 	}
 
 	/*========================================================================
@@ -291,7 +317,6 @@ void Scene::RenderPass1()
 	0,		-0.5f,		0,		0,
 	0,			0,	 1.0f,		0,
 	0.5f,	 0.5f,		0,	 1.0f };
-	UINT passIdx = 0;
 	XMStoreFloat4x4(&m_pcbMappedPassInfo->m_xmf4x4TextureTransform, XMMatrixTranspose(XMLoadFloat4x4(&texture)));
 
 
@@ -355,16 +380,23 @@ void Scene::RenderPass1()
 	m_pd3dCommandList->ResourceBarrier(3, d3dResourceBarrier);
 
 	/*========================================================================
-	* Pass 1. ±¤¿ø ·»´õ
+	* Pass 1. ±¤¿øº° ±×¸²ÀÚ¸Ê ·»´õ
 	*=======================================================================*/
 	m_pCamera->SetViewport(0, 0, 512, 512, 0.0f, 1.0f);
 	m_pCamera->SetViewportsAndScissorRects(m_pd3dCommandList);
-	m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["RenderShadow"]);
 
 	for (UINT i = 0; i < m_LightMng->GetNumLight(); i++) {
 		if (m_LightMng->GetIsShadow(i)) {
 			m_LightMng->SetShaderResource(m_pd3dCommandList, i);
-
+			switch (m_LightMng->GetLightType(i))
+			{
+			case LightType::LIGHT_SPOT: m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["RenderShadow"]); break;
+			case LightType::LIGHT_POINT: m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["RenderPointLightShadow"]); break;
+			case LightType::LIGHT_DIRECTIONAL:
+			case LightType::LIGHT_NONE:
+			default:
+				break;
+			}
 			
 
 			D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = m_TextureMng->GetDsvCPUHandle(m_LightMng->GetShadowMapName(i).c_str());
@@ -441,6 +473,9 @@ void Scene::Update(float fTimeElapsed)
 
 	m_fCurrentTime += fTimeElapsed;
 	::memcpy(&m_pcbMappedPassInfo->m_xmfCurrentTime, &m_fCurrentTime, sizeof(float));
+
+	//for_each(m_vecObject.begin(), m_vecObject.end(), [fTimeElapsed](Object* o) {o->Rotate(XMFLOAT3(0, 30 * fTimeElapsed, 0)); });
+
 }
 void Scene::Input(UCHAR* pKeyBuffer, float fTimeElapsed)
 {
@@ -475,7 +510,13 @@ void Scene::Input(UCHAR* pKeyBuffer, float fTimeElapsed)
 	}
 
 	if (pKeyBuffer[KeyCode::_N] & 0xF0) { test = true; }
-	if (pKeyBuffer[KeyCode::_M] & 0xF0) { test = false; }
+	if (pKeyBuffer[KeyCode::_M] & 0xF0) { 
+		//if (test) {
+		//	ReloadLight();
+		//	test = false; 
+		//}
+		test = false;
+	}
 
 
 
@@ -488,6 +529,9 @@ void Scene::CreatePSO()
 
 	RenderShadowPSO RenderShadowPso = RenderShadowPSO(m_pd3dDevice, m_pd3dRootSignature);
 	m_uomPipelineStates["RenderShadow"] = RenderShadowPso.GetPipelineState();
+
+	RenderPointLightShadowPSO RenderPointLightShadowPso = RenderPointLightShadowPSO(m_pd3dDevice, m_pd3dRootSignature);
+	m_uomPipelineStates["RenderPointLightShadow"] = RenderPointLightShadowPso.GetPipelineState();
 
 	ColorFromGBufferPSO ColorFromGBufferPso = ColorFromGBufferPSO(m_pd3dDevice, m_pd3dRootSignature);
 	m_uomPipelineStates["ColorFromGBuffer"] = ColorFromGBufferPso.GetPipelineState();
@@ -541,6 +585,36 @@ void Scene::CreatePassInfoShaderResource()
 	m_d3dCbvGPUPassInfoHandle = m_d3dCbvGPUDescriptorStartHandle;
 	m_d3dCbvGPUDescriptorStartHandle.ptr += gnCbvSrvDescriptorIncrementSize;
 
+}
+void Scene::ReloadLight()
+{
+	LightDataImporter lightDataImporter;
+	vector<LIGHT_DESC> vecLightDesc = lightDataImporter.Load("Data/LightData.txt");
+	string shadow("ShadowMap_");
+
+	m_LightMng->DeleteAll();
+
+	for (int i = 0; i < vecLightDesc.size(); i++) {
+		switch (vecLightDesc[i].lightType)
+		{
+		case LightType::LIGHT_POINT:		m_LightMng->AddPointLight(vecLightDesc[i], m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);		break;
+		case LightType::LIGHT_DIRECTIONAL:	m_LightMng->AddDirectionalLight(vecLightDesc[i], m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);	break;
+		case LightType::LIGHT_SPOT:			m_LightMng->AddSpotLight(vecLightDesc[i], m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);			break;
+		case LightType::LIGHT_NONE:
+		default:
+			break;
+		}
+
+		if (vecLightDesc[i].bIsShadow) {
+			string temp = to_string(i);
+			temp = shadow + temp;
+
+			m_TextureMng->DeleteTexture(temp.c_str());
+
+			m_TextureMng->AddDepthBufferTexture(temp.c_str(), m_pd3dDevice, 512, 512, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
+			m_LightMng->SetShadowMapName(temp.c_str(), i);
+		}
+	}
 }
 void Scene::CreateDescriptorHeap() 
 {

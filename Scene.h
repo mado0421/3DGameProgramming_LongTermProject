@@ -20,7 +20,6 @@ struct CB_PASS_INFO {
 	XMFLOAT4X4	m_xmf4x4TextureTransform;
 	XMFLOAT3	m_xmf3CameraPosition;
 	float		m_xmfCurrentTime;
-	UINT		m_uIdx;
 };
 
 
@@ -81,5 +80,16 @@ protected:
 
 	void CreatePassInfoShaderResource();
 	void UpdatePassInfoAboutCamera();
+
+
+protected:
+	/*==============================================================================
+	* For Test!!
+	*
+	==============================================================================*/
+	void ReloadLight();
+
+
+
 };
 

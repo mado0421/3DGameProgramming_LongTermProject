@@ -24,27 +24,43 @@ float3 SchlickFresnel(float3 R0, float3 vNormal, float3 vLight) {
 
 	return reflectPercent;
 }
+
+/*========================================================================
+* m 과 fresnelFactor에 material 값을 넣어주면 된다.
+* material은 mesh 정보 올릴 때 같이 올리거나,,, 미리 정해둔 프리셋을 두고 그걸로 셋을 하거나,,,
+* material은 어디 종속된 정보값인가? 텍스처? 메쉬? 오브젝트?
+* 텍스처로 올려주면 그게 roughness 맵인 듯
+*=======================================================================*/
 float3 BlinnPhong(float3 lightColor, float3 vToLight, float3 vNormal, float3 vToEye) {
-	const float m = 0.1f * 256.0f;
+	const float m = 0.01f * 256.0f;
 	float3 vHalf = normalize(vToEye + vToLight);
 
 	float roughnessFactor = (m + 8.0f) * pow(max(dot(vHalf, vNormal), 0.0f), m) / 8.0f;
-	float3 fresnelFactor = SchlickFresnel(float3(0.02f, 0.02f, 0.02f), vHalf, vToLight);
+	float3 fresnelFactor = SchlickFresnel(float3(0.01f, 0.01f, 0.01f), vHalf, vToLight);
 
 	float3 specAlbedo = fresnelFactor * roughnessFactor;
 	specAlbedo = specAlbedo / (specAlbedo + 1.0f);
 
+	return lightColor;
+
 	return specAlbedo * lightColor;
 }
 
-float CalcShadowFactor(float3 worldPos) {
+float CalcPointLightShadowFactor(float3 vToPixel) {
+	float3 toPixelAbs = abs(vToPixel);
+	float z = max(toPixelAbs.x, max(toPixelAbs.y, toPixelAbs.z));
+	//float depth = gmtxProjection._m32 / z + gmtxProjection._m22;
+	float depth = (gmtxProjection._m32 * z + gmtxProjection._m22) / z;
+	return gtxtShadowMap.SampleCmpLevelZero(gShadowSamplerState, vToPixel, 0).r;
+	//return 1.0f;
+}
+float CalcSpotLightShadowFactor(float3 worldPos) {
 
-	float4 temp = mul(float4(worldPos, 1.0f), gmtxLightSpaceVP);
+	float4 temp = mul(float4(worldPos, 1.0f), gmtxLightViewProj[0]);
 	temp /= temp.w;
 	temp = mul(temp, gmtxTexture);
-	float depth = gtxtShadowMap.Sample(gShadowSamplerState, temp.xy).r;
-	if (temp.z < depth) return 1.0f;
-	return 0.0f;
+	float depth = gtxtShadowMap.SampleCmpLevelZero(gShadowSamplerState, temp.xy, temp.z).r;
+	return depth;
 }
 
 float3 CalcDirectionalLight(float3 vNormal, float3 vToEye) {
@@ -70,6 +86,11 @@ float3 CalcPointLight(float3 vPos, float3 vNormal, float3 vToEye) {
 	float att = CalcAttenuation(d, gfFalloffStart, gfFalloffEnd);
 	lightColor *= att;
 
+	if (gbIsShadow) {
+		float shadowFactor = CalcPointLightShadowFactor(vPos - gvLightPosition);
+		lightColor *= shadowFactor;
+	}
+
 	return BlinnPhong(lightColor, vToLight, vNormal, vToEye);
 }
 float3 CalcSpotLight(float3 vPos, float3 vNormal, float3 vToEye) {
@@ -88,10 +109,9 @@ float3 CalcSpotLight(float3 vPos, float3 vNormal, float3 vToEye) {
 	lightColor *= spotFactor;
 
 	if (gbIsShadow) {
-		float shadowFactor = CalcShadowFactor(vPos);
+		float shadowFactor = CalcSpotLightShadowFactor(vPos);
 		lightColor *= shadowFactor;
 	}
 
-	return lightColor;
-	//return BlinnPhong(lightColor, vToLight, vNormal, vToEye);
+	return BlinnPhong(lightColor, vToLight, vNormal, vToEye);
 }

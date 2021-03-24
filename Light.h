@@ -13,7 +13,7 @@ typedef enum LIGHTTYPE {
 }LightType;
 
 struct CB_LIGHT_INFO {
-	XMFLOAT4X4	xmf4x4lightSpaceViewProj;
+	XMFLOAT4X4	m_xmf4x4ViewProj[6];
 	XMFLOAT3	xmf3Color;
 	float		fFalloffStart;
 	XMFLOAT3	xmf3Direction;
@@ -22,6 +22,12 @@ struct CB_LIGHT_INFO {
 	float		fSpotPower;
 	UINT		uType;
 	bool		bIsShadow;
+	//bool		padding0;
+	//bool		padding1;
+	//bool		padding2;
+	////UINT		padding3;
+	////UINT		padding4;
+	//XMFLOAT4X4	padding3;
 };
 
 struct LIGHT_DESC {
@@ -40,13 +46,21 @@ public:
 	Light(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 		D3D12_CPU_DESCRIPTOR_HANDLE& d3dCbvCPUDescHandle, D3D12_GPU_DESCRIPTOR_HANDLE& d3dCbvGPUDescHandle);
 
+	~Light() {
+		if (m_pd3dCBResource) {
+			m_pd3dCBResource->Unmap(0, NULL);
+			m_pd3dCBResource->Release();
+		}
+	}
+
 	void SetShaderResource(ID3D12GraphicsCommandList* pd3dCommandList);
+	LightType GetLightType() { return m_uLightType; }
 
 private:
 	void CreateResource(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	void CreateConstantBufferView(ID3D12Device* pd3dDevice, D3D12_CPU_DESCRIPTOR_HANDLE& d3dCbvCPUDescHandle);
 public:
-	UINT			m_uLightType;
+	LightType		m_uLightType;
 	bool			m_bIsEnable;
 
 	XMFLOAT3		m_xmf3Color;
@@ -58,7 +72,7 @@ public:
 	float			m_fSpotPower;
 
 	bool			m_bIsShadow;
-	XMFLOAT4X4		m_xmf4x4lightSpaceViewProj;
+	XMFLOAT4X4		m_xmf4x4ViewProj[6];
 
 	string			m_shadowMapName;
 private:
@@ -87,6 +101,12 @@ public:
 	UINT GetNumLight() { return (UINT)m_vecLight.size(); }
 	bool GetIsShadow(UINT i) { return m_vecLight[i]->m_bIsShadow; }
 	string GetShadowMapName(UINT i) { return m_vecLight[i]->m_shadowMapName; }
+	LightType GetLightType(UINT i) { return m_vecLight[i]->GetLightType(); }
+
+
+	void DeleteAll() {
+		m_vecLight.clear();
+	}
 private:
 	vector<Light*> m_vecLight;
 };

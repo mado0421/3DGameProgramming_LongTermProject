@@ -16,6 +16,7 @@ protected:
 
 	virtual D3D12_SHADER_BYTECODE		CreateVertexShader(ID3DBlob** ppd3dShaderBlob);
 	virtual D3D12_SHADER_BYTECODE		CreatePixelShader(ID3DBlob** ppd3dShaderBlob);
+	virtual D3D12_SHADER_BYTECODE		CreateGeometryShader(ID3DBlob** ppd3dShaderBlob);
 	virtual D3D12_SHADER_BYTECODE		CreateComputeShader(ID3DBlob** ppd3dShaderBlob);
 	D3D12_SHADER_BYTECODE				CompileShaderFromFile(const WCHAR* pszFileName, LPCSTR pszShaderName, LPCSTR pszShaderProfile, ID3DBlob** ppd3dShaderBlob);
 
@@ -68,6 +69,31 @@ protected:
 	virtual D3D12_SHADER_BYTECODE		CreateVertexShader(ID3DBlob** ppd3dShaderBlob);
 };
 
+/*========================================================================
+* RenderPointLightShadow PSO
+*
+* - 0 RTV
+* - 1 DSV(Texture2DArray)
+* - DepthTest True
+* - Set Bias
+* - FrontCounterClockwise True
+* - VS_RenderPointLightShadow
+* - GS_RenderPointLightShadow
+* - PS_RenderPointLightShadow
+*=======================================================================*/
+class RenderPointLightShadowPSO : public PipelineStateObject
+{
+public:
+	RenderPointLightShadowPSO(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dRootSignature) { CreatePipelineState(pd3dDevice, pd3dRootSignature); }
+protected:
+	virtual void CreatePipelineState(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dRootSignature);
+	virtual D3D12_RASTERIZER_DESC		CreateRasterizerState();
+
+	virtual D3D12_SHADER_BYTECODE		CreateGeometryShader(ID3DBlob** ppd3dShaderBlob);
+
+	virtual D3D12_SHADER_BYTECODE		CreatePixelShader(ID3DBlob** ppd3dShaderBlob);
+	virtual D3D12_SHADER_BYTECODE		CreateVertexShader(ID3DBlob** ppd3dShaderBlob);
+};
 /*========================================================================
 * ColorFromGBuffer PSO
 *

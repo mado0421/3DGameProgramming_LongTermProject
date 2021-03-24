@@ -28,9 +28,22 @@ VS_OUTPUT VS_RenderShadow(VS_INPUT input)
 	VS_OUTPUT output;
 
 	output.positionW = (float3)mul(float4(input.position, 1.0f), gmtxGameObject);
-	output.position = mul(float4(output.positionW, 1.0f), gmtxLightSpaceVP);
+	output.position = mul(float4(output.positionW, 1.0f), gmtxLightViewProj[0]);
 
 	return output;
+}
+
+
+/*========================================================================
+* RenderPointLightShadowPSO
+*
+* - 월드 변환까지만 해줌.
+*=======================================================================*/
+float4 VS_RenderPointLightShadow(VS_INPUT input) : SV_POSITION {
+
+	float4 result = mul(float4(input.position, 1.0f), gmtxGameObject);
+
+	return result;
 }
 
 /*========================================================================

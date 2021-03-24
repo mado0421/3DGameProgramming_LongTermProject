@@ -15,11 +15,19 @@ typedef enum TEXTURETYPE {
 *=======================================================================*/
 class TempTexture {
 public:
-	//~TempTexture();
+	~TempTexture() {
+		if (m_pd3dTexture) m_pd3dTexture->Release();
+		if (m_pd3dUploadBuffer) m_pd3dUploadBuffer->Release();
+	}
 	void SetByDepthBuffer(ID3D12Device* pd3dDevice, UINT width, UINT height,
 		D3D12_CPU_DESCRIPTOR_HANDLE& dsvCpuHandle,
 		D3D12_CPU_DESCRIPTOR_HANDLE& srvCpuHandle,
 		D3D12_GPU_DESCRIPTOR_HANDLE& srvGpuHandle);
+	void SetByDepthBuffer(ID3D12Device* pd3dDevice, UINT width, UINT height,
+		D3D12_CPU_DESCRIPTOR_HANDLE& dsvCpuHandle,
+		D3D12_CPU_DESCRIPTOR_HANDLE& srvCpuHandle,
+		D3D12_GPU_DESCRIPTOR_HANDLE& srvGpuHandle,
+		UINT nArraySize);
 	void SetByRenderTarget(ID3D12Device* pd3dDevice, UINT width, UINT height,
 		D3D12_CPU_DESCRIPTOR_HANDLE& rtvCpuHandle,
 		D3D12_CPU_DESCRIPTOR_HANDLE& srvCpuHandle,
@@ -63,6 +71,12 @@ public:
 		ID3D12Device* pd3dDevice, UINT width, UINT height,
 		D3D12_CPU_DESCRIPTOR_HANDLE& srvCpuHandle,
 		D3D12_GPU_DESCRIPTOR_HANDLE& srvGpuHandle);
+	void AddDepthBufferTextureArray(
+		const char* name,
+		UINT nArraySize,
+		ID3D12Device* pd3dDevice, UINT width, UINT height,
+		D3D12_CPU_DESCRIPTOR_HANDLE& srvCpuHandle,
+		D3D12_GPU_DESCRIPTOR_HANDLE& srvGpuHandle);
 	void AddRenderTargetTexture(
 		const char* name,
 		ID3D12Device* pd3dDevice, UINT width, UINT height,
@@ -75,6 +89,10 @@ public:
 		ID3D12GraphicsCommandList* pd3dCommandList,
 		D3D12_CPU_DESCRIPTOR_HANDLE& srvCpuHandle,
 		D3D12_GPU_DESCRIPTOR_HANDLE& srvGpuHandle);
+
+	void DeleteTexture(const char* name) {
+		m_uomTextures.erase(name);
+	}
 
 	ID3D12Resource* GetTextureResource(const char* name);
 	void UseForShaderResource(const char* name, ID3D12GraphicsCommandList* pd3dCommandList, UINT rootParameterIdx);

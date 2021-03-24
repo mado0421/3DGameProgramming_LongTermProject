@@ -1,6 +1,6 @@
-SamplerState gSamplerState				: register(s0);
-SamplerState gShadowSamplerState		: register(s1);
-cbuffer cbPassInfo						: register(b0)
+SamplerState gSamplerState					: register(s0);
+SamplerComparisonState gShadowSamplerState	: register(s1);
+cbuffer cbPassInfo							: register(b0)
 {
 	matrix		gmtxView				: packoffset(c0);
 	matrix		gmtxProjection			: packoffset(c4);
@@ -9,23 +9,23 @@ cbuffer cbPassInfo						: register(b0)
 	matrix		gmtxTexture				: packoffset(c16);
 	float3		gvCameraPosition		: packoffset(c20);
 	float		gfTime					: packoffset(c20.w);
-	int			gPassIdx				: packoffset(c21);
 };
-cbuffer cbGameObjectInfo				: register(b1)
+cbuffer cbGameObjectInfo					: register(b1)
 {
 	matrix		gmtxGameObject			: packoffset(c0);
 };
-cbuffer cbLightInfo						: register(b2)
+cbuffer cbLightInfo							: register(b2)
 {
-	matrix	gmtxLightSpaceVP	: packoffset(c0);
-	float3	gvLightColor		: packoffset(c4);
-	float	gfFalloffStart		: packoffset(c4.w);
-	float3	gvLightDirection	: packoffset(c5);
-	float	gfFalloffEnd		: packoffset(c5.w);
-	float3	gvLightPosition		: packoffset(c6);
-	float	gfSpotPower			: packoffset(c6.w);
-	int		gLightType			: packoffset(c7);
-	bool	gbIsShadow			: packoffset(c7.y);
+	matrix	gmtxLightViewProj[6]	: packoffset(c0);
+	float3	gvLightColor			: packoffset(c24);
+	float	gfFalloffStart			: packoffset(c24.w);
+	float3	gvLightDirection		: packoffset(c25);
+	float	gfFalloffEnd			: packoffset(c25.w);
+	float3	gvLightPosition			: packoffset(c26);
+	float	gfSpotPower				: packoffset(c26.w);
+	uint	gLightType				: packoffset(c27);
+	bool	gbIsShadow				: packoffset(c27.y);
+
 }
 Texture2D gtxtColorMap					: register(t3);
 Texture2D gtxtNormalMap					: register(t4);
@@ -46,6 +46,11 @@ struct VS_OUTPUT {
 	float3 normalW	: NORMAL;
 	float2 uv		: TEXCOORD0;
 	float4 projTex	: TEXCOORD1;
+};
+struct GS_OUTPUT
+{
+	float4 pos		: SV_POSITION;
+	uint RTIndex	: SV_RenderTargetArrayIndex;
 };
 struct GBuffer {
 	float4 cColor	: SV_TARGET0;

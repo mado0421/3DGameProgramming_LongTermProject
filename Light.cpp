@@ -3,7 +3,7 @@
 
 
 Light::Light(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, D3D12_CPU_DESCRIPTOR_HANDLE& d3dCbvCPUDescHandle, D3D12_GPU_DESCRIPTOR_HANDLE& d3dCbvGPUDescHandle)
-	: m_uLightType(0)
+	: m_uLightType(LightType::LIGHT_NONE)
 	, m_bIsEnable(true)
 	, m_xmf3Color(XMFLOAT3(1.0f, 1.0f, 1.0f))
 	, m_xmf3Position(XMFLOAT3(0, 0, 0))
@@ -12,10 +12,11 @@ Light::Light(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandLis
 	, m_fFalloffEnd(500.0f)
 	, m_fSpotPower(1.0f)
 	, m_bIsShadow(false)
-	, m_xmf4x4lightSpaceViewProj(Matrix4x4::Identity())
 	, m_pd3dCBResource(nullptr)
 	, m_pCBMappedLight(nullptr)
 {
+	for(int i = 0 ; i < 6; i++)	m_xmf4x4ViewProj[i] = Matrix4x4::Identity();
+
 	CreateResource(pd3dDevice, pd3dCommandList);
 	CreateConstantBufferView(pd3dDevice, d3dCbvCPUDescHandle);
 	m_d3dCbvGPUDescHandle = d3dCbvGPUDescHandle;
@@ -53,7 +54,12 @@ void Light::SetShaderResource(ID3D12GraphicsCommandList* pd3dCommandList)
 
 	UINT nConstantBufferBytes = ((sizeof(CB_LIGHT_INFO) + 255) & ~255);
 	memset(m_pCBMappedLight, NULL, nConstantBufferBytes);
-	XMStoreFloat4x4(&m_pCBMappedLight->xmf4x4lightSpaceViewProj, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4lightSpaceViewProj)));
+	XMStoreFloat4x4(&m_pCBMappedLight->m_xmf4x4ViewProj[0], XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4ViewProj[0])));
+	XMStoreFloat4x4(&m_pCBMappedLight->m_xmf4x4ViewProj[1], XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4ViewProj[1])));
+	XMStoreFloat4x4(&m_pCBMappedLight->m_xmf4x4ViewProj[2], XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4ViewProj[2])));
+	XMStoreFloat4x4(&m_pCBMappedLight->m_xmf4x4ViewProj[3], XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4ViewProj[3])));
+	XMStoreFloat4x4(&m_pCBMappedLight->m_xmf4x4ViewProj[4], XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4ViewProj[4])));
+	XMStoreFloat4x4(&m_pCBMappedLight->m_xmf4x4ViewProj[5], XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4ViewProj[5])));
 	memcpy(&m_pCBMappedLight->xmf3Color, &m_xmf3Color, sizeof(XMFLOAT3));
 	memcpy(&m_pCBMappedLight->fFalloffStart, &m_fFalloffStart, sizeof(float));
 	memcpy(&m_pCBMappedLight->xmf3Direction, &m_xmf3Direction, sizeof(XMFLOAT3));
@@ -75,6 +81,112 @@ UINT LightManager::AddPointLight(LIGHT_DESC desc, ID3D12Device* pd3dDevice, ID3D
 	temp->m_xmf3Color = desc.xmf3Color;
 	temp->m_bIsShadow = desc.bIsShadow;
 	temp->m_bIsEnable = true;
+
+	XMFLOAT4X4 xmf4x4Projection = Matrix4x4::PerspectiveFovLH(XMConvertToRadians(90.0f), (float)512 / (float)512, 0.1f, 1000.0f);
+
+	XMFLOAT3 x = XMFLOAT3(1, 0, 0);
+	XMFLOAT3 y = XMFLOAT3(0, 1, 0);
+	XMFLOAT3 z = XMFLOAT3(0, 0, 1);
+	XMFLOAT4X4 m_xmf4x4Temp = Matrix4x4::Identity();
+	XMFLOAT3 look, up, right;
+
+	int i = 0;
+
+	/*========================================================================
+	* +x
+	*=======================================================================*/
+	look = x;
+	up = y;
+	right = Vector3::Multiply(-1, z);
+
+	m_xmf4x4Temp._11 = right.x; m_xmf4x4Temp._12 = up.x; m_xmf4x4Temp._13 = look.x;
+	m_xmf4x4Temp._21 = right.y; m_xmf4x4Temp._22 = up.y; m_xmf4x4Temp._23 = look.y;
+	m_xmf4x4Temp._31 = right.z; m_xmf4x4Temp._32 = up.z; m_xmf4x4Temp._33 = look.z;
+	m_xmf4x4Temp._41 = -Vector3::DotProduct(desc.xmf3Position, right);
+	m_xmf4x4Temp._42 = -Vector3::DotProduct(desc.xmf3Position, up);
+	m_xmf4x4Temp._43 = -Vector3::DotProduct(desc.xmf3Position, look);
+
+	temp->m_xmf4x4ViewProj[i++] = Matrix4x4::Multiply(m_xmf4x4Temp, xmf4x4Projection);
+
+	/*========================================================================
+	* -x
+	*=======================================================================*/
+	look = Vector3::Multiply(-1, x);
+	up = y;
+	right = z;
+
+	m_xmf4x4Temp._11 = right.x; m_xmf4x4Temp._12 = up.x; m_xmf4x4Temp._13 = look.x;
+	m_xmf4x4Temp._21 = right.y; m_xmf4x4Temp._22 = up.y; m_xmf4x4Temp._23 = look.y;
+	m_xmf4x4Temp._31 = right.z; m_xmf4x4Temp._32 = up.z; m_xmf4x4Temp._33 = look.z;
+	m_xmf4x4Temp._41 = -Vector3::DotProduct(desc.xmf3Position, right);
+	m_xmf4x4Temp._42 = -Vector3::DotProduct(desc.xmf3Position, up);
+	m_xmf4x4Temp._43 = -Vector3::DotProduct(desc.xmf3Position, look);
+
+	temp->m_xmf4x4ViewProj[i++] = Matrix4x4::Multiply(m_xmf4x4Temp, xmf4x4Projection);
+
+	/*========================================================================
+	* +y
+	*=======================================================================*/
+	look = y;
+	up = Vector3::Multiply(-1, z);
+	right = x;
+
+	m_xmf4x4Temp._11 = right.x; m_xmf4x4Temp._12 = up.x; m_xmf4x4Temp._13 = look.x;
+	m_xmf4x4Temp._21 = right.y; m_xmf4x4Temp._22 = up.y; m_xmf4x4Temp._23 = look.y;
+	m_xmf4x4Temp._31 = right.z; m_xmf4x4Temp._32 = up.z; m_xmf4x4Temp._33 = look.z;
+	m_xmf4x4Temp._41 = -Vector3::DotProduct(desc.xmf3Position, right);
+	m_xmf4x4Temp._42 = -Vector3::DotProduct(desc.xmf3Position, up);
+	m_xmf4x4Temp._43 = -Vector3::DotProduct(desc.xmf3Position, look);
+
+	temp->m_xmf4x4ViewProj[i++] = Matrix4x4::Multiply(m_xmf4x4Temp, xmf4x4Projection);
+
+	/*========================================================================
+	* -y
+	*=======================================================================*/
+	look = Vector3::Multiply(-1, y);
+	up = z;
+	right = x;
+
+	m_xmf4x4Temp._11 = right.x; m_xmf4x4Temp._12 = up.x; m_xmf4x4Temp._13 = look.x;
+	m_xmf4x4Temp._21 = right.y; m_xmf4x4Temp._22 = up.y; m_xmf4x4Temp._23 = look.y;
+	m_xmf4x4Temp._31 = right.z; m_xmf4x4Temp._32 = up.z; m_xmf4x4Temp._33 = look.z;
+	m_xmf4x4Temp._41 = -Vector3::DotProduct(desc.xmf3Position, right);
+	m_xmf4x4Temp._42 = -Vector3::DotProduct(desc.xmf3Position, up);
+	m_xmf4x4Temp._43 = -Vector3::DotProduct(desc.xmf3Position, look);
+
+	temp->m_xmf4x4ViewProj[i++] = Matrix4x4::Multiply(m_xmf4x4Temp, xmf4x4Projection);
+
+	/*========================================================================
+	* +z
+	*=======================================================================*/
+	look = z;
+	up = y;
+	right = x;
+
+	m_xmf4x4Temp._11 = right.x; m_xmf4x4Temp._12 = up.x; m_xmf4x4Temp._13 = look.x;
+	m_xmf4x4Temp._21 = right.y; m_xmf4x4Temp._22 = up.y; m_xmf4x4Temp._23 = look.y;
+	m_xmf4x4Temp._31 = right.z; m_xmf4x4Temp._32 = up.z; m_xmf4x4Temp._33 = look.z;
+	m_xmf4x4Temp._41 = -Vector3::DotProduct(desc.xmf3Position, right);
+	m_xmf4x4Temp._42 = -Vector3::DotProduct(desc.xmf3Position, up);
+	m_xmf4x4Temp._43 = -Vector3::DotProduct(desc.xmf3Position, look);
+
+	temp->m_xmf4x4ViewProj[i++] = Matrix4x4::Multiply(m_xmf4x4Temp, xmf4x4Projection);
+
+	/*========================================================================
+	* -z
+	*=======================================================================*/
+	look = Vector3::Multiply(-1, z);
+	up = y;
+	right = Vector3::Multiply(-1, x);
+
+	m_xmf4x4Temp._11 = right.x; m_xmf4x4Temp._12 = up.x; m_xmf4x4Temp._13 = look.x;
+	m_xmf4x4Temp._21 = right.y; m_xmf4x4Temp._22 = up.y; m_xmf4x4Temp._23 = look.y;
+	m_xmf4x4Temp._31 = right.z; m_xmf4x4Temp._32 = up.z; m_xmf4x4Temp._33 = look.z;
+	m_xmf4x4Temp._41 = -Vector3::DotProduct(desc.xmf3Position, right);
+	m_xmf4x4Temp._42 = -Vector3::DotProduct(desc.xmf3Position, up);
+	m_xmf4x4Temp._43 = -Vector3::DotProduct(desc.xmf3Position, look);
+
+	temp->m_xmf4x4ViewProj[i++] = Matrix4x4::Multiply(m_xmf4x4Temp, xmf4x4Projection);
 
 	m_vecLight.push_back(temp);
 	return ((UINT)m_vecLight.size() - 1);
@@ -108,7 +220,7 @@ UINT LightManager::AddSpotLight(LIGHT_DESC desc, ID3D12Device* pd3dDevice, ID3D1
 
 	XMFLOAT4X4 xmf4x4View = Matrix4x4::LookAtLH(temp->m_xmf3Position, Vector3::Add(temp->m_xmf3Position, temp->m_xmf3Direction), XMFLOAT3(0, 1, 0));
 	XMFLOAT4X4 xmf4x4Projection = Matrix4x4::PerspectiveFovLH(XMConvertToRadians(120.0f), (float)512 / (float)512, 0.1f, 1000.0f);
-	temp->m_xmf4x4lightSpaceViewProj = Matrix4x4::Multiply(xmf4x4View, xmf4x4Projection);
+	temp->m_xmf4x4ViewProj[0] = Matrix4x4::Multiply(xmf4x4View, xmf4x4Projection);
 
 	m_vecLight.push_back(temp);
 	return ((UINT)m_vecLight.size() - 1);
