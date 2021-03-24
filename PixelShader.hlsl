@@ -35,6 +35,11 @@ void PS_RenderPointLightShadow(GS_OUTPUT input) {
 *=======================================================================*/
 float4 PS_ColorFromGBuffer(VS_OUTPUT input) : SV_TARGET{
 	float3 color = gtxtColorMap.Sample(gSamplerState, input.uv).xyz;
+	return float4(color, 1.0f);
+}
+
+float4 PS_ColorFromGBufferAmbient(VS_OUTPUT input) : SV_TARGET{
+	float3 color = gtxtColorMap.Sample(gSamplerState, input.uv).xyz;
 	float3 vAmbientLight = float3(0.1f, 0.1f, 0.1f);
 	return float4(color * vAmbientLight, 1.0f);
 }
@@ -58,15 +63,16 @@ float4 PS_DepthFromGBuffer(VS_OUTPUT input) : SV_TARGET{
 *=======================================================================*/
 float4 PS_AddLight(VS_OUTPUT input) : SV_TARGET{
 	float3 vWorldPosition	= WorldPosFromLinearDepth(input.uv);
+	float3 vColor			= gtxtColorMap.Sample(gSamplerState, input.uv).xyz;
 	float3 vNormal			= gtxtNormalMap.Sample(gSamplerState, input.uv).xyz * 2.0f - 1.0f;
 	float3 vToEye			= normalize(gvCameraPosition - vWorldPosition);
 
 	float3 result = float3(0.0f, 0.0f, 0.0f);
 	// ³»¿ë...
 	switch (gLightType) {
-	case 1: result += CalcPointLight(vWorldPosition, vNormal, vToEye); break;
-	case 2: result += CalcSpotLight(vWorldPosition, vNormal, vToEye); break;
-	case 3: result += CalcDirectionalLight(vNormal, vToEye);	break;
+	case 1: result += CalcPointLight(vWorldPosition, vNormal, vToEye, vColor); break;
+	case 2: result += CalcSpotLight(vWorldPosition, vNormal, vToEye, vColor); break;
+	case 3: result += CalcDirectionalLight(vNormal, vToEye, vColor);	break;
 	default: break;
 	}
 	return float4(result, 1.0f);

@@ -331,7 +331,7 @@ D3D12_DEPTH_STENCIL_DESC ColorFromGBufferPSO::CreateDepthStencilState()
 }
 D3D12_SHADER_BYTECODE ColorFromGBufferPSO::CreatePixelShader(ID3DBlob** ppd3dShaderBlob)
 {
-	return(CompileShaderFromFile(L"PixelShader.hlsl", "PS_ColorFromGBuffer", "ps_5_1", ppd3dShaderBlob));
+	return(CompileShaderFromFile(L"PixelShader.hlsl", "PS_ColorFromGBufferAmbient", "ps_5_1", ppd3dShaderBlob));
 }
 D3D12_RASTERIZER_DESC ColorFromGBufferPSO::CreateRasterizerState()
 {
@@ -547,7 +547,7 @@ D3D12_RASTERIZER_DESC RenderPointLightShadowPSO::CreateRasterizerState()
 	d3dRasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
 	d3dRasterizerDesc.CullMode = D3D12_CULL_MODE_BACK;
 	d3dRasterizerDesc.FrontCounterClockwise = TRUE;
-	d3dRasterizerDesc.DepthBias = 100000;
+	d3dRasterizerDesc.DepthBias = 1000;
 	d3dRasterizerDesc.DepthBiasClamp = 0.0f;
 	d3dRasterizerDesc.SlopeScaledDepthBias = 1.0;
 	d3dRasterizerDesc.DepthClipEnable = TRUE;

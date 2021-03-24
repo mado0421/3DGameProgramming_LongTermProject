@@ -28,6 +28,10 @@ public:
 		D3D12_CPU_DESCRIPTOR_HANDLE& srvCpuHandle,
 		D3D12_GPU_DESCRIPTOR_HANDLE& srvGpuHandle,
 		UINT nArraySize);
+	void SetByCubeDepthBuffer(ID3D12Device* pd3dDevice, UINT width, UINT height,
+		D3D12_CPU_DESCRIPTOR_HANDLE& dsvCpuHandle,
+		D3D12_CPU_DESCRIPTOR_HANDLE& srvCpuHandle,
+		D3D12_GPU_DESCRIPTOR_HANDLE& srvGpuHandle);
 	void SetByRenderTarget(ID3D12Device* pd3dDevice, UINT width, UINT height,
 		D3D12_CPU_DESCRIPTOR_HANDLE& rtvCpuHandle,
 		D3D12_CPU_DESCRIPTOR_HANDLE& srvCpuHandle,
@@ -74,6 +78,11 @@ public:
 	void AddDepthBufferTextureArray(
 		const char* name,
 		UINT nArraySize,
+		ID3D12Device* pd3dDevice, UINT width, UINT height,
+		D3D12_CPU_DESCRIPTOR_HANDLE& srvCpuHandle,
+		D3D12_GPU_DESCRIPTOR_HANDLE& srvGpuHandle);
+	void AddDepthBufferTextureCube(
+		const char* name,
 		ID3D12Device* pd3dDevice, UINT width, UINT height,
 		D3D12_CPU_DESCRIPTOR_HANDLE& srvCpuHandle,
 		D3D12_GPU_DESCRIPTOR_HANDLE& srvGpuHandle);

@@ -12,7 +12,7 @@
 ID3D12RootSignature* Scene::CreateRootSignature()
 {
 	ID3D12RootSignature* pd3dGraphicsRootSignature = NULL;
-	D3D12_DESCRIPTOR_RANGE d3dDescriptorRange[6];
+	D3D12_DESCRIPTOR_RANGE d3dDescriptorRange[7];
 
 	d3dDescriptorRange[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_CBV;
 	d3dDescriptorRange[0].NumDescriptors = 1;
@@ -50,7 +50,13 @@ ID3D12RootSignature* Scene::CreateRootSignature()
 	d3dDescriptorRange[5].RegisterSpace = 0;
 	d3dDescriptorRange[5].OffsetInDescriptorsFromTableStart = 0;
 
-	D3D12_ROOT_PARAMETER pd3dRootParameters[7];
+	d3dDescriptorRange[6].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	d3dDescriptorRange[6].NumDescriptors = 1;
+	d3dDescriptorRange[6].BaseShaderRegister = ROOTSIGNATURE_CUBE_TEXTURE;
+	d3dDescriptorRange[6].RegisterSpace = 0;
+	d3dDescriptorRange[6].OffsetInDescriptorsFromTableStart = 0;
+
+	D3D12_ROOT_PARAMETER pd3dRootParameters[8];
 
 	pd3dRootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 	pd3dRootParameters[0].Descriptor.ShaderRegister = ROOTSIGNATURE_PASSCONSTANTS;
@@ -86,6 +92,11 @@ ID3D12RootSignature* Scene::CreateRootSignature()
 	pd3dRootParameters[6].DescriptorTable.NumDescriptorRanges = 1;
 	pd3dRootParameters[6].DescriptorTable.pDescriptorRanges = &d3dDescriptorRange[5];
 	pd3dRootParameters[6].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+
+	pd3dRootParameters[7].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	pd3dRootParameters[7].DescriptorTable.NumDescriptorRanges = 1;
+	pd3dRootParameters[7].DescriptorTable.pDescriptorRanges = &d3dDescriptorRange[6];
+	pd3dRootParameters[7].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
 	D3D12_STATIC_SAMPLER_DESC d3dSamplerDesc[2];
 	::ZeroMemory(&d3dSamplerDesc, sizeof(D3D12_STATIC_SAMPLER_DESC) * 2);
@@ -269,7 +280,7 @@ void Scene::Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12Graphics
 			switch (vecLightDesc[i].lightType)
 			{
 			case LightType::LIGHT_POINT:
-				m_TextureMng->AddDepthBufferTextureArray(temp.c_str(), 6, m_pd3dDevice, 512, 512, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
+				m_TextureMng->AddDepthBufferTextureCube(temp.c_str(), m_pd3dDevice, 512, 512, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
 
 				break;
 
@@ -443,7 +454,15 @@ void Scene::RenderPass2()
 		m_LightMng->SetShaderResource(m_pd3dCommandList, i);
 
 		if (m_LightMng->GetIsShadow(i)) {
-			m_TextureMng->UseForShaderResource(m_LightMng->GetShadowMapName(i).c_str(), m_pd3dCommandList, ROOTSIGNATURE_SHADOW_TEXTURE);
+			switch (m_LightMng->GetLightType(i))
+			{
+			case LightType::LIGHT_SPOT: m_TextureMng->UseForShaderResource(m_LightMng->GetShadowMapName(i).c_str(), m_pd3dCommandList, ROOTSIGNATURE_SHADOW_TEXTURE); break;
+			case LightType::LIGHT_POINT: m_TextureMng->UseForShaderResource(m_LightMng->GetShadowMapName(i).c_str(), m_pd3dCommandList, ROOTSIGNATURE_CUBE_TEXTURE); break;
+			case LightType::LIGHT_DIRECTIONAL:
+			case LightType::LIGHT_NONE:
+			default:
+				break;
+			}
 		}
 
 		m_vecDebugWindow[3]->Render(m_pd3dCommandList);
@@ -474,7 +493,7 @@ void Scene::Update(float fTimeElapsed)
 	m_fCurrentTime += fTimeElapsed;
 	::memcpy(&m_pcbMappedPassInfo->m_xmfCurrentTime, &m_fCurrentTime, sizeof(float));
 
-	//for_each(m_vecObject.begin(), m_vecObject.end(), [fTimeElapsed](Object* o) {o->Rotate(XMFLOAT3(0, 30 * fTimeElapsed, 0)); });
+	for_each(m_vecObject.begin(), m_vecObject.end(), [fTimeElapsed](Object* o) {o->Rotate(XMFLOAT3(0, 30 * fTimeElapsed, 0)); });
 
 }
 void Scene::Input(UCHAR* pKeyBuffer, float fTimeElapsed)

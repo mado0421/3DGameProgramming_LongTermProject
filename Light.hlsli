@@ -31,47 +31,43 @@ float3 SchlickFresnel(float3 R0, float3 vNormal, float3 vLight) {
 * material은 어디 종속된 정보값인가? 텍스처? 메쉬? 오브젝트?
 * 텍스처로 올려주면 그게 roughness 맵인 듯
 *=======================================================================*/
-float3 BlinnPhong(float3 lightColor, float3 vToLight, float3 vNormal, float3 vToEye) {
-	const float m = 0.01f * 256.0f;
+float3 BlinnPhong(float3 lightColor, float3 vToLight, float3 vNormal, float3 vToEye, float3 vDiffuseColor) {
+	const float m = 4.0f * 256.0f;
 	float3 vHalf = normalize(vToEye + vToLight);
 
 	float roughnessFactor = (m + 8.0f) * pow(max(dot(vHalf, vNormal), 0.0f), m) / 8.0f;
-	float3 fresnelFactor = SchlickFresnel(float3(0.01f, 0.01f, 0.01f), vHalf, vToLight);
+	float3 fresnelFactor = SchlickFresnel(float3(0.1f, 0.1f, 0.1f), vHalf, vToLight);
 
 	float3 specAlbedo = fresnelFactor * roughnessFactor;
 	specAlbedo = specAlbedo / (specAlbedo + 1.0f);
 
-	return lightColor;
 
-	return specAlbedo * lightColor;
+	return (vDiffuseColor + specAlbedo) * lightColor;
 }
 
 float CalcPointLightShadowFactor(float3 vToPixel) {
 	float3 toPixelAbs = abs(vToPixel);
 	float z = max(toPixelAbs.x, max(toPixelAbs.y, toPixelAbs.z));
-	//float depth = gmtxProjection._m32 / z + gmtxProjection._m22;
-	float depth = (gmtxProjection._m32 * z + gmtxProjection._m22) / z;
-	return gtxtShadowMap.SampleCmpLevelZero(gShadowSamplerState, vToPixel, 0).r;
-	//return 1.0f;
+	float depth = (gmtxProjection._m22 * z + gmtxProjection._m32) / z;
+	return gtxtShadowCubeMap.SampleCmpLevelZero(gShadowSamplerState, vToPixel, depth).r;
 }
-float CalcSpotLightShadowFactor(float3 worldPos) {
+float CalcSpotLightShadowFactor(float3 vWorldPos) {
 
-	float4 temp = mul(float4(worldPos, 1.0f), gmtxLightViewProj[0]);
+	float4 temp = mul(float4(vWorldPos, 1.0f), gmtxLightViewProj[0]);
 	temp /= temp.w;
 	temp = mul(temp, gmtxTexture);
-	float depth = gtxtShadowMap.SampleCmpLevelZero(gShadowSamplerState, temp.xy, temp.z).r;
-	return depth;
+	return gtxtShadowMap.SampleCmpLevelZero(gShadowSamplerState, temp.xy, temp.z).r;
 }
 
-float3 CalcDirectionalLight(float3 vNormal, float3 vToEye) {
+float3 CalcDirectionalLight(float3 vNormal, float3 vToEye, float3 vDiffuseColor) {
 	float3 vToLight = -gvLightDirection;
 
 	float ndotl = max(dot(vToLight, vNormal), 0.0f);
 	float3 lightColor = gvLightColor * ndotl;
 
-	return BlinnPhong(lightColor, vToLight, vNormal, vToEye);
+	return BlinnPhong(lightColor, vToLight, vNormal, vToEye, vDiffuseColor);
 }
-float3 CalcPointLight(float3 vPos, float3 vNormal, float3 vToEye) {
+float3 CalcPointLight(float3 vPos, float3 vNormal, float3 vToEye, float3 vDiffuseColor) {
 	float3 vToLight = gvLightPosition - vPos;
 
 	float d = length(vToLight);
@@ -91,9 +87,9 @@ float3 CalcPointLight(float3 vPos, float3 vNormal, float3 vToEye) {
 		lightColor *= shadowFactor;
 	}
 
-	return BlinnPhong(lightColor, vToLight, vNormal, vToEye);
+	return BlinnPhong(lightColor, vToLight, vNormal, vToEye, vDiffuseColor);
 }
-float3 CalcSpotLight(float3 vPos, float3 vNormal, float3 vToEye) {
+float3 CalcSpotLight(float3 vPos, float3 vNormal, float3 vToEye, float3 vDiffuseColor) {
 	float3 vToLight = gvLightPosition - vPos;
 	float d = length(vToLight);
 	if (d > gfFalloffEnd) return float3(0, 0, 0);
@@ -113,5 +109,5 @@ float3 CalcSpotLight(float3 vPos, float3 vNormal, float3 vToEye) {
 		lightColor *= shadowFactor;
 	}
 
-	return BlinnPhong(lightColor, vToLight, vNormal, vToEye);
+	return BlinnPhong(lightColor, vToLight, vNormal, vToEye, vDiffuseColor);
 }
