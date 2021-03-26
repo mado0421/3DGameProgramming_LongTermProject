@@ -32,6 +32,7 @@ Texture2D gtxtNormalMap					: register(t4);
 Texture2D gtxtDepthMap					: register(t5);
 Texture2D gtxtShadowMap					: register(t6);
 TextureCube gtxtShadowCubeMap			: register(t7);
+Texture2DArray gtxtShadowArrayMap		: register(t8);
 
 
 struct VS_INPUT {

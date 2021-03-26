@@ -32,7 +32,7 @@ float3 SchlickFresnel(float3 R0, float3 vNormal, float3 vLight) {
 * 텍스처로 올려주면 그게 roughness 맵인 듯
 *=======================================================================*/
 float3 BlinnPhong(float3 lightColor, float3 vToLight, float3 vNormal, float3 vToEye, float3 vDiffuseColor) {
-	const float m = 4.0f * 256.0f;
+	const float m = 0.4f * 256.0f;
 	float3 vHalf = normalize(vToEye + vToLight);
 
 	float roughnessFactor = (m + 8.0f) * pow(max(dot(vHalf, vNormal), 0.0f), m) / 8.0f;

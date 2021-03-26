@@ -19,6 +19,8 @@ VS_OUTPUT VS_PackGBuffer(VS_INPUT input) {
 
 /*========================================================================
 * RenderShadowPSO
+* VS_MulW_LV_LP
+* TransformToWolrdLightViewProj ?
 *
 * - 월드 변환 후에 조명공간의 뷰 변환, 투영 변환 행렬을 곱
 * - position 만 넘겨주면 됨. 깊이를 쓸거니까.
@@ -35,7 +37,9 @@ VS_OUTPUT VS_RenderShadow(VS_INPUT input)
 
 
 /*========================================================================
-* RenderPointLightShadowPSO
+* RenderPointLightShadowPSO, VS_RenderDirectionalLightShadowPSO
+* TransToWorldSpace 로 이름을 바꾸는게?
+* 아니면 VS_MulW
 *
 * - 월드 변환까지만 해줌.
 *=======================================================================*/

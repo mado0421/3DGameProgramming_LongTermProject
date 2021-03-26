@@ -56,6 +56,31 @@ public:
 	void SetShaderResource(ID3D12GraphicsCommandList* pd3dCommandList);
 	LightType GetLightType() { return m_uLightType; }
 
+	void UpdateDirectionalLightOrthographicLH(XMFLOAT4X4 xmf4x4CameraViewInv) {
+		for (int i = 0; i < m_nCascade; i++) {
+			float minX = FLT_MAX;
+			float minY = FLT_MAX;
+			float minZ = FLT_MAX;
+			float maxX = -FLT_MAX;
+			float maxY = -FLT_MAX;
+			float maxZ = -FLT_MAX;
+			for (int j = 0; j < 8; j++) {
+				XMVECTOR temp = XMVector4Transform(XMLoadFloat4(&m_xmf4FrustumCorners[i][j]), XMLoadFloat4x4(&xmf4x4CameraViewInv));
+				temp = XMVector4Transform(temp, XMLoadFloat4x4(&m_xmf4x4View));
+				XMFLOAT4 xmf4Temp;
+				XMStoreFloat4(&xmf4Temp, temp);
+				minX = min(minX, xmf4Temp.x);
+				minY = min(minY, xmf4Temp.y);
+				minZ = min(minZ, xmf4Temp.z);
+				maxX = max(maxX, xmf4Temp.x);
+				maxY = max(maxY, xmf4Temp.y);
+				maxZ = max(maxZ, xmf4Temp.z);
+			}
+			XMFLOAT4X4 xmf4x4Proj = Matrix4x4::OrthographicLH(maxX - minX, maxY - minY, minZ, maxZ);
+			m_xmf4x4ViewProj[i] = Matrix4x4::Multiply(m_xmf4x4View, xmf4x4Proj);
+		}
+	}
+
 private:
 	void CreateResource(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	void CreateConstantBufferView(ID3D12Device* pd3dDevice, D3D12_CPU_DESCRIPTOR_HANDLE& d3dCbvCPUDescHandle);
@@ -75,6 +100,12 @@ public:
 	XMFLOAT4X4		m_xmf4x4ViewProj[6];
 
 	string			m_shadowMapName;
+
+	// For Directional Light Shadow
+	float			m_fZ[4];
+	XMFLOAT4		m_xmf4FrustumCorners[3][8];
+	XMFLOAT4X4		m_xmf4x4View;
+	UINT			m_nCascade;
 private:
 	ID3D12Resource* m_pd3dCBResource;
 	CB_LIGHT_INFO* m_pCBMappedLight;
@@ -86,7 +117,7 @@ public:
 	UINT AddPointLight(LIGHT_DESC desc, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 		D3D12_CPU_DESCRIPTOR_HANDLE& d3dCbvCPUDescHandle, D3D12_GPU_DESCRIPTOR_HANDLE& d3dCbvGPUDescHandle);
 	UINT AddDirectionalLight(LIGHT_DESC desc, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
-		D3D12_CPU_DESCRIPTOR_HANDLE& d3dCbvCPUDescHandle, D3D12_GPU_DESCRIPTOR_HANDLE& d3dCbvGPUDescHandle);
+		D3D12_CPU_DESCRIPTOR_HANDLE& d3dCbvCPUDescHandle, D3D12_GPU_DESCRIPTOR_HANDLE& d3dCbvGPUDescHandle, UINT nCascade = 3);
 	UINT AddSpotLight(LIGHT_DESC desc, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 		D3D12_CPU_DESCRIPTOR_HANDLE& d3dCbvCPUDescHandle, D3D12_GPU_DESCRIPTOR_HANDLE& d3dCbvGPUDescHandle);
 
@@ -97,6 +128,7 @@ public:
 	void SetShadowMapName(const char* name, UINT i) { m_vecLight[i]->m_shadowMapName = name; }
 
 	void SetShaderResource(ID3D12GraphicsCommandList* pd3dCommandList, UINT i) { m_vecLight[i]->SetShaderResource(pd3dCommandList); }
+	void UpdateDirectionalLightOrthographicLH(XMFLOAT4X4 xmf4x4CameraViewInv, UINT i) { m_vecLight[i]->UpdateDirectionalLightOrthographicLH(xmf4x4CameraViewInv); }
 
 	UINT GetNumLight() { return (UINT)m_vecLight.size(); }
 	bool GetIsShadow(UINT i) { return m_vecLight[i]->m_bIsShadow; }

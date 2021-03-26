@@ -1,6 +1,6 @@
 #Object
 
 { model Assets/4legMech-1.obj Assets/4legMech-1.dds position 0 0 0 }
-{ mesh Assets/room.obj position 0 0 0 }
+#{ mesh Assets/room.obj position 0 0 0 }
 
 #End

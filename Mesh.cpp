@@ -12,14 +12,14 @@ Mesh::Mesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 
 	int i = 0;
 	XMFLOAT3 pos[8];
-	pos[i++] = XMFLOAT3(-50.0f, 50.0f, 50.0f);
-	pos[i++] = XMFLOAT3(50.0f, 50.0f, 50.0f);
-	pos[i++] = XMFLOAT3(50.0f, 50.0f, -50.0f);
-	pos[i++] = XMFLOAT3(-50.0f, 50.0f, -50.0f);
-	pos[i++] = XMFLOAT3(-50.0f, -50.0f, 50.0f);
-	pos[i++] = XMFLOAT3(50.0f, -50.0f, 50.0f);
-	pos[i++] = XMFLOAT3(50.0f, -50.0f, -50.0f);
-	pos[i++] = XMFLOAT3(-50.0f, -50.0f, -50.0f);
+	pos[i++] = XMFLOAT3(-0.5f,	0.5f,  0.5f);
+	pos[i++] = XMFLOAT3( 0.5f,	0.5f,  0.5f);
+	pos[i++] = XMFLOAT3( 0.5f,	0.5f, -0.5f);
+	pos[i++] = XMFLOAT3(-0.5f,	0.5f, -0.5f);
+	pos[i++] = XMFLOAT3(-0.5f, -0.5f,  0.5f);
+	pos[i++] = XMFLOAT3( 0.5f, -0.5f,  0.5f);
+	pos[i++] = XMFLOAT3( 0.5f, -0.5f, -0.5f);
+	pos[i++] = XMFLOAT3(-0.5f, -0.5f, -0.5f);
 
 	i = 0;
 	XMFLOAT3 normal[6];

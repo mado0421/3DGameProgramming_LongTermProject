@@ -12,7 +12,7 @@
 ID3D12RootSignature* Scene::CreateRootSignature()
 {
 	ID3D12RootSignature* pd3dGraphicsRootSignature = NULL;
-	D3D12_DESCRIPTOR_RANGE d3dDescriptorRange[7];
+	D3D12_DESCRIPTOR_RANGE d3dDescriptorRange[8];
 
 	d3dDescriptorRange[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_CBV;
 	d3dDescriptorRange[0].NumDescriptors = 1;
@@ -56,7 +56,13 @@ ID3D12RootSignature* Scene::CreateRootSignature()
 	d3dDescriptorRange[6].RegisterSpace = 0;
 	d3dDescriptorRange[6].OffsetInDescriptorsFromTableStart = 0;
 
-	D3D12_ROOT_PARAMETER pd3dRootParameters[8];
+	d3dDescriptorRange[7].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	d3dDescriptorRange[7].NumDescriptors = 1;
+	d3dDescriptorRange[7].BaseShaderRegister = ROOTSIGNATURE_SHADOWARRAY_TEXTURE;
+	d3dDescriptorRange[7].RegisterSpace = 0;
+	d3dDescriptorRange[7].OffsetInDescriptorsFromTableStart = 0;
+
+	D3D12_ROOT_PARAMETER pd3dRootParameters[9];
 
 	pd3dRootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 	pd3dRootParameters[0].Descriptor.ShaderRegister = ROOTSIGNATURE_PASSCONSTANTS;
@@ -97,6 +103,11 @@ ID3D12RootSignature* Scene::CreateRootSignature()
 	pd3dRootParameters[7].DescriptorTable.NumDescriptorRanges = 1;
 	pd3dRootParameters[7].DescriptorTable.pDescriptorRanges = &d3dDescriptorRange[6];
 	pd3dRootParameters[7].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+
+	pd3dRootParameters[8].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	pd3dRootParameters[8].DescriptorTable.NumDescriptorRanges = 1;
+	pd3dRootParameters[8].DescriptorTable.pDescriptorRanges = &d3dDescriptorRange[7];
+	pd3dRootParameters[8].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
 	D3D12_STATIC_SAMPLER_DESC d3dSamplerDesc[2];
 	::ZeroMemory(&d3dSamplerDesc, sizeof(D3D12_STATIC_SAMPLER_DESC) * 2);
@@ -162,8 +173,8 @@ void Scene::Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12Graphics
 	* 카메라 설정
 	*=======================================================================*/
 	m_pCamera = new FollowCamera();
-	m_pCamera->SetPosition(XMFLOAT3(0, 4, -5));
-	m_pCamera->SetLookAt(XMFLOAT3(0, 1, 0));
+	m_pCamera->SetPosition(XMFLOAT3(0, 0, -1));
+	m_pCamera->SetLookAt(XMFLOAT3(0, 0, 0));
 
 	/*========================================================================
 	* 디스크립터 힙 생성
@@ -220,11 +231,19 @@ void Scene::Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12Graphics
 			m_vecObject.push_back(tempObj);
 		}
 		else {
+			/*
+				블렌더에서 모델 가져온다고 PSO에서 windingOrder를 CCW이 아니라 CW로 해놨음 그래서 반대로 나올건데 테스트니까 뭐
+			*/
 			Object* tempObj = new Object(m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
 
 			tempObj->Move(vecObjDesc[i].position);
 			m_vecObject.push_back(tempObj);
 		}
+	}
+	for (int i = 0; i < 30; i++) {
+		Object* tempObj = new Object(m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
+		tempObj->Move(XMFLOAT3(0, 0, i * 3 + 3));
+		m_vecObject.push_back(tempObj);
 	}
 
 
@@ -262,7 +281,7 @@ void Scene::Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12Graphics
 			
 			break;
 		case LightType::LIGHT_DIRECTIONAL:	
-			m_LightMng->AddDirectionalLight(vecLightDesc[i], m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);	
+			m_LightMng->AddDirectionalLight(vecLightDesc[i], m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle, 3);	
 			
 			break;
 		case LightType::LIGHT_SPOT:			
@@ -280,15 +299,19 @@ void Scene::Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12Graphics
 			switch (vecLightDesc[i].lightType)
 			{
 			case LightType::LIGHT_POINT:
-				m_TextureMng->AddDepthBufferTextureCube(temp.c_str(), m_pd3dDevice, 512, 512, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
+				m_TextureMng->AddDepthBufferTextureCube(temp.c_str(), m_pd3dDevice, SHADOWMAPSIZE, SHADOWMAPSIZE, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
 
 				break;
 
 			case LightType::LIGHT_SPOT:
-				m_TextureMng->AddDepthBufferTexture(temp.c_str(), m_pd3dDevice, 512, 512, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
+				m_TextureMng->AddDepthBufferTexture(temp.c_str(), m_pd3dDevice, SHADOWMAPSIZE, SHADOWMAPSIZE, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
 
 				break;
 			case LightType::LIGHT_DIRECTIONAL:
+				m_TextureMng->AddDepthBufferTextureArray(temp.c_str(), 3, m_pd3dDevice, SHADOWMAPSIZE, SHADOWMAPSIZE, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
+
+
+				break;
 			case LightType::LIGHT_NONE:
 			default:
 				break;
@@ -393,22 +416,25 @@ void Scene::RenderPass1()
 	/*========================================================================
 	* Pass 1. 광원별 그림자맵 렌더
 	*=======================================================================*/
-	m_pCamera->SetViewport(0, 0, 512, 512, 0.0f, 1.0f);
+	m_pCamera->SetViewport(0, 0, SHADOWMAPSIZE, SHADOWMAPSIZE, 0.0f, 1.0f);
 	m_pCamera->SetViewportsAndScissorRects(m_pd3dCommandList);
 
 	for (UINT i = 0; i < m_LightMng->GetNumLight(); i++) {
 		if (m_LightMng->GetIsShadow(i)) {
-			m_LightMng->SetShaderResource(m_pd3dCommandList, i);
 			switch (m_LightMng->GetLightType(i))
 			{
 			case LightType::LIGHT_SPOT: m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["RenderShadow"]); break;
 			case LightType::LIGHT_POINT: m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["RenderPointLightShadow"]); break;
 			case LightType::LIGHT_DIRECTIONAL:
+				m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["RenderDirectionalShadow"]);
+				m_LightMng->UpdateDirectionalLightOrthographicLH(m_pCamera->GetViewMatrix(), i);
+				break;
 			case LightType::LIGHT_NONE:
 			default:
 				break;
 			}
 			
+			m_LightMng->SetShaderResource(m_pd3dCommandList, i);
 
 			D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = m_TextureMng->GetDsvCPUHandle(m_LightMng->GetShadowMapName(i).c_str());
 			m_pd3dCommandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
@@ -458,7 +484,7 @@ void Scene::RenderPass2()
 			{
 			case LightType::LIGHT_SPOT: m_TextureMng->UseForShaderResource(m_LightMng->GetShadowMapName(i).c_str(), m_pd3dCommandList, ROOTSIGNATURE_SHADOW_TEXTURE); break;
 			case LightType::LIGHT_POINT: m_TextureMng->UseForShaderResource(m_LightMng->GetShadowMapName(i).c_str(), m_pd3dCommandList, ROOTSIGNATURE_CUBE_TEXTURE); break;
-			case LightType::LIGHT_DIRECTIONAL:
+			case LightType::LIGHT_DIRECTIONAL:m_TextureMng->UseForShaderResource(m_LightMng->GetShadowMapName(i).c_str(), m_pd3dCommandList, ROOTSIGNATURE_SHADOWARRAY_TEXTURE); break;
 			case LightType::LIGHT_NONE:
 			default:
 				break;
@@ -493,7 +519,7 @@ void Scene::Update(float fTimeElapsed)
 	m_fCurrentTime += fTimeElapsed;
 	::memcpy(&m_pcbMappedPassInfo->m_xmfCurrentTime, &m_fCurrentTime, sizeof(float));
 
-	for_each(m_vecObject.begin(), m_vecObject.end(), [fTimeElapsed](Object* o) {o->Rotate(XMFLOAT3(0, 30 * fTimeElapsed, 0)); });
+	//for_each(m_vecObject.begin(), m_vecObject.end(), [fTimeElapsed](Object* o) {o->Rotate(XMFLOAT3(0, 30 * fTimeElapsed, 0)); });
 
 }
 void Scene::Input(UCHAR* pKeyBuffer, float fTimeElapsed)
@@ -551,6 +577,9 @@ void Scene::CreatePSO()
 
 	RenderPointLightShadowPSO RenderPointLightShadowPso = RenderPointLightShadowPSO(m_pd3dDevice, m_pd3dRootSignature);
 	m_uomPipelineStates["RenderPointLightShadow"] = RenderPointLightShadowPso.GetPipelineState();
+	
+	RenderDirectionalShadowPSO RenderDirectionalShadowPso = RenderDirectionalShadowPSO(m_pd3dDevice, m_pd3dRootSignature);
+	m_uomPipelineStates["RenderDirectionalShadow"] = RenderDirectionalShadowPso.GetPipelineState();
 
 	ColorFromGBufferPSO ColorFromGBufferPso = ColorFromGBufferPSO(m_pd3dDevice, m_pd3dRootSignature);
 	m_uomPipelineStates["ColorFromGBuffer"] = ColorFromGBufferPso.GetPipelineState();
@@ -630,7 +659,7 @@ void Scene::ReloadLight()
 
 			m_TextureMng->DeleteTexture(temp.c_str());
 
-			m_TextureMng->AddDepthBufferTexture(temp.c_str(), m_pd3dDevice, 512, 512, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
+			m_TextureMng->AddDepthBufferTexture(temp.c_str(), m_pd3dDevice, SHADOWMAPSIZE, SHADOWMAPSIZE, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
 			m_LightMng->SetShadowMapName(temp.c_str(), i);
 		}
 	}
