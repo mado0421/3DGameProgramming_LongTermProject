@@ -83,3 +83,28 @@ Point Light Shadow를 위해 TextureManager와 Texture에 CubeMap으로 생성�
 [Introduction To Textures in Direct3D 11 - Win32 apps | Microsoft Docs](https://docs.microsoft.com/en-us/windows/win32/direct3d11/overviews-direct3d-11-resources-textures-intro)
 여기에 보면 큐브맵의 인덱스가 나온다. 저 순서대로 조명마다 뷰 변환 행렬을 만들어줘야 한다.(올릴 땐 투영 변환 행렬 곱하고 전치행렬로 바꿔서)
 <img src="https://user-images.githubusercontent.com/21697638/112391901-f2248a80-8d3b-11eb-8d31-36f302a8be15.png" width="70%" height="70%"></img>
+
+
+### 이번주 일정
+#### 21.03.29 - 21.04.04
+* Cascaded ShadowMap 을 이용한 Directional Light 그림자 구현
+* Object 렌더링 시에 텍스처 등을 어떻게 저장할 것인지 정리(자료구조 측면에서)
+* 마테리얼 구조체 업로드 준비
+* FBX SDK로 파일 읽기(애니메이션 구현 준비)
+
+### 2주 목표
+* Object 자료구조 정리(또는 Component 인터페이스 작성)
+* FBX SDK 다운로드 및 사용법 정리
+
+ ## 현재 구현된 사항
+- 큐브 메쉬 렌더링
+- 디퍼드 쉐이딩
+- 다중 SpotLight 조명 그림자
+- 다중 PointLight 조명 그림자
+- Cascade 를 TextureArray로 DepthBuffer에 그리는 것까지 진행
+
+### 2021.03.29
+원래 3월 28일까지 CSM을 만들었어야 했는데 26일에 깊이버퍼에 그려지는 것까지만 확인하고 자잘한 문제가 있던 것을 28일에 해야지 하고 내버려뒀다.
+그리고 28일에 심하게 체해서 하루종일 정말 아무것도 못 했다.
+이 문서도 어제 정리했어야 했는데.. 하여간 그림자 정말 얼마 안 남았으니 빨리 쳐내고 애니메이션을 하자.
+블렌더도 공부해보고 해야 할 것이 많다.
