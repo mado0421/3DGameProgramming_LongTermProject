@@ -56,7 +56,8 @@ public:
 	void SetShaderResource(ID3D12GraphicsCommandList* pd3dCommandList);
 	LightType GetLightType() { return m_uLightType; }
 
-	void UpdateDirectionalLightOrthographicLH(XMFLOAT4X4 xmf4x4CameraViewInv) {
+	void UpdateDirectionalLightOrthographicLH(XMFLOAT4X4 xmf4x4CameraView) {
+		XMFLOAT4X4 xmf4x4CameraViewInv = Matrix4x4::Inverse(xmf4x4CameraView);
 		for (int i = 0; i < m_nCascade; i++) {
 			float minX = FLT_MAX;
 			float minY = FLT_MAX;
@@ -66,7 +67,7 @@ public:
 			float maxZ = -FLT_MAX;
 			for (int j = 0; j < 8; j++) {
 				XMVECTOR temp = XMVector4Transform(XMLoadFloat4(&m_xmf4FrustumCorners[i][j]), XMLoadFloat4x4(&xmf4x4CameraViewInv));
-				temp = XMVector4Transform(temp, XMLoadFloat4x4(&m_xmf4x4View));
+				temp = XMVector4Transform(temp, XMLoadFloat4x4(&m_xmf4x4LightView));
 				XMFLOAT4 xmf4Temp;
 				XMStoreFloat4(&xmf4Temp, temp);
 				minX = min(minX, xmf4Temp.x);
@@ -76,8 +77,12 @@ public:
 				maxY = max(maxY, xmf4Temp.y);
 				maxZ = max(maxZ, xmf4Temp.z);
 			}
-			XMFLOAT4X4 xmf4x4Proj = Matrix4x4::OrthographicLH(maxX - minX, maxY - minY, minZ, maxZ);
-			m_xmf4x4ViewProj[i] = Matrix4x4::Multiply(m_xmf4x4View, xmf4x4Proj);
+			XMFLOAT4X4 xmf4x4Proj = Matrix4x4::OrthographicLH(maxX - minX, maxY - minY, 0, 1000.0f);
+			XMFLOAT3 newLightPos = Vector3::Multiply(-1, XMFLOAT3(maxX - (maxX - minX) * 0.5f, maxY - (maxY - minY) * 0.5f, minZ));
+			XMFLOAT4X4 xmf4x4Transfrom;
+			Matrix4x4::ToTransform(&xmf4x4Transfrom, newLightPos, XMFLOAT4(0, 0, 0, 0));
+
+			m_xmf4x4ViewProj[i] = Matrix4x4::Multiply(Matrix4x4::Multiply(m_xmf4x4LightView, xmf4x4Transfrom), xmf4x4Proj);
 		}
 	}
 
@@ -104,8 +109,9 @@ public:
 	// For Directional Light Shadow
 	float			m_fZ[4];
 	XMFLOAT4		m_xmf4FrustumCorners[3][8];
-	XMFLOAT4X4		m_xmf4x4View;
 	UINT			m_nCascade;
+	XMFLOAT4X4		m_xmf4x4LightView;
+	XMFLOAT4X4		m_xmf4x4LightViewInv;
 private:
 	ID3D12Resource* m_pd3dCBResource;
 	CB_LIGHT_INFO* m_pCBMappedLight;
@@ -128,7 +134,7 @@ public:
 	void SetShadowMapName(const char* name, UINT i) { m_vecLight[i]->m_shadowMapName = name; }
 
 	void SetShaderResource(ID3D12GraphicsCommandList* pd3dCommandList, UINT i) { m_vecLight[i]->SetShaderResource(pd3dCommandList); }
-	void UpdateDirectionalLightOrthographicLH(XMFLOAT4X4 xmf4x4CameraViewInv, UINT i) { m_vecLight[i]->UpdateDirectionalLightOrthographicLH(xmf4x4CameraViewInv); }
+	void UpdateDirectionalLightOrthographicLH(XMFLOAT4X4 xmf4x4CameraView, UINT i) { m_vecLight[i]->UpdateDirectionalLightOrthographicLH(xmf4x4CameraView); }
 
 	UINT GetNumLight() { return (UINT)m_vecLight.size(); }
 	bool GetIsShadow(UINT i) { return m_vecLight[i]->m_bIsShadow; }

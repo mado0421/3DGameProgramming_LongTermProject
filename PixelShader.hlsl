@@ -38,10 +38,22 @@ float4 PS_ColorFromGBuffer(VS_OUTPUT input) : SV_TARGET{
 	return float4(color, 1.0f);
 }
 
-float4 PS_ColorFromGBufferAmbient(VS_OUTPUT input) : SV_TARGET{
+float4 PS_ColorFromGBufferAmbient(VS_OUTPUT input) : SV_TARGET {
+	float3 vWorldPosition = WorldPosFromLinearDepth(input.uv);
+	float3 vColor = gtxtColorMap.Sample(gSamplerState, input.uv).xyz;
+	float3 vNormal = gtxtNormalMap.Sample(gSamplerState, input.uv).xyz * 2.0f - 1.0f;
+	float3 vToEye = normalize(gvCameraPosition - vWorldPosition);
+
 	float3 color = gtxtColorMap.Sample(gSamplerState, input.uv).xyz;
 	float3 vAmbientLight = float3(0.1f, 0.1f, 0.1f);
 	return float4(color * vAmbientLight, 1.0f);
+	 
+	//float d = distance(gvCameraPosition ,vWorldPosition);
+	//if (1000.0f <= d < 1020.0f) return float4(0.0f, 1.0f, 0.0f, 1.0f);
+	//else if (0.006 <= d < 0.02) return float4(0.0f, 1.0f, 0.0f, 1.0f);
+	//else if (0.02 <= d < 0.06) return float4(0.0f, 0.0f, 1.0f, 1.0f);
+	//return float4(floor(d).xxx * 0.1f, 1.0f);
+
 }
 
 /*========================================================================
@@ -50,7 +62,7 @@ float4 PS_ColorFromGBufferAmbient(VS_OUTPUT input) : SV_TARGET{
 * - Depth만 읽어올 예정. 그대로 뿌리면 된다.
 *=======================================================================*/
 float4 PS_DepthFromGBuffer(VS_OUTPUT input) : SV_TARGET{
-	float depth = gtxtDepthMap.Sample(gSamplerState, input.uv).r;
+	float depth = gtxtShadowArrayMap.Sample(gSamplerState, float3(input.uv, 0.0f)).r;
 	depth = pow(depth, 5);
 
 	return float4(depth.xxx, 1.0f);
@@ -67,12 +79,14 @@ float4 PS_AddLight(VS_OUTPUT input) : SV_TARGET{
 	float3 vNormal			= gtxtNormalMap.Sample(gSamplerState, input.uv).xyz * 2.0f - 1.0f;
 	float3 vToEye			= normalize(gvCameraPosition - vWorldPosition);
 
+
+
 	float3 result = float3(0.0f, 0.0f, 0.0f);
 	// 내용...
 	switch (gLightType) {
 	case 1: result += CalcPointLight(vWorldPosition, vNormal, vToEye, vColor); break;
 	case 2: result += CalcSpotLight(vWorldPosition, vNormal, vToEye, vColor); break;
-	case 3: result += CalcDirectionalLight(vNormal, vToEye, vColor);	break;
+	case 3: result += CalcDirectionalLight(vWorldPosition, vNormal, vToEye, vColor);	break;
 	default: break;
 	}
 	return float4(result, 1.0f);

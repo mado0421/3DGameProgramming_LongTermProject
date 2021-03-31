@@ -195,7 +195,7 @@ void Scene::Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12Graphics
 	m_TextureMng->AddRenderTargetTexture("GBuffer_Color", m_pd3dDevice, 1000, 1000, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
 	m_TextureMng->AddRenderTargetTexture("GBuffer_Normal", m_pd3dDevice, 1000, 1000, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
 	m_TextureMng->LoadFromFile("Tex_Test", L"test.dds", m_pd3dDevice, m_pd3dCommandList, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
-	m_TextureMng->LoadFromFile("mech", L"Assets/4legMech-1.dds", m_pd3dDevice, m_pd3dCommandList, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
+	m_TextureMng->LoadFromFile("mech", L"Assets/1024x1024.dds", m_pd3dDevice, m_pd3dCommandList, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
 
 	/*========================================================================
 	* Pass 1 전용 오브젝트 데이터 로드 및 생성
@@ -465,6 +465,8 @@ void Scene::RenderPass2()
 	* Pass 2. 스크린 렌더
 	*=======================================================================*/
 	m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["ColorFromGBuffer"]);
+	m_TextureMng->UseForShaderResource("GBuffer_Normal", m_pd3dCommandList, ROOTSIGNATURE_NORMAL_TEXTURE);
+	m_TextureMng->UseForShaderResource("GBuffer_Depth", m_pd3dCommandList, ROOTSIGNATURE_DEPTH_TEXTURE);
 	m_TextureMng->UseForShaderResource("GBuffer_Color", m_pd3dCommandList, ROOTSIGNATURE_COLOR_TEXTURE);
 	m_vecDebugWindow[3]->Render(m_pd3dCommandList);
 
@@ -473,8 +475,6 @@ void Scene::RenderPass2()
 	* Pass 2. 광원별 렌더
 	*=======================================================================*/
 	m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["AddLight"]);
-	m_TextureMng->UseForShaderResource("GBuffer_Normal", m_pd3dCommandList, ROOTSIGNATURE_NORMAL_TEXTURE);
-	m_TextureMng->UseForShaderResource("GBuffer_Depth", m_pd3dCommandList, ROOTSIGNATURE_DEPTH_TEXTURE);
 
 	for (UINT i = 0; i < m_LightMng->GetNumLight(); i++) {
 		m_LightMng->SetShaderResource(m_pd3dCommandList, i);
@@ -536,22 +536,22 @@ void Scene::Input(UCHAR* pKeyBuffer, float fTimeElapsed)
 	if (pKeyBuffer[KeyCode::_X] & 0xF0) { m_pCamera->Rotate(-50 * fTimeElapsed, 0, 0); }
 
 	if (pKeyBuffer[KeyCode::_1] & 0xF0) {
-		m_pCamera->SetPosition(XMFLOAT3(0, 0, -5));
-		m_pCamera->SetLookAt(XMFLOAT3(0, 0, 0));
+		m_pCamera->SetPosition(XMFLOAT3(0, 1, 0));
+		m_pCamera->SetLookAt(XMFLOAT3(0, 1, 1));
 
 	}
 	if (pKeyBuffer[KeyCode::_2] & 0xF0) {
-		m_pCamera->SetPosition(XMFLOAT3(0, 3, -5));
-		m_pCamera->SetLookAt(XMFLOAT3(0, 3, 0));
+		m_pCamera->SetPosition(XMFLOAT3(0, 1, 3));
+		m_pCamera->SetLookAt(XMFLOAT3(0, 1, 0));
 
 	}
 	if (pKeyBuffer[KeyCode::_3] & 0xF0) {
-		m_pCamera->SetPosition(XMFLOAT3(0, 0, 5));
-		m_pCamera->SetLookAt(XMFLOAT3(0, 0, 0));
+		m_pCamera->SetPosition(XMFLOAT3(0, 1, -3));
+		m_pCamera->SetLookAt(XMFLOAT3(0, 1, 0));
 	}
 	if (pKeyBuffer[KeyCode::_4] & 0xF0) {
-		m_pCamera->SetPosition(XMFLOAT3(5, 0, 0));
-		m_pCamera->SetLookAt(XMFLOAT3(0, 0, 0));
+		m_pCamera->SetPosition(XMFLOAT3(3, 1, 3));
+		m_pCamera->SetLookAt(XMFLOAT3(0, 1, 0));
 	}
 
 	if (pKeyBuffer[KeyCode::_N] & 0xF0) { test = true; }

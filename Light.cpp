@@ -217,7 +217,9 @@ UINT LightManager::AddDirectionalLight(LIGHT_DESC desc, ID3D12Device* pd3dDevice
 	temp->m_fZ[1] = 0.006f;
 	temp->m_fZ[2] = 0.02f;
 	temp->m_fZ[3] = 0.06f;
-	XMFLOAT4X4 xmf4x4View = Matrix4x4::LookAtLH(temp->m_xmf3Position, Vector3::Add(temp->m_xmf3Position, temp->m_xmf3Direction), XMFLOAT3(0, 1, 0));
+	temp->m_xmf4x4LightView = Matrix4x4::LookAtLH(XMFLOAT3(0, 0, 0), temp->m_xmf3Direction, XMFLOAT3(0, 1, 0));		
+	temp->m_xmf4x4LightViewInv = Matrix4x4::Inverse(temp->m_xmf4x4LightView);
+
 
 	for (int i = 0; i < 3; i++) {
 		float Zn = 0.1f + temp->m_fZ[i] * (1000.0f - 0.1f);
@@ -239,7 +241,6 @@ UINT LightManager::AddDirectionalLight(LIGHT_DESC desc, ID3D12Device* pd3dDevice
 		temp->m_xmf4FrustumCorners[i][6] = XMFLOAT4(Xf, -Yf, Zf, 1.0f);
 		temp->m_xmf4FrustumCorners[i][7] = XMFLOAT4(-Xf, -Yf, Zf, 1.0f);
 	}
-	temp->m_xmf4x4View = Matrix4x4::LookAtLH(XMFLOAT3(0, 0, 0), temp->m_xmf3Direction, XMFLOAT3(0, 1, 0));
 
 	m_vecLight.push_back(temp);
 	return ((UINT)m_vecLight.size() - 1);

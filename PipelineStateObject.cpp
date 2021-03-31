@@ -633,5 +633,5 @@ D3D12_SHADER_BYTECODE RenderDirectionalShadowPSO::CreatePixelShader(ID3DBlob** p
 }
 D3D12_SHADER_BYTECODE RenderDirectionalShadowPSO::CreateVertexShader(ID3DBlob** ppd3dShaderBlob)
 {
-	return(CompileShaderFromFile(L"VertexShader.hlsl", "VS_RenderPointLightShadow", "vs_5_1", ppd3dShaderBlob));
+	return(CompileShaderFromFile(L"VertexShader.hlsl", "VS_RenderDirectionalLightShadow", "vs_5_1", ppd3dShaderBlob));
 }

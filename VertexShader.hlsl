@@ -51,6 +51,19 @@ float4 VS_RenderPointLightShadow(VS_INPUT input) : SV_POSITION {
 }
 
 /*========================================================================
+* VS_RenderDirectionalLightShadowPSO
+*
+* - 월드 변환까지만 해줌.
+*=======================================================================*/
+float4 VS_RenderDirectionalLightShadow(VS_INPUT input) : SV_POSITION{
+
+	float4 result = mul(float4(input.position, 1.0f), gmtxGameObject);
+	//float4 result = mul(mul(float4(input.position, 1.0f), gmtxGameObject), gmtxView);
+
+	return result;
+}
+
+/*========================================================================
 * ColorFromGBufferPSO, AddLightPSO
 *
 * - 평면 스크린을 그릴 예정. 월드 변환만 진행. 값은 메쉬 생성때 미리 저장.

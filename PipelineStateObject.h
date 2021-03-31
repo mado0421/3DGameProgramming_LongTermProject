@@ -103,7 +103,7 @@ protected:
 * - DepthTest True
 * - Set Bias
 * - FrontCounterClockwise True
-* - VS_RenderPointLightShadow
+* - VS_RenderDirectionalLightShadow
 * - GS_RenderDirectionalLightShadow
 * - PS_RenderPointLightShadow
 *=======================================================================*/
