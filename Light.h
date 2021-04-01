@@ -77,8 +77,9 @@ public:
 				maxY = max(maxY, xmf4Temp.y);
 				maxZ = max(maxZ, xmf4Temp.z);
 			}
-			XMFLOAT4X4 xmf4x4Proj = Matrix4x4::OrthographicLH(maxX - minX, maxY - minY, 0, 1000.0f);
+			XMFLOAT4X4 xmf4x4Proj = Matrix4x4::OrthographicLH(maxX - minX, maxY - minY, -1000.0, /*maxZ - minZ*/1000.0f);
 			XMFLOAT3 newLightPos = Vector3::Multiply(-1, XMFLOAT3(maxX - (maxX - minX) * 0.5f, maxY - (maxY - minY) * 0.5f, minZ));
+			//newLightPos = Vector3::Add(newLightPos, Vector3::Multiply(-1, m_xmf3Direction));
 			XMFLOAT4X4 xmf4x4Transfrom;
 			Matrix4x4::ToTransform(&xmf4x4Transfrom, newLightPos, XMFLOAT4(0, 0, 0, 0));
 

@@ -240,12 +240,6 @@ void Scene::Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12Graphics
 			m_vecObject.push_back(tempObj);
 		}
 	}
-	for (int i = 0; i < 30; i++) {
-		Object* tempObj = new Object(m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
-		tempObj->Move(XMFLOAT3(0, 0, i * 3 + 3));
-		m_vecObject.push_back(tempObj);
-	}
-
 
 	/*========================================================================
 	* Pass 2 전용 디버그 윈도우 생성
@@ -340,6 +334,7 @@ void Scene::RenderPass1()
 	* PassInfo 설정
 	*=======================================================================*/
 	m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
+	m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
 	m_pCamera->SetViewportsAndScissorRects(m_pd3dCommandList);
 	UpdatePassInfoAboutCamera();
 
@@ -417,6 +412,8 @@ void Scene::RenderPass1()
 	* Pass 1. 광원별 그림자맵 렌더
 	*=======================================================================*/
 	m_pCamera->SetViewport(0, 0, SHADOWMAPSIZE, SHADOWMAPSIZE, 0.0f, 1.0f);
+	m_pCamera->SetScissorRect(0, 0, SHADOWMAPSIZE, SHADOWMAPSIZE);
+
 	m_pCamera->SetViewportsAndScissorRects(m_pd3dCommandList);
 
 	for (UINT i = 0; i < m_LightMng->GetNumLight(); i++) {
@@ -459,6 +456,8 @@ void Scene::RenderPass2()
 	* PassInfo 설정
 	*=======================================================================*/
 	m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
+	m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
+
 	m_pCamera->SetViewportsAndScissorRects(m_pd3dCommandList);
 
 	/*========================================================================
@@ -552,6 +551,10 @@ void Scene::Input(UCHAR* pKeyBuffer, float fTimeElapsed)
 	if (pKeyBuffer[KeyCode::_4] & 0xF0) {
 		m_pCamera->SetPosition(XMFLOAT3(3, 1, 3));
 		m_pCamera->SetLookAt(XMFLOAT3(0, 1, 0));
+	}
+	if (pKeyBuffer[KeyCode::_5] & 0xF0) {
+		m_pCamera->SetPosition(XMFLOAT3(3, 3, 3));
+		m_pCamera->SetLookAt(XMFLOAT3(0, 0, 0));
 	}
 
 	if (pKeyBuffer[KeyCode::_N] & 0xF0) { test = true; }

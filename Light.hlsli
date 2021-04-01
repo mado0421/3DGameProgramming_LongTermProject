@@ -59,16 +59,10 @@ float CalcSpotLightShadowFactor(float3 vWorldPos) {
 	return gtxtShadowMap.SampleCmpLevelZero(gShadowSamplerState, temp.xy, temp.z).r;
 }
 float CalcDirectionalLightShadowFactor(float3 vWorldPos) {
-	float d = distance(vWorldPos, gvCameraPosition);
+	float4 v = mul(float4(vWorldPos, 1.0f), gmtxView);
+
+	float d = v.z;
 	float idxCascade;
-
-	//return d;
-
-	//if (d < 0.7f) return 0.1f;
-	//else if (0.7f <= d && d < 0.8f) return 0.2f;
-	//else if (0.8f <= d && d < 0.9f) return 0.3f;
-	//else if (1.8f <= d && d < 3.9f) return 0.0f;
-	//else return 1.0f;
 
 	if (0 <= d && d < 6) idxCascade = 0;
 	else if (6 <= d && d < 20) idxCascade = 1;
@@ -79,10 +73,6 @@ float CalcDirectionalLightShadowFactor(float3 vWorldPos) {
 	temp /= temp.w;
 	temp = mul(temp, gmtxTexture);
 	return gtxtShadowArrayMap.SampleCmpLevelZero(gShadowSamplerState, float3(temp.xy, idxCascade), temp.z).r;
-	////if (0 <= d < 6) return gtxtShadowArrayMap.SampleCmpLevelZero(gShadowSamplerState, float3(temp.xy, 0.0f), temp.z).r;
-	//if (6 <= d < 20) return gtxtShadowArrayMap.SampleCmpLevelZero(gShadowSamplerState, float3(temp.xy, idxCascade), temp.z).r;
-	////else if (20 <= d < 60) return gtxtShadowArrayMap.SampleCmpLevelZero(gShadowSamplerState, float3(temp.xy, 2.0f), temp.z).r;
-	//return 1.0f;
 }
 
 float3 CalcDirectionalLight(float3 vWorldPosition, float3 vNormal, float3 vToEye, float3 vDiffuseColor) {

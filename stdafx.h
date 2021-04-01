@@ -44,7 +44,7 @@ using Microsoft::WRL::ComPtr;
 #define MAXNUMSRV 128
 #define MAXNUMLIGHT 32
 
-#define SHADOWMAPSIZE 1024
+#define SHADOWMAPSIZE 2048
 
 
 
