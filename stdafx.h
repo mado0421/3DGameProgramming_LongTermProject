@@ -31,6 +31,7 @@
 #include "MathHelper.h"
 #include "DDSTextureLoader12.h"
 
+
 using namespace DirectX;
 using namespace DirectX::PackedVector;
 using namespace std;
@@ -45,8 +46,6 @@ using Microsoft::WRL::ComPtr;
 #define MAXNUMLIGHT 32
 
 #define SHADOWMAPSIZE 2048
-
-
 
 #define ROOTSIGNATURE_PASSCONSTANTS		0
 #define ROOTSIGNATURE_OBJECTS			1
@@ -104,6 +103,13 @@ enum KeyCode {
 	_Y = 89,
 	_Z = 90,
 };
+
+class TextureManager;
+class ModelManager;
+class MaterialManager;
+extern TextureManager gTextureMng;
+extern ModelManager gModelMng;
+extern MaterialManager gMaterialMng;
 
 extern UINT gnCbvSrvDescriptorIncrementSize;
 

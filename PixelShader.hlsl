@@ -10,7 +10,8 @@ GBuffer PS_PackGBuffer(VS_OUTPUT input)
 {
 	GBuffer output;
 	input.normalW = normalize(input.normalW);
-	output.cColor = gtxtColorMap.Sample(gSamplerState, input.uv * float2(1, -1));
+	output.cColor.rgb = gtxtColorMap.Sample(gSamplerState, input.uv * float2(1, -1)).rgb;
+	output.cColor.a = gtxtDepthMap.Sample(gSamplerState, input.uv * float2(1, -1)).r;
 	output.cNormal = float4((input.normalW * 0.5 + 0.5), 1.0f);
 
 	return output;
@@ -75,18 +76,18 @@ float4 PS_DepthFromGBuffer(VS_OUTPUT input) : SV_TARGET{
 *=======================================================================*/
 float4 PS_AddLight(VS_OUTPUT input) : SV_TARGET{
 	float3 vWorldPosition	= WorldPosFromLinearDepth(input.uv);
-	float3 vColor			= gtxtColorMap.Sample(gSamplerState, input.uv).xyz;
+	float3 vColor			= gtxtColorMap.Sample(gSamplerState, input.uv).rgb;
 	float3 vNormal			= gtxtNormalMap.Sample(gSamplerState, input.uv).xyz * 2.0f - 1.0f;
 	float3 vToEye			= normalize(gvCameraPosition - vWorldPosition);
-
+	float fRoughness		= gtxtColorMap.Sample(gSamplerState, input.uv).a;
 
 
 	float3 result = float3(0.0f, 0.0f, 0.0f);
 	// ³»¿ë...
 	switch (gLightType) {
-	case 1: result += CalcPointLight(vWorldPosition, vNormal, vToEye, vColor); break;
-	case 2: result += CalcSpotLight(vWorldPosition, vNormal, vToEye, vColor); break;
-	case 3: result += CalcDirectionalLight(vWorldPosition, vNormal, vToEye, vColor);	break;
+	case 1: result += CalcPointLight(vWorldPosition, vNormal, vToEye, vColor, fRoughness); break;
+	case 2: result += CalcSpotLight(vWorldPosition, vNormal, vToEye, vColor, fRoughness); break;
+	case 3: result += CalcDirectionalLight(vWorldPosition, vNormal, vToEye, vColor, fRoughness);	break;
 	default: break;
 	}
 	return float4(result, 1.0f);

@@ -6,6 +6,10 @@ class Mesh
 public:
 	Mesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	Mesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, MESH_DATA meshData);
+	~Mesh() {
+		if (m_pd3dVertexBuffer) m_pd3dVertexBuffer->Release();
+		if (m_pd3dVertexUploadBuffer) m_pd3dVertexUploadBuffer->Release();
+	}
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList);
 
 	bool IsDiffuseMap() { return m_bIsDiffuseMap; }
@@ -32,6 +36,11 @@ class DebugWindowMesh
 {
 public:
 	DebugWindowMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, bool bIsPass2Screen = false);
+	~DebugWindowMesh() {
+		if (m_pd3dVertexBuffer) m_pd3dVertexBuffer->Release();
+		if (m_pd3dVertexUploadBuffer) m_pd3dVertexUploadBuffer->Release();
+	}
+
 	void Render(ID3D12GraphicsCommandList* pd3dCommandList);
 protected:
 	ID3D12Resource*				m_pd3dVertexBuffer;

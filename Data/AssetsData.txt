@@ -1,0 +1,8 @@
+mech.obj
+floor.obj
+Room.obj
+mech_diff.dds
+defaultDiffuseMap.dds
+defaultNormalMap.dds
+defaultSpecularMap.dds
+specularTest.dds

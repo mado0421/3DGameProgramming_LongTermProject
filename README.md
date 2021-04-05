@@ -126,9 +126,56 @@ CSM을 구현했다. 구현하면서 있었던 문제들과 해결법은 다음�
 1. 깊이텍스처배열에 렌더는 되는데 카메라가 이동해도 깊이텍스처의 내용은 바뀌지 않음 -> 조명의 위치를 각 캐스케이드의 시작점으로 이동시켜 해결
 2. 거리에 따라 잘못된 캐스케이드가 선택되어 의도하지 않은 그림자가 발생 -> 월드 공간에서 픽셀의 위치와 카메라 간의 거리로 캐스케이드를 선택하게 하지 않고, 월드 공간 픽셀의 위치를 카메라 공간으로 옮긴 뒤에 z값으로 캐스케이드를 선택하게 변경(원래 캐스케이드의 바운더리 박스를 만들 때 쓰는 뷰 프러스텀도 카메라 뷰 공간에 있었으니까)
 3. 깊이텍스처의 일부(오른쪽과 아래쪽) 공간에 렌더링이 되지 않음 -> 이건 다른 쉐도우 맵을 생성할 때도 있었으나 평상시에는 눈에 띄지 않아서 몰랐던 문제로서 쉐도우 맵을 렌더링 할 때, 뷰 포트의 크기만 쉐도우 맵의 크기에 맞게 변경해주고 시저렉트는 변경해주지 않아서 생긴 문제였음(쉐도우 텍스처의 크기를 2048로 바꾸면 1/4만 그려지는 문제가 있었는데 아... 암튼 해결함)
+
 이렇게 적어보면 별 문제 없어보이지만 마땅한 디버깅 방법을 알지 못했던 터라 주먹구구식으로 시도한 일이 많았다. 효율적인 디버깅 방법이 절실함..
 
 이제 오브젝트 자료구조와 마테리얼 등을 정리하고 구현한 뒤에 애니메이션으로 넘어갈 준비를 하면 될 것 같다.
 
 <img src="https://user-images.githubusercontent.com/21697638/113239609-0b05e080-92e6-11eb-8cce-9dda85a663b9.png" width="70%" height="70%"></img>
 <img src="https://user-images.githubusercontent.com/21697638/113239658-253fbe80-92e6-11eb-99b4-921ac5e872fa.png" width="70%" height="70%"></img>
+
+### 2021.04.04
+이번 주 내내 어딘가 아프거나 고장이 나서 남은 주말까지 포함해서 한 주를 쉬어가는 걸로 결정했다.
+나는 더 이상 3ds Max를 사용할 수 없고, 내가 원하는 조건(diffuseMap, normalMap, specularMap이 있고... 아마 앞으로 애니메이션까지 들어가면 더 까다로워질)으로 완벽하게 준비된 에셋을 구하기도 어려울 것 같아서 Blender 2.92로 에셋을 만들면서 쉬었다. 이틀 쓰면 간단한 캐릭터 하나 정도는 만들 수 있을거라 생각했는데 오랜만에 모델링을 하기도 했고, 블렌더가 맥스와 완전히 사용방법이 달라서 적응하는 것도 엄청 오래 걸렸다. 하지만 편하게 쉬었으니 괜찮다고 생각. 앞으로 쉴 때 모델링도 겸해서 해보는 것으로.
+
+<img src="https://user-images.githubusercontent.com/21697638/113578416-c23f8600-965d-11eb-8275-8df5d09a4e3a.png" width="70%" height="70%"></img>
+
+### 이번주 일정
+#### 21.04.05 - 21.04.11
+* Object 렌더링 시에 텍스처 등을 어떻게 저장할 것인지 정리(자료구조 측면에서)
+* 마테리얼 구조체 업로드 준비
+* FBX SDK로 파일 읽기(애니메이션 구현 준비)
+
+### 2주 목표
+* Object 자료구조 정리(또는 Component 인터페이스 작성)
+* FBX SDK 다운로드 및 사용법 정리
+
+### 2021.04.05
+자원 관리 자료구조를 작성했다.
+원래 Scene에 속해있던 TextureMng와 Object에 속해있던 vector<mesh*>의 자원들을 전역으로 올리고 한 번씩만 생성하게 변경하였다.(원래는 같은 mesh여도 여러 Object일 경우, 여러 번 생성하여 메모리 낭비가 있었다)
+따라서 지금 구조는 다음과 같다.
+> 전역에 gTextureMng, gModelMng, gMaterialMng 로 자원관리
+> 처음에 AssetData를 읽어서 이 Scene에서 어떤 Asset(obj, dds 등)을 사용하는지 확인
+> 위에서 확인한 AssetList를 바탕으로 Model(mesh들의 집합)과 Texture를 Load
+> MaterialData를 읽어서 Material을 생성
+> (defaultMaterial도 생성하여 mat이 없는 object의 경우, defaultMaterial을 사용하게 함)
+> Object에서 Render를 할 때, Material과 Model name을 가지고 gMaterialMng, gModelMng에서 Set과 Render하게 변경
+> (이전에 사용한 Material과 같은 경우, 추가로 Set을 하지 않게 이전에 사용한 mat의 이름을 Mng에서 저장)
+
+자원 관리를 위해 Data 파일만 3개를 사용하게 됨
+자원 사용을 위해선 다음의 순서를 거쳐야 함
+1. 먼저 Data 폴더의 AssetList에 사용할 에셋을 추가한다
+2. 해당 에셋을 Assets 폴더에 추가한다
+3. MaterialData에 추가할 Texture를 더해준다
+4. ObjectData에 Material과 Model을 더해준다
+
+하여간 해야 할 것이 많다
+
+추가로 SpecularMap을 추가하였다
+스펙큘러맵을 이렇게 사용하는게 맞는진 모르겠으나 일단 0~1 사이의 값을 가지고 roughness 값으로 사용된다. 이게 있으면 한 Texture를 사용하는 Model에서 다양한 roughness 값을 줄 수 있게 된다
+지금 light를 계산하는 hlsl에서 roughness * 256 해서 사용하고 있으므로 기억해두자
+Fresnel값도 어떻게 주고 싶은데 그것까지는 아직 못해주고 있다
+추가로 RGB Texture를 써야 할 지 고민해봐야 할 것 같음
+
+<img src="https://user-images.githubusercontent.com/21697638/113580174-45fa7200-9660-11eb-841f-0f87b0694b88.png" width="70%" height="70%"></img>
+<그라디언트로 0에서 1까지 roughness 값을 준 Texture를 사용한 모습>

@@ -292,14 +292,29 @@ D3D12_CPU_DESCRIPTOR_HANDLE TempTexture::GetRtvCPUHandle() {
 /*========================================================================
 * Texture Manager
 *=======================================================================*/
-TextureManager::TextureManager(ID3D12Device* pd3dDevice)
+TextureManager::TextureManager()
 	: m_pd3dDsvDescriptorHeap(nullptr)
 {
+}
+void TextureManager::Initialize(ID3D12Device* pd3dDevice)
+{
+	m_uomTextures.clear();
+	if (m_pd3dDsvDescriptorHeap) m_pd3dDsvDescriptorHeap->Release();
+	if (m_pd3dRtvDescriptorHeap) m_pd3dRtvDescriptorHeap->Release();
+
 	CreateDsvDescriptorHeap(pd3dDevice);
 	CreateRtvDescriptorHeap(pd3dDevice);
 	m_d3dDsvCPUDescriptorHandle = m_pd3dDsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
 	m_d3dRtvCPUDescriptorHandle = m_pd3dRtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
 }
+//TextureManager::TextureManager(ID3D12Device* pd3dDevice)
+//	: m_pd3dDsvDescriptorHeap(nullptr)
+//{
+//	CreateDsvDescriptorHeap(pd3dDevice);
+//	CreateRtvDescriptorHeap(pd3dDevice);
+//	m_d3dDsvCPUDescriptorHandle = m_pd3dDsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+//	m_d3dRtvCPUDescriptorHandle = m_pd3dRtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+//}
 void TextureManager::AddDepthBufferTexture(
 	const char* name, ID3D12Device* pd3dDevice, UINT width, UINT height, 
 	D3D12_CPU_DESCRIPTOR_HANDLE& srvCpuHandle,
@@ -336,14 +351,22 @@ void TextureManager::AddRenderTargetTexture(
 }
 void TextureManager::LoadFromFile(
 	const char* name,
-	const wchar_t* pszFileName,
 	ID3D12Device* pd3dDevice,
 	ID3D12GraphicsCommandList* pd3dCommandList,
 	D3D12_CPU_DESCRIPTOR_HANDLE& srvCpuHandle,
 	D3D12_GPU_DESCRIPTOR_HANDLE& srvGpuHandle)
 {
 	TempTexture* temp = new TempTexture();
-	temp->LoadFromFile(pszFileName, pd3dDevice, pd3dCommandList, srvCpuHandle, srvGpuHandle);
+
+
+	string ultimateOfPerfactFilePath;
+	string fileHead = "Assets/";
+	string fileTail = ".dds";
+
+	ultimateOfPerfactFilePath = fileHead + name;
+	ultimateOfPerfactFilePath += fileTail;
+
+	temp->LoadFromFile(CharToWChar(ultimateOfPerfactFilePath.c_str()), pd3dDevice, pd3dCommandList, srvCpuHandle, srvGpuHandle);
 
 	m_uomTextures[name] = temp;
 }

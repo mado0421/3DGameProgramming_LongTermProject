@@ -148,11 +148,15 @@
     <ClInclude Include="DDSTextureLoader12.h" />
     <ClInclude Include="Define.h" />
     <ClInclude Include="Framework.h" />
-    <ClInclude Include="IComponent.h" />
+    <ClInclude Include="IComponent.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="Importer.h" />
     <ClInclude Include="Light.h" />
+    <ClInclude Include="Material.h" />
     <ClInclude Include="MathHelper.h" />
     <ClInclude Include="Mesh.h" />
+    <ClInclude Include="Model.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="PipelineStateObject.h" />
     <ClInclude Include="Resource.h" />
@@ -169,10 +173,14 @@
     <ClCompile Include="d3dUtil.cpp" />
     <ClCompile Include="DDSTextureLoader12.cpp" />
     <ClCompile Include="Framework.cpp" />
-    <ClCompile Include="IComponent.cpp" />
+    <ClCompile Include="IComponent.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="Importer.cpp" />
     <ClCompile Include="Light.cpp" />
+    <ClCompile Include="Material.cpp" />
     <ClCompile Include="Mesh.cpp" />
+    <ClCompile Include="Model.cpp" />
     <ClCompile Include="Object.cpp" />
     <ClCompile Include="PipelineStateObject.cpp" />
     <ClCompile Include="Scene.cpp" />

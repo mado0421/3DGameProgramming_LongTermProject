@@ -31,8 +31,8 @@ float3 SchlickFresnel(float3 R0, float3 vNormal, float3 vLight) {
 * material은 어디 종속된 정보값인가? 텍스처? 메쉬? 오브젝트?
 * 텍스처로 올려주면 그게 roughness 맵인 듯
 *=======================================================================*/
-float3 BlinnPhong(float3 lightColor, float3 vToLight, float3 vNormal, float3 vToEye, float3 vDiffuseColor) {
-	const float m = 0.4f * 256.0f;
+float3 BlinnPhong(float3 lightColor, float3 vToLight, float3 vNormal, float3 vToEye, float3 vDiffuseColor, float roughness) {
+	const float m = roughness * 256.0f;
 	float3 vHalf = normalize(vToEye + vToLight);
 
 	float roughnessFactor = (m + 8.0f) * pow(max(dot(vHalf, vNormal), 0.0f), m) / 8.0f;
@@ -75,7 +75,7 @@ float CalcDirectionalLightShadowFactor(float3 vWorldPos) {
 	return gtxtShadowArrayMap.SampleCmpLevelZero(gShadowSamplerState, float3(temp.xy, idxCascade), temp.z).r;
 }
 
-float3 CalcDirectionalLight(float3 vWorldPosition, float3 vNormal, float3 vToEye, float3 vDiffuseColor) {
+float3 CalcDirectionalLight(float3 vWorldPosition, float3 vNormal, float3 vToEye, float3 vDiffuseColor, float roughness) {
 	float3 vToLight = -gvLightDirection;
 
 	float ndotl = max(dot(vToLight, vNormal), 0.0f);
@@ -86,9 +86,9 @@ float3 CalcDirectionalLight(float3 vWorldPosition, float3 vNormal, float3 vToEye
 		lightColor *= shadowFactor;
 	}
 
-	return BlinnPhong(lightColor, vToLight, vNormal, vToEye, vDiffuseColor);
+	return BlinnPhong(lightColor, vToLight, vNormal, vToEye, vDiffuseColor, roughness);
 }
-float3 CalcPointLight(float3 vPos, float3 vNormal, float3 vToEye, float3 vDiffuseColor) {
+float3 CalcPointLight(float3 vPos, float3 vNormal, float3 vToEye, float3 vDiffuseColor, float roughness) {
 	float3 vToLight = gvLightPosition - vPos;
 
 	float d = length(vToLight);
@@ -108,9 +108,9 @@ float3 CalcPointLight(float3 vPos, float3 vNormal, float3 vToEye, float3 vDiffus
 		lightColor *= shadowFactor;
 	}
 
-	return BlinnPhong(lightColor, vToLight, vNormal, vToEye, vDiffuseColor);
+	return BlinnPhong(lightColor, vToLight, vNormal, vToEye, vDiffuseColor, roughness);
 }
-float3 CalcSpotLight(float3 vPos, float3 vNormal, float3 vToEye, float3 vDiffuseColor) {
+float3 CalcSpotLight(float3 vPos, float3 vNormal, float3 vToEye, float3 vDiffuseColor, float roughness) {
 	float3 vToLight = gvLightPosition - vPos;
 	float d = length(vToLight);
 	if (d > gfFalloffEnd) return float3(0, 0, 0);
@@ -130,5 +130,5 @@ float3 CalcSpotLight(float3 vPos, float3 vNormal, float3 vToEye, float3 vDiffuse
 		lightColor *= shadowFactor;
 	}
 
-	return BlinnPhong(lightColor, vToLight, vNormal, vToEye, vDiffuseColor);
+	return BlinnPhong(lightColor, vToLight, vNormal, vToEye, vDiffuseColor, roughness);
 }

@@ -1,5 +1,7 @@
 #include "stdafx.h"
 #include "Importer.h"
+#include "Material.h"
+#include "Model.h"
 
 XMFLOAT3 IImporter::GetFloat3(stringstream& ss)
 {
@@ -83,11 +85,11 @@ vector<OBJECT_DESC> ObjectDataImporter::Load(const char* filePath) {
 				else if (token.compare("rotation") == 0) { cout << "  - Rotation :";temp.rotation = IImporter::GetFloat3(ss); }
 				else if (token.compare("model") == 0) { 
 					cout << "  - Model";		
-					temp.modelPath = IImporter::GetPath(ss);
-					temp.texturePath = IImporter::GetPath(ss);
-					temp.isTextured = true;
+					temp.model = IImporter::GetPath(ss);
+					temp.material = IImporter::GetPath(ss);
+					temp.isMaterial = true;
 				}
-				else if (token.compare("mesh") == 0) { cout << "  - Mesh";			temp.modelPath = IImporter::GetPath(ss); }
+				else if (token.compare("mesh") == 0) { cout << "  - Mesh";			temp.model = IImporter::GetPath(ss); }
 			}
 			vecObjDesc.push_back(temp);
 			cout << "<New Object End>\n\n";
@@ -149,9 +151,16 @@ vector<MESH_DATA> MeshDataImporter::Load(const char* filePath)
 	vector<XMFLOAT3> vecNormal;
 	vector<XMFLOAT2> vecTexCoord;
 
+	string ultimateOfPerfactFilePath;
+	string fileHead = "Assets/";
+	string fileTail = ".obj";
+	
+	ultimateOfPerfactFilePath = fileHead + filePath;
+	ultimateOfPerfactFilePath += fileTail;
+
 	int nObject = -1;
 
-	ifstream in(filePath);
+	ifstream in(ultimateOfPerfactFilePath);
 	string s;
 	string token;
 	string empty("");
@@ -230,4 +239,80 @@ vector<MESH_DATA> MeshDataImporter::Load(const char* filePath)
 	}
 
 	return vecMeshData;
+}
+
+void MaterialDataImporter::Load(const char* filePath)
+{
+	ifstream in(filePath);
+	string s;
+	string token;
+
+	if (!in.is_open()) {
+		cout << "Error\n";
+		assert(!"마테리얼 정보들을 읽어오는데 실패했습니다.");
+		return;
+	}
+
+	while (in) {
+		getline(in, s);
+
+		stringstream ss(s);
+		getline(ss, token, ' ');
+		if (token.compare("#Material") == 0) cout << "<Material Load Start>\n\n";
+		else if (token.compare("#End") == 0) { cout << "<Material Load End>";	break; }
+
+		if (token.compare("{") == 0) {
+			Material temp;
+			cout << "<New Material>\n";
+			while (token.compare("}")) {
+
+				getline(ss, token, ' ');
+
+				if (token.compare("name") == 0) { cout << " Material Name is ";			temp.matName = IImporter::GetPath(ss); }
+				else if (token.compare("d") == 0) { cout << " DiffuseMap is ";	temp.diffuseMap = IImporter::GetPath(ss); }
+				else if (token.compare("n") == 0) { cout << " NormalMap is ";			temp.normalMap = IImporter::GetPath(ss); }
+				else if (token.compare("s") == 0) { cout << " SpecularMap is ";			temp.specularMap = IImporter::GetPath(ss); }
+				else if (token.compare("f") == 0) { cout << " FresnelFactor is ";				temp.fresnelFactor = IImporter::GetFloat3(ss); }
+			}
+			gMaterialMng.AddMaterial(temp);
+			cout << "<New Material End>\n\n";
+		}
+	}
+
+
+}
+
+void AssetListDataImporter::Load(
+	ID3D12Device* pd3dDevice,
+	ID3D12GraphicsCommandList* pd3dCommandList,
+	D3D12_CPU_DESCRIPTOR_HANDLE& srvCpuHandle,
+	D3D12_GPU_DESCRIPTOR_HANDLE& srvGpuHandle)
+{
+	ifstream in("Data/AssetsData.txt");
+	string s;
+
+	string empty("");
+	if (!in.is_open()) {
+		assert(!"에셋 리스트 정보들을 읽어오는데 실패했습니다.");
+		return;
+	}
+
+	while (in) {
+		string name;
+		string type;
+		getline(in, s);
+		stringstream ss(s);
+
+		getline(ss, name, '.');
+		getline(ss, type, '\n');
+		if (type.compare("dds") == 0) {
+			if (gTextureMng.IsAleadyExist(name.c_str())) continue;
+			gTextureMng.LoadFromFile(name.c_str(), pd3dDevice, pd3dCommandList, srvCpuHandle, srvGpuHandle);
+		}
+		if (type.compare("obj") == 0) {
+			if (gModelMng.IsAleadyExist(name.c_str())) continue;
+			gModelMng.AddModel(name.c_str(), pd3dDevice, pd3dCommandList);
+		}
+	}
+	return;
 }

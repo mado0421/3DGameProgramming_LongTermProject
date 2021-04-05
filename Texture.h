@@ -67,8 +67,14 @@ using unorderedTextureMap = unordered_map<string, TempTexture*>;
 
 class TextureManager {
 public:
-	TextureManager() = delete;
-	TextureManager(ID3D12Device* pd3dDevice);
+	TextureManager();
+	void Initialize(ID3D12Device* pd3dDevice);
+	//TextureManager(ID3D12Device* pd3dDevice);
+	~TextureManager() {
+		m_uomTextures.clear();
+		if (m_pd3dDsvDescriptorHeap) m_pd3dDsvDescriptorHeap->Release();
+		if (m_pd3dRtvDescriptorHeap) m_pd3dRtvDescriptorHeap->Release();
+	}
 
 	void AddDepthBufferTexture(
 		const char* name,
@@ -93,7 +99,6 @@ public:
 		D3D12_GPU_DESCRIPTOR_HANDLE& srvGpuHandle);
 	void LoadFromFile(
 		const char* name,
-		const wchar_t* pszFileName,
 		ID3D12Device* pd3dDevice,
 		ID3D12GraphicsCommandList* pd3dCommandList,
 		D3D12_CPU_DESCRIPTOR_HANDLE& srvCpuHandle,
@@ -102,6 +107,7 @@ public:
 	void DeleteTexture(const char* name) {
 		m_uomTextures.erase(name);
 	}
+	bool IsAleadyExist(const char* name) { return m_uomTextures.count(name); }
 
 	ID3D12Resource* GetTextureResource(const char* name);
 	void UseForShaderResource(const char* name, ID3D12GraphicsCommandList* pd3dCommandList, UINT rootParameterIdx);

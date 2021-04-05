@@ -8,8 +8,10 @@
 #include "Light.h"
 #include "Vertex.h"
 
-class Object;
 using SHAPE = vector<Vertex>;
+
+class Object;
+class Material;
 class MESH_DATA {
 public:
 	string name;
@@ -22,9 +24,9 @@ struct VertexIdx {
 struct OBJECT_DESC {
 	XMFLOAT3	position		= XMFLOAT3(0, 0, 0);
 	XMFLOAT3	rotation		= XMFLOAT3(0, 0, 0);
-	string		modelPath		= "";
-	string		texturePath		= "";
-	bool isTextured = false;
+	string		model			= "";
+	string		material		= "defaultMaterial";
+	bool isMaterial = false;
 };
 
 class IImporter {
@@ -58,6 +60,7 @@ protected:
 	}
 };
 
+
 class ObjectDataImporter : public IImporter {
 public:
 	vector<OBJECT_DESC> Load(const char* filePath);
@@ -69,4 +72,16 @@ public:
 class MeshDataImporter : public IImporter {
 public:
 	vector<MESH_DATA> Load(const char* filePath);
+};
+class MaterialDataImporter : public IImporter {
+public:
+	void Load(const char* filePath);
+};
+class AssetListDataImporter : public IImporter {
+public:
+	void Load(
+		ID3D12Device* pd3dDevice,
+		ID3D12GraphicsCommandList* pd3dCommandList,
+		D3D12_CPU_DESCRIPTOR_HANDLE& srvCpuHandle,
+		D3D12_GPU_DESCRIPTOR_HANDLE& srvGpuHandle);
 };

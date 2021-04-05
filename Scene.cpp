@@ -8,6 +8,7 @@
 #include "Light.h"
 #include "Importer.h"
 #include "Vertex.h"
+#include "Model.h"
 
 ID3D12RootSignature* Scene::CreateRootSignature()
 {
@@ -187,56 +188,66 @@ void Scene::Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12Graphics
 	*=======================================================================*/
 	CreatePassInfoShaderResource();
 
+
+
+
 	/*========================================================================
 	* 텍스쳐
 	*=======================================================================*/
-	m_TextureMng = new TextureManager(m_pd3dDevice);
-	m_TextureMng->AddDepthBufferTexture("GBuffer_Depth", m_pd3dDevice, 1000, 1000, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
-	m_TextureMng->AddRenderTargetTexture("GBuffer_Color", m_pd3dDevice, 1000, 1000, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
-	m_TextureMng->AddRenderTargetTexture("GBuffer_Normal", m_pd3dDevice, 1000, 1000, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
-	m_TextureMng->LoadFromFile("Tex_Test", L"test.dds", m_pd3dDevice, m_pd3dCommandList, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
-	m_TextureMng->LoadFromFile("mech", L"Assets/1024x1024.dds", m_pd3dDevice, m_pd3dCommandList, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
+	gTextureMng.Initialize(m_pd3dDevice);
+	gTextureMng.AddDepthBufferTexture("GBuffer_Depth", m_pd3dDevice, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
+	gTextureMng.AddRenderTargetTexture("GBuffer_Color", m_pd3dDevice, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
+	gTextureMng.AddRenderTargetTexture("GBuffer_Normal", m_pd3dDevice, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
+
+	gTextureMng.LoadFromFile("defaultDiffuseMap", m_pd3dDevice, m_pd3dCommandList, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
+	gTextureMng.LoadFromFile("defaultNormalMap", m_pd3dDevice, m_pd3dCommandList, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
+	gTextureMng.LoadFromFile("defaultSpecularMap", m_pd3dDevice, m_pd3dCommandList, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
+	//gTextureMng.LoadFromFile("mech_diff", m_pd3dDevice, m_pd3dCommandList, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
+	//gTextureMng.LoadFromFile("specularTest",  m_pd3dDevice, m_pd3dCommandList, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
+
+
+	/*========================================================================
+	* 마테리얼
+	*=======================================================================*/
+	MaterialDataImporter matDataImporter;
+	matDataImporter.Load("Data/MaterialData.txt");
+
+
+	/*========================================================================
+	* 모델
+	*=======================================================================*/
+	gModelMng.Initialize();
+	//gModelMng.AddModel("mech", m_pd3dDevice, m_pd3dCommandList);
+	//gModelMng.AddModel("floor", m_pd3dDevice, m_pd3dCommandList);
+
+
+	/*========================================================================
+	* 에셋 리스트 로드해서 모델이랑 텍스처를 동시에 로드
+	*=======================================================================*/
+	AssetListDataImporter assetImporter;
+	assetImporter.Load(m_pd3dDevice, m_pd3dCommandList, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
 
 	/*========================================================================
 	* Pass 1 전용 오브젝트 데이터 로드 및 생성
 	*=======================================================================*/
 	ObjectDataImporter objDataImporter;
 	vector<OBJECT_DESC> vecObjDesc = objDataImporter.Load("Data/ObjectData.txt");
-	MeshDataImporter meshDataImporter;
-
-
 
 	for (int i = 0; i < vecObjDesc.size(); i++) {
-		if (strcmp(vecObjDesc[i].modelPath.c_str(), "") != 0) {
-			vector<MESH_DATA> vecMeshData = meshDataImporter.Load(vecObjDesc[i].modelPath.c_str());
-			//if (vecObjDesc[i].isTextured) {
-			//	m_TextureMng->LoadFromFile(vecObjDesc[i].texturePath.c_str(), CharToWChar( vecObjDesc[i].texturePath.c_str()), m_pd3dDevice, m_pd3dCommandList, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
-			//	for (int i = 0; i < vecMeshData.size(); i++) vecMeshData[i].textureName = vecObjDesc[i].texturePath;
-			//}
-
-			/*
-			* OBJECT_DATA로 texturePath는 얻어옴.
-			* 1. 텍스처 로드하고
-			* 2. Mesh들에 넣어주거나
-			* 아니 근데 그 오브젝트에서 쓸 메쉬를 전부 가져온거 아냐??? 그럼 걍 그 텍스처로 써버려도?
-			* ㅘ연 내가 부분 부분 다른 텍스처를 쓸 일이 있을까??
-			* 아 근데 2개씩 써본 적이 있긴 한데
-			* 혹시 모르니까 메쉬별로 하게 하자.
-			*
-			*/
-			Object* tempObj = new Object(m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle, vecMeshData);
-
-
-			tempObj->Move(vecObjDesc[i].position);
-			m_vecObject.push_back(tempObj);
-		}
-		else {
-			/*
-				블렌더에서 모델 가져온다고 PSO에서 windingOrder를 CCW이 아니라 CW로 해놨음 그래서 반대로 나올건데 테스트니까 뭐
-			*/
+		if (strcmp(vecObjDesc[i].model.c_str(), "") != 0) {
+			/*========================================================================
+			* 여기까지 작업했음
+			* 
+			* - 오브젝트 데이터에서 마테리얼 이름을 읽어오는 부분까지 함.
+			* - 마테리얼을 오브젝트가 가지게 하고
+			* - 오브젝트 렌더를 할 때, gModelMng와 gMaterialMng를 통해서 렌더링 할 수 있도록 구조 변경할 것.
+			* 
+			*=======================================================================*/
 			Object* tempObj = new Object(m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
 
 			tempObj->Move(vecObjDesc[i].position);
+			tempObj->SetModel(vecObjDesc[i].model.c_str());
+			tempObj->SetMaterial(vecObjDesc[i].material.c_str());
 			m_vecObject.push_back(tempObj);
 		}
 	}
@@ -293,16 +304,16 @@ void Scene::Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12Graphics
 			switch (vecLightDesc[i].lightType)
 			{
 			case LightType::LIGHT_POINT:
-				m_TextureMng->AddDepthBufferTextureCube(temp.c_str(), m_pd3dDevice, SHADOWMAPSIZE, SHADOWMAPSIZE, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
+				gTextureMng.AddDepthBufferTextureCube(temp.c_str(), m_pd3dDevice, SHADOWMAPSIZE, SHADOWMAPSIZE, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
 
 				break;
 
 			case LightType::LIGHT_SPOT:
-				m_TextureMng->AddDepthBufferTexture(temp.c_str(), m_pd3dDevice, SHADOWMAPSIZE, SHADOWMAPSIZE, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
+				gTextureMng.AddDepthBufferTexture(temp.c_str(), m_pd3dDevice, SHADOWMAPSIZE, SHADOWMAPSIZE, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
 
 				break;
 			case LightType::LIGHT_DIRECTIONAL:
-				m_TextureMng->AddDepthBufferTextureArray(temp.c_str(), 3, m_pd3dDevice, SHADOWMAPSIZE, SHADOWMAPSIZE, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
+				gTextureMng.AddDepthBufferTextureArray(temp.c_str(), 3, m_pd3dDevice, SHADOWMAPSIZE, SHADOWMAPSIZE, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
 
 
 				break;
@@ -358,32 +369,32 @@ void Scene::RenderPass1()
 	::ZeroMemory(&d3dResourceBarrier, sizeof(D3D12_RESOURCE_BARRIER));
 	d3dResourceBarrier[0].Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
 	d3dResourceBarrier[0].Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-	d3dResourceBarrier[0].Transition.pResource = m_TextureMng->GetTextureResource("GBuffer_Depth");
+	d3dResourceBarrier[0].Transition.pResource = gTextureMng.GetTextureResource("GBuffer_Depth");
 	d3dResourceBarrier[0].Transition.StateBefore = D3D12_RESOURCE_STATE_GENERIC_READ;
 	d3dResourceBarrier[0].Transition.StateAfter = D3D12_RESOURCE_STATE_DEPTH_WRITE;
 	d3dResourceBarrier[0].Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 
 	d3dResourceBarrier[1].Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
 	d3dResourceBarrier[1].Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-	d3dResourceBarrier[1].Transition.pResource = m_TextureMng->GetTextureResource("GBuffer_Color");
+	d3dResourceBarrier[1].Transition.pResource = gTextureMng.GetTextureResource("GBuffer_Color");
 	d3dResourceBarrier[1].Transition.StateBefore = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
 	d3dResourceBarrier[1].Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
 	d3dResourceBarrier[1].Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 
 	d3dResourceBarrier[2].Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
 	d3dResourceBarrier[2].Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-	d3dResourceBarrier[2].Transition.pResource = m_TextureMng->GetTextureResource("GBuffer_Normal");
+	d3dResourceBarrier[2].Transition.pResource = gTextureMng.GetTextureResource("GBuffer_Normal");
 	d3dResourceBarrier[2].Transition.StateBefore = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
 	d3dResourceBarrier[2].Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
 	d3dResourceBarrier[2].Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 	m_pd3dCommandList->ResourceBarrier(3, d3dResourceBarrier);
 
-	D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = m_TextureMng->GetDsvCPUHandle("GBuffer_Depth");
+	D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = gTextureMng.GetDsvCPUHandle("GBuffer_Depth");
 	m_pd3dCommandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
 
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle[2];
-	rtvHandle[0] = m_TextureMng->GetRtvCPUHandle("GBuffer_Color");
-	rtvHandle[1] = m_TextureMng->GetRtvCPUHandle("GBuffer_Normal");
+	rtvHandle[0] = gTextureMng.GetRtvCPUHandle("GBuffer_Color");
+	rtvHandle[1] = gTextureMng.GetRtvCPUHandle("GBuffer_Normal");
 
 	float pfClearColor[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
 	m_pd3dCommandList->ClearRenderTargetView(rtvHandle[0], pfClearColor, 0, NULL);
@@ -392,18 +403,18 @@ void Scene::RenderPass1()
 	m_pd3dCommandList->OMSetRenderTargets(2, rtvHandle, FALSE, &dsvHandle);
 
 	m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["PackGBuffer"]);
-	m_TextureMng->UseForShaderResource("mech", m_pd3dCommandList, ROOTSIGNATURE_COLOR_TEXTURE);
+	//gTextureMng.UseForShaderResource("mech", m_pd3dCommandList, ROOTSIGNATURE_COLOR_TEXTURE);
 	for (int i = 0; i < m_vecObject.size(); i++) m_vecObject[i]->Render(m_pd3dCommandList);
 
-	d3dResourceBarrier[0].Transition.pResource = m_TextureMng->GetTextureResource("GBuffer_Depth");
+	d3dResourceBarrier[0].Transition.pResource = gTextureMng.GetTextureResource("GBuffer_Depth");
 	d3dResourceBarrier[0].Transition.StateBefore = D3D12_RESOURCE_STATE_DEPTH_WRITE;
 	d3dResourceBarrier[0].Transition.StateAfter = D3D12_RESOURCE_STATE_GENERIC_READ;
 
-	d3dResourceBarrier[1].Transition.pResource = m_TextureMng->GetTextureResource("GBuffer_Color");
+	d3dResourceBarrier[1].Transition.pResource = gTextureMng.GetTextureResource("GBuffer_Color");
 	d3dResourceBarrier[1].Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
 	d3dResourceBarrier[1].Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
 
-	d3dResourceBarrier[2].Transition.pResource = m_TextureMng->GetTextureResource("GBuffer_Normal");
+	d3dResourceBarrier[2].Transition.pResource = gTextureMng.GetTextureResource("GBuffer_Normal");
 	d3dResourceBarrier[2].Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
 	d3dResourceBarrier[2].Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
 	m_pd3dCommandList->ResourceBarrier(3, d3dResourceBarrier);
@@ -433,7 +444,7 @@ void Scene::RenderPass1()
 			
 			m_LightMng->SetShaderResource(m_pd3dCommandList, i);
 
-			D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = m_TextureMng->GetDsvCPUHandle(m_LightMng->GetShadowMapName(i).c_str());
+			D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = gTextureMng.GetDsvCPUHandle(m_LightMng->GetShadowMapName(i).c_str());
 			m_pd3dCommandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
 			m_pd3dCommandList->OMSetRenderTargets(0, NULL, TRUE, &dsvHandle);
 
@@ -464,9 +475,9 @@ void Scene::RenderPass2()
 	* Pass 2. 스크린 렌더
 	*=======================================================================*/
 	m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["ColorFromGBuffer"]);
-	m_TextureMng->UseForShaderResource("GBuffer_Normal", m_pd3dCommandList, ROOTSIGNATURE_NORMAL_TEXTURE);
-	m_TextureMng->UseForShaderResource("GBuffer_Depth", m_pd3dCommandList, ROOTSIGNATURE_DEPTH_TEXTURE);
-	m_TextureMng->UseForShaderResource("GBuffer_Color", m_pd3dCommandList, ROOTSIGNATURE_COLOR_TEXTURE);
+	gTextureMng.UseForShaderResource("GBuffer_Normal", m_pd3dCommandList, ROOTSIGNATURE_NORMAL_TEXTURE);
+	gTextureMng.UseForShaderResource("GBuffer_Depth", m_pd3dCommandList, ROOTSIGNATURE_DEPTH_TEXTURE);
+	gTextureMng.UseForShaderResource("GBuffer_Color", m_pd3dCommandList, ROOTSIGNATURE_COLOR_TEXTURE);
 	m_vecDebugWindow[3]->Render(m_pd3dCommandList);
 
 
@@ -481,9 +492,9 @@ void Scene::RenderPass2()
 		if (m_LightMng->GetIsShadow(i)) {
 			switch (m_LightMng->GetLightType(i))
 			{
-			case LightType::LIGHT_SPOT: m_TextureMng->UseForShaderResource(m_LightMng->GetShadowMapName(i).c_str(), m_pd3dCommandList, ROOTSIGNATURE_SHADOW_TEXTURE); break;
-			case LightType::LIGHT_POINT: m_TextureMng->UseForShaderResource(m_LightMng->GetShadowMapName(i).c_str(), m_pd3dCommandList, ROOTSIGNATURE_CUBE_TEXTURE); break;
-			case LightType::LIGHT_DIRECTIONAL:m_TextureMng->UseForShaderResource(m_LightMng->GetShadowMapName(i).c_str(), m_pd3dCommandList, ROOTSIGNATURE_SHADOWARRAY_TEXTURE); break;
+			case LightType::LIGHT_SPOT: gTextureMng.UseForShaderResource(m_LightMng->GetShadowMapName(i).c_str(), m_pd3dCommandList, ROOTSIGNATURE_SHADOW_TEXTURE); break;
+			case LightType::LIGHT_POINT: gTextureMng.UseForShaderResource(m_LightMng->GetShadowMapName(i).c_str(), m_pd3dCommandList, ROOTSIGNATURE_CUBE_TEXTURE); break;
+			case LightType::LIGHT_DIRECTIONAL:gTextureMng.UseForShaderResource(m_LightMng->GetShadowMapName(i).c_str(), m_pd3dCommandList, ROOTSIGNATURE_SHADOWARRAY_TEXTURE); break;
 			case LightType::LIGHT_NONE:
 			default:
 				break;
@@ -498,12 +509,12 @@ void Scene::RenderPass2()
 	*=======================================================================*/
 	if (test) {
 		m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["DebugColor"]);
-		m_TextureMng->UseForShaderResource("GBuffer_Color", m_pd3dCommandList, ROOTSIGNATURE_COLOR_TEXTURE);
+		gTextureMng.UseForShaderResource("GBuffer_Color", m_pd3dCommandList, ROOTSIGNATURE_COLOR_TEXTURE);
 		m_vecDebugWindow[0]->Render(m_pd3dCommandList);
-		m_TextureMng->UseForShaderResource("GBuffer_Normal", m_pd3dCommandList, ROOTSIGNATURE_COLOR_TEXTURE);
+		gTextureMng.UseForShaderResource("GBuffer_Normal", m_pd3dCommandList, ROOTSIGNATURE_COLOR_TEXTURE);
 		m_vecDebugWindow[1]->Render(m_pd3dCommandList);
 
-		m_TextureMng->UseForShaderResource("GBuffer_Depth", m_pd3dCommandList, ROOTSIGNATURE_DEPTH_TEXTURE);
+		gTextureMng.UseForShaderResource("GBuffer_Depth", m_pd3dCommandList, ROOTSIGNATURE_DEPTH_TEXTURE);
 		m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["DebugDepth"]);
 		m_vecDebugWindow[2]->Render(m_pd3dCommandList);
 	}
@@ -660,9 +671,9 @@ void Scene::ReloadLight()
 			string temp = to_string(i);
 			temp = shadow + temp;
 
-			m_TextureMng->DeleteTexture(temp.c_str());
+			gTextureMng.DeleteTexture(temp.c_str());
 
-			m_TextureMng->AddDepthBufferTexture(temp.c_str(), m_pd3dDevice, SHADOWMAPSIZE, SHADOWMAPSIZE, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
+			gTextureMng.AddDepthBufferTexture(temp.c_str(), m_pd3dDevice, SHADOWMAPSIZE, SHADOWMAPSIZE, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
 			m_LightMng->SetShadowMapName(temp.c_str(), i);
 		}
 	}
