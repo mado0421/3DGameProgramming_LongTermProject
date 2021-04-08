@@ -6,3 +6,5 @@ defaultDiffuseMap.dds
 defaultNormalMap.dds
 defaultSpecularMap.dds
 specularTest.dds
+animationTest2mesh2.mm
+animationTest2mesh2.mac

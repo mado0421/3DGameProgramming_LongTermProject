@@ -7,6 +7,7 @@
 #include <DirectXMath.h>
 #include "Light.h"
 #include "Vertex.h"
+#include "Animation.h"
 
 using SHAPE = vector<Vertex>;
 
@@ -72,6 +73,7 @@ public:
 class MeshDataImporter : public IImporter {
 public:
 	vector<MESH_DATA> Load(const char* filePath);
+	vector<MESH_DATA> FBXLoad(const char* filePath);
 };
 class MaterialDataImporter : public IImporter {
 public:
@@ -85,3 +87,11 @@ public:
 		D3D12_CPU_DESCRIPTOR_HANDLE& srvCpuHandle,
 		D3D12_GPU_DESCRIPTOR_HANDLE& srvGpuHandle);
 };
+class AnimClipDataImporter : public IImporter {
+public:
+	AnimClip Load(const char* filePath);
+};
+
+//class FBXImporter {
+//
+//};

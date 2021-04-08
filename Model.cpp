@@ -10,15 +10,22 @@ void ModelManager::Initialize()
 
 void ModelManager::AddModel(const char* fileName, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	//string ultimateOfPerfectFilePath;
-	//string fileHead = "Assets/";
-	//string fileTail = ".obj";
-
-	//ultimateOfPerfectFilePath = fileHead + fileName;
-	//ultimateOfPerfectFilePath += fileTail;
-
 	MeshDataImporter meshDataImporter;
 	vector<MESH_DATA> vecMeshData = meshDataImporter.Load(fileName);
+	Model model;
+
+	for (int i = 0; i < vecMeshData.size(); i++) {
+		Mesh* pMesh = new Mesh(pd3dDevice, pd3dCommandList, vecMeshData[i]);
+		model.push_back(pMesh);
+	}
+
+	m_uomModel[fileName] = model;
+}
+
+void ModelManager::AddFBXModel(const char* fileName, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	MeshDataImporter meshDataImporter;
+	vector<MESH_DATA> vecMeshData = meshDataImporter.FBXLoad(fileName);
 	Model model;
 
 	for (int i = 0; i < vecMeshData.size(); i++) {

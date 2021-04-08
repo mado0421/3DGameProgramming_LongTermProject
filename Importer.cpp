@@ -2,6 +2,7 @@
 #include "Importer.h"
 #include "Material.h"
 #include "Model.h"
+#include "Animation.h"
 
 XMFLOAT3 IImporter::GetFloat3(stringstream& ss)
 {
@@ -241,6 +242,114 @@ vector<MESH_DATA> MeshDataImporter::Load(const char* filePath)
 	return vecMeshData;
 }
 
+struct CtrlPoint {
+	XMFLOAT3    position;
+	int      boneIndices[4];
+	float    weights[4];
+
+	CtrlPoint()
+		: position(XMFLOAT3(0, 0, 0))
+	{
+		int i = 0;
+		boneIndices[i++] = 0;
+		boneIndices[i++] = 0;
+		boneIndices[i++] = 0;
+		boneIndices[i++] = 0;
+		i = 0;
+		weights[i++] = 0;
+		weights[i++] = 0;
+		weights[i++] = 0;
+		weights[i++] = 0;
+	}
+};
+struct VertexForImport {
+	UINT ctrlPointIndex;
+	XMFLOAT3 normal;
+	XMFLOAT3 binormal;
+	XMFLOAT3 tangent;
+	XMFLOAT2 uv;
+
+	VertexForImport()
+		: ctrlPointIndex(0)
+		, normal(XMFLOAT3(0, 0, 0))
+		, binormal(XMFLOAT3(0, 0, 0))
+		, tangent(XMFLOAT3(0, 0, 0))
+		, uv(XMFLOAT2(0, 0))
+	{}
+};
+vector<MESH_DATA> MeshDataImporter::FBXLoad(const char* filePath)
+{
+	vector<MESH_DATA> vecMeshData;
+
+	string ultimateOfPerfectFilePath;
+
+	string fileHead = "Assets/";
+	string fileTail = ".mm";   // my mesh
+
+	ultimateOfPerfectFilePath = fileHead + filePath;
+	ultimateOfPerfectFilePath += fileTail;
+
+	ifstream in;
+	in.open(ultimateOfPerfectFilePath, ios::in | ios::binary);
+
+	int nMesh;
+	in.read((char*)&nMesh, sizeof(int));
+
+	for (int iMesh = 0; iMesh < nMesh; iMesh++) {
+		string name = "fbxMesh.";
+		string num = to_string(iMesh);
+		
+		MESH_DATA tempMesh;
+		tempMesh.name = name + num;
+		
+		int nCtrlPoint;
+		in.read((char*)&nCtrlPoint, sizeof(int));
+
+		CtrlPoint* pCtrlPoint = new CtrlPoint[nCtrlPoint];
+		in.read((char*)pCtrlPoint, sizeof(CtrlPoint) * nCtrlPoint);
+		vector<CtrlPoint> vecCP;
+
+		for (int iCP = 0; iCP < nCtrlPoint; ++iCP) {
+			CtrlPoint temp;
+			temp = pCtrlPoint[iCP];
+			vecCP.push_back(temp);
+		}
+
+		int nVertex;
+		in.read((char*)&nVertex, sizeof(int));
+		vector<Vertex> vecVertex;
+
+		VertexForImport* pVertex = new VertexForImport[nVertex];
+		in.read((char*)pVertex, sizeof(VertexForImport) * nVertex);
+
+		for (int iV = 0; iV < nVertex; ++iV) {
+			VertexForImport v;
+			v = pVertex[iV];
+			Vertex temp;
+			temp.m_xmf3Pos = vecCP[v.ctrlPointIndex].position;
+			temp.m_xmf3Normal = v.normal;
+			temp.m_xmf3BiTangent = v.binormal;
+			temp.m_xmf3Tangent = v.tangent;
+			temp.m_xmf2UV = v.uv;
+			temp.m_xmi4BoneIndices.x = vecCP[v.ctrlPointIndex].boneIndices[0];
+			temp.m_xmi4BoneIndices.y = vecCP[v.ctrlPointIndex].boneIndices[1];
+			temp.m_xmi4BoneIndices.z = vecCP[v.ctrlPointIndex].boneIndices[2];
+			temp.m_xmi4BoneIndices.w = vecCP[v.ctrlPointIndex].boneIndices[3];
+			temp.m_xmi4BoneWeights.x = vecCP[v.ctrlPointIndex].weights[0];
+			temp.m_xmi4BoneWeights.y = vecCP[v.ctrlPointIndex].weights[1];
+			temp.m_xmi4BoneWeights.z = vecCP[v.ctrlPointIndex].weights[2];
+			temp.m_xmi4BoneWeights.w = vecCP[v.ctrlPointIndex].weights[3];
+			tempMesh.shape.push_back(temp);
+		}
+
+		vecMeshData.push_back(tempMesh);
+	}
+
+	in.close();
+
+	return vecMeshData;
+}
+
 void MaterialDataImporter::Load(const char* filePath)
 {
 	ifstream in(filePath);
@@ -313,6 +422,74 @@ void AssetListDataImporter::Load(
 			if (gModelMng.IsAleadyExist(name.c_str())) continue;
 			gModelMng.AddModel(name.c_str(), pd3dDevice, pd3dCommandList);
 		}
+		if (type.compare("mm") == 0) {
+			if (gModelMng.IsAleadyExist(name.c_str())) continue;
+			gModelMng.AddFBXModel(name.c_str(), pd3dDevice, pd3dCommandList);
+		}
+		if (type.compare("mac") == 0) {
+			if (gAnimMng.IsAleadyExist(name.c_str())) continue;
+			gAnimMng.AddAnimClip(name.c_str(), pd3dDevice, pd3dCommandList);
+		}
 	}
 	return;
+}
+struct TransformForImport {
+	float RotationTranslation[7];
+};
+AnimClip AnimClipDataImporter::Load(const char* filePath)
+{
+	AnimClip animClip;
+
+	animClip.strName = filePath;
+
+	string ultimateOfPerfectFilePath;
+
+	string fileHead = "Assets/";
+	string fileTail = ".mac";   // my animation clip
+
+	ultimateOfPerfectFilePath = fileHead + filePath;
+	ultimateOfPerfectFilePath += fileTail;
+
+	ifstream in;
+	in.open(ultimateOfPerfectFilePath, ios::in | ios::binary);
+
+	int nBone;
+	int nFrame;
+
+	in.read((char*)&nBone, sizeof(int));
+	in.read((char*)&nFrame, sizeof(int));
+
+	animClip.nFrame = nFrame;
+	animClip.vecBone.resize(nBone);
+
+	int nArray = nBone * nFrame;
+
+	TransformForImport* transform = new TransformForImport[nArray];
+	in.read((char*)transform, sizeof(TransformForImport) * nArray);
+
+	for (int iBone = 0; iBone < nBone; ++iBone) {
+
+		animClip.vecBone[iBone].reserve(nFrame);
+
+		for (int iFrame = 0; iFrame < nFrame; ++iFrame) {
+			TransformForImport temp;
+
+			temp = transform[iBone * nFrame + iFrame];
+			FrameTransform tempFT;
+			int i = 0;
+			tempFT.xmf4QuatRotation.x = temp.RotationTranslation[i++];
+			tempFT.xmf4QuatRotation.y = temp.RotationTranslation[i++];
+			tempFT.xmf4QuatRotation.z = temp.RotationTranslation[i++];
+			tempFT.xmf4QuatRotation.w = temp.RotationTranslation[i++];
+			tempFT.xmf3Translation.x = temp.RotationTranslation[i++];
+			tempFT.xmf3Translation.y = temp.RotationTranslation[i++];
+			tempFT.xmf3Translation.z = temp.RotationTranslation[i++];
+
+			animClip.vecBone[iBone].push_back(tempFT);
+		}
+	}
+
+	in.close();
+
+	return animClip;
 }

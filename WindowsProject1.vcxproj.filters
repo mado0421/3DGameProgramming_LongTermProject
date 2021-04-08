@@ -51,6 +51,9 @@
     <Filter Include="소스 파일\etc\FileIO">
       <UniqueIdentifier>{3039cdb3-d862-4227-aaeb-b83d276ad2d0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\Object\Animation">
+      <UniqueIdentifier>{acf69ee2-00be-4fa2-92c0-b2e8b3d0b538}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Resource.h">
@@ -117,6 +120,9 @@
     <ClInclude Include="Model.h">
       <Filter>소스 파일\Object</Filter>
     </ClInclude>
+    <ClInclude Include="Animation.h">
+      <Filter>소스 파일\Object\Animation</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WindowsProject1.cpp">
@@ -170,6 +176,9 @@
     </ClCompile>
     <ClCompile Include="Model.cpp">
       <Filter>소스 파일\Object</Filter>
+    </ClCompile>
+    <ClCompile Include="Animation.cpp">
+      <Filter>소스 파일\Object\Animation</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -154,6 +154,7 @@ CSM을 구현했다. 구현하면서 있었던 문제들과 해결법은 다음�
 자원 관리 자료구조를 작성했다.
 원래 Scene에 속해있던 TextureMng와 Object에 속해있던 vector<mesh*>의 자원들을 전역으로 올리고 한 번씩만 생성하게 변경하였다.(원래는 같은 mesh여도 여러 Object일 경우, 여러 번 생성하여 메모리 낭비가 있었다)
 따라서 지금 구조는 다음과 같다.
+
 > 전역에 gTextureMng, gModelMng, gMaterialMng 로 자원관리
 > 처음에 AssetData를 읽어서 이 Scene에서 어떤 Asset(obj, dds 등)을 사용하는지 확인
 > 위에서 확인한 AssetList를 바탕으로 Model(mesh들의 집합)과 Texture를 Load
@@ -178,4 +179,22 @@ Fresnel값도 어떻게 주고 싶은데 그것까지는 아직 못해주고 있
 추가로 RGB Texture를 써야 할 지 고민해봐야 할 것 같음
 
 <img src="https://user-images.githubusercontent.com/21697638/113580174-45fa7200-9660-11eb-841f-0f87b0694b88.png" width="70%" height="70%"></img>
+
 <그라디언트로 0에서 1까지 roughness 값을 준 Texture를 사용한 모습>
+
+### 2021.04.08
+Blender에서 리깅과 애니메이션 작업까지 한 모델을 FBX로 Export하여 사용하기 위해 작업했다.
+스키닝 애니메이션은 한 차례 구현해 본 적이 있어 이론을 복습하는 것은 쉬웠다.
+FBX SDK의 사용법이 어렵고 복잡해서 많이 힘들었는데 Parser를 작성한 지금도 현재의 방식이 그리 맘에 들지 않는다.
+블렌더에서 키프레임을 Export하고 다시 Import 해보니 Max에서 리샘플링 옵션을 켠 것처럼 모든 프레임에 키프레임이 생기는걸 볼 수 있었다. 특정 키프레임의 시간만 얻는 것을 포기하고 모든 프레임에서 toWorld 행렬을 뽑아냈다.
+빠르게 로드하기 위해 바이너리 포맷으로 만든 뒤에 한 번에 데이터 전체를 읽어내는 식으로 만들었다. (이후 처리 공정이 있긴 하지만)
+지금은 루트 상수버퍼를 추가하고 애니메이션 본 변환 행렬을 올리는 것까지 진행했다.
+앞으로 해야 할 일은 다음과 같다.
+
+1. 변환 행렬을 시간에 따라 보간.
+2. 이 오브젝트가 FBX 모델인지 OBJ 모델인지, 애니메이션이 적용되어있는 메쉬인지 등을 구분.
+3. 각자 다른 PSO를 사용하여 렌더링.
+
+블렌더에서 FBX로 Export 할 때, 토폴로지를 D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP이 아니라 D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST로 뽑고 싶은데 Export 옵션에선 못 찾겠다. 
+pd3dCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST); 
+이 함수를 찾아서 수정해야 할 것. (FBX모델은 TRIANGLESTRIP로 변환했으니까)

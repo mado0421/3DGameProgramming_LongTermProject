@@ -18,6 +18,7 @@
 #include <vector>
 #include <unordered_map>
 #include <iostream>
+#include <fstream>
 
 #include <d3d12.h>
 #include "d3dUtil.h"
@@ -47,15 +48,16 @@ using Microsoft::WRL::ComPtr;
 
 #define SHADOWMAPSIZE 2048
 
-#define ROOTSIGNATURE_PASSCONSTANTS		0
-#define ROOTSIGNATURE_OBJECTS			1
-#define ROOTSIGNATURE_LIGHTS			2
-#define ROOTSIGNATURE_COLOR_TEXTURE		3
-#define ROOTSIGNATURE_NORMAL_TEXTURE	4
-#define ROOTSIGNATURE_DEPTH_TEXTURE		5
-#define ROOTSIGNATURE_SHADOW_TEXTURE	6
-#define ROOTSIGNATURE_CUBE_TEXTURE		7
-#define ROOTSIGNATURE_SHADOWARRAY_TEXTURE		8
+#define ROOTSIGNATURE_PASSCONSTANTS			0
+#define ROOTSIGNATURE_OBJECTS				1
+#define ROOTSIGNATURE_LIGHTS				2
+#define ROOTSIGNATURE_COLOR_TEXTURE			3
+#define ROOTSIGNATURE_NORMAL_TEXTURE		4
+#define ROOTSIGNATURE_DEPTH_TEXTURE			5
+#define ROOTSIGNATURE_SHADOW_TEXTURE		6
+#define ROOTSIGNATURE_CUBE_TEXTURE			7
+#define ROOTSIGNATURE_SHADOWARRAY_TEXTURE	8
+#define ROOTSIGNATURE_ANIMTRANSFORM			9
 
 
 #define RESOURCE_TEXTURE2D			0x01
@@ -107,9 +109,11 @@ enum KeyCode {
 class TextureManager;
 class ModelManager;
 class MaterialManager;
+class AnimationManager;
 extern TextureManager gTextureMng;
 extern ModelManager gModelMng;
 extern MaterialManager gMaterialMng;
+extern AnimationManager gAnimMng;
 
 extern UINT gnCbvSrvDescriptorIncrementSize;
 
