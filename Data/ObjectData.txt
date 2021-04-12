@@ -2,7 +2,7 @@
 
 #{ model Assets/4legMech-1.obj Assets/1024x1024.dds position 0 0 0 }
 #{ model mech TestMat position 0 0 0 }
-{ mesh animationTest2mesh2 TestMat position 0 0 0 }
+{ mesh animTest7(uvmapping,triagulate,nosplit) position 0 0 0 }
 #{ mesh Assets/room.obj position 0 0 0 }
 #{ model floor TestMat position 0 0 0 }
 

@@ -414,7 +414,6 @@ void Scene::RenderPass1()
 	m_pd3dCommandList->OMSetRenderTargets(2, rtvHandle, FALSE, &dsvHandle);
 
 	m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["PackGBuffer"]);
-	//gTextureMng.UseForShaderResource("mech", m_pd3dCommandList, ROOTSIGNATURE_COLOR_TEXTURE);
 	for (int i = 0; i < m_vecObject.size(); i++) m_vecObject[i]->Render(m_pd3dCommandList);
 
 	d3dResourceBarrier[0].Transition.pResource = gTextureMng.GetTextureResource("GBuffer_Depth");
@@ -470,9 +469,9 @@ void Scene::RenderPass2()
 	* 
 	* 근데 PrevRender에서 했던 설정값이 저장되진 않을까?
 	*=======================================================================*/
-	m_pd3dCommandList->SetGraphicsRootSignature(m_pd3dRootSignature);				
-	m_pd3dCommandList->SetDescriptorHeaps(1, &m_pd3dCbvSrvDescriptorHeap);			
-	m_pd3dCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	//m_pd3dCommandList->SetGraphicsRootSignature(m_pd3dRootSignature);				
+	//m_pd3dCommandList->SetDescriptorHeaps(1, &m_pd3dCbvSrvDescriptorHeap);			
+	//m_pd3dCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	/*========================================================================
 	* PassInfo 설정

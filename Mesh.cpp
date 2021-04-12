@@ -119,8 +119,7 @@ Mesh::Mesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 
 	m_strName = meshData.name;
 	meshData.shape.size();
-
-	if (!meshData.textureName.empty()) SetDiffMapName(meshData.textureName.c_str());
+	isFbx = meshData.isFbx;
 
 	Vertex* pVertices = new Vertex[m_nVertices];
 
@@ -137,8 +136,16 @@ Mesh::Mesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 
 void Mesh::Render(ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	// 모든 메쉬를 이걸로 그릴거 같아서 얘는 처음 한 번으로 빼둘 것.
-	//pd3dCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST); 
+
+	/*========================================================================
+	* 이제 메쉬마다 구분해서 토폴로지 변경함
+	* 근데 맘에 안 드니까
+	* 빨리 Fbx 모델만 쓰든지 하자
+	* 아님 OBJ도 저걸로 뽑든지 허 참내
+	*=======================================================================*/
+	//if (isFbx)pd3dCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+	//else pd3dCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
 	pd3dCommandList->IASetVertexBuffers(0, 1, &m_d3dVertexBufferView);
 	pd3dCommandList->DrawInstanced(m_nVertices, 1, 0, 0);
 }
@@ -191,6 +198,8 @@ DebugWindowMesh::DebugWindowMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 void DebugWindowMesh::Render(ID3D12GraphicsCommandList* pd3dCommandList)
 {
+	pd3dCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
 	pd3dCommandList->IASetVertexBuffers(0, 1, &m_d3dVertexBufferView);
 	pd3dCommandList->DrawInstanced(m_nVertices, 1, 0, 0);
 }

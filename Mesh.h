@@ -12,11 +12,6 @@ public:
 	}
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList);
 
-	bool IsDiffuseMap() { return m_bIsDiffuseMap; }
-
-	void SetDiffMapName(const char* name) { if (IsDiffuseMap()) assert(!"이미 디퓨즈맵이 있습니다.\n"); m_strDiffMapName = name; m_bIsDiffuseMap = true; }
-	string GetDiffMapName() { if (!IsDiffuseMap()) assert(!"디퓨즈맵이 없습니다.\n"); return m_strDiffMapName; }
-
 protected:
 	ID3D12Resource*				m_pd3dVertexBuffer;
 	ID3D12Resource*				m_pd3dVertexUploadBuffer;
@@ -26,7 +21,7 @@ protected:
 	UINT	m_nVertices;
 	string	m_strName;
 
-	bool	m_bIsDiffuseMap = false;
+	bool isFbx;
 
 	string	m_strDiffMapName;
 	string	m_strNormMapName;

@@ -180,8 +180,6 @@ Fresnel값도 어떻게 주고 싶은데 그것까지는 아직 못해주고 있
 
 <img src="https://user-images.githubusercontent.com/21697638/113580174-45fa7200-9660-11eb-841f-0f87b0694b88.png" width="70%" height="70%"></img>
 
-<그라디언트로 0에서 1까지 roughness 값을 준 Texture를 사용한 모습>
-
 ### 2021.04.08
 Blender에서 리깅과 애니메이션 작업까지 한 모델을 FBX로 Export하여 사용하기 위해 작업했다.
 스키닝 애니메이션은 한 차례 구현해 본 적이 있어 이론을 복습하는 것은 쉬웠다.
@@ -198,3 +196,38 @@ FBX SDK의 사용법이 어렵고 복잡해서 많이 힘들었는데 Parser를 
 블렌더에서 FBX로 Export 할 때, 토폴로지를 D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP이 아니라 D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST로 뽑고 싶은데 Export 옵션에선 못 찾겠다. 
 pd3dCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST); 
 이 함수를 찾아서 수정해야 할 것. (FBX모델은 TRIANGLESTRIP로 변환했으니까)
+
+### 이번주 일정
+#### 21.04.12 - 21.04.18
+* AnimationClip, AnimationCtrl 등 Animation 자료구조 구현
+
+### 2주 목표
+* Animation 구현
+
+### 2021.04.12
+Blender에서 Export한 FBX 파일에 문제가 많아서 Max로 작업환경을 변경했다. Blender에서 있었던 문제는 다음과 같다.
+
+- FBX 포맷으로 Export 할 경우, Vertex가 없어지는 문제가 있다. 정확히는 프리미티브 토폴로지가 트라이앵글도 아니고 트라이앵글 스트립도 아니고 전체 Face의 절반이 사라지는 문제가 있다... Export 한 결과물을 다시 Import 했을 때 Mesh에 문제가 있던 것 같아 보이진 않았는데 대체 어떻게 저장을 하고 있는 것인지 모르겠음.
+- Export 할 때, 3ds Max에서의 '리샘플링 올' 옵션이 자동으로 적용되는 듯하다... Keyframe의 Time 값을 얻기 위해 Parser를 돌렸을 때, 모든 프레임의 시간이 나오길래 뭔가 싶어서 다시 Import 해봤는데 모든 프레임에 키프레임이 찍혀있는걸 보고 3ds Max를 설치했다.
+
+<img src="https://user-images.githubusercontent.com/21697638/114394625-5ec1d500-9bd6-11eb-8125-32ac869a7680.png" width="70%" height="70%"></img>
+
+Blender에서 Export 하는 것은 문제가 너무 많아서 다시 Max에서 작업하는 것으로 변경했다. 그로 인해 AnimationClip의 자료구조가 변경되었고(이젠 키프레임을 리샘플링 올을 하지 않은 결과로 처리할 수 있으니까) Parser의 구조도 변경하였다.
+
+AnimationClip의 구조는 다음과 같다.
+
+    struct Keyframe {
+	    float keytime;
+	    float4 rotation;
+	    float3 translation;
+	}
+	
+	using Bone = vector<Keyframe>;
+	
+	AnimationClip DataStructure
+	
+	nBone
+	eachBone: nKeyframe
+	sizeof(Keyframe) * nTotalKeyframe
+	
+   Parser를 구현했고 이에 맞춰서 본 프로젝트에서 Import 할 수 있게끔 변경했다.  FBX로 읽은 Mesh를 렌더링 하는 것까지 구현했다. AnimationClip을 읽어오는 것까지 성공했다.

@@ -16,8 +16,8 @@ class Material;
 class MESH_DATA {
 public:
 	string name;
-	string textureName;
 	SHAPE shape;
+	bool isFbx = false;
 };
 struct VertexIdx {
 	int vid, vtid, vnid;
@@ -91,7 +91,3 @@ class AnimClipDataImporter : public IImporter {
 public:
 	AnimClip Load(const char* filePath);
 };
-
-//class FBXImporter {
-//
-//};
