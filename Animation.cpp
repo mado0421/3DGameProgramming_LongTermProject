@@ -7,49 +7,19 @@ void AnimationManager::Initialize()
 	m_uomAnimClip.clear();
 }
 
-void AnimationManager::SettingCB(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, D3D12_CPU_DESCRIPTOR_HANDLE& d3dCbvCPUDescriptorStartHandle, D3D12_GPU_DESCRIPTOR_HANDLE& d3dCbvGPUDescriptorStartHandle)
-{
-	//for_each(m_uomAnimClip.begin(), m_uomAnimClip.end(), [&](AnimClip c) 
-	//	{c.PrepareCB(pd3dDevice, pd3dCommandList, d3dCbvCPUDescriptorStartHandle, d3dCbvGPUDescriptorStartHandle); });
-	for (auto i = m_uomAnimClip.begin(); i != m_uomAnimClip.end(); i++) {
-		i->second.PrepareCB(pd3dDevice, pd3dCommandList, d3dCbvCPUDescriptorStartHandle, d3dCbvGPUDescriptorStartHandle);
-	}
-}
-
 void AnimationManager::AddAnimClip(const char* fileName, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	AnimClipDataImporter importer;
-	AnimClip animClip = importer.Load(fileName);
+	AnimClip* animClip = new AnimClip();
+	*animClip = importer.Load(fileName);
 
 	m_uomAnimClip[fileName] = animClip;
 }
 
-void AnimationManager::Render(const char* name, double objectTime, ID3D12GraphicsCommandList* pd3dCommandList)
+AnimationController::AnimationController(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, D3D12_CPU_DESCRIPTOR_HANDLE& cbvCpuHandle, D3D12_GPU_DESCRIPTOR_HANDLE& cbvGpuHandle)
 {
-	if (prevAnimClipName == name) return;
-	prevAnimClipName = name;
+	m_fTime = 0;
 
-	pd3dCommandList->SetGraphicsRootDescriptorTable(ROOTSIGNATURE_ANIMTRANSFORM, m_uomAnimClip[name].m_d3dCbvGPUDescriptorHandle);
-	UINT ncbElementBytes = ((sizeof(CB_BONE_INFO) + 255) & ~255);
-	memset(m_uomAnimClip[name].m_pCBMappedBones, NULL, ncbElementBytes);
-	for (int i = 0; i < nMaxBone; i++) {
-
-		//m_uomAnimClip[name].vecBone[i][0].xmf3Translation;
-		//m_uomAnimClip[name].vecBone[i][0].xmf4QuatRotation;
-		//XMMatrixRotationQuaternion(XMLoadFloat4(&m_uomAnimClip[name].vecBone[i][0].xmf4QuatRotation));
-		//XMMatrixTranslationFromVector(XMLoadFloat3(&m_uomAnimClip[name].vecBone[i][0].xmf3Translation));
-		//XMMatrixMultiply(XMMatrixRotationQuaternion(
-		//	XMLoadFloat4(&m_uomAnimClip[name].vecBone[i][0].xmf4QuatRotation)),
-		//	XMMatrixTranslationFromVector(XMLoadFloat3(&m_uomAnimClip[name].vecBone[i][0].xmf3Translation)));
-		XMStoreFloat4x4(&m_uomAnimClip[name].m_pCBMappedBones->xmf4x4Transform[i], 
-			XMMatrixTranspose(XMMatrixMultiply(XMMatrixRotationQuaternion(
-			XMLoadFloat4(&m_uomAnimClip[name].vecBone[i][0].xmf4QuatRotation)),
-			XMMatrixTranslationFromVector(XMLoadFloat3(&m_uomAnimClip[name].vecBone[i][0].xmf3Translation)))));
-	}
-}
-
-void AnimClip::PrepareCB(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, D3D12_CPU_DESCRIPTOR_HANDLE& d3dCbvCPUDescriptorStartHandle, D3D12_GPU_DESCRIPTOR_HANDLE& d3dCbvGPUDescriptorStartHandle)
-{
 	UINT ncbElementBytes = ((sizeof(CB_BONE_INFO) + 255) & ~255);
 
 	m_pd3dCBResource = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes,
@@ -63,10 +33,142 @@ void AnimClip::PrepareCB(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd
 		d3dGpuVirtualAddress = m_pd3dCBResource->GetGPUVirtualAddress();
 		d3dCBVDesc.SizeInBytes = ncbElementBytes;
 		d3dCBVDesc.BufferLocation = d3dGpuVirtualAddress;
-		pd3dDevice->CreateConstantBufferView(&d3dCBVDesc, d3dCbvCPUDescriptorStartHandle);
+		pd3dDevice->CreateConstantBufferView(&d3dCBVDesc, cbvCpuHandle);
 
-		d3dCbvCPUDescriptorStartHandle.ptr += gnCbvSrvDescriptorIncrementSize;
+		cbvCpuHandle.ptr += gnCbvSrvDescriptorIncrementSize;
 	}
-	m_d3dCbvGPUDescriptorHandle = d3dCbvGPUDescriptorStartHandle;
-	d3dCbvGPUDescriptorStartHandle.ptr += gnCbvSrvDescriptorIncrementSize;
+	m_d3dCbvGPUDescriptorHandle = cbvGpuHandle;
+	cbvGpuHandle.ptr += gnCbvSrvDescriptorIncrementSize;
+}
+
+void AnimationController::Update(float fTimeElapsed)
+{
+	m_fTime += fTimeElapsed;
+}
+
+
+//m_uomAnimClip[name].vecBone[i][0].xmf3Translation;
+//m_uomAnimClip[name].vecBone[i][0].xmf4QuatRotation;
+//XMMatrixRotationQuaternion(XMLoadFloat4(&m_uomAnimClip[name].vecBone[i][0].xmf4QuatRotation));
+//XMMatrixTranslationFromVector(XMLoadFloat3(&m_uomAnimClip[name].vecBone[i][0].xmf3Translation));
+//XMMatrixMultiply(XMMatrixRotationQuaternion(
+//	XMLoadFloat4(&m_uomAnimClip[name].vecBone[i][0].xmf4QuatRotation)),
+//	XMMatrixTranslationFromVector(XMLoadFloat3(&m_uomAnimClip[name].vecBone[i][0].xmf3Translation)));
+
+void AnimationController::SetMatrix(ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	AnimClip* temp = gAnimMng.GetAnimClip("animTest2");
+
+	pd3dCommandList->SetGraphicsRootDescriptorTable(ROOTSIGNATURE_ANIMTRANSFORM, m_d3dCbvGPUDescriptorHandle);
+	UINT ncbElementBytes = ((sizeof(CB_BONE_INFO) + 255) & ~255);
+	memset(m_pCBMappedBones, NULL, ncbElementBytes);
+
+	float fTime = m_fTime;
+	while (fTime > temp->fClipLength) {
+		fTime -= temp->fClipLength;
+	}
+
+	/*========================================================================
+	* 각 Bone마다 InterpolationIndex를 찾아야 함
+	========================================================================*/
+	for (int iBone = 0; iBone < temp->vecBone.size(); iBone++) {
+		/*========================================================================
+		* 만약, 키프레임이 하나밖에 없으면 그 값을 그대로 넣는다.
+		========================================================================*/
+		if (temp->vecBone[iBone].size() <= 1) {
+			XMStoreFloat4x4(&m_pCBMappedBones->xmf4x4Transform[iBone], 
+				XMMatrixTranspose(
+					XMMatrixMultiply(
+						XMMatrixRotationQuaternion(XMLoadFloat4(&temp->vecBone[iBone][0].xmf4QuatRotation)), 
+						XMMatrixTranslationFromVector(XMLoadFloat3(&temp->vecBone[iBone][0].xmf3Translation)))));
+		}
+		/*========================================================================
+		* 키프레임이 두 개 이상이면 index를 찾아야 한다.
+		* 
+		========================================================================*/
+		else {
+			Keyframe k0, k1, k2, k3, result;
+			int iFrame = 0;
+
+#ifdef DEBUG
+			bool ok = false;
+#endif
+			for (; iFrame < temp->vecBone[iBone].size(); iFrame++) {
+				/*========================================================================
+				* 중간에 있는 경우:
+				========================================================================*/
+				if (fTime < temp->vecBone[iBone][iFrame].keyTime) {
+					k2 = temp->vecBone[iBone][iFrame];
+
+					if (iFrame + 1 == temp->vecBone[iBone].size())	k3 = temp->vecBone[iBone][iFrame];
+					else											k3 = temp->vecBone[iBone][iFrame + 1];
+
+					k1 = temp->vecBone[iBone][iFrame - 1];
+
+					if (iFrame - 1 == 0)	k0 = temp->vecBone[iBone][iFrame - 1];
+					else					k0 = temp->vecBone[iBone][iFrame - 2];
+
+					float t = (fTime - k2.keyTime) / (k3.keyTime - k2.keyTime);
+
+					InterpolateKeyframe(k0, k1, k2, k3, t, result);
+#ifdef DEBUG
+					ok = true;
+#endif
+					break;
+				}
+			}
+			/*========================================================================
+			* 다 뒤졌는데 없었다. 맨 뒤에 있는 것임.
+			========================================================================*/
+			if (iFrame == temp->vecBone[iBone].size()) {
+				k1 = temp->vecBone[iBone][temp->vecBone[iBone].size() - 1];
+				k2 = k1;
+				k3 = k1;
+
+				if (temp->vecBone[iBone].size() - 2 >= 0)	k0 = temp->vecBone[iBone][temp->vecBone[iBone].size() - 2];
+				else										k0 = k1;
+
+				float t = (fTime - k1.keyTime) / (temp->fClipLength - k1.keyTime);
+
+				InterpolateKeyframe(k0, k1, k2, k3, t, result);
+#ifdef DEBUG
+				ok = true;
+#endif
+			}
+#ifdef DEBUG
+			if (!ok) assert(!"idx 다시 찾아~~");
+#endif
+			XMStoreFloat4x4(&m_pCBMappedBones->xmf4x4Transform[iBone],
+				XMMatrixTranspose(
+					XMMatrixMultiply(
+						XMMatrixRotationQuaternion(XMLoadFloat4(&result.xmf4QuatRotation)),
+						XMMatrixTranslationFromVector(XMLoadFloat3(&result.xmf3Translation)))));
+
+		}
+	}
+}
+
+void AnimationController::InterpolateKeyframe(Keyframe k0, Keyframe k1, Keyframe k2, Keyframe k3, float t, Keyframe& out)
+{
+	out.xmf4QuatRotation = Interpolate(k0.xmf4QuatRotation, k1.xmf4QuatRotation, k2.xmf4QuatRotation, k3.xmf4QuatRotation, t);
+	out.xmf3Translation = Interpolate(k0.xmf3Translation, k1.xmf3Translation, k2.xmf3Translation, k3.xmf3Translation, t);
+}
+
+XMFLOAT4 AnimationController::Interpolate(XMFLOAT4 q0, XMFLOAT4 q1, XMFLOAT4 q2, XMFLOAT4 q3, float t)
+{
+	XMVECTOR resultV = XMVectorCatmullRom(XMLoadFloat4(&q0), XMLoadFloat4(&q1), XMLoadFloat4(&q2), XMLoadFloat4(&q3), t);
+	XMFLOAT4 result;
+
+	XMStoreFloat4(&result, resultV);
+
+	return result;
+}
+
+XMFLOAT3 AnimationController::Interpolate(XMFLOAT3 q0, XMFLOAT3 q1, XMFLOAT3 q2, XMFLOAT3 q3, float t)
+{
+	XMVECTOR resultV = XMVectorCatmullRom(XMLoadFloat3(&q0), XMLoadFloat3(&q1), XMLoadFloat3(&q2), XMLoadFloat3(&q3), t);
+	XMFLOAT3 result;
+
+	XMStoreFloat3(&result, resultV);
+	return result;
 }

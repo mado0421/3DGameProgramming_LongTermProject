@@ -1,6 +1,6 @@
 SamplerState gSamplerState					: register(s0);
 SamplerComparisonState gShadowSamplerState	: register(s1);
-cbuffer cbPassInfo							: register(b0)
+cbuffer cbPassInfo						: register(b0)
 {
 	matrix		gmtxView				: packoffset(c0);
 	matrix		gmtxProjection			: packoffset(c4);
@@ -10,21 +10,21 @@ cbuffer cbPassInfo							: register(b0)
 	float3		gvCameraPosition		: packoffset(c20);
 	float		gfTime					: packoffset(c20.w);
 };
-cbuffer cbGameObjectInfo					: register(b1)
+cbuffer cbGameObjectInfo				: register(b1)
 {
 	matrix		gmtxGameObject			: packoffset(c0);
 };
-cbuffer cbLightInfo							: register(b2)
+cbuffer cbLightInfo						: register(b2)
 {
-	matrix	gmtxLightViewProj[6]	: packoffset(c0);
-	float3	gvLightColor			: packoffset(c24);
-	float	gfFalloffStart			: packoffset(c24.w);
-	float3	gvLightDirection		: packoffset(c25);
-	float	gfFalloffEnd			: packoffset(c25.w);
-	float3	gvLightPosition			: packoffset(c26);
-	float	gfSpotPower				: packoffset(c26.w);
-	uint	gLightType				: packoffset(c27);
-	bool	gbIsShadow				: packoffset(c27.y);
+	matrix		gmtxLightViewProj[6]	: packoffset(c0);
+	float3		gvLightColor			: packoffset(c24);
+	float		gfFalloffStart			: packoffset(c24.w);
+	float3		gvLightDirection		: packoffset(c25);
+	float		gfFalloffEnd			: packoffset(c25.w);
+	float3		gvLightPosition			: packoffset(c26);
+	float		gfSpotPower				: packoffset(c26.w);
+	uint		gLightType				: packoffset(c27);
+	bool		gbIsShadow				: packoffset(c27.y);
 
 }
 Texture2D gtxtColorMap					: register(t3);
@@ -33,21 +33,26 @@ Texture2D gtxtDepthMap					: register(t5);
 Texture2D gtxtShadowMap					: register(t6);
 TextureCube gtxtShadowCubeMap			: register(t7);
 Texture2DArray gtxtShadowArrayMap		: register(t8);
-
+cbuffer cbAnimationInfo					: register(b9)
+{
+	matrix		gmtxAnimation[64]		: packoffset(c0);
+};
 
 struct VS_INPUT {
 	float3 position : POSITION;
 	float3 normal	: NORMAL;
 	float3 tangent	: TANGENT;
-	float3 bitangent: BITANGENT;
+	//float3 binormal	: BINORMAL;
+	uint4  boneIdx	: BLENDINDICES;
+	float4 weight	: BLENDWEIGHT;
 	float2 uv		: TEXCOORD;
 };
 struct VS_OUTPUT {
 	float4 position : SV_POSITION;
 	float3 positionW: POSITION;
-	float3 normalW	: NORMAL;
 	float2 uv		: TEXCOORD0;
-	float4 projTex	: TEXCOORD1;
+	float3 normalW	: TEXCOORD1;
+	float3 tangentW	: TEXCOORD2;
 };
 struct GS_OUTPUT
 {

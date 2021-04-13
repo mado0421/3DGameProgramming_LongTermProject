@@ -47,6 +47,28 @@ protected:
 };
 
 /*========================================================================
+* AnimatedObject PSO
+*
+* - 2 RTV
+* - 1 DSV
+* - DepthTest True
+* - FrontCounterClockwise False
+* - VS_AnimatedWVP
+* - PS_PackGBuffer
+*=======================================================================*/
+class AnimatedObjectPSO : public PipelineStateObject
+{
+public:
+	AnimatedObjectPSO(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dRootSignature) { CreatePipelineState(pd3dDevice, pd3dRootSignature); }
+protected:
+	virtual void CreatePipelineState(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dRootSignature);
+	virtual D3D12_RASTERIZER_DESC		CreateRasterizerState();
+
+	virtual D3D12_SHADER_BYTECODE		CreatePixelShader(ID3DBlob** ppd3dShaderBlob);
+	virtual D3D12_SHADER_BYTECODE		CreateVertexShader(ID3DBlob** ppd3dShaderBlob);
+};
+
+/*========================================================================
 * RenderShadow PSO
 *
 * - 0 RTV

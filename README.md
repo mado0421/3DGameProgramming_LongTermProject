@@ -231,3 +231,18 @@ AnimationClip의 구조는 다음과 같다.
 	sizeof(Keyframe) * nTotalKeyframe
 	
    Parser를 구현했고 이에 맞춰서 본 프로젝트에서 Import 할 수 있게끔 변경했다.  FBX로 읽은 Mesh를 렌더링 하는 것까지 구현했다. AnimationClip을 읽어오는 것까지 성공했다.
+
+### 2021.04.13
+AnimationClip에서 읽은 FrameData를 GPU에 올려 VS에서 사용할 수 있게 하였다. 
+VS Input Semantic으로 TEXCOORD는 되고 TEXCOORD1은 안된다.
+FrameData가 문제 없이 올라가는 것을 확인했고 이전 Frame과 다음 Frame 간의 보간을 구현하였다.
+3ds Max에서 회전 값은 TCB, 위치 값은 베지어 방식으로 보간한다고 하여 찾아보았는데,
+TCB는 Tension, Continuity, Bias의 줄임말로 CatmullRom Spline에 bias 값을 넣은 정도로 보였다.
+나는 T, C, B 모두 Default 값으로 두고 에셋을 만들 예정이므로 CatmullRom 보간만 할 수 있으면 된다.
+그리고 그건 XMVectorCatmullRom() 라는 함수로 이미 구현되어 있다.
+
+다만, CatmullRom 스플라인은 보간하려는 두 값의 연속성? 미분값? 속도?값 을 정하기 위해 그 앞과 뒤의 값도 필요로 하기 때문에 값을 4개 전달해야 한다.
+이것과 지금 AnimationClip의 저장방식(frameLength와 같은 keytime을 가지는 맨 마지막 키프레임이 있을 수도, 없을 수도 있는 구조)에 따른 루프 애니메이션과 루프가 아닌 애니메이션의 키프레임 인덱스를 정하는 방법을 전부 구현하지는 않았다.
+지금 구현한 방법은 맨 앞과 맨 마지막이 이어지지 않는다는 가정 하에 구현하였다.
+
+현재 프레임 인덱스를 구하는 것 자체는 크게 문제가 없는 것 같고 변환 행렬 값에 문제가 있어서 제대로 애니메이트 되지 않고 있다.

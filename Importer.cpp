@@ -90,6 +90,13 @@ vector<OBJECT_DESC> ObjectDataImporter::Load(const char* filePath) {
 					temp.material = IImporter::GetPath(ss);
 					temp.isMaterial = true;
 				}
+				else if (token.compare("animModel") == 0) {
+					cout << "  - animModel";
+					temp.model = IImporter::GetPath(ss);
+					temp.material = IImporter::GetPath(ss);
+					temp.isMaterial = true;
+					temp.isAnimated = true;
+				}
 				else if (token.compare("mesh") == 0) { cout << "  - Mesh";			temp.model = IImporter::GetPath(ss); }
 			}
 			vecObjDesc.push_back(temp);
@@ -189,7 +196,6 @@ vector<MESH_DATA> MeshDataImporter::Load(const char* filePath)
 
 			MESH_DATA temp;
 			temp.name = GetPath(ss);
-			temp.isFbx = false;
 			vecMeshData.push_back(temp);
 			nObject++;
 
@@ -302,7 +308,6 @@ vector<MESH_DATA> MeshDataImporter::FBXLoad(const char* filePath)
 		
 		MESH_DATA tempMesh;
 		tempMesh.name = name + num;
-		tempMesh.isFbx = true;
 		
 		int nCtrlPoint;
 		in.read((char*)&nCtrlPoint, sizeof(int));
@@ -330,7 +335,7 @@ vector<MESH_DATA> MeshDataImporter::FBXLoad(const char* filePath)
 			Vertex temp;
 			temp.m_xmf3Pos = vecCP[v.ctrlPointIndex].position;
 			temp.m_xmf3Normal = v.normal;
-			temp.m_xmf3BiTangent = v.binormal;
+			//temp.m_xmf3BiTangent = v.binormal;
 			temp.m_xmf3Tangent = v.tangent;
 			temp.m_xmf2UV = v.uv;
 			temp.m_xmi4BoneIndices.x = vecCP[v.ctrlPointIndex].boneIndices[0];
@@ -479,6 +484,7 @@ AnimClip AnimClipDataImporter::Load(const char* filePath)
 		nTotalKeyframe += nFrame;
 	}
 
+	float clipLength = 0;
 	TransformForImport* transform = new TransformForImport[nTotalKeyframe];
 	in.read((char*)transform, sizeof(TransformForImport) * nTotalKeyframe);
 	int iFrameCounter = 0;
@@ -494,10 +500,14 @@ AnimClip AnimClipDataImporter::Load(const char* filePath)
 			animClip.vecBone[iBone][iFrame].xmf3Translation.y = transform[iFrameCounter].RotationTranslation[i++];
 			animClip.vecBone[iBone][iFrame].xmf3Translation.z = transform[iFrameCounter].RotationTranslation[i++];
 			iFrameCounter++;
+
+			clipLength = max(animClip.vecBone[iBone][iFrame].keyTime, clipLength);
 		}
 	}
 
 	in.close();
+
+	animClip.fClipLength = clipLength;
 
 	return animClip;
 }

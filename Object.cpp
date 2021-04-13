@@ -3,6 +3,7 @@
 #include "Mesh.h"
 #include "Model.h"
 #include "Material.h"
+#include "Animation.h"
 
 Object::Object(
 	ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
@@ -112,4 +113,24 @@ void DebugWindowObject::Render(ID3D12GraphicsCommandList* pd3dCommandList)
 	XMStoreFloat4x4(&m_pCBMappedObjects->xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4World)));
 
 	m_pDWMesh->Render(pd3dCommandList);
+}
+
+AnimatedObject::AnimatedObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, D3D12_CPU_DESCRIPTOR_HANDLE& d3dCbvCPUDescriptorStartHandle, D3D12_GPU_DESCRIPTOR_HANDLE& d3dCbvGPUDescriptorStartHandle)
+	:Object(pd3dDevice, pd3dCommandList, d3dCbvCPUDescriptorStartHandle, d3dCbvGPUDescriptorStartHandle)
+{
+	m_AnimCtrl = new AnimationController(pd3dDevice, pd3dCommandList, d3dCbvCPUDescriptorStartHandle, d3dCbvGPUDescriptorStartHandle);
+
+
+}
+
+void AnimatedObject::Update(float fTimeElapsed)
+{
+	Object::Update(fTimeElapsed);
+	m_AnimCtrl->Update(fTimeElapsed);
+}
+
+void AnimatedObject::Render(ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	m_AnimCtrl->SetMatrix(pd3dCommandList);
+	Object::Render(pd3dCommandList);
 }

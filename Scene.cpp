@@ -254,12 +254,20 @@ void Scene::Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12Graphics
 			* - 오브젝트 렌더를 할 때, gModelMng와 gMaterialMng를 통해서 렌더링 할 수 있도록 구조 변경할 것.
 			* 
 			*=======================================================================*/
-			Object* tempObj = new Object(m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
-
-			tempObj->Move(vecObjDesc[i].position);
-			tempObj->SetModel(vecObjDesc[i].model.c_str());
-			tempObj->SetMaterial(vecObjDesc[i].material.c_str());
-			m_vecObject.push_back(tempObj);
+			if (vecObjDesc[i].isAnimated) {
+				AnimatedObject* tempObj = new AnimatedObject(m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
+				tempObj->Move(vecObjDesc[i].position);
+				tempObj->SetModel(vecObjDesc[i].model.c_str());
+				tempObj->SetMaterial(vecObjDesc[i].material.c_str());
+				m_vecAnimObject.push_back(tempObj);
+			}
+			else {
+				Object* tempObj = new Object(m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
+				tempObj->Move(vecObjDesc[i].position);
+				tempObj->SetModel(vecObjDesc[i].model.c_str());
+				tempObj->SetMaterial(vecObjDesc[i].material.c_str());
+				m_vecObject.push_back(tempObj);
+			}
 		}
 	}
 
@@ -414,7 +422,9 @@ void Scene::RenderPass1()
 	m_pd3dCommandList->OMSetRenderTargets(2, rtvHandle, FALSE, &dsvHandle);
 
 	m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["PackGBuffer"]);
-	for (int i = 0; i < m_vecObject.size(); i++) m_vecObject[i]->Render(m_pd3dCommandList);
+	for (auto iter = m_vecObject.begin(); iter != m_vecObject.end(); iter++) (*iter)->Render(m_pd3dCommandList);
+	m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["AnimatedObject"]);
+	for (auto iter = m_vecAnimObject.begin(); iter != m_vecAnimObject.end(); iter++) (*iter)->Render(m_pd3dCommandList);
 
 	d3dResourceBarrier[0].Transition.pResource = gTextureMng.GetTextureResource("GBuffer_Depth");
 	d3dResourceBarrier[0].Transition.StateBefore = D3D12_RESOURCE_STATE_DEPTH_WRITE;
@@ -539,6 +549,9 @@ void Scene::Update(float fTimeElapsed)
 	m_fCurrentTime += fTimeElapsed;
 	::memcpy(&m_pcbMappedPassInfo->m_xmfCurrentTime, &m_fCurrentTime, sizeof(float));
 
+
+	for (auto iter = m_vecObject.begin(); iter != m_vecObject.end(); iter++) (*iter)->Update(fTimeElapsed);
+	for (auto iter = m_vecAnimObject.begin(); iter != m_vecAnimObject.end(); iter++) (*iter)->Update(fTimeElapsed);
 	//for_each(m_vecObject.begin(), m_vecObject.end(), [fTimeElapsed](Object* o) {o->Rotate(XMFLOAT3(0, 30 * fTimeElapsed, 0)); });
 
 }
@@ -595,6 +608,9 @@ void Scene::CreatePSO()
 {
 	PackGBufferPSO PackGBufferPso = PackGBufferPSO(m_pd3dDevice, m_pd3dRootSignature);
 	m_uomPipelineStates["PackGBuffer"] = PackGBufferPso.GetPipelineState();
+
+	AnimatedObjectPSO AnimatedObjectPso = AnimatedObjectPSO(m_pd3dDevice, m_pd3dRootSignature);
+	m_uomPipelineStates["AnimatedObject"] = AnimatedObjectPso.GetPipelineState();
 
 	RenderShadowPSO RenderShadowPso = RenderShadowPSO(m_pd3dDevice, m_pd3dRootSignature);
 	m_uomPipelineStates["RenderShadow"] = RenderShadowPso.GetPipelineState();

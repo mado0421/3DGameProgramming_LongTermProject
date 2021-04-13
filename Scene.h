@@ -3,6 +3,7 @@
 
 
 class Object;
+class AnimatedObject;
 class DebugWindowObject;
 class Camera;
 class RenderToTextureClass;
@@ -39,6 +40,7 @@ protected:
 
 	vector<DebugWindowObject*>					m_vecDebugWindow;
 	vector<Object*>								m_vecObject;
+	vector<AnimatedObject*>						m_vecAnimObject;
 	unordered_map<string, ID3D12PipelineState*> m_uomPipelineStates;
 
 	LightManager*								m_LightMng;
@@ -48,18 +50,12 @@ protected:
 	CB_PASS_INFO*								m_pcbMappedPassInfo;
 	D3D12_GPU_DESCRIPTOR_HANDLE					m_d3dCbvGPUPassInfoHandle;
 
-
 	Framework*									m_pFramework;
 	Camera*										m_pCamera;
 	float										m_fCurrentTime = 0;
 
-
 public:
-
-
-
 	bool test = false;
-	UINT camLightIdx = 0;
 
 public:
 	virtual void Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
@@ -77,10 +73,8 @@ protected:
 	virtual void CreateSRV() {}
 	virtual void CreatePSO();
 
-
 	void CreatePassInfoShaderResource();
 	void UpdatePassInfoAboutCamera();
-
 
 protected:
 	/*==============================================================================
@@ -88,8 +82,5 @@ protected:
 	*
 	==============================================================================*/
 	void ReloadLight();
-
-
-
 };
 

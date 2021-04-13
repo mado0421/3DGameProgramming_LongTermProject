@@ -5,6 +5,8 @@
 #pragma comment(lib, "d3d12.lib")
 #pragma comment(lib, "dxgi.lib")
 
+#define DEBUG
+
 #include "targetver.h"
 #define WIN32_LEAN_AND_MEAN             // 거의 사용되지 않는 내용을 Windows 헤더에서 제외합니다.
 // Windows 헤더 파일
@@ -322,3 +324,25 @@ inline wchar_t* CharToWChar(const char* str) {
 	return wcstring;
 }
 
+//	f0: prev, f1: value0, f2: value1, f3: next
+//	Hermite:
+//	P(t) = s^2(1+2t)A + t^2(1+2s)D + s^2tU - st^2V
+// 
+//	Catmull-Rom:
+//	Vn = (Pn+1 - Pn-1)/2
+// 
+//	U = (f2 - f0)/2
+//	V = (f3 - f1)/2
+//
+//	t: 0 ~ 1
+inline float CatmullRomInterpolate(float f0, float f1, float f2, float f3, float t) {
+	float s = 1 - t;
+	float U = (f2 - f0) * 0.5f;
+	float V = (f3 - f1) * 0.5f;
+
+	return
+		float(pow(s, 2)) * (1 + 2 * t) * f0 +
+		float(pow(t, 2)) * (1 + 2 * s) * f1 +
+		float(pow(s, 2)) * t * U -
+		float(pow(t, 2)) * s * V;
+}

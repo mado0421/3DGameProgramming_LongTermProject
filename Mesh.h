@@ -21,8 +21,6 @@ protected:
 	UINT	m_nVertices;
 	string	m_strName;
 
-	bool isFbx;
-
 	string	m_strDiffMapName;
 	string	m_strNormMapName;
 };

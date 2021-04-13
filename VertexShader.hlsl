@@ -18,6 +18,37 @@ VS_OUTPUT VS_PackGBuffer(VS_INPUT input) {
 }
 
 /*========================================================================
+* AnimatedPackGBufferPSO
+*
+* - 평범하게 월드 변환, 뷰 변환, 투영 변환 행렬곱
+* - position, normal, texCoord
+*=======================================================================*/
+VS_OUTPUT VS_AnimatedWVP(VS_INPUT input) {
+	VS_OUTPUT output;
+
+	float weights[4] = { input.weight[0], input.weight[1], input.weight[2], input.weight[3] };
+
+	float3 posL		= 0;
+	float3 normalL	= 0;
+	float3 tangentL = 0;
+
+	for (int i = 0; i < 4; ++i) {
+		posL		+= weights[i] * mul(float4(input.position, 1.0f), gmtxAnimation[input.boneIdx[i]]).xyz;
+		normalL		+= weights[i] * mul(input.normal, (float3x3)gmtxAnimation[input.boneIdx[i]]);
+		tangentL	+= weights[i] * mul(input.tangent, (float3x3)gmtxAnimation[input.boneIdx[i]]);
+	}
+
+	output.positionW	= (float3)mul(float4(posL, 1.0f), gmtxGameObject);
+	output.position		= mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
+	output.normalW		= mul(normalL, (float3x3)gmtxGameObject);
+	output.tangentW		= mul(tangentL, (float3x3)gmtxGameObject);
+	output.uv			= input.uv;
+
+	return output;
+}
+
+
+/*========================================================================
 * RenderShadowPSO
 * VS_MulW_LV_LP
 * TransformToWolrdLightViewProj ?

@@ -6,5 +6,5 @@ defaultDiffuseMap.dds
 defaultNormalMap.dds
 defaultSpecularMap.dds
 specularTest.dds
-animTest7(uvmapping,triagulate,nosplit).mac
-animTest7(uvmapping,triagulate,nosplit).mm
+animTest2.mac
+animTest2.mm

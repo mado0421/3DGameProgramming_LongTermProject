@@ -17,7 +17,6 @@ class MESH_DATA {
 public:
 	string name;
 	SHAPE shape;
-	bool isFbx = false;
 };
 struct VertexIdx {
 	int vid, vtid, vnid;
@@ -27,7 +26,8 @@ struct OBJECT_DESC {
 	XMFLOAT3	rotation		= XMFLOAT3(0, 0, 0);
 	string		model			= "";
 	string		material		= "defaultMaterial";
-	bool isMaterial = false;
+	bool		isMaterial = false;
+	bool		isAnimated = false;
 };
 
 class IImporter {
