@@ -333,7 +333,15 @@ vector<MESH_DATA> MeshDataImporter::FBXLoad(const char* filePath)
 			VertexForImport v;
 			v = pVertex[iV];
 			Vertex temp;
+
+
+			float tempyz;
+
 			temp.m_xmf3Pos = vecCP[v.ctrlPointIndex].position;
+			tempyz = temp.m_xmf3Pos.y;
+			temp.m_xmf3Pos.y = temp.m_xmf3Pos.z;
+			temp.m_xmf3Pos.z = tempyz;
+
 			temp.m_xmf3Normal = v.normal;
 			//temp.m_xmf3BiTangent = v.binormal;
 			temp.m_xmf3Tangent = v.tangent;
@@ -457,51 +465,32 @@ AnimClip AnimClipDataImporter::Load(const char* filePath)
 	ultimateOfPerfectFilePath = fileHead + filePath;
 	ultimateOfPerfectFilePath += fileTail;
 
-	/*===============================================================
-	* Import Data Structure
-	*
-	* nBone
-	* nFrame
-	* nFrame
-	* nFrame
-	*
-	* ( sizeof( float ) * 8 ) * nTotalFrame
-	*
-	===============================================================*/
-
 	ifstream in;
-
 	in.open(ultimateOfPerfectFilePath, ios::in | ios::binary);
+
 	int nBone;
 	in.read((char*)&nBone, sizeof(int));
 	animClip.vecBone.resize(nBone);
 
-	int nTotalKeyframe = 0;
+	int* nFrame = new int[nBone];
+	in.read((char*)nFrame, sizeof(int) * nBone);
+
 	for (int iBone = 0; iBone < nBone; ++iBone) {
-		int nFrame;
-		in.read((char*)&nFrame, sizeof(int));
-		animClip.vecBone[iBone].resize(nFrame);
-		nTotalKeyframe += nFrame;
+		animClip.vecBone[iBone].keys.resize(nFrame[iBone]);
 	}
 
 	float clipLength = 0;
-	TransformForImport* transform = new TransformForImport[nTotalKeyframe];
-	in.read((char*)transform, sizeof(TransformForImport) * nTotalKeyframe);
-	int iFrameCounter = 0;
-	for (int iBone = 0; iBone < nBone; ++iBone) {
-		for (int iFrame = 0; iFrame < animClip.vecBone[iBone].size(); iFrame++) {
-			int i = 0;
-			animClip.vecBone[iBone][iFrame].keyTime = transform[iFrameCounter].RotationTranslation[i++];
-			animClip.vecBone[iBone][iFrame].xmf4QuatRotation.x = transform[iFrameCounter].RotationTranslation[i++];
-			animClip.vecBone[iBone][iFrame].xmf4QuatRotation.y = transform[iFrameCounter].RotationTranslation[i++];
-			animClip.vecBone[iBone][iFrame].xmf4QuatRotation.z = transform[iFrameCounter].RotationTranslation[i++];
-			animClip.vecBone[iBone][iFrame].xmf4QuatRotation.w = transform[iFrameCounter].RotationTranslation[i++];
-			animClip.vecBone[iBone][iFrame].xmf3Translation.x = transform[iFrameCounter].RotationTranslation[i++];
-			animClip.vecBone[iBone][iFrame].xmf3Translation.y = transform[iFrameCounter].RotationTranslation[i++];
-			animClip.vecBone[iBone][iFrame].xmf3Translation.z = transform[iFrameCounter].RotationTranslation[i++];
-			iFrameCounter++;
+	for (int iBone = 0; iBone < nBone; iBone++) {
+		int nFloat = 7 + 8 * animClip.vecBone[iBone].keys.size();
+		float* fIn = new float[nFloat];
+		in.read((char*)fIn, sizeof(float) * nFloat);
 
-			clipLength = max(animClip.vecBone[iBone][iFrame].keyTime, clipLength);
+		int offset = 0;
+		animClip.vecBone[iBone].globalMtx = IImporter::GetMatrix(fIn, offset);
+
+		for (int iKeys = 0; iKeys < animClip.vecBone[iBone].keys.size(); iKeys++) {
+			animClip.vecBone[iBone].keys[iKeys] = IImporter::GetKeyframe(fIn, offset);
+			clipLength = max(animClip.vecBone[iBone].keys[iKeys].keyTime, clipLength);
 		}
 	}
 

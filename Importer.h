@@ -59,6 +59,44 @@ protected:
 
 		return output;
 	}
+
+	XMFLOAT4X4 GetMatrix(const float* fIn, int& offset) {
+		int i = 0;
+		XMFLOAT4X4 result;
+		XMFLOAT4 r;
+		XMFLOAT3 t;
+
+		r.x = fIn[offset + i++];
+		r.y = fIn[offset + i++];
+		r.z = fIn[offset + i++];
+		r.w = fIn[offset + i++];
+		t.x = fIn[offset + i++];
+		t.y = fIn[offset + i++];
+		t.z = fIn[offset + i++];
+
+		offset += i;
+
+		XMStoreFloat4x4(&result,
+				XMMatrixMultiply(
+					XMMatrixRotationQuaternion(XMLoadFloat4(&r)),
+					XMMatrixTranslationFromVector(XMLoadFloat3(&t))));
+
+		return result;
+	}
+	Keyframe GetKeyframe(const float* fIn, int& offset) {
+		Keyframe result;
+		int i = 0;
+		result.keyTime = fIn[offset + i++];
+		result.xmf4QuatRotation.x = fIn[offset + i++];
+		result.xmf4QuatRotation.y = fIn[offset + i++];
+		result.xmf4QuatRotation.z = fIn[offset + i++];
+		result.xmf4QuatRotation.w = fIn[offset + i++];
+		result.xmf3Translation.x = fIn[offset + i++];
+		result.xmf3Translation.y = fIn[offset + i++];
+		result.xmf3Translation.z = fIn[offset + i++];
+		offset += i;
+		return result;
+	}
 };
 
 

@@ -43,7 +43,7 @@ AnimationController::AnimationController(ID3D12Device* pd3dDevice, ID3D12Graphic
 
 void AnimationController::Update(float fTimeElapsed)
 {
-	m_fTime += fTimeElapsed;
+	m_fTime += fTimeElapsed * 0.1f;
 }
 
 
@@ -59,6 +59,9 @@ void AnimationController::SetMatrix(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	AnimClip* temp = gAnimMng.GetAnimClip("animTest2");
 
+	XMMATRIX mtxFront, mtxBack, result;
+
+
 	pd3dCommandList->SetGraphicsRootDescriptorTable(ROOTSIGNATURE_ANIMTRANSFORM, m_d3dCbvGPUDescriptorHandle);
 	UINT ncbElementBytes = ((sizeof(CB_BONE_INFO) + 255) & ~255);
 	memset(m_pCBMappedBones, NULL, ncbElementBytes);
@@ -72,15 +75,17 @@ void AnimationController::SetMatrix(ID3D12GraphicsCommandList* pd3dCommandList)
 	* 각 Bone마다 InterpolationIndex를 찾아야 함
 	========================================================================*/
 	for (int iBone = 0; iBone < temp->vecBone.size(); iBone++) {
+
+		mtxFront = XMLoadFloat4x4(&temp->vecBone[iBone].globalMtx);
+
+
 		/*========================================================================
 		* 만약, 키프레임이 하나밖에 없으면 그 값을 그대로 넣는다.
 		========================================================================*/
-		if (temp->vecBone[iBone].size() <= 1) {
-			XMStoreFloat4x4(&m_pCBMappedBones->xmf4x4Transform[iBone], 
-				XMMatrixTranspose(
-					XMMatrixMultiply(
-						XMMatrixRotationQuaternion(XMLoadFloat4(&temp->vecBone[iBone][0].xmf4QuatRotation)), 
-						XMMatrixTranslationFromVector(XMLoadFloat3(&temp->vecBone[iBone][0].xmf3Translation)))));
+		if (temp->vecBone[iBone].keys.size() <= 1) {
+			mtxBack = XMMatrixMultiply(
+						XMMatrixRotationQuaternion(XMLoadFloat4(&temp->vecBone[iBone].keys[0].xmf4QuatRotation)),
+						XMMatrixTranslationFromVector(XMLoadFloat3(&temp->vecBone[iBone].keys[0].xmf3Translation)));
 		}
 		/*========================================================================
 		* 키프레임이 두 개 이상이면 index를 찾아야 한다.
@@ -90,62 +95,88 @@ void AnimationController::SetMatrix(ID3D12GraphicsCommandList* pd3dCommandList)
 			Keyframe k0, k1, k2, k3, result;
 			int iFrame = 0;
 
-#ifdef DEBUG
-			bool ok = false;
-#endif
-			for (; iFrame < temp->vecBone[iBone].size(); iFrame++) {
+			for (; iFrame < temp->vecBone[iBone].keys.size(); iFrame++) {
 				/*========================================================================
 				* 중간에 있는 경우:
 				========================================================================*/
-				if (fTime < temp->vecBone[iBone][iFrame].keyTime) {
-					k2 = temp->vecBone[iBone][iFrame];
+				if (fTime <= temp->vecBone[iBone].keys[iFrame].keyTime) {
+					k2 = temp->vecBone[iBone].keys[iFrame];
 
-					if (iFrame + 1 == temp->vecBone[iBone].size())	k3 = temp->vecBone[iBone][iFrame];
-					else											k3 = temp->vecBone[iBone][iFrame + 1];
+					if (iFrame == temp->vecBone[iBone].keys.size() - 1)	k3 = temp->vecBone[iBone].keys[iFrame];
+					else												k3 = temp->vecBone[iBone].keys[iFrame + 1];
 
-					k1 = temp->vecBone[iBone][iFrame - 1];
+					float t;
 
-					if (iFrame - 1 == 0)	k0 = temp->vecBone[iBone][iFrame - 1];
-					else					k0 = temp->vecBone[iBone][iFrame - 2];
+					if (iFrame == 0) {
+						k0 = temp->vecBone[iBone].keys[iFrame];
+						k1 = temp->vecBone[iBone].keys[iFrame];
 
-					float t = (fTime - k2.keyTime) / (k3.keyTime - k2.keyTime);
+						if (k2.keyTime <= 0)	t = fTime;
+						else					t = (k2.keyTime - fTime) / k2.keyTime;
+					}
+					else if (iFrame == 1) {
+						k0 = temp->vecBone[iBone].keys[iFrame - 1];
+						k1 = temp->vecBone[iBone].keys[iFrame - 1];
+
+						if ((k2.keyTime - k1.keyTime) <= 0)	t = fTime;
+						else					t = (k2.keyTime - fTime) / (k2.keyTime - k1.keyTime);
+					}
+					else {
+						k0 = temp->vecBone[iBone].keys[iFrame - 2];
+						k1 = temp->vecBone[iBone].keys[iFrame - 1];
+
+						if ((k2.keyTime - k1.keyTime) <= 0)	t = fTime;
+						else								t = (k2.keyTime - fTime) / (k2.keyTime - k1.keyTime);
+					}
 
 					InterpolateKeyframe(k0, k1, k2, k3, t, result);
-#ifdef DEBUG
-					ok = true;
-#endif
 					break;
 				}
 			}
 			/*========================================================================
 			* 다 뒤졌는데 없었다. 맨 뒤에 있는 것임.
 			========================================================================*/
-			if (iFrame == temp->vecBone[iBone].size()) {
-				k1 = temp->vecBone[iBone][temp->vecBone[iBone].size() - 1];
+			if (iFrame == temp->vecBone[iBone].keys.size()) {
+				k1 = temp->vecBone[iBone].keys[temp->vecBone[iBone].keys.size() - 1];
 				k2 = k1;
 				k3 = k1;
 
-				if (temp->vecBone[iBone].size() - 2 >= 0)	k0 = temp->vecBone[iBone][temp->vecBone[iBone].size() - 2];
+				if (temp->vecBone[iBone].keys.size() - 2 >= 0)	k0 = temp->vecBone[iBone].keys[temp->vecBone[iBone].keys.size() - 2];
 				else										k0 = k1;
 
 				float t = (fTime - k1.keyTime) / (temp->fClipLength - k1.keyTime);
 
 				InterpolateKeyframe(k0, k1, k2, k3, t, result);
-#ifdef DEBUG
-				ok = true;
-#endif
 			}
-#ifdef DEBUG
-			if (!ok) assert(!"idx 다시 찾아~~");
-#endif
-			XMStoreFloat4x4(&m_pCBMappedBones->xmf4x4Transform[iBone],
-				XMMatrixTranspose(
-					XMMatrixMultiply(
+			mtxBack = XMMatrixMultiply(
 						XMMatrixRotationQuaternion(XMLoadFloat4(&result.xmf4QuatRotation)),
-						XMMatrixTranslationFromVector(XMLoadFloat3(&result.xmf3Translation)))));
+						XMMatrixTranslationFromVector(XMLoadFloat3(&result.xmf3Translation)));
 
 		}
+
+		//XMVECTOR det;
+		//det = XMMatrixDeterminant(mtxFront);
+		//mtxFront = XMMatrixInverse(&det, mtxFront);
+		//det = XMMatrixDeterminant(mtxBack);
+		//mtxBack = XMMatrixInverse(&det, mtxBack);
+
+		result = XMMatrixMultiply(mtxFront, mtxBack);
+		XMStoreFloat4x4(&m_pCBMappedBones->xmf4x4Transform[iBone], XMMatrixTranspose( result ));
 	}
+
+	mtxFront = XMLoadFloat4x4(&temp->vecBone[2].globalMtx);
+	mtxBack = XMMatrixMultiply(
+		XMMatrixRotationQuaternion(XMLoadFloat4(&temp->vecBone[2].keys[0].xmf4QuatRotation)),
+		XMMatrixTranslationFromVector(XMLoadFloat3(&temp->vecBone[2].keys[0].xmf3Translation)));
+
+	result = XMMatrixMultiply(mtxFront, mtxBack);
+	XMFLOAT4X4 test;
+	XMStoreFloat4x4(&test, result);
+
+	XMVECTOR r = XMQuaternionRotationMatrix(result);
+	XMFLOAT4 rr;
+	XMStoreFloat4(&rr, r);
+
 }
 
 void AnimationController::InterpolateKeyframe(Keyframe k0, Keyframe k1, Keyframe k2, Keyframe k3, float t, Keyframe& out)

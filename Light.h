@@ -110,7 +110,7 @@ public:
 	// For Directional Light Shadow
 	float			m_fZ[4];
 	XMFLOAT4		m_xmf4FrustumCorners[3][8];
-	UINT			m_nCascade;
+	int			m_nCascade;
 	XMFLOAT4X4		m_xmf4x4LightView;
 	XMFLOAT4X4		m_xmf4x4LightViewInv;
 private:

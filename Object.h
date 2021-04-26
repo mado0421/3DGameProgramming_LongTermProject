@@ -63,7 +63,7 @@ public:
 		D3D12_CPU_DESCRIPTOR_HANDLE& d3dCbvCPUDescriptorStartHandle,
 		D3D12_GPU_DESCRIPTOR_HANDLE& d3dCbvGPUDescriptorStartHandle);
 	virtual ~AnimatedObject() {
-		if (m_AnimCtrl) delete m_AnimCtrl;
+		//if (m_AnimCtrl) delete m_AnimCtrl;
 	}
 	virtual void Update(float fTimeElapsed);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList);

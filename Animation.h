@@ -10,7 +10,11 @@ struct Keyframe {
 struct CB_BONE_INFO {
 	XMFLOAT4X4 xmf4x4Transform[nMaxBone];
 };
-using Bone = vector<Keyframe>;
+struct Bone {
+	XMFLOAT4X4 globalMtx;
+	vector<Keyframe> keys;
+};
+
 struct AnimClip {
 	string strClipName;
 	vector<Bone> vecBone;
