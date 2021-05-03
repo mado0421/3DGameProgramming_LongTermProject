@@ -68,6 +68,7 @@ public:
 	virtual void Update(float fTimeElapsed);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList);
 
+	void SetAnimCtrlTime(float t);
 
 protected:
 	AnimationController* m_AnimCtrl;

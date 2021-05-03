@@ -2,8 +2,8 @@
 
 #{ model mech TestMat position 0 0 0 }
 #{ mesh animTest position 0 0 0 }
-{ animModel animTest2 position 0 0 0 }
+{ animModel animTest_YUP position 0 0 0 }
 #{ mesh Assets/room.obj position 0 0 0 }
-#{ model floor TestMat position 0 0 0 }
+#{ model floor TestMat position 0 -2 0 }
 
 #End

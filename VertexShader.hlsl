@@ -27,6 +27,7 @@ VS_OUTPUT VS_AnimatedWVP(VS_INPUT input) {
 	VS_OUTPUT output;
 
 	float weights[4] = { input.weight[0], input.weight[1], input.weight[2], input.weight[3] };
+	//float weights[4] = { 1, 0, 0, 0 };
 
 	float3 posL		= 0;
 	float3 normalL	= 0;

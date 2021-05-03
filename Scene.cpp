@@ -469,6 +469,8 @@ void Scene::RenderPass1()
 			m_pd3dCommandList->OMSetRenderTargets(0, NULL, TRUE, &dsvHandle);
 
 			for (int i = 0; i < m_vecObject.size(); i++) m_vecObject[i]->Render(m_pd3dCommandList);
+			//for (auto iter = m_vecAnimObject.begin(); iter != m_vecAnimObject.end(); iter++) (*iter)->Render(m_pd3dCommandList);
+
 		}
 	}
 }
@@ -569,26 +571,42 @@ void Scene::Input(UCHAR* pKeyBuffer, float fTimeElapsed)
 	if (pKeyBuffer[KeyCode::_X] & 0xF0) { m_pCamera->Rotate(-50 * fTimeElapsed, 0, 0); }
 
 	if (pKeyBuffer[KeyCode::_1] & 0xF0) {
-		m_pCamera->SetPosition(XMFLOAT3(0, 1, 0));
-		m_pCamera->SetLookAt(XMFLOAT3(0, 1, 1));
-
+		//m_pCamera->SetPosition(XMFLOAT3(0, 1, 0));
+		//m_pCamera->SetLookAt(XMFLOAT3(0, 1, 1));
+		m_vecAnimObject[0]->SetAnimCtrlTime(0);
+		gTestInt = 0;
 	}
 	if (pKeyBuffer[KeyCode::_2] & 0xF0) {
-		m_pCamera->SetPosition(XMFLOAT3(0, 1, 3));
-		m_pCamera->SetLookAt(XMFLOAT3(0, 1, 0));
+		//m_pCamera->SetPosition(XMFLOAT3(0, 1, 3));
+		//m_pCamera->SetLookAt(XMFLOAT3(0, 1, 0));
+		m_vecAnimObject[0]->SetAnimCtrlTime(0.333333343);
+		gTestInt = 1;
 
 	}
 	if (pKeyBuffer[KeyCode::_3] & 0xF0) {
-		m_pCamera->SetPosition(XMFLOAT3(0, 1, -3));
-		m_pCamera->SetLookAt(XMFLOAT3(0, 1, 0));
+		//m_pCamera->SetPosition(XMFLOAT3(0, 1, -3));
+		//m_pCamera->SetLookAt(XMFLOAT3(0, 1, 0));
+		m_vecAnimObject[0]->SetAnimCtrlTime(0.666666687);
+		gTestInt = 2;
+
 	}
 	if (pKeyBuffer[KeyCode::_4] & 0xF0) {
-		m_pCamera->SetPosition(XMFLOAT3(3, 1, 3));
-		m_pCamera->SetLookAt(XMFLOAT3(0, 1, 0));
+		//m_pCamera->SetPosition(XMFLOAT3(3, 1, 3));
+		//m_pCamera->SetLookAt(XMFLOAT3(0, 1, 0));1.00000000
+		m_vecAnimObject[0]->SetAnimCtrlTime(1.00000000);
+		gTestInt = 3;
 	}
 	if (pKeyBuffer[KeyCode::_5] & 0xF0) {
-		m_pCamera->SetPosition(XMFLOAT3(3, 3, 3));
-		m_pCamera->SetLookAt(XMFLOAT3(0, 0, 0));
+		//m_pCamera->SetPosition(XMFLOAT3(3, 3, 3));
+		//m_pCamera->SetLookAt(XMFLOAT3(0, 0, 0));1.00000000
+		m_vecAnimObject[0]->SetAnimCtrlTime(1.33333337);
+		gTestInt = 4;
+	}
+	if (pKeyBuffer[KeyCode::_6] & 0xF0) {
+		//m_pCamera->SetPosition(XMFLOAT3(3, 3, 3));
+		//m_pCamera->SetLookAt(XMFLOAT3(0, 0, 0));1.00000000
+		m_vecAnimObject[0]->SetAnimCtrlTime(1.66666663);
+		gTestInt = 5;
 	}
 
 	if (pKeyBuffer[KeyCode::_N] & 0xF0) { test = true; }

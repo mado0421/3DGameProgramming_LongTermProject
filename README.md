@@ -246,3 +246,30 @@ TCB는 Tension, Continuity, Bias의 줄임말로 CatmullRom Spline에 bias 값�
 지금 구현한 방법은 맨 앞과 맨 마지막이 이어지지 않는다는 가정 하에 구현하였다.
 
 현재 프레임 인덱스를 구하는 것 자체는 크게 문제가 없는 것 같고 변환 행렬 값에 문제가 있어서 제대로 애니메이트 되지 않고 있다.
+
+### 이번주 일정
+#### 21.04.12 - 21.04.18
+* Animation Parser, Animation Controller 구현
+
+진척사항이 없어서 커밋하지 않았다.
+
+### 이번주 일정
+#### 21.04.19 - 21.04.25
+* Animation Parser, Animation Controller 구현
+
+진척사항이 없어서 커밋하지 않았다.
+
+### 이번주 일정
+#### 21.04.26 - 21.05.02
+* 휴식
+
+### 이번주 일정
+#### 21.05.03 - 21.05.09
+* Animation Parser, Animation Controller 구현
+
+### 2021.05.03
+Fbx Parser 구현 성공. 추후 내용 정리해서 올릴 것.
+
+### 2021.05.04
+본 프로젝트에 적용 완료. 코드 정리해서 올릴 것.
+<img src="https://user-images.githubusercontent.com/21697638/116945821-8840be80-acb3-11eb-8188-742572a047b6.png" width="70%" height="70%"></img>

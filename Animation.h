@@ -3,7 +3,6 @@
 constexpr UINT nMaxBone = 64;
 
 struct Keyframe {
-	float keyTime;
 	XMFLOAT4 xmf4QuatRotation;
 	XMFLOAT3 xmf3Translation;
 };
@@ -18,7 +17,8 @@ struct Bone {
 struct AnimClip {
 	string strClipName;
 	vector<Bone> vecBone;
-	float fClipLength = 0;
+	vector<double>vecTimes;
+	double fClipLength = 0;
 };
 
 class AnimationManager {
@@ -53,9 +53,11 @@ public:
 	void SetMatrix(ID3D12GraphicsCommandList* pd3dCommandList);
 	void InterpolateKeyframe(Keyframe k0, Keyframe k1, Keyframe k2, Keyframe k3, float t, Keyframe& out);
 
+	void Test_SetTime(float t) { m_fTime = t; }
+
 protected:
-	XMFLOAT4 Interpolate(XMFLOAT4 q0, XMFLOAT4 q1, XMFLOAT4 q2, XMFLOAT4 q3, float t);
-	XMFLOAT3 Interpolate(XMFLOAT3 v0, XMFLOAT3 v1, XMFLOAT3 v2, XMFLOAT3 v3, float t);
+	XMFLOAT4 Interpolate(const XMFLOAT4 q0, const XMFLOAT4 q1, const XMFLOAT4 q2, const XMFLOAT4 q3, float t);
+	XMFLOAT3 Interpolate(const XMFLOAT3 v0, const XMFLOAT3 v1, const XMFLOAT3 v2, const XMFLOAT3 v3, float t);
 
 protected:
 	float			m_fTime;

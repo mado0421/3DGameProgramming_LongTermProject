@@ -134,3 +134,8 @@ void AnimatedObject::Render(ID3D12GraphicsCommandList* pd3dCommandList)
 	m_AnimCtrl->SetMatrix(pd3dCommandList);
 	Object::Render(pd3dCommandList);
 }
+
+void AnimatedObject::SetAnimCtrlTime(float t)
+{
+	m_AnimCtrl->Test_SetTime(t);
+}

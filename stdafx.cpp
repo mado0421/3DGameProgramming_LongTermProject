@@ -8,5 +8,6 @@ TextureManager	gTextureMng;
 ModelManager	gModelMng;
 MaterialManager gMaterialMng;
 AnimationManager gAnimMng;
+int gTestInt = 0;
 
 UINT gnCbvSrvDescriptorIncrementSize = 0;

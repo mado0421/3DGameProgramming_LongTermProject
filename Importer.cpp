@@ -11,7 +11,6 @@ XMFLOAT3 IImporter::GetFloat3(stringstream& ss)
 	ss >> xmf3Pos.x;
 	ss >> xmf3Pos.y;
 	ss >> xmf3Pos.z;
-	cout << xmf3Pos.x << ", " << xmf3Pos.y << ", " << xmf3Pos.z << "\n";
 
 	return xmf3Pos;
 }
@@ -22,7 +21,6 @@ XMFLOAT2 IImporter::GetFloat2(stringstream& ss)
 	ss >> xmf2.x;
 	ss >> xmf2.y;
 
-	cout << xmf2.x << ", " << xmf2.y << "\n";
 
 	return xmf2;
 }
@@ -32,7 +30,6 @@ float IImporter::GetFloat(stringstream& ss)
 
 	ss >> f;
 
-	cout << f << "\n";
 
 	return f;
 }
@@ -41,7 +38,6 @@ bool IImporter::GetBool(stringstream& ss) {
 
 	ss >> boolalpha >> b;
 
-	cout << b << "\n";
 
 	return b;
 }
@@ -50,7 +46,6 @@ string IImporter::GetPath(stringstream& ss)
 	string path;
 
 	ss >> path;
-	cout << path << "\n";
 
 	return path;
 }
@@ -62,7 +57,6 @@ vector<OBJECT_DESC> ObjectDataImporter::Load(const char* filePath) {
 	vector<OBJECT_DESC> vecObjDesc;
 
 	if (!in.is_open()) {
-		cout << "Error\n";
 		assert(!"오브젝트 정보들을 읽어오는데 실패했습니다.");
 		return vecObjDesc;
 	}
@@ -72,35 +66,30 @@ vector<OBJECT_DESC> ObjectDataImporter::Load(const char* filePath) {
 
 		stringstream ss(s);
 		getline(ss, token, ' ');
-		if (token.compare("#Object") == 0) cout << "<Object Load Start>\n\n";
-		else if (token.compare("#End") == 0) { cout << "<Object Load End>";	break; }
+		if (token.compare("#End") == 0) break;
 
 		if (token.compare("{") == 0) {
 			OBJECT_DESC temp;
-			cout << "<New Object>\n";
 			while (token.compare("}")) {
 
 				getline(ss, token, ' ');
 
-				if (token.compare("position") == 0) { cout << "  - Position :";		temp.position = IImporter::GetFloat3(ss); }
-				else if (token.compare("rotation") == 0) { cout << "  - Rotation :";temp.rotation = IImporter::GetFloat3(ss); }
+				if (token.compare("position") == 0) temp.position = IImporter::GetFloat3(ss); 
+				else if (token.compare("rotation") == 0) temp.rotation = IImporter::GetFloat3(ss); 
 				else if (token.compare("model") == 0) { 
-					cout << "  - Model";		
 					temp.model = IImporter::GetPath(ss);
 					temp.material = IImporter::GetPath(ss);
 					temp.isMaterial = true;
 				}
 				else if (token.compare("animModel") == 0) {
-					cout << "  - animModel";
 					temp.model = IImporter::GetPath(ss);
 					temp.material = IImporter::GetPath(ss);
 					temp.isMaterial = true;
 					temp.isAnimated = true;
 				}
-				else if (token.compare("mesh") == 0) { cout << "  - Mesh";			temp.model = IImporter::GetPath(ss); }
+				else if (token.compare("mesh") == 0) temp.model = IImporter::GetPath(ss); 
 			}
 			vecObjDesc.push_back(temp);
-			cout << "<New Object End>\n\n";
 		}
 	}
 
@@ -114,7 +103,6 @@ vector<LIGHT_DESC> LightDataImporter::Load(const char* filePath) {
 	vector<LIGHT_DESC> vecLightDesc;
 
 	if (!in.is_open()) {
-		cout << "Error\n";
 		assert(!"라이트 정보들을 읽어오는데 실패했습니다.");
 		return vecLightDesc;
 	}
@@ -124,28 +112,25 @@ vector<LIGHT_DESC> LightDataImporter::Load(const char* filePath) {
 
 		stringstream ss(s);
 		getline(ss, token, ' ');
-		if (token.compare("#Light") == 0) cout << "<Light Load Start>\n\n";
-		else if (token.compare("#End") == 0) { cout << "<Light Load End>";	break; }
+		if (token.compare("#End") == 0) break; 
 
 		if (token.compare("{") == 0) {
 			LIGHT_DESC temp;
-			cout << "<New Light>\n";
 			while (token.compare("}")) {
 
 				getline(ss, token, ' ');
 
-				if (token.compare("point") == 0) { cout << "  - PointLight\n";		temp.lightType = LIGHTTYPE::LIGHT_POINT; }
-				else if (token.compare("dir") == 0) { cout << "  - DirectionalLight\n"; temp.lightType = LIGHTTYPE::LIGHT_DIRECTIONAL; }
-				else if (token.compare("spot") == 0) { cout << "  - SpotLight\n";		temp.lightType = LIGHTTYPE::LIGHT_SPOT; }
-				else if (token.compare("position") == 0) { cout << " Position is ";			temp.xmf3Position = IImporter::GetFloat3(ss); }
-				else if (token.compare("color") == 0) { cout << " color is ";				temp.xmf3Color = IImporter::GetFloat3(ss); }
-				else if (token.compare("direction") == 0) { cout << " direction is ";			temp.xmf3Direction = IImporter::GetFloat3(ss); }
-				else if (token.compare("falloff") == 0) { cout << " falloff is ";			temp.xmf2Falloff = IImporter::GetFloat2(ss); }
-				else if (token.compare("spotPower") == 0) { cout << " spotPower is ";			temp.fSpotPower = IImporter::GetFloat(ss); }
-				else if (token.compare("shadow") == 0) { cout << " shadow is ";			temp.bIsShadow = IImporter::GetBool(ss); }
+				if (token.compare("point") == 0) {			temp.lightType = LIGHTTYPE::LIGHT_POINT; }
+				else if (token.compare("dir") == 0) {		temp.lightType = LIGHTTYPE::LIGHT_DIRECTIONAL; }
+				else if (token.compare("spot") == 0) {		temp.lightType = LIGHTTYPE::LIGHT_SPOT; }
+				else if (token.compare("position") == 0) {	temp.xmf3Position = IImporter::GetFloat3(ss); }
+				else if (token.compare("color") == 0) {		temp.xmf3Color = IImporter::GetFloat3(ss); }
+				else if (token.compare("direction") == 0) { temp.xmf3Direction = IImporter::GetFloat3(ss); }
+				else if (token.compare("falloff") == 0) {	temp.xmf2Falloff = IImporter::GetFloat2(ss); }
+				else if (token.compare("spotPower") == 0) { temp.fSpotPower = IImporter::GetFloat(ss); }
+				else if (token.compare("shadow") == 0) {	temp.bIsShadow = IImporter::GetBool(ss); }
 			}
 			vecLightDesc.push_back(temp);
-			cout << "<New Light End>\n\n";
 		}
 	}
 
@@ -173,7 +158,6 @@ vector<MESH_DATA> MeshDataImporter::Load(const char* filePath)
 	string token;
 	string empty("");
 	if (!in.is_open()) {
-		cout << "Error\n";
 		assert(!"메쉬 파일 이상해!!\n");
 	}
 
@@ -190,7 +174,6 @@ vector<MESH_DATA> MeshDataImporter::Load(const char* filePath)
 		getline(ss, token, ' ');
 		if (token.compare("#") == 0) continue;
 		else if (token.compare("o") == 0) { 
-			cout << token << " "; 
 			s.replace(0, 2, empty); 
 			stringstream ss(s); 
 
@@ -202,7 +185,6 @@ vector<MESH_DATA> MeshDataImporter::Load(const char* filePath)
 			continue; 
 		}
 		else if (token.compare("v") == 0) { 
-			cout << token << " ";
 			s.replace(0, 2, empty); 
 			stringstream ss(s); 
 			vecControlPoint.push_back( GetFloat3(ss) );
@@ -210,7 +192,6 @@ vector<MESH_DATA> MeshDataImporter::Load(const char* filePath)
 			continue;
 		}
 		else if (token.compare("vt") == 0) { 
-			cout << token << " "; 
 			s.replace(0, 3, empty); 
 			stringstream ss(s); 
 			vecTexCoord.push_back( GetFloat2(ss) );
@@ -218,7 +199,6 @@ vector<MESH_DATA> MeshDataImporter::Load(const char* filePath)
 			continue;
 		}
 		else if (token.compare("vn") == 0) {
-			cout << token << " "; 
 			s.replace(0, 3, empty);
 			stringstream ss(s); 
 			vecNormal.push_back( GetFloat3(ss) );
@@ -227,7 +207,6 @@ vector<MESH_DATA> MeshDataImporter::Load(const char* filePath)
 		}
 		else if (token.compare("s") == 0) continue;
 		else if (token.compare("f") == 0) {
-			cout << token << " ";
 			s.replace(0, 2, empty);
 			stringstream ss(s);
 			VertexIdx verIdx;
@@ -239,11 +218,9 @@ vector<MESH_DATA> MeshDataImporter::Load(const char* filePath)
 
 			verIdx = GetIdx(ss);
 			vecMeshData[nObject].shape.push_back(Vertex(vecControlPoint[verIdx.vid], vecNormal[verIdx.vnid], vecTexCoord[verIdx.vtid]));
-			cout << "\n";
 			continue;
 		}
 
-		cout << s << "\n";
 	}
 
 	return vecMeshData;
@@ -284,6 +261,7 @@ struct VertexForImport {
 		, uv(XMFLOAT2(0, 0))
 	{}
 };
+
 vector<MESH_DATA> MeshDataImporter::FBXLoad(const char* filePath)
 {
 	vector<MESH_DATA> vecMeshData;
@@ -334,17 +312,14 @@ vector<MESH_DATA> MeshDataImporter::FBXLoad(const char* filePath)
 			v = pVertex[iV];
 			Vertex temp;
 
-
-			float tempyz;
-
 			temp.m_xmf3Pos = vecCP[v.ctrlPointIndex].position;
-			tempyz = temp.m_xmf3Pos.y;
-			temp.m_xmf3Pos.y = temp.m_xmf3Pos.z;
-			temp.m_xmf3Pos.z = tempyz;
-
+			swap(temp.m_xmf3Pos.y, temp.m_xmf3Pos.z);
+			cout << temp.m_xmf3Pos.x << ", " << temp.m_xmf3Pos.y << ", " << temp.m_xmf3Pos.z << "\n";
+			//temp.m_xmf3Pos.z *= -1;
 			temp.m_xmf3Normal = v.normal;
-			//temp.m_xmf3BiTangent = v.binormal;
+			//temp.m_xmf3Normal.z *= -1;
 			temp.m_xmf3Tangent = v.tangent;
+			//temp.m_xmf3Tangent.z *= -1;
 			temp.m_xmf2UV = v.uv;
 			temp.m_xmi4BoneIndices.x = vecCP[v.ctrlPointIndex].boneIndices[0];
 			temp.m_xmi4BoneIndices.y = vecCP[v.ctrlPointIndex].boneIndices[1];
@@ -372,7 +347,6 @@ void MaterialDataImporter::Load(const char* filePath)
 	string token;
 
 	if (!in.is_open()) {
-		cout << "Error\n";
 		assert(!"마테리얼 정보들을 읽어오는데 실패했습니다.");
 		return;
 	}
@@ -382,24 +356,21 @@ void MaterialDataImporter::Load(const char* filePath)
 
 		stringstream ss(s);
 		getline(ss, token, ' ');
-		if (token.compare("#Material") == 0) cout << "<Material Load Start>\n\n";
-		else if (token.compare("#End") == 0) { cout << "<Material Load End>";	break; }
+		if (token.compare("#End") == 0) break;
 
 		if (token.compare("{") == 0) {
 			Material temp;
-			cout << "<New Material>\n";
 			while (token.compare("}")) {
 
 				getline(ss, token, ' ');
 
-				if (token.compare("name") == 0) { cout << " Material Name is ";			temp.matName = IImporter::GetPath(ss); }
-				else if (token.compare("d") == 0) { cout << " DiffuseMap is ";	temp.diffuseMap = IImporter::GetPath(ss); }
-				else if (token.compare("n") == 0) { cout << " NormalMap is ";			temp.normalMap = IImporter::GetPath(ss); }
-				else if (token.compare("s") == 0) { cout << " SpecularMap is ";			temp.specularMap = IImporter::GetPath(ss); }
-				else if (token.compare("f") == 0) { cout << " FresnelFactor is ";				temp.fresnelFactor = IImporter::GetFloat3(ss); }
+				if (token.compare("name") == 0) {	temp.matName = IImporter::GetPath(ss); }
+				else if (token.compare("d") == 0) { temp.diffuseMap = IImporter::GetPath(ss); }
+				else if (token.compare("n") == 0) { temp.normalMap = IImporter::GetPath(ss); }
+				else if (token.compare("s") == 0) { temp.specularMap = IImporter::GetPath(ss); }
+				else if (token.compare("f") == 0) { temp.fresnelFactor = IImporter::GetFloat3(ss); }
 			}
 			gMaterialMng.AddMaterial(temp);
-			cout << "<New Material End>\n\n";
 		}
 	}
 
@@ -468,35 +439,34 @@ AnimClip AnimClipDataImporter::Load(const char* filePath)
 	ifstream in;
 	in.open(ultimateOfPerfectFilePath, ios::in | ios::binary);
 
-	int nBone;
+	int nBone, nKeys;
+	double* pKeytimes;
 	in.read((char*)&nBone, sizeof(int));
+	in.read((char*)&nKeys, sizeof(int));
+
+	pKeytimes = new double[nKeys];
+	in.read((char*)pKeytimes, sizeof(double) * nKeys);
+
+	for (int i = 0; i < nKeys; i++) animClip.vecTimes.push_back(pKeytimes[i]);
+	animClip.fClipLength = animClip.vecTimes.back();
+
 	animClip.vecBone.resize(nBone);
 
-	int* nFrame = new int[nBone];
-	in.read((char*)nFrame, sizeof(int) * nBone);
-
-	for (int iBone = 0; iBone < nBone; ++iBone) {
-		animClip.vecBone[iBone].keys.resize(nFrame[iBone]);
-	}
-
-	float clipLength = 0;
 	for (int iBone = 0; iBone < nBone; iBone++) {
-		int nFloat = 7 + 8 * animClip.vecBone[iBone].keys.size();
+
+		int nFloat = 7 * (nKeys + 1);
 		float* fIn = new float[nFloat];
 		in.read((char*)fIn, sizeof(float) * nFloat);
 
 		int offset = 0;
 		animClip.vecBone[iBone].globalMtx = IImporter::GetMatrix(fIn, offset);
 
-		for (int iKeys = 0; iKeys < animClip.vecBone[iBone].keys.size(); iKeys++) {
-			animClip.vecBone[iBone].keys[iKeys] = IImporter::GetKeyframe(fIn, offset);
-			clipLength = max(animClip.vecBone[iBone].keys[iKeys].keyTime, clipLength);
+		for (int iKeys = 0; iKeys < nKeys; iKeys++) {
+			animClip.vecBone[iBone].keys.push_back(IImporter::GetKeyframe(fIn, offset));
 		}
 	}
 
 	in.close();
-
-	animClip.fClipLength = clipLength;
 
 	return animClip;
 }

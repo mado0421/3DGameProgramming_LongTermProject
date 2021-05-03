@@ -49,13 +49,10 @@ protected:
 		strcpy_s(str_buff, 256, token.c_str());
 		tok = strtok_s(str_buff, seps, &next_tok);
 		output.vid = atoi(tok) - 1;
-		cout << output.vid << " ";
 		tok = strtok_s(next_tok, seps, &next_tok);
 		output.vtid = atoi(tok) - 1;
-		cout << output.vtid << " ";
 		tok = strtok_s(next_tok, seps, &next_tok);
 		output.vnid = atoi(tok) - 1;
-		cout << output.vnid << " ";
 
 		return output;
 	}
@@ -86,7 +83,6 @@ protected:
 	Keyframe GetKeyframe(const float* fIn, int& offset) {
 		Keyframe result;
 		int i = 0;
-		result.keyTime = fIn[offset + i++];
 		result.xmf4QuatRotation.x = fIn[offset + i++];
 		result.xmf4QuatRotation.y = fIn[offset + i++];
 		result.xmf4QuatRotation.z = fIn[offset + i++];
