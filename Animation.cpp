@@ -81,127 +81,65 @@ void PrintMtx(const XMMATRIX& m) {
 
 void AnimationController::SetMatrix(ID3D12GraphicsCommandList* pd3dCommandList)
 {
-
-	AnimClip* temp = gAnimMng.GetAnimClip("animTest_YUP");
-
-	XMMATRIX mtxFront, mtxBack, result;
-
+	AnimClip* animClip = gAnimMng.GetAnimClip("animTest_YUP");
+	XMMATRIX mtxFront, mtxBack;
+	Keyframe result;
+	int i0, i1, i2, i3;
+	double normalizedTime;
+	double time = m_fTime;
+	while (time > animClip->fClipLength) time -= animClip->fClipLength;
 
 	pd3dCommandList->SetGraphicsRootDescriptorTable(ROOTSIGNATURE_ANIMTRANSFORM, m_d3dCbvGPUDescriptorHandle);
 	UINT ncbElementBytes = ((sizeof(CB_BONE_INFO) + 255) & ~255);
 	memset(m_pCBMappedBones, NULL, ncbElementBytes);
 
-	float normalizedTime = m_fTime;
-	while (normalizedTime > temp->fClipLength) {
-		normalizedTime -= temp->fClipLength;
-	}
+	for (int timeIdx = 0; timeIdx < animClip->vecTimes.size(); timeIdx++) {
+		// 특정 Key와 시간이 같다면(맨 앞이거나, 맨 뒤거나, 중간에 어떤 Key에 걸렸거나)
+		if (time == animClip->vecTimes[timeIdx]) {
+			for (int i = 0; i < animClip->vecBone.size(); i++) {
 
-	Sleep(10);
-	system("cls");
+				mtxFront = XMLoadFloat4x4(&animClip->vecBone[i].toDressposeInv);
+				mtxBack = XMMatrixMultiply(
+					XMMatrixRotationQuaternion(XMLoadFloat4(&animClip->vecBone[i].keys[timeIdx].xmf4QuatRotation)),
+					XMMatrixTranslationFromVector(XMLoadFloat3(&animClip->vecBone[i].keys[timeIdx].xmf3Translation))
+				);
 
-
-	goto A;
-	/*========================================================================
-	* 각 Bone마다 InterpolationIndex를 찾아야 함
-	========================================================================*/
-	for (int iBone = 0; iBone < temp->vecBone.size(); iBone++) {
-		mtxFront = XMLoadFloat4x4(&temp->vecBone[iBone].globalMtx);
-
-		/*========================================================================
-		* 만약, 키프레임이 하나밖에 없으면 그 값을 그대로 넣는다.
-		========================================================================*/
-		if (temp->vecBone[iBone].keys.size() == 1) {
-			mtxBack = XMMatrixMultiply(
-						XMMatrixTranslationFromVector(XMLoadFloat3(&temp->vecBone[iBone].keys[0].xmf3Translation)),
-						XMMatrixRotationQuaternion(XMLoadFloat4(&temp->vecBone[iBone].keys[0].xmf4QuatRotation))
-						);
-
+				XMStoreFloat4x4(&m_pCBMappedBones->xmf4x4Transform[i], XMMatrixTranspose(XMMatrixMultiply(mtxFront, mtxBack)));
+			}
+			break;
 		}
-		/*========================================================================
-		* 키프레임이 두 개 이상이면 index를 찾아야 한다.
-		* 
-		========================================================================*/
-		else {
-			Keyframe k0, k1, k2, k3, result;
-			double t1, t2;
-			
-			for (int i = 0; i < temp->vecBone[iBone].keys.size(); i++) {
-				if (normalizedTime <= temp->vecTimes[iBone]) {
-					if (i == 0) {
-						k0 = k1 = k2 = k3 = temp->vecBone[iBone].keys.front();
-						t1 = t2 = temp->vecTimes[iBone];
-					}
-					else {
-						k1 = temp->vecBone[iBone].keys[i - 1];
-						k2 = temp->vecBone[iBone].keys[i];
-						t1 = temp->vecTimes[iBone];
-						t2 = temp->vecTimes[iBone + 1];
+		if (animClip->vecTimes[timeIdx] < time && time <= animClip->vecTimes[timeIdx + 1]) {
+			i1 = timeIdx; i2 = timeIdx + 1;
 
+			if (timeIdx != 0)							i0 = i1 - 1;
+			else										i0 = 0;
+			if (i2 != animClip->vecTimes.size() - 1)	i3 = i2 + 1;
+			else										i3 = i2;
+			// KeySelect End
 
-						if (i != 1) k0 = temp->vecBone[iBone].keys[i - 2];
-						else		k0 = temp->vecBone[iBone].keys[i - 1];
+			normalizedTime = (time - animClip->vecTimes[i1]) / (animClip->vecTimes[i2] - animClip->vecTimes[i1]);
 
-						if (i != temp->vecBone[iBone].keys.size() - 1)	k3 = temp->vecBone[iBone].keys[i + 1];
-						else											k3 = temp->vecBone[iBone].keys[i];
-					}
-					goto AnimKeySelectEnd;
-				}
+			for (int boneIdx = 0; boneIdx < animClip->vecBone.size(); boneIdx++) {
+
+				mtxFront = XMLoadFloat4x4(&animClip->vecBone[boneIdx].toDressposeInv);
+				InterpolateKeyframe(
+					animClip->vecBone[boneIdx].keys[i0], 
+					animClip->vecBone[boneIdx].keys[i1],
+					animClip->vecBone[boneIdx].keys[i2], 
+					animClip->vecBone[boneIdx].keys[i3], 
+					normalizedTime,
+					result);
+				
+				mtxBack = XMMatrixMultiply(
+					XMMatrixRotationQuaternion(XMLoadFloat4(&result.xmf4QuatRotation)),
+					XMMatrixTranslationFromVector(XMLoadFloat3(&result.xmf3Translation))
+				);
+
+				XMStoreFloat4x4(&m_pCBMappedBones->xmf4x4Transform[boneIdx], XMMatrixTranspose(XMMatrixMultiply(mtxFront, mtxBack)));
 			}
-			k0 = k1 = k2 = k3 = temp->vecBone[iBone].keys.back();
-			t1 = t2 = temp->vecTimes[iBone];
-			AnimKeySelectEnd:
-
-			if (t1 == t2) {
-
-				result = k2;
-			}
-			else {
-				float timeBetweenkey12 = ( normalizedTime - t1) / (t2 - t1);
-
-				InterpolateKeyframe(k0, k1, k2, k3, timeBetweenkey12, result);
-			}
-
-			mtxBack = XMMatrixMultiply(
-				XMMatrixTranslationFromVector(XMLoadFloat3(&result.xmf3Translation)),
-				XMMatrixRotationQuaternion(XMLoadFloat4(&result.xmf4QuatRotation))
-			);			
-
+			break;
 		}
-		result = XMMatrixMultiply(mtxFront, mtxBack);
-
-		XMStoreFloat4x4(&m_pCBMappedBones->xmf4x4Transform[iBone], XMMatrixTranspose(result));
 	}
-
-
-A:;
-	AnimClip* animClip = gAnimMng.GetAnimClip("animTest_YUP");
-	XMVECTOR p0 = XMVectorSet(0.5, 3, 0.5, 1);
-
-	for (int i = 0; i < animClip->vecBone.size(); i++) {
-		//cout << "Bone_" << i << "\n";
-		//cout << " - Global\n";
-		mtxFront = XMLoadFloat4x4(&animClip->vecBone[i].globalMtx);
-		//PrintMtx(mtxBack);
-
-		mtxBack = XMMatrixMultiply(
-			XMMatrixRotationQuaternion(XMLoadFloat4(&animClip->vecBone[i].keys[gTestInt].xmf4QuatRotation)),
-			XMMatrixTranslationFromVector(XMLoadFloat3(&animClip->vecBone[i].keys[gTestInt].xmf3Translation))
-		);
-		//cout << " - elt\n";
-		//PrintMtx(mtxFront);
-
-		result = XMMatrixMultiply(mtxFront, mtxBack);
-		XMVECTOR p = XMVector3Transform(p0, result);
-		cout << "P :" << maxEpsilon(XMVectorGetX(p)) << ", " << maxEpsilon(XMVectorGetY(p)) << ", " << maxEpsilon(XMVectorGetZ(p)) << ", " << maxEpsilon(XMVectorGetW(p)) << "\n\n";
-
-		//cout << " - result\n";
-		//PrintMtx(result);
-		//cout << "\n";
-
-		//XMStoreFloat4x4(&m_pCBMappedBones->xmf4x4Transform[i], result);
-		XMStoreFloat4x4(&m_pCBMappedBones->xmf4x4Transform[i],  XMMatrixTranspose(result));
-	}
-
 
 }
 

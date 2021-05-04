@@ -10,7 +10,7 @@ struct CB_BONE_INFO {
 	XMFLOAT4X4 xmf4x4Transform[nMaxBone];
 };
 struct Bone {
-	XMFLOAT4X4 globalMtx;
+	XMFLOAT4X4 toDressposeInv;
 	vector<Keyframe> keys;
 };
 

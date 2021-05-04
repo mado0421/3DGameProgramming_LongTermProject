@@ -273,3 +273,9 @@ Fbx Parser 구현 성공. 추후 내용 정리해서 올릴 것.
 ### 2021.05.04
 본 프로젝트에 적용 완료. 코드 정리해서 올릴 것.
 <img src="https://user-images.githubusercontent.com/21697638/116945821-8840be80-acb3-11eb-8188-742572a047b6.png" width="70%" height="70%"></img>
+
+
+- Parser에서 VertexNormal이 제대로 입력되지 않아 Split per-vertex Normals 옵션을 켤 수 없었는데 해당 부분을 수정.
+- PSO를 변경하고 추가하여 애니메이션이 적용된 오브젝트도 Shadow Occluder로 작용.
+
+<img src="https://user-images.githubusercontent.com/21697638/116962876-3fecc500-ace2-11eb-8b04-df5c9c8aa109.png" width="70%" height="70%"></img>

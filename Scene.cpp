@@ -449,27 +449,43 @@ void Scene::RenderPass1()
 
 	for (UINT i = 0; i < m_LightMng->GetNumLight(); i++) {
 		if (m_LightMng->GetIsShadow(i)) {
-			switch (m_LightMng->GetLightType(i))
-			{
-			case LightType::LIGHT_SPOT: m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["RenderShadow"]); break;
-			case LightType::LIGHT_POINT: m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["RenderPointLightShadow"]); break;
-			case LightType::LIGHT_DIRECTIONAL:
-				m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["RenderDirectionalShadow"]);
-				m_LightMng->UpdateDirectionalLightOrthographicLH(m_pCamera->GetViewMatrix(), i);
-				break;
-			case LightType::LIGHT_NONE:
-			default:
-				break;
-			}
-			
 			m_LightMng->SetShaderResource(m_pd3dCommandList, i);
 
 			D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = gTextureMng.GetDsvCPUHandle(m_LightMng->GetShadowMapName(i).c_str());
 			m_pd3dCommandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
 			m_pd3dCommandList->OMSetRenderTargets(0, NULL, TRUE, &dsvHandle);
 
-			for (int i = 0; i < m_vecObject.size(); i++) m_vecObject[i]->Render(m_pd3dCommandList);
-			//for (auto iter = m_vecAnimObject.begin(); iter != m_vecAnimObject.end(); iter++) (*iter)->Render(m_pd3dCommandList);
+			switch (m_LightMng->GetLightType(i))
+			{
+			case LightType::LIGHT_SPOT: 
+
+				m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["SpotLightShadow"]); 
+				for (int i = 0; i < m_vecObject.size(); i++) m_vecObject[i]->Render(m_pd3dCommandList);
+
+				m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["SpotLightShadowAnim"]);
+				for (auto iter = m_vecAnimObject.begin(); iter != m_vecAnimObject.end(); iter++) (*iter)->Render(m_pd3dCommandList);
+				break;
+			case LightType::LIGHT_POINT: 
+
+				m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["PointLightShadow"]); 
+				for (int i = 0; i < m_vecObject.size(); i++) m_vecObject[i]->Render(m_pd3dCommandList);
+
+				m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["PointLightShadowAnim"]);
+				for (auto iter = m_vecAnimObject.begin(); iter != m_vecAnimObject.end(); iter++) (*iter)->Render(m_pd3dCommandList);
+				break;
+			case LightType::LIGHT_DIRECTIONAL:
+
+				m_LightMng->UpdateDirectionalLightOrthographicLH(m_pCamera->GetViewMatrix(), i);
+				m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["DirectionalLightShadow"]);
+				for (int i = 0; i < m_vecObject.size(); i++) m_vecObject[i]->Render(m_pd3dCommandList);
+
+				m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["DirectionalLightShadowAnim"]);
+				for (auto iter = m_vecAnimObject.begin(); iter != m_vecAnimObject.end(); iter++) (*iter)->Render(m_pd3dCommandList);
+				break;
+			case LightType::LIGHT_NONE:
+			default:
+				break;
+			}
 
 		}
 	}
@@ -571,42 +587,30 @@ void Scene::Input(UCHAR* pKeyBuffer, float fTimeElapsed)
 	if (pKeyBuffer[KeyCode::_X] & 0xF0) { m_pCamera->Rotate(-50 * fTimeElapsed, 0, 0); }
 
 	if (pKeyBuffer[KeyCode::_1] & 0xF0) {
-		//m_pCamera->SetPosition(XMFLOAT3(0, 1, 0));
-		//m_pCamera->SetLookAt(XMFLOAT3(0, 1, 1));
-		m_vecAnimObject[0]->SetAnimCtrlTime(0);
-		gTestInt = 0;
+		m_pCamera->SetPosition(XMFLOAT3(0, 1, 0));
+		m_pCamera->SetLookAt(XMFLOAT3(0, 1, 1));
 	}
 	if (pKeyBuffer[KeyCode::_2] & 0xF0) {
-		//m_pCamera->SetPosition(XMFLOAT3(0, 1, 3));
-		//m_pCamera->SetLookAt(XMFLOAT3(0, 1, 0));
-		m_vecAnimObject[0]->SetAnimCtrlTime(0.333333343);
-		gTestInt = 1;
+		m_pCamera->SetPosition(XMFLOAT3(0, 1, 3));
+		m_pCamera->SetLookAt(XMFLOAT3(0, 1, 0));
 
 	}
 	if (pKeyBuffer[KeyCode::_3] & 0xF0) {
-		//m_pCamera->SetPosition(XMFLOAT3(0, 1, -3));
-		//m_pCamera->SetLookAt(XMFLOAT3(0, 1, 0));
-		m_vecAnimObject[0]->SetAnimCtrlTime(0.666666687);
-		gTestInt = 2;
+		m_pCamera->SetPosition(XMFLOAT3(0, 1, -3));
+		m_pCamera->SetLookAt(XMFLOAT3(0, 1, 0));
 
 	}
 	if (pKeyBuffer[KeyCode::_4] & 0xF0) {
-		//m_pCamera->SetPosition(XMFLOAT3(3, 1, 3));
-		//m_pCamera->SetLookAt(XMFLOAT3(0, 1, 0));1.00000000
-		m_vecAnimObject[0]->SetAnimCtrlTime(1.00000000);
-		gTestInt = 3;
+		m_pCamera->SetPosition(XMFLOAT3(3, 1, 3));
+		m_pCamera->SetLookAt(XMFLOAT3(0, 1, 0));
 	}
 	if (pKeyBuffer[KeyCode::_5] & 0xF0) {
-		//m_pCamera->SetPosition(XMFLOAT3(3, 3, 3));
-		//m_pCamera->SetLookAt(XMFLOAT3(0, 0, 0));1.00000000
-		m_vecAnimObject[0]->SetAnimCtrlTime(1.33333337);
-		gTestInt = 4;
+		m_pCamera->SetPosition(XMFLOAT3(3, 3, 3));
+		m_pCamera->SetLookAt(XMFLOAT3(0, 0, 0));
 	}
 	if (pKeyBuffer[KeyCode::_6] & 0xF0) {
-		//m_pCamera->SetPosition(XMFLOAT3(3, 3, 3));
-		//m_pCamera->SetLookAt(XMFLOAT3(0, 0, 0));1.00000000
-		m_vecAnimObject[0]->SetAnimCtrlTime(1.66666663);
-		gTestInt = 5;
+		m_pCamera->SetPosition(XMFLOAT3(3, 3, 3));
+		m_pCamera->SetLookAt(XMFLOAT3(0, 0, 0));
 	}
 
 	if (pKeyBuffer[KeyCode::_N] & 0xF0) { test = true; }
@@ -631,13 +635,19 @@ void Scene::CreatePSO()
 	m_uomPipelineStates["AnimatedObject"] = AnimatedObjectPso.GetPipelineState();
 
 	RenderShadowPSO RenderShadowPso = RenderShadowPSO(m_pd3dDevice, m_pd3dRootSignature);
-	m_uomPipelineStates["RenderShadow"] = RenderShadowPso.GetPipelineState();
+	m_uomPipelineStates["SpotLightShadow"] = RenderShadowPso.GetPipelineState();
+	RenderSpotLightShadowAnimatedObjectPSO RenderSpotLightShadowAnimatedObjectPso = RenderSpotLightShadowAnimatedObjectPSO(m_pd3dDevice, m_pd3dRootSignature);
+	m_uomPipelineStates["SpotLightShadowAnim"] = RenderSpotLightShadowAnimatedObjectPso.GetPipelineState();
 
 	RenderPointLightShadowPSO RenderPointLightShadowPso = RenderPointLightShadowPSO(m_pd3dDevice, m_pd3dRootSignature);
-	m_uomPipelineStates["RenderPointLightShadow"] = RenderPointLightShadowPso.GetPipelineState();
-	
+	m_uomPipelineStates["PointLightShadow"] = RenderPointLightShadowPso.GetPipelineState();
+	RenderPointLightShadowAnimatedObjectPSO RenderPointLightShadowAnimatedObjectPso = RenderPointLightShadowAnimatedObjectPSO(m_pd3dDevice, m_pd3dRootSignature);
+	m_uomPipelineStates["PointLightShadowAnim"] = RenderPointLightShadowAnimatedObjectPso.GetPipelineState();
+
 	RenderDirectionalShadowPSO RenderDirectionalShadowPso = RenderDirectionalShadowPSO(m_pd3dDevice, m_pd3dRootSignature);
-	m_uomPipelineStates["RenderDirectionalShadow"] = RenderDirectionalShadowPso.GetPipelineState();
+	m_uomPipelineStates["DirectionalLightShadow"] = RenderDirectionalShadowPso.GetPipelineState();
+	RenderDirectionalShadowAnimatedObjectPSO RenderDirectionalShadowAnimatedObjectPso = RenderDirectionalShadowAnimatedObjectPSO(m_pd3dDevice, m_pd3dRootSignature);
+	m_uomPipelineStates["DirectionalLightShadowAnim"] = RenderDirectionalShadowAnimatedObjectPso.GetPipelineState();
 
 	ColorFromGBufferPSO ColorFromGBufferPso = ColorFromGBufferPSO(m_pd3dDevice, m_pd3dRootSignature);
 	m_uomPipelineStates["ColorFromGBuffer"] = ColorFromGBufferPso.GetPipelineState();

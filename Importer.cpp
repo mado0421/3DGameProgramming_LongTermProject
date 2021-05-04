@@ -314,12 +314,10 @@ vector<MESH_DATA> MeshDataImporter::FBXLoad(const char* filePath)
 
 			temp.m_xmf3Pos = vecCP[v.ctrlPointIndex].position;
 			swap(temp.m_xmf3Pos.y, temp.m_xmf3Pos.z);
-			cout << temp.m_xmf3Pos.x << ", " << temp.m_xmf3Pos.y << ", " << temp.m_xmf3Pos.z << "\n";
-			//temp.m_xmf3Pos.z *= -1;
 			temp.m_xmf3Normal = v.normal;
-			//temp.m_xmf3Normal.z *= -1;
+			swap(temp.m_xmf3Normal.y, temp.m_xmf3Normal.z);
 			temp.m_xmf3Tangent = v.tangent;
-			//temp.m_xmf3Tangent.z *= -1;
+			swap(temp.m_xmf3Tangent.y, temp.m_xmf3Tangent.z);
 			temp.m_xmf2UV = v.uv;
 			temp.m_xmi4BoneIndices.x = vecCP[v.ctrlPointIndex].boneIndices[0];
 			temp.m_xmi4BoneIndices.y = vecCP[v.ctrlPointIndex].boneIndices[1];
@@ -459,7 +457,7 @@ AnimClip AnimClipDataImporter::Load(const char* filePath)
 		in.read((char*)fIn, sizeof(float) * nFloat);
 
 		int offset = 0;
-		animClip.vecBone[iBone].globalMtx = IImporter::GetMatrix(fIn, offset);
+		animClip.vecBone[iBone].toDressposeInv = IImporter::GetMatrix(fIn, offset);
 
 		for (int iKeys = 0; iKeys < nKeys; iKeys++) {
 			animClip.vecBone[iBone].keys.push_back(IImporter::GetKeyframe(fIn, offset));

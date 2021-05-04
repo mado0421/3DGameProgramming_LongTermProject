@@ -27,15 +27,15 @@ VS_OUTPUT VS_AnimatedWVP(VS_INPUT input) {
 	VS_OUTPUT output;
 
 	float weights[4] = { input.weight[0], input.weight[1], input.weight[2], input.weight[3] };
-	//float weights[4] = { 1, 0, 0, 0 };
 
+	float3 normal = normalize(input.normal);
 	float3 posL		= 0;
 	float3 normalL	= 0;
 	float3 tangentL = 0;
 
 	for (int i = 0; i < 4; ++i) {
 		posL		+= weights[i] * mul(float4(input.position, 1.0f), gmtxAnimation[input.boneIdx[i]]).xyz;
-		normalL		+= weights[i] * mul(input.normal, (float3x3)gmtxAnimation[input.boneIdx[i]]);
+		normalL		+= weights[i] * mul(normal, (float3x3)gmtxAnimation[input.boneIdx[i]]);
 		tangentL	+= weights[i] * mul(input.tangent, (float3x3)gmtxAnimation[input.boneIdx[i]]);
 	}
 
@@ -57,11 +57,28 @@ VS_OUTPUT VS_AnimatedWVP(VS_INPUT input) {
 * - 월드 변환 후에 조명공간의 뷰 변환, 투영 변환 행렬을 곱
 * - position 만 넘겨주면 됨. 깊이를 쓸거니까.
 *=======================================================================*/
-VS_OUTPUT VS_RenderShadow(VS_INPUT input)
+VS_OUTPUT VS_RenderSpotLightShadowObject(VS_INPUT input)
 {
 	VS_OUTPUT output;
 
 	output.positionW = (float3)mul(float4(input.position, 1.0f), gmtxGameObject);
+	output.position = mul(float4(output.positionW, 1.0f), gmtxLightViewProj[0]);
+
+	return output;
+}
+VS_OUTPUT VS_RenderSpotLightShadowAnimatedObject(VS_INPUT input)
+{
+	VS_OUTPUT output;
+
+	float weights[4] = { input.weight[0], input.weight[1], input.weight[2], input.weight[3] };
+
+	float3 posL = 0;
+
+	for (int i = 0; i < 4; ++i) {
+		posL += weights[i] * mul(float4(input.position, 1.0f), gmtxAnimation[input.boneIdx[i]]).xyz;
+	}
+
+	output.positionW = (float3)mul(float4(posL, 1.0f), gmtxGameObject);
 	output.position = mul(float4(output.positionW, 1.0f), gmtxLightViewProj[0]);
 
 	return output;
@@ -81,6 +98,17 @@ float4 VS_RenderPointLightShadow(VS_INPUT input) : SV_POSITION {
 
 	return result;
 }
+float4 VS_RenderPointLightShadowAnimatedObject(VS_INPUT input) : SV_POSITION{
+	float weights[4] = { input.weight[0], input.weight[1], input.weight[2], input.weight[3] };
+	float3 posL = 0;
+	for (int i = 0; i < 4; ++i) {
+		posL += weights[i] * mul(float4(input.position, 1.0f), gmtxAnimation[input.boneIdx[i]]).xyz;
+	}
+
+	float4 result = mul(float4(posL, 1.0f), gmtxGameObject);
+
+	return result;
+}
 
 /*========================================================================
 * VS_RenderDirectionalLightShadowPSO
@@ -90,7 +118,17 @@ float4 VS_RenderPointLightShadow(VS_INPUT input) : SV_POSITION {
 float4 VS_RenderDirectionalLightShadow(VS_INPUT input) : SV_POSITION{
 
 	float4 result = mul(float4(input.position, 1.0f), gmtxGameObject);
-	//float4 result = mul(mul(float4(input.position, 1.0f), gmtxGameObject), gmtxView);
+
+	return result;
+}
+float4 VS_RenderDirectionalLightShadowAnimatedObject(VS_INPUT input) : SV_POSITION{
+	float weights[4] = { input.weight[0], input.weight[1], input.weight[2], input.weight[3] };
+	float3 posL = 0;
+	for (int i = 0; i < 4; ++i) {
+		posL += weights[i] * mul(float4(input.position, 1.0f), gmtxAnimation[input.boneIdx[i]]).xyz;
+	}
+
+	float4 result = mul(float4(posL, 1.0f), gmtxGameObject);
 
 	return result;
 }
