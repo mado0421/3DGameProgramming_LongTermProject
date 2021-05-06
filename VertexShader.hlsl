@@ -39,6 +39,9 @@ VS_OUTPUT VS_AnimatedWVP(VS_INPUT input) {
 		tangentL	+= weights[i] * mul(input.tangent, (float3x3)gmtxAnimation[input.boneIdx[i]]);
 	}
 
+	posL.x *= -1;
+	normalL.x *= -1;
+
 	output.positionW	= (float3)mul(float4(posL, 1.0f), gmtxGameObject);
 	output.position		= mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
 	output.normalW		= mul(normalL, (float3x3)gmtxGameObject);
@@ -77,6 +80,7 @@ VS_OUTPUT VS_RenderSpotLightShadowAnimatedObject(VS_INPUT input)
 	for (int i = 0; i < 4; ++i) {
 		posL += weights[i] * mul(float4(input.position, 1.0f), gmtxAnimation[input.boneIdx[i]]).xyz;
 	}
+	posL.x *= -1;
 
 	output.positionW = (float3)mul(float4(posL, 1.0f), gmtxGameObject);
 	output.position = mul(float4(output.positionW, 1.0f), gmtxLightViewProj[0]);
@@ -104,6 +108,7 @@ float4 VS_RenderPointLightShadowAnimatedObject(VS_INPUT input) : SV_POSITION{
 	for (int i = 0; i < 4; ++i) {
 		posL += weights[i] * mul(float4(input.position, 1.0f), gmtxAnimation[input.boneIdx[i]]).xyz;
 	}
+	posL.x *= -1;
 
 	float4 result = mul(float4(posL, 1.0f), gmtxGameObject);
 
@@ -127,6 +132,7 @@ float4 VS_RenderDirectionalLightShadowAnimatedObject(VS_INPUT input) : SV_POSITI
 	for (int i = 0; i < 4; ++i) {
 		posL += weights[i] * mul(float4(input.position, 1.0f), gmtxAnimation[input.boneIdx[i]]).xyz;
 	}
+	posL.x *= -1;
 
 	float4 result = mul(float4(posL, 1.0f), gmtxGameObject);
 

@@ -53,7 +53,7 @@ public:
 	void SetMatrix(ID3D12GraphicsCommandList* pd3dCommandList);
 	void InterpolateKeyframe(Keyframe k0, Keyframe k1, Keyframe k2, Keyframe k3, float t, Keyframe& out);
 
-	void Test_SetTime(float t) { m_fTime = t; }
+	void Test_AddTime(float t) { m_fTime += t; }
 
 protected:
 	XMFLOAT4 Interpolate(const XMFLOAT4 q0, const XMFLOAT4 q1, const XMFLOAT4 q2, const XMFLOAT4 q3, float t);

@@ -43,7 +43,7 @@ AnimationController::AnimationController(ID3D12Device* pd3dDevice, ID3D12Graphic
 
 void AnimationController::Update(float fTimeElapsed)
 {
-	m_fTime += fTimeElapsed * 0.1f;
+	if(gTestInt==0)	m_fTime += fTimeElapsed;
 }
 
 float maxEpsilon(float f) {
@@ -81,7 +81,7 @@ void PrintMtx(const XMMATRIX& m) {
 
 void AnimationController::SetMatrix(ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	AnimClip* animClip = gAnimMng.GetAnimClip("animTest_YUP");
+	AnimClip* animClip = gAnimMng.GetAnimClip("human");
 	XMMATRIX mtxFront, mtxBack;
 	Keyframe result;
 	int i0, i1, i2, i3;
@@ -93,9 +93,24 @@ void AnimationController::SetMatrix(ID3D12GraphicsCommandList* pd3dCommandList)
 	UINT ncbElementBytes = ((sizeof(CB_BONE_INFO) + 255) & ~255);
 	memset(m_pCBMappedBones, NULL, ncbElementBytes);
 
+	if (gTestInt == 2) { 
+		system("cls"); 
+		cout
+			<< "=========================================\n"
+			<< "curTime: " << time << "\n";
+	}
+
 	for (int timeIdx = 0; timeIdx < animClip->vecTimes.size(); timeIdx++) {
 		// 특정 Key와 시간이 같다면(맨 앞이거나, 맨 뒤거나, 중간에 어떤 Key에 걸렸거나)
+
 		if (time == animClip->vecTimes[timeIdx]) {
+
+			if (gTestInt == 2) { 
+				cout
+					<< "=========================================\n"
+					<< "TimeIdx: " << timeIdx << "\n";
+			}
+
 			for (int i = 0; i < animClip->vecBone.size(); i++) {
 
 				mtxFront = XMLoadFloat4x4(&animClip->vecBone[i].toDressposeInv);
@@ -103,6 +118,13 @@ void AnimationController::SetMatrix(ID3D12GraphicsCommandList* pd3dCommandList)
 					XMMatrixRotationQuaternion(XMLoadFloat4(&animClip->vecBone[i].keys[timeIdx].xmf4QuatRotation)),
 					XMMatrixTranslationFromVector(XMLoadFloat3(&animClip->vecBone[i].keys[timeIdx].xmf3Translation))
 				);
+
+				if (gTestInt == 2) {
+					cout
+						<< "=========================================\n"
+						<< "BoneIdx: " << i << "\n";
+					PrintMtx(XMMatrixMultiply(mtxFront, mtxBack));
+				}
 
 				XMStoreFloat4x4(&m_pCBMappedBones->xmf4x4Transform[i], XMMatrixTranspose(XMMatrixMultiply(mtxFront, mtxBack)));
 			}
@@ -118,6 +140,19 @@ void AnimationController::SetMatrix(ID3D12GraphicsCommandList* pd3dCommandList)
 			// KeySelect End
 
 			normalizedTime = (time - animClip->vecTimes[i1]) / (animClip->vecTimes[i2] - animClip->vecTimes[i1]);
+
+			if (gTestInt == 2) {
+				cout
+					<< "=========================================\n"
+					<< "TimeIdx: " << timeIdx << "\n"
+					<< "=========================================\n"
+					<< "i0: " << i0 << "\n"
+					<< "i1: " << i1 << "\n"
+					<< "i2: " << i2 << "\n"
+					<< "i3: " << i3 << "\n"
+					<< "=========================================\n"
+					<< "normalizedTime: " << normalizedTime << "\n";
+			}
 
 			for (int boneIdx = 0; boneIdx < animClip->vecBone.size(); boneIdx++) {
 
@@ -135,17 +170,76 @@ void AnimationController::SetMatrix(ID3D12GraphicsCommandList* pd3dCommandList)
 					XMMatrixTranslationFromVector(XMLoadFloat3(&result.xmf3Translation))
 				);
 
+				if (gTestInt == 2) {
+					if (boneIdx == 7 || boneIdx == 26) {
+
+					cout
+						<< "=========================================\n"
+						<< "BoneIdx: " << boneIdx << "\n";
+					PrintMtx(XMMatrixMultiply(mtxFront, mtxBack));
+					}
+				}
+
 				XMStoreFloat4x4(&m_pCBMappedBones->xmf4x4Transform[boneIdx], XMMatrixTranspose(XMMatrixMultiply(mtxFront, mtxBack)));
 			}
 			break;
 		}
 	}
 
+	if (gTestInt == 2) {
+		cout
+			<< "=========================================\n"
+			<< "Bone 7 L UpperArm\n";
+		for (int i = 7; i < 12; i++) {
+			cout
+				<< "Key " << i << "'s Q :"
+				<< animClip->vecBone[7].keys[i].xmf4QuatRotation.x << ", "
+				<< animClip->vecBone[7].keys[i].xmf4QuatRotation.y << ", "
+				<< animClip->vecBone[7].keys[i].xmf4QuatRotation.z << ", "
+				<< animClip->vecBone[7].keys[i].xmf4QuatRotation.w << "\n";
+		}
+		for (int i = 7; i < 12; i++) {
+			cout
+				<< "Key " << i << "'s T :"
+				<< animClip->vecBone[7].keys[i].xmf3Translation.x << ", "
+				<< animClip->vecBone[7].keys[i].xmf3Translation.y << ", "
+				<< animClip->vecBone[7].keys[i].xmf3Translation.z << "\n";
+		}
+		cout
+			<< "=========================================\n"
+			<< "Bone 26 R UpperArm\n";
+		for (int i = 7; i < 12; i++) {
+			cout
+				<< "Key " << i << "'s Q :"
+				<< animClip->vecBone[26].keys[i].xmf4QuatRotation.x << ", "
+				<< animClip->vecBone[26].keys[i].xmf4QuatRotation.y << ", "
+				<< animClip->vecBone[26].keys[i].xmf4QuatRotation.z << ", "
+				<< animClip->vecBone[26].keys[i].xmf4QuatRotation.w << "\n";
+		}
+		for (int i = 7; i < 12; i++) {
+			cout
+				<< "Key " << i << "'s T :"
+				<< animClip->vecBone[26].keys[i].xmf3Translation.x << ", "
+				<< animClip->vecBone[26].keys[i].xmf3Translation.y << ", "
+				<< animClip->vecBone[26].keys[i].xmf3Translation.z << "\n";
+		}
+
+
+
+
+
+
+
+		gTestInt = 1;
+	}
+
 }
 
 void AnimationController::InterpolateKeyframe(Keyframe k0, Keyframe k1, Keyframe k2, Keyframe k3, float t, Keyframe& out)
 {
-	out.xmf4QuatRotation = Interpolate(k0.xmf4QuatRotation, k1.xmf4QuatRotation, k2.xmf4QuatRotation, k3.xmf4QuatRotation, t);
+	XMStoreFloat4(&out.xmf4QuatRotation, 
+	XMQuaternionSlerp(XMLoadFloat4(&k1.xmf4QuatRotation), XMLoadFloat4(&k2.xmf4QuatRotation), t));
+	//out.xmf4QuatRotation = Interpolate(k0.xmf4QuatRotation, k1.xmf4QuatRotation, k2.xmf4QuatRotation, k3.xmf4QuatRotation, t);
 	out.xmf3Translation = Interpolate(k0.xmf3Translation, k1.xmf3Translation, k2.xmf3Translation, k3.xmf3Translation, t);
 }
 

@@ -227,9 +227,9 @@ vector<MESH_DATA> MeshDataImporter::Load(const char* filePath)
 }
 
 struct CtrlPoint {
-	XMFLOAT3    position;
-	int      boneIndices[4];
-	float    weights[4];
+	XMFLOAT3		position;
+	unsigned int    boneIndices[4];
+	double			weights[4];
 
 	CtrlPoint()
 		: position(XMFLOAT3(0, 0, 0))
@@ -314,10 +314,13 @@ vector<MESH_DATA> MeshDataImporter::FBXLoad(const char* filePath)
 
 			temp.m_xmf3Pos = vecCP[v.ctrlPointIndex].position;
 			swap(temp.m_xmf3Pos.y, temp.m_xmf3Pos.z);
+			temp.m_xmf3Pos.z *= -1;
 			temp.m_xmf3Normal = v.normal;
 			swap(temp.m_xmf3Normal.y, temp.m_xmf3Normal.z);
+			temp.m_xmf3Normal.z *= -1;
 			temp.m_xmf3Tangent = v.tangent;
 			swap(temp.m_xmf3Tangent.y, temp.m_xmf3Tangent.z);
+			temp.m_xmf3Tangent.z *= -1;
 			temp.m_xmf2UV = v.uv;
 			temp.m_xmi4BoneIndices.x = vecCP[v.ctrlPointIndex].boneIndices[0];
 			temp.m_xmi4BoneIndices.y = vecCP[v.ctrlPointIndex].boneIndices[1];

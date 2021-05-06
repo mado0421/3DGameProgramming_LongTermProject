@@ -2,7 +2,7 @@
 
 #{ spot color 0.8 0.0 0.0 direction 0 -2 1 position 2 6 -2 falloff 7 9 spotPower 4 shadow true }
 #{ spot color 0.0 0.8 0.0 direction 1 -1 0 position -2 6 0 falloff 8 10 spotPower 4 shadow true }
-{ spot color 0 0.1 0 direction 0 -1 2 position 0 3 -3 falloff 8 9 spotPower 1 shadow true }
+{ spot color 0 0.1 0 direction 0 -1 2 position 0 3 -3 falloff 3 5 spotPower 1 shadow true }
 { point position 0 2 4 color 0.4 0 0 falloff 12 17 shadow true }
 { dir color 0.3 0.3 0.3 direction 1 -1 1 shadow true }
 

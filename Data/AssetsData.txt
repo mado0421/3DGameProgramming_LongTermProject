@@ -6,5 +6,5 @@ defaultDiffuseMap.dds
 defaultNormalMap.dds
 defaultSpecularMap.dds
 specularTest.dds
-animTest_YUP.mm
-animTest_YUP.mac
+human.mac
+human.mm

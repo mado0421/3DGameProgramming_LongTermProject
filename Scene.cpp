@@ -586,9 +586,15 @@ void Scene::Input(UCHAR* pKeyBuffer, float fTimeElapsed)
 	if (pKeyBuffer[KeyCode::_Z] & 0xF0) { m_pCamera->Rotate(50 * fTimeElapsed, 0, 0); }
 	if (pKeyBuffer[KeyCode::_X] & 0xF0) { m_pCamera->Rotate(-50 * fTimeElapsed, 0, 0); }
 
+	if (pKeyBuffer[KeyCode::_J] & 0xF0) { gTestInt = 1; m_vecAnimObject[0]->AddAnimCtrlTime(-fTimeElapsed * 0.1f); }
+	if (pKeyBuffer[KeyCode::_K] & 0xF0) { gTestInt = 0; }
+	if (pKeyBuffer[KeyCode::_L] & 0xF0) { gTestInt = 1; m_vecAnimObject[0]->AddAnimCtrlTime(fTimeElapsed * 0.1f); }
+	if (pKeyBuffer[KeyCode::_P] & 0xF0) { gTestInt = 2; }
+
 	if (pKeyBuffer[KeyCode::_1] & 0xF0) {
 		m_pCamera->SetPosition(XMFLOAT3(0, 1, 0));
 		m_pCamera->SetLookAt(XMFLOAT3(0, 1, 1));
+		
 	}
 	if (pKeyBuffer[KeyCode::_2] & 0xF0) {
 		m_pCamera->SetPosition(XMFLOAT3(0, 1, 3));

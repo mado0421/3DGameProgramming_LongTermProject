@@ -279,3 +279,22 @@ Fbx Parser 구현 성공. 추후 내용 정리해서 올릴 것.
 - PSO를 변경하고 추가하여 애니메이션이 적용된 오브젝트도 Shadow Occluder로 작용.
 
 <img src="https://user-images.githubusercontent.com/21697638/116962876-3fecc500-ace2-11eb-8b04-df5c9c8aa109.png" width="70%" height="70%"></img>
+
+### 2021.05.06
+미리 만들어둔 사람 모델을 리깅하여 사용하였다.
+
+Parser에서 Mesh를 저장할 때 하나의 Vertex에 영향을 주는 Bone이 5개 이상인 경우가 나오는 문제가 있었다.
+하나의 Vertex에 영향을 주는 Bone이 4개를 초과하는 경우, 가장 작은 weight값을 가진 Bone을 지우고 해당 weight값을 나눠 다른 Bone들의 weight에 더해주는 방법으로 수정하였다.
+<img src="https://user-images.githubusercontent.com/21697638/117238481-edd5ac00-ae67-11eb-9259-b6ca4016ee7f.gif" width="70%" height="70%"></img>
+이전에 구현해둔 쿼터니언 보간 방식은 각 요소별로 CatmullRom 보간을 하는 방법이었기 때문에, 회전값이 튀는 문제가 있었다.
+같은 회전값을 나타내더라도 표현하는 쿼터니언 값이 다를 수 있던 문제였는데(아마?) 이를 요소별로 단순하게 보간하여 발생한 것 같아 XMQuaternionSlerp()을 사용하여 보간하게 변경하였다.
+
+FBX Asset Import 시에
+1. position과 normal의 Y와 Z를 Swap한다.
+2. position과 normal의 Z에 -1을 곱한다.
+
+VertexShader에서
+1. position과 normal 변환결과값의 X에 -1을 곱한다.
+(tangent나 uv에 비슷한 처리를 해야 하는지는 아직 모름)
+
+<img src="https://user-images.githubusercontent.com/21697638/117239997-d3e99880-ae6a-11eb-99d1-6542dd5d441b.gif" width="70%" height="70%"></img>
