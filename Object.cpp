@@ -3,7 +3,6 @@
 #include "Mesh.h"
 #include "Model.h"
 #include "Material.h"
-#include "Animation.h"
 
 Object::Object(
 	ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
@@ -24,6 +23,7 @@ Object::Object(
 
 void Object::Update(float fTimeElapsed)
 {
+	m_time += fTimeElapsed;
 }
 
 void Object::Render(ID3D12GraphicsCommandList* pd3dCommandList)
@@ -126,16 +126,23 @@ AnimatedObject::AnimatedObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 void AnimatedObject::Update(float fTimeElapsed)
 {
 	Object::Update(fTimeElapsed);
-	m_AnimCtrl->Update(fTimeElapsed);
 }
 
 void AnimatedObject::Render(ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	m_AnimCtrl->SetMatrix(pd3dCommandList);
+	m_AnimCtrl->SetMatrix(pd3dCommandList, m_time);
 	Object::Render(pd3dCommandList);
 }
 
-void AnimatedObject::AddAnimCtrlTime(float t)
+HumanoidObject::HumanoidObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, D3D12_CPU_DESCRIPTOR_HANDLE& d3dCbvCPUDescriptorStartHandle, D3D12_GPU_DESCRIPTOR_HANDLE& d3dCbvGPUDescriptorStartHandle)
+	:AnimatedObject(pd3dDevice, pd3dCommandList, d3dCbvCPUDescriptorStartHandle, d3dCbvGPUDescriptorStartHandle)
 {
-	m_AnimCtrl->Test_AddTime(t);
+	m_AnimCtrl = new HumanoidAnimCtrl(pd3dDevice, pd3dCommandList, d3dCbvCPUDescriptorStartHandle, d3dCbvGPUDescriptorStartHandle);
+
+}
+
+void HumanoidObject::Render(ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	m_AnimCtrl->SetMatrix(pd3dCommandList, m_curState, m_time);
+	Object::Render(pd3dCommandList);
 }

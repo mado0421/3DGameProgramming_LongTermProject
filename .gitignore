@@ -40,3 +40,4 @@
 *.pdb
 *.vcxproj.FileListAbsolute.txt
 *.mm
+*.mac

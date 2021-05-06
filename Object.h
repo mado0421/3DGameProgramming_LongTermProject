@@ -1,4 +1,5 @@
 #pragma once
+#include "Animation.h"
 
 struct CB_OBJECT_INFO {
 	XMFLOAT4X4	xmf4x4World;
@@ -8,8 +9,6 @@ class DebugWindowMesh;
 class MESH_DATA;
 
 using meshVec = vector<Mesh*>;
-
-struct IComponent;
 
 class Object
 {
@@ -41,6 +40,8 @@ protected:
 
 	string material;
 	string model;
+	double m_time;
+
 };
 
 class DebugWindowObject : public Object {
@@ -68,8 +69,28 @@ public:
 	virtual void Update(float fTimeElapsed);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList);
 
-	void AddAnimCtrlTime(float t);
+private:
+	AnimationController* m_AnimCtrl;
+};
+
+
+
+class HumanoidObject : public AnimatedObject {
+public:
+	HumanoidObject(
+		ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+		D3D12_CPU_DESCRIPTOR_HANDLE& d3dCbvCPUDescriptorStartHandle,
+		D3D12_GPU_DESCRIPTOR_HANDLE& d3dCbvGPUDescriptorStartHandle);
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList);
+
+	void ChangeState(const HumanoidState& nextState) {
+		m_curState = nextState;
+		m_time = 0;
+	}
 
 protected:
-	AnimationController* m_AnimCtrl;
+	HumanoidState m_curState;
+
+private:
+	HumanoidAnimCtrl* m_AnimCtrl;
 };

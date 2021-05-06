@@ -49,20 +49,33 @@ public:
 	~AnimationController() { if (m_pd3dCBResource) m_pd3dCBResource->Release(); }
 
 public:
-	void Update(float fTimeElapsed);
-	void SetMatrix(ID3D12GraphicsCommandList* pd3dCommandList);
-	void InterpolateKeyframe(Keyframe k0, Keyframe k1, Keyframe k2, Keyframe k3, float t, Keyframe& out);
-
-	void Test_AddTime(float t) { m_fTime += t; }
-
+	void SetMatrix(ID3D12GraphicsCommandList* pd3dCommandList, const double time);
 protected:
+	void InterpolateKeyframe(Keyframe k0, Keyframe k1, Keyframe k2, Keyframe k3, float t, Keyframe& out);
 	XMFLOAT4 Interpolate(const XMFLOAT4 q0, const XMFLOAT4 q1, const XMFLOAT4 q2, const XMFLOAT4 q3, float t);
 	XMFLOAT3 Interpolate(const XMFLOAT3 v0, const XMFLOAT3 v1, const XMFLOAT3 v2, const XMFLOAT3 v3, float t);
 
 protected:
-	float			m_fTime;
-
 	ID3D12Resource* m_pd3dCBResource = NULL;
 	CB_BONE_INFO*	m_pCBMappedBones = NULL;
 	D3D12_GPU_DESCRIPTOR_HANDLE	m_d3dCbvGPUDescriptorHandle;
+};
+
+enum HumanoidState {
+	IDLE,
+	WALK,
+	RUN,
+	JUMP,
+	ATTACK,
+	DIE
+};
+
+class HumanoidAnimCtrl : public AnimationController {
+public:
+	HumanoidAnimCtrl(ID3D12Device* pd3dDevice,
+		ID3D12GraphicsCommandList* pd3dCommandList,
+		D3D12_CPU_DESCRIPTOR_HANDLE& cbvCpuHandle,
+		D3D12_GPU_DESCRIPTOR_HANDLE& cbvGpuHandle);
+	void SetMatrix(ID3D12GraphicsCommandList* pd3dCommandList, const HumanoidState& state, const double time);
+
 };

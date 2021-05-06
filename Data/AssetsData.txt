@@ -6,5 +6,6 @@ defaultDiffuseMap.dds
 defaultNormalMap.dds
 defaultSpecularMap.dds
 specularTest.dds
-human.mac
 human.mm
+Humanoid_Idle.mac
+Humanoid_Walk.mac

@@ -255,7 +255,7 @@ void Scene::Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12Graphics
 			* 
 			*=======================================================================*/
 			if (vecObjDesc[i].isAnimated) {
-				AnimatedObject* tempObj = new AnimatedObject(m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
+				AnimatedObject* tempObj = new HumanoidObject(m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
 				tempObj->Move(vecObjDesc[i].position);
 				tempObj->SetModel(vecObjDesc[i].model.c_str());
 				tempObj->SetMaterial(vecObjDesc[i].material.c_str());
@@ -586,10 +586,13 @@ void Scene::Input(UCHAR* pKeyBuffer, float fTimeElapsed)
 	if (pKeyBuffer[KeyCode::_Z] & 0xF0) { m_pCamera->Rotate(50 * fTimeElapsed, 0, 0); }
 	if (pKeyBuffer[KeyCode::_X] & 0xF0) { m_pCamera->Rotate(-50 * fTimeElapsed, 0, 0); }
 
-	if (pKeyBuffer[KeyCode::_J] & 0xF0) { gTestInt = 1; m_vecAnimObject[0]->AddAnimCtrlTime(-fTimeElapsed * 0.1f); }
-	if (pKeyBuffer[KeyCode::_K] & 0xF0) { gTestInt = 0; }
-	if (pKeyBuffer[KeyCode::_L] & 0xF0) { gTestInt = 1; m_vecAnimObject[0]->AddAnimCtrlTime(fTimeElapsed * 0.1f); }
-	if (pKeyBuffer[KeyCode::_P] & 0xF0) { gTestInt = 2; }
+	if (pKeyBuffer[KeyCode::_J] & 0xF0) { dynamic_cast<HumanoidObject*>(m_vecAnimObject[0])->ChangeState(HumanoidState::IDLE); }
+	if (pKeyBuffer[KeyCode::_K] & 0xF0) { dynamic_cast<HumanoidObject*>(m_vecAnimObject[0])->ChangeState(HumanoidState::WALK); }
+
+	//if (pKeyBuffer[KeyCode::_J] & 0xF0) { gTestInt = 1; m_vecAnimObject[0]->AddAnimCtrlTime(-fTimeElapsed * 0.1f); }
+	//if (pKeyBuffer[KeyCode::_K] & 0xF0) { gTestInt = 0; }
+	//if (pKeyBuffer[KeyCode::_L] & 0xF0) { gTestInt = 1; m_vecAnimObject[0]->AddAnimCtrlTime(fTimeElapsed * 0.1f); }
+	//if (pKeyBuffer[KeyCode::_P] & 0xF0) { gTestInt = 2; }
 
 	if (pKeyBuffer[KeyCode::_1] & 0xF0) {
 		m_pCamera->SetPosition(XMFLOAT3(0, 1, 0));
