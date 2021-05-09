@@ -72,9 +72,9 @@ void PrintMtx(const XMMATRIX& m) {
 
 }
 
-void AnimationController::SetMatrix(ID3D12GraphicsCommandList* pd3dCommandList, const double dTime)
+void AnimationController::SetMatrix(ID3D12GraphicsCommandList* pd3dCommandList, const char* strClipName, const double dTime)
 {
-	AnimClip* animClip = gAnimMng.GetAnimClip("human");
+	AnimClip* animClip = gAnimMng.GetAnimClip(strClipName);
 	XMMATRIX mtxFront, mtxBack;
 	Keyframe result;
 	int i0, i1, i2, i3;
@@ -161,87 +161,4 @@ XMFLOAT3 AnimationController::Interpolate(const XMFLOAT3 q0, const XMFLOAT3 q1, 
 
 	XMStoreFloat3(&result, resultV);
 	return result;
-}
-
-HumanoidAnimCtrl::HumanoidAnimCtrl(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, D3D12_CPU_DESCRIPTOR_HANDLE& cbvCpuHandle, D3D12_GPU_DESCRIPTOR_HANDLE& cbvGpuHandle)
-	:AnimationController(pd3dDevice, pd3dCommandList, cbvCpuHandle, cbvGpuHandle)
-{
-}
-
-void HumanoidAnimCtrl::SetMatrix(ID3D12GraphicsCommandList* pd3dCommandList, const HumanoidState& state, const double dTime)
-{
-	AnimClip* animClip = nullptr;
-
-	switch (state)
-	{
-	case HumanoidState::IDLE:
-		animClip = gAnimMng.GetAnimClip("Humanoid_Idle");
-		break;
-
-	case HumanoidState::WALK:
-		animClip = gAnimMng.GetAnimClip("Humanoid_Walk");
-		break;
-	default:
-		break;
-	}
-	if (animClip == nullptr) return;
-	XMMATRIX mtxFront, mtxBack;
-	Keyframe result;
-	int i0, i1, i2, i3;
-	double normalizedTime;
-	double time = dTime;
-	while (time > animClip->fClipLength) time -= animClip->fClipLength;
-
-	pd3dCommandList->SetGraphicsRootDescriptorTable(ROOTSIGNATURE_ANIMTRANSFORM, m_d3dCbvGPUDescriptorHandle);
-	UINT ncbElementBytes = ((sizeof(CB_BONE_INFO) + 255) & ~255);
-	memset(m_pCBMappedBones, NULL, ncbElementBytes);
-
-	for (int timeIdx = 0; timeIdx < animClip->vecTimes.size(); timeIdx++) {
-		// 특정 Key와 시간이 같다면(맨 앞이거나, 맨 뒤거나, 중간에 어떤 Key에 걸렸거나)
-
-		if (time == animClip->vecTimes[timeIdx]) {
-
-			for (int i = 0; i < animClip->vecBone.size(); i++) {
-
-				mtxFront = XMLoadFloat4x4(&animClip->vecBone[i].toDressposeInv);
-				mtxBack = XMMatrixMultiply(
-					XMMatrixRotationQuaternion(XMLoadFloat4(&animClip->vecBone[i].keys[timeIdx].xmf4QuatRotation)),
-					XMMatrixTranslationFromVector(XMLoadFloat3(&animClip->vecBone[i].keys[timeIdx].xmf3Translation))
-				);
-
-				XMStoreFloat4x4(&m_pCBMappedBones->xmf4x4Transform[i], XMMatrixTranspose(XMMatrixMultiply(mtxFront, mtxBack)));
-			}
-			break;
-		}
-		if (animClip->vecTimes[timeIdx] < time && time <= animClip->vecTimes[timeIdx + 1]) {
-			i1 = timeIdx; i2 = timeIdx + 1;
-
-			if (timeIdx != 0)							i0 = i1 - 1;
-			else										i0 = 0;
-			if (i2 != animClip->vecTimes.size() - 1)	i3 = i2 + 1;
-			else										i3 = i2;
-			// KeySelect End
-
-			normalizedTime = (time - animClip->vecTimes[i1]) / (animClip->vecTimes[i2] - animClip->vecTimes[i1]);
-
-			for (int boneIdx = 0; boneIdx < animClip->vecBone.size(); boneIdx++) {
-
-				mtxFront = XMLoadFloat4x4(&animClip->vecBone[boneIdx].toDressposeInv);
-				InterpolateKeyframe(
-					animClip->vecBone[boneIdx].keys[i0],
-					animClip->vecBone[boneIdx].keys[i1],
-					animClip->vecBone[boneIdx].keys[i2],
-					animClip->vecBone[boneIdx].keys[i3],
-					normalizedTime,
-					result);
-
-				mtxBack = XMMatrixMultiply(
-					XMMatrixRotationQuaternion(XMLoadFloat4(&result.xmf4QuatRotation)),
-					XMMatrixTranslationFromVector(XMLoadFloat3(&result.xmf3Translation))
-				);
-				XMStoreFloat4x4(&m_pCBMappedBones->xmf4x4Transform[boneIdx], XMMatrixTranspose(XMMatrixMultiply(mtxFront, mtxBack)));
-			}
-			break;
-		}
-	}
 }

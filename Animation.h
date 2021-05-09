@@ -49,7 +49,7 @@ public:
 	~AnimationController() { if (m_pd3dCBResource) m_pd3dCBResource->Release(); }
 
 public:
-	void SetMatrix(ID3D12GraphicsCommandList* pd3dCommandList, const double time);
+	void SetMatrix(ID3D12GraphicsCommandList* pd3dCommandList, const char* StateName, const double time);
 protected:
 	void InterpolateKeyframe(Keyframe k0, Keyframe k1, Keyframe k2, Keyframe k3, float t, Keyframe& out);
 	XMFLOAT4 Interpolate(const XMFLOAT4 q0, const XMFLOAT4 q1, const XMFLOAT4 q2, const XMFLOAT4 q3, float t);
@@ -59,23 +59,4 @@ protected:
 	ID3D12Resource* m_pd3dCBResource = NULL;
 	CB_BONE_INFO*	m_pCBMappedBones = NULL;
 	D3D12_GPU_DESCRIPTOR_HANDLE	m_d3dCbvGPUDescriptorHandle;
-};
-
-enum HumanoidState {
-	IDLE,
-	WALK,
-	RUN,
-	JUMP,
-	ATTACK,
-	DIE
-};
-
-class HumanoidAnimCtrl : public AnimationController {
-public:
-	HumanoidAnimCtrl(ID3D12Device* pd3dDevice,
-		ID3D12GraphicsCommandList* pd3dCommandList,
-		D3D12_CPU_DESCRIPTOR_HANDLE& cbvCpuHandle,
-		D3D12_GPU_DESCRIPTOR_HANDLE& cbvGpuHandle);
-	void SetMatrix(ID3D12GraphicsCommandList* pd3dCommandList, const HumanoidState& state, const double time);
-
 };

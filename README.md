@@ -306,3 +306,47 @@ VertexShader에서
 AnimationController를 상속받는 HumanoidAnimCtrl를 만들고 HumanoidObject가 갖고 있는 HumanoidState에 따라 다른 Clip을 재생하도록 하였다.
 
 <img src="https://user-images.githubusercontent.com/21697638/117376845-f2a06b80-af0c-11eb-8174-a37296c1df5d.gif" width="70%" height="70%"></img>
+
+AnimationController에서는 입력받은 State와 Time으로 행렬을 만들어 Set까지 하고 있다.
+이것으로 컨트롤러에서 할 일은 일단 끝. (블렌딩 등을 제외하고)
+AnimatedObject(특히 HumanoidObject를 기준으로)에서 State 전환을 만들어야 한다.
+외부에서 Object에게 MoveForward() 명령어를 주었을 때, 만약 해당 Object가 직전에 Jump를 하여 InAir State라면, MoveForward()를 호출해도 아무런 효과가 없어야 한다.
+
+### 이번주 일정
+#### 21.05.10 - 21.05.17
+* State와 Transaction 구현
+* Object의 상황에 따라 State가 전환
+* 소스코드 정리
+
+### 2주 목표
+* UI와 Font 구현(한글까지 지원할 수 있도록)
+
+### 2021.05.10
+State 클래스를 다음과 같이 작성하고 Humanoid_Idle, Humanoid_Walk 클래스를 State 클래스를 상속받아 구현하였다.
+
+	class State {
+	public:
+		State(const char* strName, Object* obj) :m_strStateName(strName), m_pObject(obj) {}
+
+		void AddTransation(Transaction* transation) { 	m_vecTransactions.push_back(transation); }
+		bool IsSatisfyTransaction(const char* strStateName);
+		void ChangeStateTo(const char* strStateName);
+
+		virtual void EnterState() {}
+		virtual void LeaveState() {}
+	public:
+		virtual void MoveForward() = 0;
+		virtual void Update(float fTimeElapsed) = 0;
+
+	public:
+		string m_strStateName;
+
+	protected:
+		vector<Transaction*>	m_vecTransactions;
+		Object*					m_pObject;
+	};
+
+Idle State인 플레이어 캐릭터에게 WalkForward() 명령을 주면 Walk State로 전환할 수 있는 Transaction이 있는지 검사하고, 있으면 해당 Transaction의 조건에 적합한지 확인 후에 맞으면 해당 State로 전환한다.
+
+	if(IsSatisfyTransaction("strStateName")) ChangeStateTo("strStateName");
+

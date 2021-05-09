@@ -9,6 +9,7 @@
 #include "Importer.h"
 #include "Vertex.h"
 #include "Model.h"
+#include "State.h"
 
 ID3D12RootSignature* Scene::CreateRootSignature()
 {
@@ -255,7 +256,7 @@ void Scene::Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12Graphics
 			* 
 			*=======================================================================*/
 			if (vecObjDesc[i].isAnimated) {
-				AnimatedObject* tempObj = new HumanoidObject(m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
+				HumanoidObject* tempObj = new HumanoidObject(m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
 				tempObj->Move(vecObjDesc[i].position);
 				tempObj->SetModel(vecObjDesc[i].model.c_str());
 				tempObj->SetMaterial(vecObjDesc[i].material.c_str());
@@ -270,6 +271,8 @@ void Scene::Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12Graphics
 			}
 		}
 	}
+	g_AnimCtrl = new AnimationController(pd3dDevice, pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
+
 
 	/*========================================================================
 	* Pass 2 전용 디버그 윈도우 생성
@@ -586,8 +589,8 @@ void Scene::Input(UCHAR* pKeyBuffer, float fTimeElapsed)
 	if (pKeyBuffer[KeyCode::_Z] & 0xF0) { m_pCamera->Rotate(50 * fTimeElapsed, 0, 0); }
 	if (pKeyBuffer[KeyCode::_X] & 0xF0) { m_pCamera->Rotate(-50 * fTimeElapsed, 0, 0); }
 
-	if (pKeyBuffer[KeyCode::_J] & 0xF0) { dynamic_cast<HumanoidObject*>(m_vecAnimObject[0])->ChangeState(HumanoidState::IDLE); }
-	if (pKeyBuffer[KeyCode::_K] & 0xF0) { dynamic_cast<HumanoidObject*>(m_vecAnimObject[0])->ChangeState(HumanoidState::WALK); }
+	if (pKeyBuffer[KeyCode::_J] & 0xF0) { dynamic_cast<HumanoidObject*>(m_vecAnimObject[0])->WalkForward(); }
+	//if (pKeyBuffer[KeyCode::_K] & 0xF0) { dynamic_cast<HumanoidObject*>(m_vecAnimObject[0])->ChangeState(HumanoidState::WALK); }
 
 	//if (pKeyBuffer[KeyCode::_J] & 0xF0) { gTestInt = 1; m_vecAnimObject[0]->AddAnimCtrlTime(-fTimeElapsed * 0.1f); }
 	//if (pKeyBuffer[KeyCode::_K] & 0xF0) { gTestInt = 0; }

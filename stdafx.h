@@ -121,10 +121,12 @@ class TextureManager;
 class ModelManager;
 class MaterialManager;
 class AnimationManager;
+class AnimationController;
 extern TextureManager gTextureMng;
 extern ModelManager gModelMng;
 extern MaterialManager gMaterialMng;
 extern AnimationManager gAnimMng;
+extern AnimationController* g_AnimCtrl;
 extern int gTestInt;
 extern UINT gnCbvSrvDescriptorIncrementSize;
 

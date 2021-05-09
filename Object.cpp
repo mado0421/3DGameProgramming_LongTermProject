@@ -3,6 +3,8 @@
 #include "Mesh.h"
 #include "Model.h"
 #include "Material.h"
+#include "State.h"
+#include "Transaction.h"
 
 Object::Object(
 	ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
@@ -115,34 +117,45 @@ void DebugWindowObject::Render(ID3D12GraphicsCommandList* pd3dCommandList)
 	m_pDWMesh->Render(pd3dCommandList);
 }
 
+HumanoidObject::HumanoidObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, D3D12_CPU_DESCRIPTOR_HANDLE& d3dCbvCPUDescriptorStartHandle, D3D12_GPU_DESCRIPTOR_HANDLE& d3dCbvGPUDescriptorStartHandle)
+	:AnimatedObject(pd3dDevice, pd3dCommandList, d3dCbvCPUDescriptorStartHandle, d3dCbvGPUDescriptorStartHandle)
+{
+
+	HumanoidState_Idle* idle = new HumanoidState_Idle("Humanoid_Idle", this);
+	HumanoidState_Walk* walk = new HumanoidState_Walk("Humanoid_Walk", this);
+
+	idle->AddTransation(new Transaction(walk, TV::JUST, NULL, 0));
+	walk->AddTransation(new Transaction(idle, TV::SPD, LessThanEqualsTo, 0));
+
+	m_uomStates[idle->m_strStateName] = idle;
+	m_uomStates[walk->m_strStateName] = walk;
+
+	m_currState = idle;
+}
+
+void HumanoidObject::WalkForward()
+{
+	m_currState->MoveForward();
+}
+
 AnimatedObject::AnimatedObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, D3D12_CPU_DESCRIPTOR_HANDLE& d3dCbvCPUDescriptorStartHandle, D3D12_GPU_DESCRIPTOR_HANDLE& d3dCbvGPUDescriptorStartHandle)
 	:Object(pd3dDevice, pd3dCommandList, d3dCbvCPUDescriptorStartHandle, d3dCbvGPUDescriptorStartHandle)
 {
-	m_AnimCtrl = new AnimationController(pd3dDevice, pd3dCommandList, d3dCbvCPUDescriptorStartHandle, d3dCbvGPUDescriptorStartHandle);
-
-
 }
 
-void AnimatedObject::Update(float fTimeElapsed)
+void AnimatedObject::SetState(const char* strStateName)
 {
-	Object::Update(fTimeElapsed);
+	m_currState = m_uomStates[strStateName]; m_currState->EnterState();
 }
 
 void AnimatedObject::Render(ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	m_AnimCtrl->SetMatrix(pd3dCommandList, m_time);
+	g_AnimCtrl->SetMatrix(pd3dCommandList, m_currState->m_strStateName.c_str(), m_time);
 	Object::Render(pd3dCommandList);
 }
 
-HumanoidObject::HumanoidObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, D3D12_CPU_DESCRIPTOR_HANDLE& d3dCbvCPUDescriptorStartHandle, D3D12_GPU_DESCRIPTOR_HANDLE& d3dCbvGPUDescriptorStartHandle)
-	:AnimatedObject(pd3dDevice, pd3dCommandList, d3dCbvCPUDescriptorStartHandle, d3dCbvGPUDescriptorStartHandle)
+void AnimatedObject::Update(float fTimeElapsed)
 {
-	m_AnimCtrl = new HumanoidAnimCtrl(pd3dDevice, pd3dCommandList, d3dCbvCPUDescriptorStartHandle, d3dCbvGPUDescriptorStartHandle);
-
-}
-
-void HumanoidObject::Render(ID3D12GraphicsCommandList* pd3dCommandList)
-{
-	m_AnimCtrl->SetMatrix(pd3dCommandList, m_curState, m_time);
-	Object::Render(pd3dCommandList);
+	m_time += fTimeElapsed;
+	m_currState->Update(fTimeElapsed);
 }

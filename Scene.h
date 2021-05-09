@@ -23,7 +23,6 @@ struct CB_PASS_INFO {
 	float		m_xmfCurrentTime;
 };
 
-
 class Scene
 {
 protected:
