@@ -83,6 +83,7 @@ Point Light Shadow를 위해 TextureManager와 Texture에 CubeMap으로 생성�
 원래 Texture2DArray로 만들고 그걸 Texture2D로 되지 않을까 하고 올려봤었는데 어림도 없었다.
 [Introduction To Textures in Direct3D 11 - Win32 apps | Microsoft Docs](https://docs.microsoft.com/en-us/windows/win32/direct3d11/overviews-direct3d-11-resources-textures-intro)
 여기에 보면 큐브맵의 인덱스가 나온다. 저 순서대로 조명마다 뷰 변환 행렬을 만들어줘야 한다.(올릴 땐 투영 변환 행렬 곱하고 전치행렬로 바꿔서)
+
 <img src="https://user-images.githubusercontent.com/21697638/112391901-f2248a80-8d3b-11eb-8d31-36f302a8be15.png" width="70%" height="70%"></img>
 
 
@@ -288,6 +289,7 @@ Parser에서 Mesh를 저장할 때 하나의 Vertex에 영향을 주는 Bone이 
 하나의 Vertex에 영향을 주는 Bone이 4개를 초과하는 경우, 가장 작은 weight값을 가진 Bone을 지우고 해당 weight값을 나눠 다른 Bone들의 weight에 더해주는 방법으로 수정하였다.
 
 <img src="https://user-images.githubusercontent.com/21697638/117238481-edd5ac00-ae67-11eb-9259-b6ca4016ee7f.gif" width="70%" height="70%"></img>
+
 이전에 구현해둔 쿼터니언 보간 방식은 각 요소별로 CatmullRom 보간을 하는 방법이었기 때문에, 회전값이 튀는 문제가 있었다.
 같은 회전값을 나타내더라도 표현하는 쿼터니언 값이 다를 수 있던 문제였는데(아마?) 이를 요소별로 단순하게 보간하여 발생한 것 같아 XMQuaternionSlerp()을 사용하여 보간하게 변경하였다.
 
