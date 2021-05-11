@@ -36,7 +36,7 @@ float3 BlinnPhong(float3 lightColor, float3 vToLight, float3 vNormal, float3 vTo
 	float3 vHalf = normalize(vToEye + vToLight);
 
 	float roughnessFactor = (m + 8.0f) * pow(max(dot(vHalf, vNormal), 0.0f), m) / 8.0f;
-	float3 fresnelFactor = SchlickFresnel(float3(0.1f, 0.1f, 0.1f), vHalf, vToLight);
+	float3 fresnelFactor = SchlickFresnel(float3(0.9f, 0.9f, 0.9f), vHalf, vToLight);
 
 	float3 specAlbedo = fresnelFactor * roughnessFactor;
 	specAlbedo = specAlbedo / (specAlbedo + 1.0f);

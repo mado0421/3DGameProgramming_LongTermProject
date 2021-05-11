@@ -6,13 +6,37 @@
 *
 * - position, normal, texCoord°¡ ³Ñ¾î¿È.
 *=======================================================================*/
+float3 NormalSampleToWorldSpace(float3 normalMapSample, float3 unitNormalW, float3 tangentW)
+{
+	// Uncompress each component from [0,1] to [-1,1].
+	float3 normalT = 2.0f * normalMapSample - 1.0f;
+
+	// Build orthonormal basis.
+	float3 N = unitNormalW;
+	float3 T = normalize(tangentW - dot(tangentW, N) * N);
+	float3 B = cross(N, T);
+
+	float3x3 TBN = float3x3(T, B, N);
+
+	// Transform from tangent space to world space.
+	float3 bumpedNormalW = mul(normalT, TBN);
+
+	return bumpedNormalW;
+}
+
+
+
 GBuffer PS_PackGBuffer(VS_OUTPUT input)
 {
 	GBuffer output;
 	input.normalW = normalize(input.normalW);
-	output.cColor.rgb = gtxtColorMap.Sample(gSamplerState, input.uv * float2(1, -1)).rgb;
-	output.cColor.a = gtxtDepthMap.Sample(gSamplerState, input.uv * float2(1, -1)).r;
-	output.cNormal = float4((input.normalW * 0.5 + 0.5), 1.0f);
+	output.cColor.rgb = gtxtColorMap.Sample(gSamplerState, input.uv).rgb;
+	output.cColor.a = (1 - gtxtDepthMap.Sample(gSamplerState, input.uv).r);
+
+	output.cNormal.rgb = NormalSampleToWorldSpace(gtxtNormalMap.Sample(gSamplerState, input.uv).rgb, input.normalW, input.tangentW) * 0.5 + 0.5;
+
+	//output.cNormal.rgb = (gtxtNormalMap.Sample(gSamplerState, input.uv).rgb * 0.5 + 0.5).rgb;
+	//output.cNormal = float4((input.normalW * 0.5 + 0.5), 1.0f);
 
 	return output;
 }

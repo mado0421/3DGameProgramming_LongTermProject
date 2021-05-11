@@ -9,3 +9,9 @@ specularTest.dds
 human.mm
 Humanoid_Idle.mac
 Humanoid_Walk.mac
+CobblestoneOld_albedo.dds
+CobblestoneOld_normal.dds
+CobblestoneOld_roughness.dds
+10x10Floor.mm
+1x1FloorNoAnim(tangentTest).mm
+1x1FloorWithAnim(tangentTest).mm

@@ -42,7 +42,6 @@ struct VS_INPUT {
 	float3 position : POSITION;
 	float3 normal	: NORMAL;
 	float3 tangent	: TANGENT;
-	//float3 binormal	: BINORMAL;
 	uint4  boneIdx	: BLENDINDICES;
 	float4 weight	: BLENDWEIGHT;
 	float2 uv		: TEXCOORD;
@@ -51,8 +50,8 @@ struct VS_OUTPUT {
 	float4 position : SV_POSITION;
 	float3 positionW: POSITION;
 	float2 uv		: TEXCOORD0;
-	float3 normalW	: TEXCOORD1;
-	float3 tangentW	: TEXCOORD2;
+	float3 normalW	: NORMAL;
+	float3 tangentW	: TANGENT;
 };
 struct GS_OUTPUT
 {

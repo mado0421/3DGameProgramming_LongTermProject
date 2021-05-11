@@ -74,13 +74,13 @@ void Light::SetShaderResource(ID3D12GraphicsCommandList* pd3dCommandList)
 UINT LightManager::AddPointLight(LIGHT_DESC desc, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, D3D12_CPU_DESCRIPTOR_HANDLE& d3dCbvCPUDescHandle, D3D12_GPU_DESCRIPTOR_HANDLE& d3dCbvGPUDescHandle)
 {
 	Light* temp = new Light(pd3dDevice, pd3dCommandList, d3dCbvCPUDescHandle, d3dCbvGPUDescHandle);
-	temp->m_uLightType = LIGHTTYPE::LIGHT_POINT;
-	temp->m_xmf3Position = desc.xmf3Position;
-	temp->m_fFalloffStart = desc.xmf2Falloff.x;
-	temp->m_fFalloffEnd = desc.xmf2Falloff.y;
-	temp->m_xmf3Color = desc.xmf3Color;
-	temp->m_bIsShadow = desc.bIsShadow;
-	temp->m_bIsEnable = true;
+	temp->m_uLightType		= LIGHTTYPE::LIGHT_POINT;
+	temp->m_xmf3Position	= desc.xmf3Position;
+	temp->m_fFalloffStart	= desc.xmf2Falloff.x;
+	temp->m_fFalloffEnd		= desc.xmf2Falloff.y;
+	temp->m_xmf3Color		= desc.xmf3Color;
+	temp->m_bIsShadow		= desc.bIsShadow;
+	temp->m_bIsEnable		= true;
 
 	XMFLOAT4X4 xmf4x4Projection = Matrix4x4::PerspectiveFovLH(XMConvertToRadians(90.0f), 1, 0.1f, 1000.0f);
 
@@ -196,10 +196,10 @@ UINT LightManager::AddDirectionalLight(LIGHT_DESC desc, ID3D12Device* pd3dDevice
 {
 	Light* temp = new Light(pd3dDevice, pd3dCommandList, d3dCbvCPUDescHandle, d3dCbvGPUDescHandle);
 	temp->m_uLightType = LIGHTTYPE::LIGHT_DIRECTIONAL;
-	temp->m_xmf3Direction = desc.xmf3Direction;
-	temp->m_xmf3Color = desc.xmf3Color;
-	temp->m_bIsShadow = desc.bIsShadow;
-	temp->m_bIsEnable = true;
+	temp->m_xmf3Direction	= Vector3::Normalize( desc.xmf3Direction );
+	temp->m_xmf3Color		= desc.xmf3Color;
+	temp->m_bIsShadow		= desc.bIsShadow;
+	temp->m_bIsEnable		= true;
 
 	/*
 	* 필요한 것: m_pCamera의 m_xmf4x4ViewInv, light의 ViewMatrix, Cascade별 Zn, Zf, FOV, Cascade별 행렬을 담을 array
@@ -250,14 +250,14 @@ UINT LightManager::AddSpotLight(LIGHT_DESC desc, ID3D12Device* pd3dDevice, ID3D1
 {
 	Light* temp = new Light(pd3dDevice, pd3dCommandList, d3dCbvCPUDescHandle, d3dCbvGPUDescHandle);
 	temp->m_uLightType = LIGHTTYPE::LIGHT_SPOT;
-	temp->m_xmf3Direction = desc.xmf3Direction;
-	temp->m_xmf3Position = desc.xmf3Position;
-	temp->m_xmf3Color = desc.xmf3Color;
-	temp->m_fFalloffStart = desc.xmf2Falloff.x;
-	temp->m_fFalloffEnd = desc.xmf2Falloff.y;
-	temp->m_fSpotPower = desc.fSpotPower;
-	temp->m_bIsShadow = desc.bIsShadow;
-	temp->m_bIsEnable = true;
+	temp->m_xmf3Direction	= Vector3::Normalize( desc.xmf3Direction );
+	temp->m_xmf3Position	= desc.xmf3Position;
+	temp->m_xmf3Color		= desc.xmf3Color;
+	temp->m_fFalloffStart	= desc.xmf2Falloff.x;
+	temp->m_fFalloffEnd		= desc.xmf2Falloff.y;
+	temp->m_fSpotPower		= desc.fSpotPower;
+	temp->m_bIsShadow		= desc.bIsShadow;
+	temp->m_bIsEnable		= true;
 
 	XMFLOAT4X4 xmf4x4View = Matrix4x4::LookAtLH(temp->m_xmf3Position, Vector3::Add(temp->m_xmf3Position, temp->m_xmf3Direction), XMFLOAT3(0, 1, 0));
 	XMFLOAT4X4 xmf4x4Projection = Matrix4x4::PerspectiveFovLH(XMConvertToRadians(120.0f), 1, 0.1f, 1000.0f);

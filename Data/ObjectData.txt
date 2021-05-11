@@ -4,6 +4,8 @@
 #{ mesh animTest position 0 0 0 }
 { animModel human position 0 0 0 }
 #{ mesh Assets/room.obj position 0 0 0 }
-{ model floor TestMat position 0 0 0 }
+#{ model 1x1FloorNoAnim(tangentTest) CobblestoneMat position 1 -1 0 }
+#{ model 1x1FloorWithAnim(tangentTest) CobblestoneMat position -1 -1 0 }
+{ model 10x10Floor CobblestoneMat position 0 0 0 }
 
 #End

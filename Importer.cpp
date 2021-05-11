@@ -322,6 +322,7 @@ vector<MESH_DATA> MeshDataImporter::FBXLoad(const char* filePath)
 			swap(temp.m_xmf3Tangent.y, temp.m_xmf3Tangent.z);
 			temp.m_xmf3Tangent.z *= -1;
 			temp.m_xmf2UV = v.uv;
+			temp.m_xmf2UV.y *= -1;
 			temp.m_xmi4BoneIndices.x = vecCP[v.ctrlPointIndex].boneIndices[0];
 			temp.m_xmi4BoneIndices.y = vecCP[v.ctrlPointIndex].boneIndices[1];
 			temp.m_xmi4BoneIndices.z = vecCP[v.ctrlPointIndex].boneIndices[2];

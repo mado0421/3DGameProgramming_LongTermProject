@@ -352,3 +352,36 @@ Idle State인 플레이어 캐릭터에게 WalkForward() 명령을 주면 Walk S
 
 	if(IsSatisfyTransaction("strStateName")) ChangeStateTo("strStateName");
 
+### 2021.05.11
+이번 2주 목표를 'UI와 Font 구현(한글까지 지원할 수 있도록)'에서 '손에 무기 들려주기, IK 구현, 애니메이션 블렌더(이건 시도까지만)'으로 변경
+Bump 매핑을 구현하는 것을 먼저 한다.
+
+https://www.textures.com/ 에서 albedo, normal, roughness맵을 다 갖고 있는 Texture Set를 받아 테스트에 사용하였다.
+사용한 Set은 [Medieval Cobblestone Pavement - PBR0024 (textures.com)](https://www.textures.com/download/PBR0052/133087)
+
+Specular Map과 Roughness Map이 갖는 의미의 차이점을 잘 모르겠기에 지금은 Specular Map의 슬롯을 기본으로 비워두고, Albedo Map(이것도 Diffuse Map과의 차이점을 모르겠다)의 Alpha 채널에 Roughness Map의 정보를 넣어 하나로 합친 뒤에 사용하였다.
+즉, 지금 마테리얼이 Texture Set으로 갖는 정보는 Diffuse.rgb, Roughness.r(==Diffuse.a에 들어감), Normal.rgb 이렇게 있다.
+재질의 프레넬 값을 가지는 텍스처는 아직 보지 못했기에 따로 재질에 따라 제작할 필요가 있다. 또는 마테리얼마다 지정해주거나.
+다만, 지금 사용하고 있는 마테리얼마다 지정해주는 방식은 한 마테리얼에서 다양한 재질을 표현할 수 없다는 문제가 있다.
+예를 들어, 하나의 모델에서 한 부분은 천 재질이고, 다른 부분은 가죽 재질일 때, Roughness 값은 다르게 줄 수 있지만 프레넬 값은 동일하게 줄 수 밖에 없다. 금속의 경우, 프레넬 값이 매우 큰 것이 다른 재질과의 차이점인데 하나의 마테리얼에서 그것을 표현할 수 없다는 것이 문제가 된다.
+하지만 이와 별개로 마테리얼이라는 표현 자체가 재질을 의미하는 만큼, 마테리얼 하나에 재질 하나만을 표현해야 하는 것이 아닌가 같은 것도 고려해봐야 할 것 같다.
+일단 지금은 프레넬 값을 마테리얼마다 고정하여 주고 있다.
+
+<img src="https://user-images.githubusercontent.com/21697638/117751361-edfeee80-b24f-11eb-9d7d-5062e195720e.png" width="70%" height="70%"></img>
+
+<img src="https://user-images.githubusercontent.com/21697638/117751397-fe16ce00-b24f-11eb-9328-6e5f1cd4879c.png" width="70%" height="70%"></img>
+
+아래 사진은 하드코딩 되어 있는 프레넬 값에 차이를 줘 렌더링 한 결과물이다.
+[왼쪽 - 0.1, 오른쪽 - 0.9]
+
+SpotLight 생성 시에 SpotLight의 각도를 SpotPower로 조절해주고 있었으나, LightDirection이 normalize 되지 않은 채로 들어가 의도하지 않은 결과가 나오는 점을 수정.
+
+<img src="https://user-images.githubusercontent.com/21697638/117754539-7b910d00-b255-11eb-9875-7b5450ee4364.png" width="70%" height="70%"></img>
+
+3ds Max에서 지금 필요한 모든 정보들을 얻기 위해선 다음과 같은 처리가 필요하다.
+1. UnwrapUVW를 하여 UV를 생성
+2. TurnToPoly를 하여 모든 Polygon Size를 3 이하로 줄여, 수동 Triangulate (Export 옵션에서 선택하는 Triangulate 만으로는 Binormal과 Tangent가 제대로 생성되지 않았다)
+3. Split per-Vertex normals, Tangents and Binormals, Triangulate 에 체크
+4. Units은 Automatic, Axis는 Y-up
+5. Import 할 때, Position, Normal, Tangent는 YZ Swap, Z 반전
+6. Import 할 때, UV는 V 반전
