@@ -35,6 +35,15 @@ void Object::Render(ID3D12GraphicsCommandList* pd3dCommandList)
 	memset(m_pCBMappedObjects, NULL, ncbElementBytes);
 	XMStoreFloat4x4(&m_pCBMappedObjects->xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4World)));
 
+	if (m_pParent) {
+		XMMATRIX xmmtxParentBoneInv = dynamic_cast<HumanoidObject*>(m_pParent)->GetBoneMatrix(28);	// 9: L Hand, 28: R Hand
+		xmmtxParentBoneInv = XMMatrixMultiply(xmmtxParentBoneInv, XMMatrixReflect(XMVectorSet(1, 0, 0, 0)));
+		xmmtxParentBoneInv = XMMatrixMultiply(XMMatrixRotationRollPitchYaw(0, XMConvertToRadians(90), XMConvertToRadians(90)), xmmtxParentBoneInv);
+		XMStoreFloat4x4(&m_pCBMappedObjects->xmf4x4World, XMMatrixTranspose(XMMatrixMultiply(XMLoadFloat4x4(&m_xmf4x4World), xmmtxParentBoneInv)));
+		//XMStoreFloat4x4(&m_pCBMappedObjects->xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4World)));
+	}
+	else			XMStoreFloat4x4(&m_pCBMappedObjects->xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4World)));
+
 	gMaterialMng.SetMaterial(material.c_str(), pd3dCommandList);
 	gModelMng.Render(model.c_str(), pd3dCommandList);
 }
@@ -146,6 +155,11 @@ AnimatedObject::AnimatedObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 void AnimatedObject::SetState(const char* strStateName)
 {
 	m_currState = m_uomStates[strStateName]; m_currState->EnterState();
+}
+
+XMMATRIX AnimatedObject::GetBoneMatrix(int boneIdx)
+{
+	return g_AnimCtrl->GetBoneMatrix(m_currState->m_strStateName.c_str(), boneIdx, m_time);
 }
 
 void AnimatedObject::Render(ID3D12GraphicsCommandList* pd3dCommandList)

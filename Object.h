@@ -35,9 +35,11 @@ public:
 	virtual void Update(float fTimeElapsed);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList);
 
+	void SetParent(Object* pObject) { m_pParent = pObject; }
 	virtual void SetState(const char* strStateName) {};
 	XMFLOAT3 const GetLook() { return XMFLOAT3(m_xmf4x4World._31, m_xmf4x4World._32, m_xmf4x4World._33); }
 	float const GetSpeed() { return m_fSpeed; }
+	virtual XMMATRIX GetBoneMatrix(int boneIdx) { return XMMatrixIdentity(); }
 	void SetSpeed(float fSpd) { m_fSpeed = fSpd; }
 	void Move(const XMFLOAT3 xmf3Vector);
 	void Rotate(const XMFLOAT3 xmf3Vector);
@@ -55,6 +57,7 @@ protected:
 	XMFLOAT4X4	m_xmf4x4World;
 	double		m_time;
 	float		m_fSpeed;
+	Object*		m_pParent;
 };
 
 class DebugWindowObject : public Object {
@@ -79,6 +82,7 @@ public:
 		D3D12_GPU_DESCRIPTOR_HANDLE& d3dCbvGPUDescriptorStartHandle);
 
 	virtual void SetState(const char* strStateName);
+	virtual XMMATRIX GetBoneMatrix(int boneIdx);
 
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void Update(float fTimeElapsed);

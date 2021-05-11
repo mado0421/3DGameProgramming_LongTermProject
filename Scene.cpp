@@ -247,14 +247,6 @@ void Scene::Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12Graphics
 
 	for (int i = 0; i < vecObjDesc.size(); i++) {
 		if (strcmp(vecObjDesc[i].model.c_str(), "") != 0) {
-			/*========================================================================
-			* 여기까지 작업했음
-			* 
-			* - 오브젝트 데이터에서 마테리얼 이름을 읽어오는 부분까지 함.
-			* - 마테리얼을 오브젝트가 가지게 하고
-			* - 오브젝트 렌더를 할 때, gModelMng와 gMaterialMng를 통해서 렌더링 할 수 있도록 구조 변경할 것.
-			* 
-			*=======================================================================*/
 			if (vecObjDesc[i].isAnimated) {
 				HumanoidObject* tempObj = new HumanoidObject(m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
 				tempObj->Move(vecObjDesc[i].position);
@@ -272,6 +264,8 @@ void Scene::Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12Graphics
 		}
 	}
 	g_AnimCtrl = new AnimationController(pd3dDevice, pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
+
+	m_vecObject[0]->SetParent(m_vecAnimObject[0]);
 
 
 	/*========================================================================

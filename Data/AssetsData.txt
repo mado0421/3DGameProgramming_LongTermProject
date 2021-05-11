@@ -15,3 +15,6 @@ CobblestoneOld_roughness.dds
 10x10Floor.mm
 1x1FloorNoAnim(tangentTest).mm
 1x1FloorWithAnim(tangentTest).mm
+pistol.mm
+pistol_albedo.dds
+pistol_normal.dds

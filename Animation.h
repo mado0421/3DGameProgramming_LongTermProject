@@ -50,6 +50,7 @@ public:
 
 public:
 	void SetMatrix(ID3D12GraphicsCommandList* pd3dCommandList, const char* StateName, const double time);
+	XMMATRIX GetBoneMatrix(const char* StateName, int boneIdx, const double time);
 protected:
 	void InterpolateKeyframe(Keyframe k0, Keyframe k1, Keyframe k2, Keyframe k3, float t, Keyframe& out);
 	XMFLOAT4 Interpolate(const XMFLOAT4 q0, const XMFLOAT4 q1, const XMFLOAT4 q2, const XMFLOAT4 q3, float t);

@@ -136,6 +136,76 @@ void AnimationController::SetMatrix(ID3D12GraphicsCommandList* pd3dCommandList, 
 	}
 }
 
+XMMATRIX AnimationController::GetBoneMatrix(const char* strClipName, int boneIdx, const double dTime)
+{
+	AnimClip* animClip = gAnimMng.GetAnimClip(strClipName);
+	XMMATRIX mtxFront, mtxBack;
+	Keyframe result;
+	int i0, i1, i2, i3;
+	double normalizedTime;
+	double time = dTime;
+	while (time > animClip->fClipLength) time -= animClip->fClipLength;
+
+
+
+	for (int timeIdx = 0; timeIdx < animClip->vecTimes.size(); timeIdx++) {
+		// 특정 Key와 시간이 같다면(맨 앞이거나, 맨 뒤거나, 중간에 어떤 Key에 걸렸거나)
+		if (time == animClip->vecTimes[timeIdx]) {
+			mtxFront = XMMatrixMultiply(
+				XMMatrixRotationQuaternion(XMLoadFloat4(&animClip->vecBone[0].keys[0].xmf4QuatRotation)),
+				XMMatrixTranslationFromVector(XMLoadFloat3(&animClip->vecBone[0].keys[0].xmf3Translation))
+			);
+			XMVECTOR det = XMMatrixDeterminant(mtxFront);
+			mtxFront = XMMatrixInverse(&det, mtxFront);
+
+
+			mtxBack = XMMatrixMultiply(
+				XMMatrixRotationQuaternion(XMLoadFloat4(&animClip->vecBone[boneIdx].keys[timeIdx].xmf4QuatRotation)),
+				XMMatrixTranslationFromVector(XMLoadFloat3(&animClip->vecBone[boneIdx].keys[timeIdx].xmf3Translation))
+			);
+
+			//return XMMatrixMultiply(mtxFront, mtxBack);
+			return mtxBack;
+			break;
+		}
+		if (animClip->vecTimes[timeIdx] < time && time <= animClip->vecTimes[timeIdx + 1]) {
+			i1 = timeIdx; i2 = timeIdx + 1;
+
+			if (timeIdx != 0)							i0 = i1 - 1;
+			else										i0 = 0;
+			if (i2 != animClip->vecTimes.size() - 1)	i3 = i2 + 1;
+			else										i3 = i2;
+			// KeySelect End
+
+			normalizedTime = (time - animClip->vecTimes[i1]) / (animClip->vecTimes[i2] - animClip->vecTimes[i1]);
+
+			InterpolateKeyframe(
+				animClip->vecBone[boneIdx].keys[i0],
+				animClip->vecBone[boneIdx].keys[i1],
+				animClip->vecBone[boneIdx].keys[i2],
+				animClip->vecBone[boneIdx].keys[i3],
+				normalizedTime,
+				result);
+
+			mtxFront = XMMatrixMultiply(
+				XMMatrixRotationQuaternion(XMLoadFloat4(&animClip->vecBone[0].keys[0].xmf4QuatRotation)),
+				XMMatrixTranslationFromVector(XMLoadFloat3(&animClip->vecBone[0].keys[0].xmf3Translation))
+			);
+			XMVECTOR det = XMMatrixDeterminant(mtxFront);
+			mtxFront = XMMatrixInverse(&det, mtxFront);
+
+			mtxBack = XMMatrixMultiply(
+				XMMatrixRotationQuaternion(XMLoadFloat4(&result.xmf4QuatRotation)),
+				XMMatrixTranslationFromVector(XMLoadFloat3(&result.xmf3Translation))
+			);
+			//return XMMatrixMultiply(mtxFront, mtxBack);
+			return mtxBack;
+
+			break;
+		}
+	}
+}
+
 void AnimationController::InterpolateKeyframe(Keyframe k0, Keyframe k1, Keyframe k2, Keyframe k3, float t, Keyframe& out)
 {
 	XMStoreFloat4(&out.xmf4QuatRotation, 

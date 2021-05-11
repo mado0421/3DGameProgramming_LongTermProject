@@ -385,3 +385,11 @@ SpotLight 생성 시에 SpotLight의 각도를 SpotPower로 조절해주고 있�
 4. Units은 Automatic, Axis는 Y-up
 5. Import 할 때, Position, Normal, Tangent는 YZ Swap, Z 반전
 6. Import 할 때, UV는 V 반전
+
+<img src="https://user-images.githubusercontent.com/21697638/117795033-c1b39400-b288-11eb-8eba-6b0d1f3a59c3.png" width="70%" height="70%"></img>
+
+다른 오브젝트를 Humanoid Object의 R Hand Bone까지 옮기는 것을 구현했다.
+여기서 오브젝트가 YZ평면으로 반전된 곳에 위치하는 문제가 있었는데
+이것은 AnimClip을 import 할 때, 해당 평면에 대해 반전되서 들어오는 것을 별다른 처리 없이 그대로 사용한 뒤,
+VS에서 모든 Vertex에 대해 일괄적으로 position.x *= -1를 해주는 것으로 마무리했기 때문이다. (이렇게 해야 의도한 대로 좌우가 맞게 출력되므로)
+지금은 옮기려는 오브젝트에 평면대칭행렬을 곱해서 해결했지만 위에서 말한 AnimClip 행렬들에 평면대칭행렬을 곱해서 VS에서 추가적인 계산을 할 필요 없도록 수정해야 할 것

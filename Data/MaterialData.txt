@@ -4,5 +4,6 @@
 { name MechMat d mech_diff f 0.1 0.1 0.1 }
 { name TestMat s specularTest f 0.1 0.1 0.1 }
 { name CobblestoneMat d CobblestoneOld_albedo n CobblestoneOld_normal s CobblestoneOld_roughness f 0.1 0.1 0.1 }
+{ name PistolMat d pistol_albedo n pistol_normal f 0.1 0.1 0.1 }
 
 #End
