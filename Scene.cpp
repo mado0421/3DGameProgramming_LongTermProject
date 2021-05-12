@@ -266,7 +266,7 @@ void Scene::Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12Graphics
 	g_AnimCtrl = new AnimationController(pd3dDevice, pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
 
 	m_vecObject[0]->SetParent(m_vecAnimObject[0]);
-
+	m_vecObject[0]->SetPosition(XMFLOAT3(0.028, 0, 0.08));
 
 	/*========================================================================
 	* Pass 2 전용 디버그 윈도우 생성
@@ -564,10 +564,11 @@ void Scene::Update(float fTimeElapsed)
 	m_fCurrentTime += fTimeElapsed;
 	::memcpy(&m_pcbMappedPassInfo->m_xmfCurrentTime, &m_fCurrentTime, sizeof(float));
 
+	if (gTestInt) {
 
-	for (auto iter = m_vecObject.begin(); iter != m_vecObject.end(); iter++) (*iter)->Update(fTimeElapsed);
-	for (auto iter = m_vecAnimObject.begin(); iter != m_vecAnimObject.end(); iter++) (*iter)->Update(fTimeElapsed);
-	//for_each(m_vecObject.begin(), m_vecObject.end(), [fTimeElapsed](Object* o) {o->Rotate(XMFLOAT3(0, 30 * fTimeElapsed, 0)); });
+		for (auto iter = m_vecObject.begin(); iter != m_vecObject.end(); iter++) (*iter)->Update(fTimeElapsed);
+		for (auto iter = m_vecAnimObject.begin(); iter != m_vecAnimObject.end(); iter++) (*iter)->Update(fTimeElapsed);
+	}
 
 }
 void Scene::Input(UCHAR* pKeyBuffer, float fTimeElapsed)
@@ -584,27 +585,20 @@ void Scene::Input(UCHAR* pKeyBuffer, float fTimeElapsed)
 	if (pKeyBuffer[KeyCode::_X] & 0xF0) { m_pCamera->Rotate(-50 * fTimeElapsed, 0, 0); }
 
 	if (pKeyBuffer[KeyCode::_J] & 0xF0) { dynamic_cast<HumanoidObject*>(m_vecAnimObject[0])->WalkForward(); }
-	//if (pKeyBuffer[KeyCode::_K] & 0xF0) { dynamic_cast<HumanoidObject*>(m_vecAnimObject[0])->ChangeState(HumanoidState::WALK); }
-
-	//if (pKeyBuffer[KeyCode::_J] & 0xF0) { gTestInt = 1; m_vecAnimObject[0]->AddAnimCtrlTime(-fTimeElapsed * 0.1f); }
-	//if (pKeyBuffer[KeyCode::_K] & 0xF0) { gTestInt = 0; }
-	//if (pKeyBuffer[KeyCode::_L] & 0xF0) { gTestInt = 1; m_vecAnimObject[0]->AddAnimCtrlTime(fTimeElapsed * 0.1f); }
-	//if (pKeyBuffer[KeyCode::_P] & 0xF0) { gTestInt = 2; }
+	if (pKeyBuffer[KeyCode::_U] & 0xF0) gTestInt = 1;
+	if (pKeyBuffer[KeyCode::_I] & 0xF0) gTestInt = 0;
 
 	if (pKeyBuffer[KeyCode::_1] & 0xF0) {
 		m_pCamera->SetPosition(XMFLOAT3(0, 1, 0));
 		m_pCamera->SetLookAt(XMFLOAT3(0, 1, 1));
-		
 	}
 	if (pKeyBuffer[KeyCode::_2] & 0xF0) {
 		m_pCamera->SetPosition(XMFLOAT3(0, 1, 3));
 		m_pCamera->SetLookAt(XMFLOAT3(0, 1, 0));
-
 	}
 	if (pKeyBuffer[KeyCode::_3] & 0xF0) {
 		m_pCamera->SetPosition(XMFLOAT3(0, 1, -3));
 		m_pCamera->SetLookAt(XMFLOAT3(0, 1, 0));
-
 	}
 	if (pKeyBuffer[KeyCode::_4] & 0xF0) {
 		m_pCamera->SetPosition(XMFLOAT3(3, 1, 3));
@@ -619,13 +613,17 @@ void Scene::Input(UCHAR* pKeyBuffer, float fTimeElapsed)
 		m_pCamera->SetLookAt(XMFLOAT3(0, 0, 0));
 	}
 
-	if (pKeyBuffer[KeyCode::_N] & 0xF0) { test = true; }
+	if (pKeyBuffer[KeyCode::_C] & 0xF0) { m_vecObject[0]->PrintTest(); }
+	if (pKeyBuffer[KeyCode::_V] & 0xF0) { m_vecObject[0]->SetPosition(XMFLOAT3(0, 0, 0)); }
+	if (pKeyBuffer[KeyCode::_B] & 0xF0) { m_vecObject[0]->Move(XMFLOAT3(0.1 * fTimeElapsed, 0, 0)); }
+	if (pKeyBuffer[KeyCode::_N] & 0xF0) { m_vecObject[0]->Move(XMFLOAT3(0, 0.1 * fTimeElapsed, 0));/*test = true;*/ }
 	if (pKeyBuffer[KeyCode::_M] & 0xF0) { 
-		//if (test) {
-		//	ReloadLight();
-		//	test = false; 
-		//}
-		test = false;
+		////if (test) {
+		////	ReloadLight();
+		////	test = false; 
+		////}m_vecObject[0]->Move(XMFLOAT3(0.1, 0, 0));
+		//test = false;
+		m_vecObject[0]->Move(XMFLOAT3(0, 0, 0.1 * fTimeElapsed));
 	}
 
 

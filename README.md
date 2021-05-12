@@ -78,7 +78,7 @@
 이제 메쉬 로드가 된다.
 <img src="https://user-images.githubusercontent.com/21697638/111926071-aa5cf380-8aee-11eb-83ce-9b9e3ea0e60d.png" width="70%" height="70%"></img>
 
-###2021.03.25
+### 2021.03.25
 Point Light Shadow를 위해 TextureManager와 Texture에 CubeMap으로 생성하는 함수를 작성해주고 Header.hlsli에 TextureCube를 추가해주었다.
 원래 Texture2DArray로 만들고 그걸 Texture2D로 되지 않을까 하고 올려봤었는데 어림도 없었다.
 [Introduction To Textures in Direct3D 11 - Win32 apps | Microsoft Docs](https://docs.microsoft.com/en-us/windows/win32/direct3d11/overviews-direct3d-11-resources-textures-intro)
@@ -393,3 +393,11 @@ SpotLight 생성 시에 SpotLight의 각도를 SpotPower로 조절해주고 있�
 이것은 AnimClip을 import 할 때, 해당 평면에 대해 반전되서 들어오는 것을 별다른 처리 없이 그대로 사용한 뒤,
 VS에서 모든 Vertex에 대해 일괄적으로 position.x *= -1를 해주는 것으로 마무리했기 때문이다. (이렇게 해야 의도한 대로 좌우가 맞게 출력되므로)
 지금은 옮기려는 오브젝트에 평면대칭행렬을 곱해서 해결했지만 위에서 말한 AnimClip 행렬들에 평면대칭행렬을 곱해서 VS에서 추가적인 계산을 할 필요 없도록 수정해야 할 것
+
+### 2021.05.12
+
+<img src="https://user-images.githubusercontent.com/21697638/117913228-fd4b6e00-b31b-11eb-954c-3f05813e5e4a.gif" width="70%" height="70%"></img>
+
+손 위치에 오브젝트를 옮기는 것에 성공했다.
+Object 클래스에서 부모에 상대적인 로컬변환행렬과 절대값인 월드변환행렬을 받을 수 있도록 구현.
+에셋이 좌우반전되는 문제는 쉽게 해결할 수 있는 부분이 아닌 것 같아 일단 묻어두고 이후에 수정.

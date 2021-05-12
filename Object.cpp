@@ -11,7 +11,7 @@ Object::Object(
 	D3D12_CPU_DESCRIPTOR_HANDLE& d3dCbvCPUDescriptorStartHandle,
 	D3D12_GPU_DESCRIPTOR_HANDLE& d3dCbvGPUDescriptorStartHandle)
 {
-	m_xmf4x4World	= Matrix4x4::Identity();
+	m_xmf4x4Local			= Matrix4x4::Identity();
 	Mesh * pMesh			= new Mesh(pd3dDevice, pd3dCommandList);
 
 	UINT ncbElementBytes = ((sizeof(CB_OBJECT_INFO) + 255) & ~255);
@@ -33,16 +33,20 @@ void Object::Render(ID3D12GraphicsCommandList* pd3dCommandList)
 	pd3dCommandList->SetGraphicsRootDescriptorTable(ROOTSIGNATURE_OBJECTS, m_d3dCbvGPUDescriptorHandle);
 	UINT ncbElementBytes = ((sizeof(CB_OBJECT_INFO) + 255) & ~255);
 	memset(m_pCBMappedObjects, NULL, ncbElementBytes);
-	XMStoreFloat4x4(&m_pCBMappedObjects->xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4World)));
+	//XMStoreFloat4x4(&m_pCBMappedObjects->xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4Local)));
 
 	if (m_pParent) {
+		XMMATRIX xmmtxParentWorld = dynamic_cast<HumanoidObject*>(m_pParent)->GetWorldTransform();
 		XMMATRIX xmmtxParentBoneInv = dynamic_cast<HumanoidObject*>(m_pParent)->GetBoneMatrix(28);	// 9: L Hand, 28: R Hand
-		xmmtxParentBoneInv = XMMatrixMultiply(xmmtxParentBoneInv, XMMatrixReflect(XMVectorSet(1, 0, 0, 0)));
 		xmmtxParentBoneInv = XMMatrixMultiply(XMMatrixRotationRollPitchYaw(0, XMConvertToRadians(90), XMConvertToRadians(90)), xmmtxParentBoneInv);
-		XMStoreFloat4x4(&m_pCBMappedObjects->xmf4x4World, XMMatrixTranspose(XMMatrixMultiply(XMLoadFloat4x4(&m_xmf4x4World), xmmtxParentBoneInv)));
-		//XMStoreFloat4x4(&m_pCBMappedObjects->xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4World)));
+
+		XMMATRIX result = XMMatrixMultiply(XMLoadFloat4x4(&m_xmf4x4Local), xmmtxParentBoneInv);
+		result = XMMatrixMultiply(result, xmmtxParentWorld );
+
+		//XMStoreFloat4x4(&m_pCBMappedObjects->xmf4x4World, XMMatrixTranspose(XMMatrixMultiply(xmmtxParentBoneInv, result)));
+		XMStoreFloat4x4(&m_pCBMappedObjects->xmf4x4World, XMMatrixTranspose(result));
 	}
-	else			XMStoreFloat4x4(&m_pCBMappedObjects->xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4World)));
+	else			XMStoreFloat4x4(&m_pCBMappedObjects->xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4Local)));
 
 	gMaterialMng.SetMaterial(material.c_str(), pd3dCommandList);
 	gModelMng.Render(model.c_str(), pd3dCommandList);
@@ -73,17 +77,17 @@ void Object::CreateCBV(ID3D12Device* pd3dDevice, D3D12_CPU_DESCRIPTOR_HANDLE& d3
 
 void Object::Move(const XMFLOAT3 xmf3Vector)
 {
-	m_xmf4x4World._41 += xmf3Vector.x;
-	m_xmf4x4World._42 += xmf3Vector.y;
-	m_xmf4x4World._43 += xmf3Vector.z;
+	m_xmf4x4Local._41 += xmf3Vector.x;
+	m_xmf4x4Local._42 += xmf3Vector.y;
+	m_xmf4x4Local._43 += xmf3Vector.z;
 }
 
 void Object::Rotate(const XMFLOAT3 angle)
 {
 	XMMATRIX xmmtxRotate	= XMMatrixRotationQuaternion(XMQuaternionRotationRollPitchYaw(XMConvertToRadians(-angle.x), XMConvertToRadians(-angle.y), XMConvertToRadians(-angle.z)));
-	XMFLOAT3 xmf3Right		= XMFLOAT3(m_xmf4x4World._11, m_xmf4x4World._12, m_xmf4x4World._13);
-	XMFLOAT3 xmf3Up			= XMFLOAT3(m_xmf4x4World._21, m_xmf4x4World._22, m_xmf4x4World._23);
-	XMFLOAT3 xmf3Look		= XMFLOAT3(m_xmf4x4World._31, m_xmf4x4World._32, m_xmf4x4World._33);
+	XMFLOAT3 xmf3Right		= XMFLOAT3(m_xmf4x4Local._11, m_xmf4x4Local._12, m_xmf4x4Local._13);
+	XMFLOAT3 xmf3Up			= XMFLOAT3(m_xmf4x4Local._21, m_xmf4x4Local._22, m_xmf4x4Local._23);
+	XMFLOAT3 xmf3Look		= XMFLOAT3(m_xmf4x4Local._31, m_xmf4x4Local._32, m_xmf4x4Local._33);
 
 	xmf3Look	= Vector3::TransformNormal(xmf3Look, xmmtxRotate);
 	xmf3Right	= Vector3::TransformNormal(xmf3Right, xmmtxRotate);
@@ -92,9 +96,9 @@ void Object::Rotate(const XMFLOAT3 angle)
 	xmf3Right	= Vector3::CrossProduct(xmf3Up, xmf3Look, true);
 	xmf3Up		= Vector3::CrossProduct(xmf3Look, xmf3Right, true);
 
-	m_xmf4x4World._11 = xmf3Right.x;	m_xmf4x4World._12 = xmf3Right.y;	m_xmf4x4World._13 = xmf3Right.z;
-	m_xmf4x4World._21 = xmf3Up.x;		m_xmf4x4World._22 = xmf3Up.y;		m_xmf4x4World._23 = xmf3Up.z;
-	m_xmf4x4World._31 = xmf3Look.x;		m_xmf4x4World._32 = xmf3Look.y;		m_xmf4x4World._33 = xmf3Look.z;
+	m_xmf4x4Local._11 = xmf3Right.x;	m_xmf4x4Local._12 = xmf3Right.y;	m_xmf4x4Local._13 = xmf3Right.z;
+	m_xmf4x4Local._21 = xmf3Up.x;		m_xmf4x4Local._22 = xmf3Up.y;		m_xmf4x4Local._23 = xmf3Up.z;
+	m_xmf4x4Local._31 = xmf3Look.x;		m_xmf4x4Local._32 = xmf3Look.y;		m_xmf4x4Local._33 = xmf3Look.z;
 }
 
 DebugWindowObject::DebugWindowObject(
@@ -104,7 +108,7 @@ DebugWindowObject::DebugWindowObject(
 	bool bIsPass2Screen)
 	: Object(pd3dDevice, pd3dCommandList, d3dCbvCPUDescriptorStartHandle, d3dCbvGPUDescriptorStartHandle)
 {
-	m_xmf4x4World = Matrix4x4::Identity();
+	m_xmf4x4Local = Matrix4x4::Identity();
 	m_pDWMesh = new DebugWindowMesh(pd3dDevice, pd3dCommandList, bIsPass2Screen);
 
 	UINT ncbElementBytes = ((sizeof(CB_OBJECT_INFO) + 255) & ~255);
@@ -121,7 +125,7 @@ void DebugWindowObject::Render(ID3D12GraphicsCommandList* pd3dCommandList)
 	pd3dCommandList->SetGraphicsRootDescriptorTable(ROOTSIGNATURE_OBJECTS, m_d3dCbvGPUDescriptorHandle);
 	UINT ncbElementBytes = ((sizeof(CB_OBJECT_INFO) + 255) & ~255);
 	memset(m_pCBMappedObjects, NULL, ncbElementBytes);
-	XMStoreFloat4x4(&m_pCBMappedObjects->xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4World)));
+	XMStoreFloat4x4(&m_pCBMappedObjects->xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4Local)));
 
 	m_pDWMesh->Render(pd3dCommandList);
 }
@@ -157,7 +161,7 @@ void AnimatedObject::SetState(const char* strStateName)
 	m_currState = m_uomStates[strStateName]; m_currState->EnterState();
 }
 
-XMMATRIX AnimatedObject::GetBoneMatrix(int boneIdx)
+XMMATRIX const AnimatedObject::GetBoneMatrix(int boneIdx)
 {
 	return g_AnimCtrl->GetBoneMatrix(m_currState->m_strStateName.c_str(), boneIdx, m_time);
 }
