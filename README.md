@@ -401,3 +401,34 @@ VS에서 모든 Vertex에 대해 일괄적으로 position.x *= -1를 해주는 �
 손 위치에 오브젝트를 옮기는 것에 성공했다.
 Object 클래스에서 부모에 상대적인 로컬변환행렬과 절대값인 월드변환행렬을 받을 수 있도록 구현.
 에셋이 좌우반전되는 문제는 쉽게 해결할 수 있는 부분이 아닌 것 같아 일단 묻어두고 이후에 수정.
+
+<img src="https://user-images.githubusercontent.com/21697638/117935310-8c697d80-b33e-11eb-8b7a-22d406e4309b.png" width="70%" height="70%"></img>
+
+<img src="https://user-images.githubusercontent.com/21697638/117935367-9be8c680-b33e-11eb-87e7-cf6485aefefc.png" width="70%" height="70%"></img>
+
+항상 도움받고 있다. 문제 해결 후에 보답했다.
+애니메이션 정보를 좌표계에 문제가 없이 가져오는데 성공했다.
+이제 전후좌우 전부 맞다. AnimatedObject와 일반 Obecjt 간에 CCW 차이 또한 없다.
+
+    // In AnimClip Parser
+    FbxAxisSystem d3dAxisSystem(FbxAxisSystem::EUpVector::eYAxis, FbxAxisSystem::EFrontVector::eParityOdd, FbxAxisSystem::ECoordSystem::eLeftHanded);
+    d3dAxisSystem.DeepConvertScene(lScene);
+
+	// In Main Program Importer
+	// 이 부분은 Mesh Parser에서 처리하고 넘어오는게 좋을 것 같다.
+	temp.m_xmf3Pos = vecCP[v.ctrlPointIndex].position;
+	swap(temp.m_xmf3Pos.y, temp.m_xmf3Pos.z);
+	temp.m_xmf3Pos.z *= -1;
+	temp.m_xmf3Pos.x *= -1;
+	temp.m_xmf3Normal = v.normal;
+	swap(temp.m_xmf3Normal.y, temp.m_xmf3Normal.z);
+	temp.m_xmf3Normal.z *= -1;
+	temp.m_xmf3Normal.x *= -1;
+	temp.m_xmf3Tangent = v.tangent;
+	swap(temp.m_xmf3Tangent.y, temp.m_xmf3Tangent.z);
+	temp.m_xmf3Tangent.z *= -1;
+	temp.m_xmf3Tangent.x *= -1;
+	temp.m_xmf2UV = v.uv;
+	temp.m_xmf2UV.y *= -1;
+
+이렇게 하면 에셋 제작 시에 의도한 모습으로 애니메이션이 재생되고, 추가적인 처리를 해줄 필요도 없다.
