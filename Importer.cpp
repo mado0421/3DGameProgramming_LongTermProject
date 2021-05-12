@@ -315,12 +315,15 @@ vector<MESH_DATA> MeshDataImporter::FBXLoad(const char* filePath)
 			temp.m_xmf3Pos = vecCP[v.ctrlPointIndex].position;
 			swap(temp.m_xmf3Pos.y, temp.m_xmf3Pos.z);
 			temp.m_xmf3Pos.z *= -1;
+			temp.m_xmf3Pos.x *= -1;
 			temp.m_xmf3Normal = v.normal;
 			swap(temp.m_xmf3Normal.y, temp.m_xmf3Normal.z);
 			temp.m_xmf3Normal.z *= -1;
+			temp.m_xmf3Normal.x *= -1;
 			temp.m_xmf3Tangent = v.tangent;
 			swap(temp.m_xmf3Tangent.y, temp.m_xmf3Tangent.z);
 			temp.m_xmf3Tangent.z *= -1;
+			temp.m_xmf3Tangent.x *= -1;
 			temp.m_xmf2UV = v.uv;
 			temp.m_xmf2UV.y *= -1;
 			temp.m_xmi4BoneIndices.x = vecCP[v.ctrlPointIndex].boneIndices[0];

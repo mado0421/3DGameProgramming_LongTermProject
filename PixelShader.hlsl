@@ -70,7 +70,7 @@ float4 PS_ColorFromGBufferAmbient(VS_OUTPUT input) : SV_TARGET {
 	float3 vToEye = normalize(gvCameraPosition - vWorldPosition);
 
 	float3 color = gtxtColorMap.Sample(gSamplerState, input.uv).xyz;
-	float3 vAmbientLight = float3(0.3f, 0.3f, 0.3f);
+	float3 vAmbientLight = float3(0.1f, 0.1f, 0.1f);
 	return float4(color * vAmbientLight, 1.0f);
 	 
 	//float d = distance(gvCameraPosition ,vWorldPosition);

@@ -186,8 +186,11 @@ void Scene::Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12Graphics
 	* 카메라 설정
 	*=======================================================================*/
 	m_pCamera = new FollowCamera();
-	m_pCamera->SetPosition(XMFLOAT3(0, 0, -1));
-	m_pCamera->SetLookAt(XMFLOAT3(0, 0, 0));
+	//m_pCamera->SetPosition(XMFLOAT3(0, 0, -1));
+	//m_pCamera->SetLookAt(XMFLOAT3(0, 0, 0));
+
+	m_pCamera->SetPosition(XMFLOAT3(0, 1, -3));
+	m_pCamera->SetLookAt(XMFLOAT3(0, 1, 0));
 
 	/*========================================================================
 	* 디스크립터 힙 생성
@@ -266,7 +269,7 @@ void Scene::Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12Graphics
 	g_AnimCtrl = new AnimationController(pd3dDevice, pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
 
 	m_vecObject[0]->SetParent(m_vecAnimObject[0]);
-	m_vecObject[0]->SetPosition(XMFLOAT3(0.028, 0, 0.08));
+	m_vecObject[0]->SetPosition(XMFLOAT3(-0.028, 0, 0.08));
 
 	/*========================================================================
 	* Pass 2 전용 디버그 윈도우 생성
@@ -564,7 +567,7 @@ void Scene::Update(float fTimeElapsed)
 	m_fCurrentTime += fTimeElapsed;
 	::memcpy(&m_pcbMappedPassInfo->m_xmfCurrentTime, &m_fCurrentTime, sizeof(float));
 
-	if (gTestInt) {
+	if (!gTestInt) {
 
 		for (auto iter = m_vecObject.begin(); iter != m_vecObject.end(); iter++) (*iter)->Update(fTimeElapsed);
 		for (auto iter = m_vecAnimObject.begin(); iter != m_vecAnimObject.end(); iter++) (*iter)->Update(fTimeElapsed);

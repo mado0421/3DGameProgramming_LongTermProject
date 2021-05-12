@@ -38,7 +38,7 @@ void Object::Render(ID3D12GraphicsCommandList* pd3dCommandList)
 	if (m_pParent) {
 		XMMATRIX xmmtxParentWorld = dynamic_cast<HumanoidObject*>(m_pParent)->GetWorldTransform();
 		XMMATRIX xmmtxParentBoneInv = dynamic_cast<HumanoidObject*>(m_pParent)->GetBoneMatrix(28);	// 9: L Hand, 28: R Hand
-		xmmtxParentBoneInv = XMMatrixMultiply(XMMatrixRotationRollPitchYaw(0, XMConvertToRadians(90), XMConvertToRadians(90)), xmmtxParentBoneInv);
+		xmmtxParentBoneInv = XMMatrixMultiply(XMMatrixRotationRollPitchYaw(0, XMConvertToRadians(-90), XMConvertToRadians(-90)), xmmtxParentBoneInv);
 
 		XMMATRIX result = XMMatrixMultiply(XMLoadFloat4x4(&m_xmf4x4Local), xmmtxParentBoneInv);
 		result = XMMatrixMultiply(result, xmmtxParentWorld );

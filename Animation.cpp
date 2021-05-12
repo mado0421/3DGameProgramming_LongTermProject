@@ -104,8 +104,8 @@ void AnimationController::SetMatrix(ID3D12GraphicsCommandList* pd3dCommandList, 
 				//XMStoreFloat4x4(&m_pCBMappedBones->xmf4x4Transform[i], XMMatrixTranspose(XMMatrixMultiply(XMMatrixMultiply(mtxFront, XMMatrixReflect(XMVectorSet(0, 0, 1, 0))), XMMatrixMultiply(mtxBack, XMMatrixReflect(XMVectorSet(0, 0, 1, 0))))));
 
 
-				XMStoreFloat4x4(&m_pCBMappedBones->xmf4x4Transform[i], XMMatrixTranspose(XMMatrixMultiply(XMMatrixMultiply(mtxFront, mtxBack), XMMatrixReflect(XMVectorSet(1, 0, 0, 0)))));
-				//XMStoreFloat4x4(&m_pCBMappedBones->xmf4x4Transform[i], XMMatrixTranspose(XMMatrixMultiply(mtxFront, mtxBack)));
+				//XMStoreFloat4x4(&m_pCBMappedBones->xmf4x4Transform[i], XMMatrixTranspose(XMMatrixMultiply(XMMatrixMultiply(mtxFront, mtxBack), XMMatrixReflect(XMVectorSet(1, 0, 0, 0)))));
+				XMStoreFloat4x4(&m_pCBMappedBones->xmf4x4Transform[i], XMMatrixTranspose(XMMatrixMultiply(mtxFront, mtxBack)));
 			}
 			break;
 		}
@@ -141,8 +141,8 @@ void AnimationController::SetMatrix(ID3D12GraphicsCommandList* pd3dCommandList, 
 
 				//XMStoreFloat4x4(&m_pCBMappedBones->xmf4x4Transform[boneIdx], XMMatrixTranspose(XMMatrixMultiply(XMMatrixMultiply(mtxFront, XMMatrixReflect(XMVectorSet(0, 0, 1, 0))), XMMatrixMultiply(mtxBack, XMMatrixReflect(XMVectorSet(0, 0, 1, 0))))));
 
-				XMStoreFloat4x4(&m_pCBMappedBones->xmf4x4Transform[boneIdx], XMMatrixTranspose(XMMatrixMultiply(XMMatrixMultiply(mtxFront, mtxBack), XMMatrixReflect(XMVectorSet(1, 0, 0, 0)))));
-				//XMStoreFloat4x4(&m_pCBMappedBones->xmf4x4Transform[boneIdx], XMMatrixTranspose(XMMatrixMultiply(mtxFront, mtxBack)));
+				//XMStoreFloat4x4(&m_pCBMappedBones->xmf4x4Transform[boneIdx], XMMatrixTranspose(XMMatrixMultiply(XMMatrixMultiply(mtxFront, mtxBack), XMMatrixReflect(XMVectorSet(1, 0, 0, 0)))));
+				XMStoreFloat4x4(&m_pCBMappedBones->xmf4x4Transform[boneIdx], XMMatrixTranspose(XMMatrixMultiply(mtxFront, mtxBack)));
 			}
 			break;
 		}
