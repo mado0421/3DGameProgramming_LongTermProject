@@ -612,7 +612,7 @@ D3D12_RASTERIZER_DESC RenderDirectionalShadowPSO::CreateRasterizerState()
 	D3D12_RASTERIZER_DESC d3dRasterizerDesc;
 	::ZeroMemory(&d3dRasterizerDesc, sizeof(D3D12_RASTERIZER_DESC));
 	d3dRasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
-	d3dRasterizerDesc.CullMode = D3D12_CULL_MODE_BACK;
+	d3dRasterizerDesc.CullMode = D3D12_CULL_MODE_NONE;
 	d3dRasterizerDesc.FrontCounterClockwise = TRUE;
 	d3dRasterizerDesc.DepthBias				= 500;
 	d3dRasterizerDesc.DepthBiasClamp		= 0.0f;

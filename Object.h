@@ -55,16 +55,6 @@ public:
 	virtual float const GetSpeed() { return m_fSpeed; }
 
 	virtual void WalkForward() {}
-
-
-
-	virtual void PrintTest() {
-		cout 
-			<< m_xmf4x4Local._41 << ", "
-			<< m_xmf4x4Local._42 << ", "
-			<< m_xmf4x4Local._43 << "\n";
-	}
-
 protected:
 	D3D12_GPU_DESCRIPTOR_HANDLE	m_d3dCbvGPUDescriptorHandle;
 	ID3D12Resource*				m_pd3dCBResource;

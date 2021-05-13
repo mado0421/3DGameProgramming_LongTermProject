@@ -50,8 +50,9 @@ using namespace std;
 using Microsoft::WRL::ComPtr;
 
 
-#define FRAME_BUFFER_WIDTH 1000
-#define FRAME_BUFFER_HEIGHT 1000
+#define FRAME_BUFFER_WIDTH 1920
+#define FRAME_BUFFER_HEIGHT 1080
+#define ASPECT_RATIO				(float(FRAME_BUFFER_WIDTH) / float(FRAME_BUFFER_HEIGHT))
 
 #define MAXNUMCBV 1024
 #define MAXNUMSRV 128

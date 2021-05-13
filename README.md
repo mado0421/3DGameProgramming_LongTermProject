@@ -432,3 +432,15 @@ Object 클래스에서 부모에 상대적인 로컬변환행렬과 절대값인
 	temp.m_xmf2UV.y *= -1;
 
 이렇게 하면 에셋 제작 시에 의도한 모습으로 애니메이션이 재생되고, 추가적인 처리를 해줄 필요도 없다.
+
+### 2021.05.13
+
+Mixamo에서 애니메이션을 다운로드 하여 Parse하고 적용하였다.
+Mixamo 사용법은 다음과 같다.
+1. Biped를 남기고 모두 제거한 뒤, FBX로 Export하여 Mixamo에 업로드한다.
+2. 원하는 애니메이션 클립을 선택하고 Without Skin 옵션을 선택한 뒤, 다운로드 한다.
+3. Skin이 적용된 Mesh와 Biped가 같이 있는 Max 파일에서 방금 다운로드한 FBX 파일을 Import 한다. (이때, Import 설정은 https://m.blog.naver.com/bluegod731/221167655192 를 참고)
+4. 애니메이션이 적용된 Max파일을 그대로 Export하여 AnimParser에서 처리하면 그대로 사용할 수 있다.
+
+해상도를 1920*1080으로 변경하였다.
+Cascaded Shadow Map 구현에 있어서 버그를 찾았으므로 이를 수정하는 것을 최우선 목표로 한다.

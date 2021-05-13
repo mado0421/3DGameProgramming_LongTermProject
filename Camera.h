@@ -1,6 +1,6 @@
 #pragma once
 
-#define ASPECT_RATIO				(float(FRAME_BUFFER_WIDTH) / float(FRAME_BUFFER_HEIGHT))
+//#define ASPECT_RATIO				(float(FRAME_BUFFER_WIDTH) / float(FRAME_BUFFER_HEIGHT))
 #define CAM_MOVE_SPEED		3
 #define CAM_ROTATE_SPEED	3
 

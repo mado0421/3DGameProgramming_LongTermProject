@@ -56,36 +56,8 @@ public:
 	void SetShaderResource(ID3D12GraphicsCommandList* pd3dCommandList);
 	LightType GetLightType() { return m_uLightType; }
 
-	void UpdateDirectionalLightOrthographicLH(XMFLOAT4X4 xmf4x4CameraView) {
-		XMFLOAT4X4 xmf4x4CameraViewInv = Matrix4x4::Inverse(xmf4x4CameraView);
-		for (int i = 0; i < m_nCascade; i++) {
-			float minX = FLT_MAX;
-			float minY = FLT_MAX;
-			float minZ = FLT_MAX;
-			float maxX = -FLT_MAX;
-			float maxY = -FLT_MAX;
-			float maxZ = -FLT_MAX;
-			for (int j = 0; j < 8; j++) {
-				XMVECTOR temp = XMVector4Transform(XMLoadFloat4(&m_xmf4FrustumCorners[i][j]), XMLoadFloat4x4(&xmf4x4CameraViewInv));
-				temp = XMVector4Transform(temp, XMLoadFloat4x4(&m_xmf4x4LightView));
-				XMFLOAT4 xmf4Temp;
-				XMStoreFloat4(&xmf4Temp, temp);
-				minX = min(minX, xmf4Temp.x);
-				minY = min(minY, xmf4Temp.y);
-				minZ = min(minZ, xmf4Temp.z);
-				maxX = max(maxX, xmf4Temp.x);
-				maxY = max(maxY, xmf4Temp.y);
-				maxZ = max(maxZ, xmf4Temp.z);
-			}
-			XMFLOAT4X4 xmf4x4Proj = Matrix4x4::OrthographicLH(maxX - minX, maxY - minY, -1000.0, /*maxZ - minZ*/1000.0f);
-			XMFLOAT3 newLightPos = Vector3::Multiply(-1, XMFLOAT3(maxX - (maxX - minX) * 0.5f, maxY - (maxY - minY) * 0.5f, minZ));
-			//newLightPos = Vector3::Add(newLightPos, Vector3::Multiply(-1, m_xmf3Direction));
-			XMFLOAT4X4 xmf4x4Transfrom;
-			Matrix4x4::ToTransform(&xmf4x4Transfrom, newLightPos, XMFLOAT4(0, 0, 0, 0));
+	void UpdateDirectionalLightOrthographicLH(XMFLOAT4X4 xmf4x4CameraView);
 
-			m_xmf4x4ViewProj[i] = Matrix4x4::Multiply(Matrix4x4::Multiply(m_xmf4x4LightView, xmf4x4Transfrom), xmf4x4Proj);
-		}
-	}
 
 private:
 	void CreateResource(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);

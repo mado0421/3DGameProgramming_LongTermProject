@@ -64,9 +64,12 @@ float CalcDirectionalLightShadowFactor(float3 vWorldPos) {
 	float d = v.z;
 	float idxCascade;
 
-	if (0 <= d && d < 6) idxCascade = 0;
-	else if (6 <= d && d < 20) idxCascade = 1;
-	else if (20 <= d && d < 60) idxCascade = 2;
+	//idxCascade = 0;
+
+	//if (0 <= d && d < 6) idxCascade = 0;
+	if (6 <= d && d < 20) idxCascade = 1;
+	//else if (6 <= d && d < 20) idxCascade = 1;
+	//else if (20 <= d && d < 60) idxCascade = 2;
 	else return 1.0f;
 
 	float4 temp = mul(float4(vWorldPos, 1.0f), gmtxLightViewProj[idxCascade]);

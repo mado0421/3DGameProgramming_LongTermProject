@@ -18,3 +18,8 @@ CobblestoneOld_roughness.dds
 pistol.mm
 pistol_albedo.dds
 pistol_normal.dds
+ArcadedWoodPanels_albedo.dds
+ArcadedWoodPanels_normal.dds
+Leather_Tufted_albedo.dds
+Leather_Tufted_normal.dds
+10x1wall.mm
