@@ -444,3 +444,10 @@ Mixamo 사용법은 다음과 같다.
 
 해상도를 1920*1080으로 변경하였다.
 Cascaded Shadow Map 구현에 있어서 버그를 찾았으므로 이를 수정하는 것을 최우선 목표로 한다.
+
+### 2021.05.14
+
+<img src="https://user-images.githubusercontent.com/21697638/118232331-573e6600-b4cb-11eb-9733-548b1a0b22e7.png" width="70%" height="70%"></img>
+
+창의 크기를 1920*1080으로 늘렸다.
+Cascaded Shadow Map 기능에 버그가 있어 수정하였다. 이제 가끔씩 보였던 자잘한 그림자들이 보이지 않게 됐다.

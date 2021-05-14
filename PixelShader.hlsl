@@ -87,7 +87,7 @@ float4 PS_ColorFromGBufferAmbient(VS_OUTPUT input) : SV_TARGET {
 * - Depth만 읽어올 예정. 그대로 뿌리면 된다.
 *=======================================================================*/
 float4 PS_DepthFromGBuffer(VS_OUTPUT input) : SV_TARGET{
-	float depth = gtxtShadowArrayMap.Sample(gSamplerState, float3(input.uv, 1.0f)).r;
+	float depth = gtxtShadowArrayMap.Sample(gSamplerState, float3(input.uv, 0.0f)).r;
 	depth = pow(depth, 5);
 
 	return float4(depth.xxx, 1.0f);
