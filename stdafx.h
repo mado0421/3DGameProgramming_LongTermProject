@@ -30,6 +30,7 @@
 #include <unordered_map>
 #include <iostream>
 #include <fstream>
+#include <algorithm>
 
 #include <d3d12.h>
 #include "d3dUtil.h"
@@ -79,6 +80,12 @@ using Microsoft::WRL::ComPtr;
 #define RESOURCE_BUFFER				0x05
 
 enum KeyCode {
+	_Tab	= 9,
+	_Shift	= 16,
+	_Ctrl	= 17,
+	_Alt	= 18,
+	_Space	= 32,
+
 	_0 = 48,
 	_1 = 49,
 	_2 = 50,
@@ -117,6 +124,9 @@ enum KeyCode {
 	_Y = 89,
 	_Z = 90,
 };
+inline bool IsKeyDown(UCHAR* pKeyBuffer, const KeyCode key) {
+	return (pKeyBuffer[key] & 0xF0);
+}
 
 class TextureManager;
 class ModelManager;

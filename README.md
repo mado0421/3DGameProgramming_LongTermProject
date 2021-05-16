@@ -315,7 +315,7 @@ AnimatedObject(특히 HumanoidObject를 기준으로)에서 State 전환을 만�
 외부에서 Object에게 MoveForward() 명령어를 주었을 때, 만약 해당 Object가 직전에 Jump를 하여 InAir State라면, MoveForward()를 호출해도 아무런 효과가 없어야 한다.
 
 ### 이번주 일정
-#### 21.05.10 - 21.05.17
+#### 21.05.10 - 21.05.16
 * State와 Transaction 구현
 * Object의 상황에 따라 State가 전환
 * 소스코드 정리
@@ -451,3 +451,22 @@ Cascaded Shadow Map 구현에 있어서 버그를 찾았으므로 이를 수정�
 
 창의 크기를 1920*1080으로 늘렸다.
 Cascaded Shadow Map 기능에 버그가 있어 수정하였다. 이제 가끔씩 보였던 자잘한 그림자들이 보이지 않게 됐다.
+
+### 이번주 일정
+#### 21.05.17 - 21.05.23
+* Humanoid의 이동 State들을 구현
+* 이동할 때, 애니메이션 블렌딩 구현
+
+### 2주 목표
+* 애니메이션 블렌딩
+* IK
+* 마우스로 시선을 돌리면 몸이 살짝 틀어지고, 머리가 해당 방향을 보고, 우클릭을 누르면 조준을 하고 , 그 상태에서 하체는 이동을 따로 하는 등
+
+### 2021.05.17
+Animation Blend를 구현하기 위해 우선 HumanoidState부터 변경하였다.
+Humanoid_WalkForward에서 Humanoid_Moving으로 구조를 바꾸고, State 안에서 KeyInput을 받게 하였다.
+State는 이제 vecAnimClipNameList를 반환한다.
+AnimationCtrl은 미리 Blend를 위해 하나의 ClipName이 아닌 ClipName이 담긴 vector를 인자로 받게 변경하였다.
+
+<img src="https://user-images.githubusercontent.com/21697638/118416437-a9a99d80-b6ea-11eb-893e-233858dbb3d0.gif" width="70%" height="70%"></img>
+

@@ -189,8 +189,8 @@ void Scene::Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12Graphics
 	//m_pCamera->SetPosition(XMFLOAT3(0, 0, -1));
 	//m_pCamera->SetLookAt(XMFLOAT3(0, 0, 0));
 
-	m_pCamera->SetPosition(XMFLOAT3(0, 1, -3));
-	m_pCamera->SetLookAt(XMFLOAT3(0, 1, 0));
+	m_pCamera->SetPosition(XMFLOAT3(0, 2, -3));
+	m_pCamera->SetLookAt(XMFLOAT3(0, 1, 1));
 
 	/*========================================================================
 	* 叼胶农赋磐 赛 积己
@@ -578,10 +578,10 @@ void Scene::Update(float fTimeElapsed)
 }
 void Scene::Input(UCHAR* pKeyBuffer, float fTimeElapsed)
 {
-	if (pKeyBuffer[KeyCode::_W] & 0xF0) { m_pCamera->MoveForward(2); }
-	if (pKeyBuffer[KeyCode::_A] & 0xF0) { m_pCamera->MoveLeft(2); }
-	if (pKeyBuffer[KeyCode::_S] & 0xF0) { m_pCamera->MoveBackward(2); }
-	if (pKeyBuffer[KeyCode::_D] & 0xF0) { m_pCamera->MoveRight(2); }
+	//if (pKeyBuffer[KeyCode::_W] & 0xF0) { m_pCamera->MoveForward(2); }
+	//if (pKeyBuffer[KeyCode::_A] & 0xF0) { m_pCamera->MoveLeft(2); }
+	//if (pKeyBuffer[KeyCode::_S] & 0xF0) { m_pCamera->MoveBackward(2); }
+	//if (pKeyBuffer[KeyCode::_D] & 0xF0) { m_pCamera->MoveRight(2); }
 	if (pKeyBuffer[KeyCode::_R] & 0xF0) { m_pCamera->MoveUp(2); }
 	if (pKeyBuffer[KeyCode::_F] & 0xF0) { m_pCamera->MoveDown(2); }
 	if (pKeyBuffer[KeyCode::_Q] & 0xF0) { m_pCamera->Rotate(0, -50 * fTimeElapsed, 0); }
@@ -589,7 +589,7 @@ void Scene::Input(UCHAR* pKeyBuffer, float fTimeElapsed)
 	if (pKeyBuffer[KeyCode::_Z] & 0xF0) { m_pCamera->Rotate(50 * fTimeElapsed, 0, 0); }
 	if (pKeyBuffer[KeyCode::_X] & 0xF0) { m_pCamera->Rotate(-50 * fTimeElapsed, 0, 0); }
 
-	if (pKeyBuffer[KeyCode::_J] & 0xF0) { dynamic_cast<HumanoidObject*>(m_vecAnimObject[0])->WalkForward(); }
+	//if (pKeyBuffer[KeyCode::_J] & 0xF0) { dynamic_cast<HumanoidObject*>(m_vecAnimObject[0])->WalkForward(); }
 	if (pKeyBuffer[KeyCode::_U] & 0xF0) gTestInt = 1;
 	if (pKeyBuffer[KeyCode::_I] & 0xF0) gTestInt = 0;
 
@@ -628,7 +628,7 @@ void Scene::Input(UCHAR* pKeyBuffer, float fTimeElapsed)
 		//m_vecObject[0]->Move(XMFLOAT3(0, 0, 0.1 * fTimeElapsed));
 
 
-
+	dynamic_cast<HumanoidObject*>(m_vecAnimObject[0])->Input(pKeyBuffer);
 }
 
 void Scene::CreatePSO()

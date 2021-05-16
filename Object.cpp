@@ -52,6 +52,10 @@ void Object::Render(ID3D12GraphicsCommandList* pd3dCommandList)
 	gModelMng.Render(model.c_str(), pd3dCommandList);
 }
 
+void Object::Input(UCHAR* pKeyBuffer)
+{
+}
+
 void Object::SetCbvGpuHandle(D3D12_GPU_DESCRIPTOR_HANDLE& d3dCbvGPUDescriptorStartHandle)
 {
 	m_d3dCbvGPUDescriptorHandle = d3dCbvGPUDescriptorStartHandle;
@@ -135,24 +139,30 @@ HumanoidObject::HumanoidObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 {
 
 	HumanoidState_Idle* idle = new HumanoidState_Idle("Humanoid_Idle", this);
-	HumanoidState_Walk* walk = new HumanoidState_Walk("Humanoid_Walk", this);
+	HumanoidState_Moving* move = new HumanoidState_Moving("HumanoidState_Moving", this);
 
-	idle->AddTransation(new Transaction(walk, TV::JUST, NULL, 0));
-	walk->AddTransation(new Transaction(idle, TV::SPD, LessThanEqualsTo, 0));
+	idle->AddTransation(new Transaction(move, TV::JUST, NULL, 0));
+	move->AddTransation(new Transaction(idle, TV::SPD, LessThanEqualsTo, 0));
 
 	m_uomStates[idle->m_strStateName] = idle;
-	m_uomStates[walk->m_strStateName] = walk;
+	m_uomStates[move->m_strStateName] = move;
 
 	m_currState = idle;
 }
 
-void HumanoidObject::WalkForward()
+void HumanoidObject::Input(UCHAR* pKeyBuffer)
 {
-	m_currState->MoveForward();
+	m_currState->Input(pKeyBuffer);
 }
+
+//void HumanoidObject::WalkForward()
+//{
+//	m_currState->MoveForward();
+//}
 
 AnimatedObject::AnimatedObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, D3D12_CPU_DESCRIPTOR_HANDLE& d3dCbvCPUDescriptorStartHandle, D3D12_GPU_DESCRIPTOR_HANDLE& d3dCbvGPUDescriptorStartHandle)
 	:Object(pd3dDevice, pd3dCommandList, d3dCbvCPUDescriptorStartHandle, d3dCbvGPUDescriptorStartHandle)
+	,m_currState(NULL)
 {
 }
 
@@ -163,12 +173,12 @@ void AnimatedObject::SetState(const char* strStateName)
 
 XMMATRIX const AnimatedObject::GetBoneMatrix(int boneIdx)
 {
-	return g_AnimCtrl->GetBoneMatrix(m_currState->m_strStateName.c_str(), boneIdx, m_time);
+	return g_AnimCtrl->GetBoneMatrix(m_currState->GetAnimClipNameList(), boneIdx, m_time, 1);
 }
 
 void AnimatedObject::Render(ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	g_AnimCtrl->SetMatrix(pd3dCommandList, m_currState->m_strStateName.c_str(), m_time);
+	g_AnimCtrl->SetMatrix(pd3dCommandList, m_currState->GetAnimClipNameList(), m_time, 1);
 	Object::Render(pd3dCommandList);
 }
 
@@ -177,3 +187,7 @@ void AnimatedObject::Update(float fTimeElapsed)
 	m_time += fTimeElapsed;
 	m_currState->Update(fTimeElapsed);
 }
+
+//void AnimatedObject::Input(UCHAR* pKeyBuffer)
+//{
+//}

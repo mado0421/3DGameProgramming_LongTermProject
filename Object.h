@@ -34,7 +34,7 @@ public:
 
 	virtual void Update(float fTimeElapsed);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList);
-
+	virtual void Input(UCHAR* pKeyBuffer);
 public:
 	virtual void Move(const XMFLOAT3 xmf3Vector);
 	virtual void Rotate(const XMFLOAT3 xmf3Vector);
@@ -54,7 +54,7 @@ public:
 	virtual XMFLOAT3 const GetLook() { return XMFLOAT3(m_xmf4x4Local._31, m_xmf4x4Local._32, m_xmf4x4Local._33); }
 	virtual float const GetSpeed() { return m_fSpeed; }
 
-	virtual void WalkForward() {}
+	//virtual void WalkForward() {}
 protected:
 	D3D12_GPU_DESCRIPTOR_HANDLE	m_d3dCbvGPUDescriptorHandle;
 	ID3D12Resource*				m_pd3dCBResource;
@@ -107,7 +107,6 @@ public:
 		ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 		D3D12_CPU_DESCRIPTOR_HANDLE& d3dCbvCPUDescriptorStartHandle,
 		D3D12_GPU_DESCRIPTOR_HANDLE& d3dCbvGPUDescriptorStartHandle);
-	
-	virtual void WalkForward();
 
+	virtual void Input(UCHAR* pKeyBuffer);
 };
