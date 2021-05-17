@@ -470,3 +470,7 @@ AnimationCtrl은 미리 Blend를 위해 하나의 ClipName이 아닌 ClipName이
 
 <img src="https://user-images.githubusercontent.com/21697638/118416437-a9a99d80-b6ea-11eb-893e-233858dbb3d0.gif" width="70%" height="70%"></img>
 
+Animation Controller 부분에서 pair<string, float>를 받게 변경하고 행렬에 가중치를 곱한 결과물을 모두 합해서 반환시켰다.
+
+<img src="https://user-images.githubusercontent.com/21697638/118465773-2e250c00-b73d-11eb-958f-8a06607587d2.gif" width="70%" height="70%"></img>
+

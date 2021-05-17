@@ -49,8 +49,8 @@ public:
 	~AnimationController() { if (m_pd3dCBResource) m_pd3dCBResource->Release(); }
 
 public:
-	void SetMatrix(ID3D12GraphicsCommandList* pd3dCommandList, vector<string> vecStrAnimClipName, const double time, const float fInterpolateFactor);
-	XMMATRIX GetBoneMatrix(vector<string> vecStrAnimClipName, int boneIdx, const double time, const float fInterpolateFactor);
+	void SetMatrix(ID3D12GraphicsCommandList* pd3dCommandList, const vector<pair<string, float>> vecStrAnimClipName, const float time);
+	XMMATRIX GetBoneMatrix(const vector<pair<string, float>> vecStrAnimClipName, int boneIdx, const float time);
 protected:
 	void InterpolateKeyframe(Keyframe k0, Keyframe k1, Keyframe k2, Keyframe k3, float t, Keyframe& out);
 	XMFLOAT4 Interpolate(const XMFLOAT4 q0, const XMFLOAT4 q1, const XMFLOAT4 q2, const XMFLOAT4 q3, float t);

@@ -13,6 +13,8 @@ Object::Object(
 {
 	m_xmf4x4Local			= Matrix4x4::Identity();
 	Mesh * pMesh			= new Mesh(pd3dDevice, pd3dCommandList);
+	m_fSpeed = 0;
+	m_xmf3Velocity = XMFLOAT3(0, 0, 0);
 
 	UINT ncbElementBytes = ((sizeof(CB_OBJECT_INFO) + 255) & ~255);
 
@@ -155,11 +157,6 @@ void HumanoidObject::Input(UCHAR* pKeyBuffer)
 	m_currState->Input(pKeyBuffer);
 }
 
-//void HumanoidObject::WalkForward()
-//{
-//	m_currState->MoveForward();
-//}
-
 AnimatedObject::AnimatedObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, D3D12_CPU_DESCRIPTOR_HANDLE& d3dCbvCPUDescriptorStartHandle, D3D12_GPU_DESCRIPTOR_HANDLE& d3dCbvGPUDescriptorStartHandle)
 	:Object(pd3dDevice, pd3dCommandList, d3dCbvCPUDescriptorStartHandle, d3dCbvGPUDescriptorStartHandle)
 	,m_currState(NULL)
@@ -173,12 +170,12 @@ void AnimatedObject::SetState(const char* strStateName)
 
 XMMATRIX const AnimatedObject::GetBoneMatrix(int boneIdx)
 {
-	return g_AnimCtrl->GetBoneMatrix(m_currState->GetAnimClipNameList(), boneIdx, m_time, 1);
+	return g_AnimCtrl->GetBoneMatrix(m_currState->GetAnimClipNameList(), boneIdx, m_time);
 }
 
 void AnimatedObject::Render(ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	g_AnimCtrl->SetMatrix(pd3dCommandList, m_currState->GetAnimClipNameList(), m_time, 1);
+	g_AnimCtrl->SetMatrix(pd3dCommandList, m_currState->GetAnimClipNameList(), m_time);
 	Object::Render(pd3dCommandList);
 }
 
@@ -187,7 +184,3 @@ void AnimatedObject::Update(float fTimeElapsed)
 	m_time += fTimeElapsed;
 	m_currState->Update(fTimeElapsed);
 }
-
-//void AnimatedObject::Input(UCHAR* pKeyBuffer)
-//{
-//}

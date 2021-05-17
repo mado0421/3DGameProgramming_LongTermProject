@@ -12,6 +12,11 @@ inline bool IsIn(float target, float min, float max) {
 	return true;
 }
 
+inline void Clamp(float& val, const float min, const float max) {
+	val = min(val, max);
+	val = max(val, min);
+}
+
 const XMFLOAT2 vector2Epsilon{ XMFLOAT2(FLT_EPSILON, FLT_EPSILON) };
 const XMFLOAT3 vector3Epsilon{ XMFLOAT3(FLT_EPSILON, FLT_EPSILON, FLT_EPSILON) };
 

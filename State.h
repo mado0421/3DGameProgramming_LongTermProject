@@ -19,7 +19,7 @@ public:
 public:
 	virtual void Update(float fTimeElapsed) = 0;
 	virtual void Input(UCHAR* pKeyBuffer) = 0;
-	virtual vector<string> GetAnimClipNameList() = 0;
+	virtual vector<pair<string, float>> GetAnimClipNameList() = 0;
 
 public:
 	string m_strStateName;
@@ -43,9 +43,9 @@ public:
 				ChangeStateTo("HumanoidState_Moving"); 
 			}
 	}
-	virtual vector<string> GetAnimClipNameList() {
-		vector<string> result;
-		result.push_back("Humanoid_Idle");
+	virtual vector<pair<string, float>> GetAnimClipNameList() {
+		vector<pair<string, float>> result;
+		result.push_back(pair<string, float>("Humanoid_Idle", 1));
 		return result;
 	}
 };
@@ -54,16 +54,17 @@ class HumanoidState_Moving : public State {
 public:
 	HumanoidState_Moving(const char* strName, Object* obj) 
 		:State(strName, obj) 
-		, m_xmf3MovingDir(XMFLOAT3(0,0,0))
+		, m_xmf3MovingDir(XMFLOAT3(0, 0, 0))
 	{}
 
 	virtual void EnterState() { m_bKeyDown = true; m_xmf3MovingDir = XMFLOAT3(0, 0, 0); }
 	virtual void Update(float fTimeElapsed);
 	virtual void Input(UCHAR* pKeyBuffer);
-	virtual vector<string> GetAnimClipNameList();
+	virtual vector<pair<string, float>> GetAnimClipNameList();
 public:
 	bool m_bKeyDown		= false;
 	bool m_bShiftDown	= false;
-	float m_fSpdIncreaseFactor = 0.8;
+	float m_fSpdIncreaseFactor = 0.8f;
+	float m_fDragFactor = 0.13f;
 	XMFLOAT3 m_xmf3MovingDir;
 };

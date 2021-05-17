@@ -22,35 +22,47 @@ void State::ChangeStateTo(const char* strStateName)
 
 void HumanoidState_Moving::Update(float fTimeElapsed)
 {
-	float lSpdLimit = 0;
-	// 만약 Key가 눌렸다면
-	// 속력을 증가시킨다
+	float fSpdLimit = 0;
+
+
 	if (m_bKeyDown) {
 		// 만약 Shift가 눌렸다면
 		// 속력 제한을 RunningSPD까지
-		if (m_bShiftDown)	lSpdLimit = runSpd;
-		else 				lSpdLimit = walkSpd;
-		
-		// 만약 현재 속력이 limit보다 작다면 증가
-		// 아니라면 감소
-		if (lSpdLimit > m_pObject->GetSpeed()) 
-				m_pObject->SetSpeed(m_pObject->GetSpeed() + fTimeElapsed);
-		else	m_pObject->SetSpeed(m_pObject->GetSpeed() - fTimeElapsed);
+		if (m_bShiftDown)	fSpdLimit = runSpd;
+		else 				fSpdLimit = walkSpd;
 
-		m_bKeyDown = false;
-		m_bShiftDown = false;
+		m_pObject->SetVelocity(Vector3::Multiply(1 - min(fTimeElapsed * 0.3f, 1), m_pObject->GetVelocity()));
+
+		// 증가
+		m_pObject->SetVelocity(Vector3::Add(m_pObject->GetVelocity(), Vector3::Multiply(fTimeElapsed * 1.5f, Vector3::Normalize(m_xmf3MovingDir))));
+
+		// 절대값이 한도를 넘으면 제한
+		XMFLOAT3 currVelocity = m_pObject->GetVelocity();
+		Clamp(currVelocity.x, -fSpdLimit, fSpdLimit);
+		Clamp(currVelocity.z, -fSpdLimit, fSpdLimit);
+		if (IsZero(currVelocity.x)) currVelocity.x = 0;
+		if (IsZero(currVelocity.z)) currVelocity.z = 0;
+		m_pObject->SetVelocity(currVelocity);
+
+		m_bKeyDown		= false;
+		m_bShiftDown	= false;
 	}
 	else {
-		m_pObject->SetSpeed(m_pObject->GetSpeed() - fTimeElapsed);
+		m_pObject->SetVelocity(Vector3::Multiply(1 - min(fTimeElapsed * 2.5f, 1), m_pObject->GetVelocity()));
+		XMFLOAT3 currVelocity = m_pObject->GetVelocity();
+		if (IsZero(currVelocity.x)) currVelocity.x = 0;
+		if (IsZero(currVelocity.z)) currVelocity.z = 0;
+		m_pObject->SetVelocity(currVelocity);
+
 		if (IsSatisfyTransaction("Humanoid_Idle")) { m_pObject->SetSpeed(0); ChangeStateTo("Humanoid_Idle"); }
 	}
+	//m_pObject->Move(Vector3::Multiply(fTimeElapsed, m_pObject->GetVelocity()));
 
-	m_pObject->Move(Vector3::Multiply(m_pObject->GetSpeed() * fTimeElapsed, Vector3::Normalize(m_xmf3MovingDir)));
 }
 
 void HumanoidState_Moving::Input(UCHAR* pKeyBuffer)
 {
-	//m_xmf3MovingDir
+	// 눌린 방향을 알려준다.
 	m_xmf3MovingDir = XMFLOAT3(0, 0, 0);
 	if (IsKeyDown(pKeyBuffer, KeyCode::_W)) { m_xmf3MovingDir.z += 1; m_bKeyDown = true; }
 	if (IsKeyDown(pKeyBuffer, KeyCode::_A)) { m_xmf3MovingDir.x -= 1; m_bKeyDown = true; }
@@ -59,13 +71,34 @@ void HumanoidState_Moving::Input(UCHAR* pKeyBuffer)
 	if (IsKeyDown(pKeyBuffer, KeyCode::_Shift)) {m_bShiftDown = true; }
 }
 
-vector<string> HumanoidState_Moving::GetAnimClipNameList()
+vector<pair<string, float>> HumanoidState_Moving::GetAnimClipNameList()
 {
-	vector<string> result;
-	if (m_xmf3MovingDir.z == 1) result.push_back("Humanoid_WalkingForward");
-	if (m_xmf3MovingDir.x == 1) result.push_back("Humanoid_WalkingRightStrafe");
-	if (m_xmf3MovingDir.z == -1) result.push_back("Humanoid_WalkingBackward");
-	if (m_xmf3MovingDir.x == -1) result.push_back("Humanoid_WalkingLeftStrafe");
-	if (result.empty()) result.push_back("Humanoid_Idle");
+	vector<pair<string, float>> result;
+
+	float fLength = Vector3::Length( m_pObject->GetVelocity() );
+	if (walkSpd >= fLength) {
+		//float walkFactor = fLength / walkSpd;
+		//float idleFactor = (1 - fLength) / walkSpd;
+		float walkFactor = 1;
+
+		XMFLOAT3 normalizedDir = Vector3::Normalize(m_pObject->GetVelocity());
+		if (0 < normalizedDir.x) result.push_back(pair<string, float>("Humanoid_WalkingRightStrafe",walkFactor * normalizedDir.x));
+		if (0 < normalizedDir.z) result.push_back(pair<string, float>("Humanoid_WalkingForward",	walkFactor * normalizedDir.z));
+		if (0 > normalizedDir.x) result.push_back(pair<string, float>("Humanoid_WalkingLeftStrafe", walkFactor * -normalizedDir.x));
+		if (0 > normalizedDir.z) result.push_back(pair<string, float>("Humanoid_WalkingBackward",	walkFactor * -normalizedDir.z));
+		//result.push_back(pair<string, float>("Humanoid_Idle", idleFactor));
+
+
+	}
+	else {
+
+	}
+
+	system("cls");
+	cout << "fLength :" << fLength << "\n";
+	for (int i = 0; i < result.size(); i++) cout << result[i].first.c_str() << "\t - :" << result[i].second << "\n";
+	Sleep(1);
+
+	if (result.empty()) result.push_back(pair<string, float>("Humanoid_Idle", 1));
 	return result;
 }
