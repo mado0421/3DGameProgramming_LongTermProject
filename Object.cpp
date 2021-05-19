@@ -13,7 +13,6 @@ Object::Object(
 {
 	m_xmf4x4Local			= Matrix4x4::Identity();
 	Mesh * pMesh			= new Mesh(pd3dDevice, pd3dCommandList);
-	m_fSpeed = 0;
 	m_xmf3Velocity = XMFLOAT3(0, 0, 0);
 
 	UINT ncbElementBytes = ((sizeof(CB_OBJECT_INFO) + 255) & ~255);
@@ -170,12 +169,14 @@ void AnimatedObject::SetState(const char* strStateName)
 
 XMMATRIX const AnimatedObject::GetBoneMatrix(int boneIdx)
 {
-	return g_AnimCtrl->GetBoneMatrix(m_currState->GetAnimClipNameList(), boneIdx, m_time);
+	//return g_AnimCtrl->GetBoneMatrix(m_currState->GetAnimClipNameList(), boneIdx, m_time);
+	return g_AnimCtrl->GetLatestToWorldTransformOfSpecificBone(boneIdx);
 }
 
 void AnimatedObject::Render(ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	g_AnimCtrl->SetMatrix(pd3dCommandList, m_currState->GetAnimClipNameList(), m_time);
+//	g_AnimCtrl->SetMatrix(pd3dCommandList, m_currState->GetAnimClipNameList(), m_time);
+	g_AnimCtrl->SetAnimationTransform(pd3dCommandList);
 	Object::Render(pd3dCommandList);
 }
 
@@ -183,4 +184,6 @@ void AnimatedObject::Update(float fTimeElapsed)
 {
 	m_time += fTimeElapsed;
 	m_currState->Update(fTimeElapsed);
+	g_AnimCtrl->MakeAnimationTransform(m_currState->GetAnimClipNameList(), m_time);
+
 }

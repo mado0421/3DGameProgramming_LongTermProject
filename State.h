@@ -54,17 +54,16 @@ class HumanoidState_Moving : public State {
 public:
 	HumanoidState_Moving(const char* strName, Object* obj) 
 		:State(strName, obj) 
-		, m_xmf3MovingDir(XMFLOAT3(0, 0, 0))
+		, m_xmf3InputDir(XMFLOAT3(0, 0, 0))
 	{}
 
-	virtual void EnterState() { m_bKeyDown = true; m_xmf3MovingDir = XMFLOAT3(0, 0, 0); }
+	virtual void EnterState() { m_bKeyDown = true; m_xmf3InputDir = XMFLOAT3(0, 0, 0); }
 	virtual void Update(float fTimeElapsed);
 	virtual void Input(UCHAR* pKeyBuffer);
 	virtual vector<pair<string, float>> GetAnimClipNameList();
 public:
 	bool m_bKeyDown		= false;
 	bool m_bShiftDown	= false;
-	float m_fSpdIncreaseFactor = 0.8f;
-	float m_fDragFactor = 0.13f;
-	XMFLOAT3 m_xmf3MovingDir;
+	float m_fDragFactor = 1.0f;
+	XMFLOAT3 m_xmf3InputDir;
 };

@@ -423,10 +423,10 @@ void Scene::RenderPass1()
 
 	m_pd3dCommandList->OMSetRenderTargets(2, rtvHandle, FALSE, &dsvHandle);
 
-	m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["PackGBuffer"]);
-	for (auto iter = m_vecObject.begin(); iter != m_vecObject.end(); iter++) (*iter)->Render(m_pd3dCommandList);
 	m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["AnimatedObject"]);
 	for (auto iter = m_vecAnimObject.begin(); iter != m_vecAnimObject.end(); iter++) (*iter)->Render(m_pd3dCommandList);
+	m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["PackGBuffer"]);
+	for (auto iter = m_vecObject.begin(); iter != m_vecObject.end(); iter++) (*iter)->Render(m_pd3dCommandList);
 
 	d3dResourceBarrier[0].Transition.pResource = gTextureMng.GetTextureResource("GBuffer_Depth");
 	d3dResourceBarrier[0].Transition.StateBefore = D3D12_RESOURCE_STATE_DEPTH_WRITE;

@@ -474,3 +474,18 @@ Animation Controller 부분에서 pair<string, float>를 받게 변경하고 행
 
 <img src="https://user-images.githubusercontent.com/21697638/118465773-2e250c00-b73d-11eb-958f-8a06607587d2.gif" width="70%" height="70%"></img>
 
+### 2021.05.19
+
+<img src="https://user-images.githubusercontent.com/21697638/118802238-dde4b000-b8dc-11eb-9d3f-460e5000a6fd.gif" width="70%" height="70%"></img>
+
+AnimationController 클래스의 SetMatrix()와 GetBoneMatrix() 함수를 MakeAnimationTransform(), GetLatestToWorldTransfromOfSpecificBone(), SetAnimationTransform() 함수로 대체하였다.
+이제 자식 오브젝트는 부모 오브젝트의 BoneAnimationTransform을 구하기 위해 부모가 어떤 AnimClip들을 사용하는지 몰라도 된다. 다만, 기존의 AnimationController를 전역에 선언하고 모든 AnimatedObject가 같이 사용했었는데 이 부분은 변경해야 한다.
+
+Idle AnimClip이 순간적으로 매우 빠르게 재생되는 문제가 있었는데, 이는 Blend 대상인 Clip들의 시간을 모두 평균화 해주면서 생긴 문제였으며
+Idle / Walk, Run 등으로 따로 시간을 맞춰주어 Blend하는게 옳은 방법인 것 같다.
+(예를 들어, Walk와 Run은 서로 시간을 평균내서 맞춰줘야 하지만 Idle은 다른 범주의 Clip이므로)
+
+Moving State에서 Weight값을 정해주는 부분을 수정하였다.
+
+발이 겹치거나, 동작이 안 맞거나 하는 부분이 있다.
+지금은 Object의 time 하나로 모든 것을 계산하고 있는데 발이 떠있는 상태 등을 확인해야 하므로 이동하기 시작했을 때의 time을 시작부분으로 정해주는 것도 좋을 것 같다.

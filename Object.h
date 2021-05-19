@@ -45,7 +45,6 @@ public:
 	}
 	virtual void SetParent(Object* pObject) { m_pParent = pObject; }
 	virtual void SetState(const char* strStateName) {};
-	virtual void SetSpeed(float fSpd) { m_fSpeed = fSpd; }
 	virtual void SetVelocity(const XMFLOAT3 xmf3Vector) { m_xmf3Velocity = xmf3Vector; }
 
 	virtual XMMATRIX const GetWorldTransform() {
@@ -54,7 +53,6 @@ public:
 	}
 	virtual XMMATRIX const GetBoneMatrix(int boneIdx) { return XMMatrixIdentity(); }
 	virtual XMFLOAT3 const GetLook() { return XMFLOAT3(m_xmf4x4Local._31, m_xmf4x4Local._32, m_xmf4x4Local._33); }
-	virtual float const GetSpeed() { return m_fSpeed; }
 	virtual XMFLOAT3 const GetVelocity() { return m_xmf3Velocity; }
 
 protected:
@@ -67,7 +65,6 @@ protected:
 protected:
 	XMFLOAT4X4	m_xmf4x4Local;
 	double		m_time;
-	float		m_fSpeed;
 	XMFLOAT3	m_xmf3Velocity;
 	Object*		m_pParent;
 };
