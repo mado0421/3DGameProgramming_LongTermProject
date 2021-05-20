@@ -35,9 +35,9 @@ public:
 	virtual void Update(float fTimeElapsed);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void Input(UCHAR* pKeyBuffer);
-public:
 	virtual void Move(const XMFLOAT3 xmf3Vector);
 	virtual void Rotate(const XMFLOAT3 xmf3Vector);
+public:
 	virtual void SetPosition(const XMFLOAT3 xmf3Position) { 
 		m_xmf4x4Local._41 = xmf3Position.x; 
 		m_xmf4x4Local._42 = xmf3Position.y;
@@ -54,6 +54,7 @@ public:
 	virtual XMMATRIX const GetBoneMatrix(int boneIdx) { return XMMatrixIdentity(); }
 	virtual XMFLOAT3 const GetLook() { return XMFLOAT3(m_xmf4x4Local._31, m_xmf4x4Local._32, m_xmf4x4Local._33); }
 	virtual XMFLOAT3 const GetVelocity() { return m_xmf3Velocity; }
+	virtual XMFLOAT3 const GetPosition() { return XMFLOAT3(m_xmf4x4Local._41, m_xmf4x4Local._42, m_xmf4x4Local._43); }
 
 protected:
 	D3D12_GPU_DESCRIPTOR_HANDLE	m_d3dCbvGPUDescriptorHandle;

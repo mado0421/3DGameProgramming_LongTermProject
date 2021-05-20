@@ -10,7 +10,11 @@ Humanoid_RunningRightStrafe.mac
 Humanoid_Shooting.mac
 Humanoid_WalkingForward.mac
 Humanoid_WalkingLeftStrafe.mac
+Humanoid_WalkingLeftStrafeForward.mac
+Humanoid_WalkingLeftStrafeBack.mac
 Humanoid_WalkingRightStrafe.mac
+Humanoid_WalkingRightStrafeForward.mac
+Humanoid_WalkingRightStrafeBack.mac
 Humanoid_WalkingBackward.mac
 CobblestoneOld_albedo.dds
 CobblestoneOld_normal.dds

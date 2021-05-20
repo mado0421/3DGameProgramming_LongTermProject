@@ -573,6 +573,10 @@ void Scene::Update(float fTimeElapsed)
 
 		for (auto iter = m_vecObject.begin(); iter != m_vecObject.end(); iter++) (*iter)->Update(fTimeElapsed);
 		for (auto iter = m_vecAnimObject.begin(); iter != m_vecAnimObject.end(); iter++) (*iter)->Update(fTimeElapsed);
+		m_pCamera->SetPosition(
+			Vector3::Add(Vector3::Add(m_vecAnimObject[0]->GetPosition(), Vector3::Multiply(-2.5, m_vecAnimObject[0]->GetLook())), XMFLOAT3(0, 2, 0))
+		);
+		m_pCamera->SetLookAtPosition(Vector3::Add(m_vecAnimObject[0]->GetPosition(), XMFLOAT3(0,1,0)));
 	}
 
 }

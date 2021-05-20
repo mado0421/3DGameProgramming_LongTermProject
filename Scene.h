@@ -1,7 +1,6 @@
 #pragma once
 #include "stdafx.h"
 
-
 class Object;
 class AnimatedObject;
 class DebugWindowObject;
@@ -43,7 +42,6 @@ protected:
 	unordered_map<string, ID3D12PipelineState*> m_uomPipelineStates;
 
 	LightManager*								m_LightMng;
-	//TextureManager*								m_TextureMng;
 
 	ID3D12Resource*								m_pd3dcbPassInfo;
 	CB_PASS_INFO*								m_pcbMappedPassInfo;

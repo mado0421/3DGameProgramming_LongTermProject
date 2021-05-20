@@ -87,10 +87,28 @@ vector<pair<string, float>> HumanoidState_Moving::GetAnimClipNameList()
 			float x = normalizedDir.x / (abs(normalizedDir.x) + abs(normalizedDir.z));
 			float z = normalizedDir.z / (abs(normalizedDir.x) + abs(normalizedDir.z));
 
-			if (0 < x)  result.push_back(pair<string, float>("Humanoid_WalkingRightStrafe", (1 - idleFactor) * x));
-			if (0 > x)  result.push_back(pair<string, float>("Humanoid_WalkingLeftStrafe", (1 - idleFactor) * -x));
-			if (0 < z)  result.push_back(pair<string, float>("Humanoid_WalkingForward", (1 - idleFactor) * z));
-			if (0 > z)  result.push_back(pair<string, float>("Humanoid_WalkingBackward", (1 - idleFactor) * -z));
+			//if (0 < x)  result.push_back(pair<string, float>("Humanoid_WalkingRightStrafe", (1 - idleFactor) * x));
+			//if (0 > x)  result.push_back(pair<string, float>("Humanoid_WalkingLeftStrafe", (1 - idleFactor) * -x));
+			if (0 < z) result.push_back(pair<string, float>("Humanoid_WalkingForward", (1 - idleFactor) * z));
+			if (0 > z) result.push_back(pair<string, float>("Humanoid_WalkingBackward", (1 - idleFactor) * -z));
+			
+			float forward = normalizedDir.z;
+			float strafe = 1 - abs(normalizedDir.z);
+			float backward = -normalizedDir.z;
+
+			Clamp(forward, 0, 1);
+			Clamp(backward, 0, 1);
+
+			if (0 < x) {
+				if(forward) result.push_back(pair<string, float>("Humanoid_WalkingRightStrafeForward", (1 - idleFactor) * x * forward));
+				if(strafe)	result.push_back(pair<string, float>("Humanoid_WalkingRightStrafe", (1 - idleFactor) * x * strafe));
+				if(backward)result.push_back(pair<string, float>("Humanoid_WalkingLeftStrafeBack", (1 - idleFactor) * x * backward));
+			}
+			else if (0 > x) {
+				if (forward) result.push_back(pair<string, float>("Humanoid_WalkingLeftStrafeForward", (1 - idleFactor) * -x * forward));
+				if (strafe)	result.push_back(pair<string, float>("Humanoid_WalkingLeftStrafe", (1 - idleFactor) * -x * strafe));
+				if (backward)result.push_back(pair<string, float>("Humanoid_WalkingRightStrafeBack", (1 - idleFactor) * -x * backward));
+			}
 		}
 		result.push_back(pair<string, float>("Humanoid_Idle", idleFactor));
 	}

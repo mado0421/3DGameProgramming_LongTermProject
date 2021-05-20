@@ -49,21 +49,19 @@ public:
 	~AnimationController() { if (m_pd3dCBResource) m_pd3dCBResource->Release(); }
 
 public:
-	void SetMatrix(ID3D12GraphicsCommandList* pd3dCommandList, const vector<pair<string, float>> vecStrAnimClipName, const float time);
-	XMMATRIX GetBoneMatrix(const vector<pair<string, float>> vecStrAnimClipName, int boneIdx, const float time);
-
 	void MakeAnimationTransform(const vector<pair<string, float>> vecPairClipNWeight, const float fTime);
-	XMMATRIX GetLatestToWorldTransformOfSpecificBone(const int boneIdx);
 	void SetAnimationTransform(ID3D12GraphicsCommandList* pd3dCommandList);
+	XMMATRIX GetLatestToWorldTransformOfSpecificBone(const int boneIdx);
+
 protected:
 	void InterpolateKeyframe(Keyframe k0, Keyframe k1, Keyframe k2, Keyframe k3, float t, Keyframe& out);
 	XMFLOAT4 Interpolate(const XMFLOAT4 q0, const XMFLOAT4 q1, const XMFLOAT4 q2, const XMFLOAT4 q3, float t);
 	XMFLOAT3 Interpolate(const XMFLOAT3 v0, const XMFLOAT3 v1, const XMFLOAT3 v2, const XMFLOAT3 v3, float t);
 
 protected:
-	ID3D12Resource*		m_pd3dCBResource = NULL;
-	CB_BONE_INFO*		m_pCBMappedBones = NULL;
-	XMFLOAT4X4* m_pToWorldTransform = NULL;
-	XMFLOAT4X4* m_pAnimationTransform = NULL;
+	ID3D12Resource*				m_pd3dCBResource = NULL;
+	CB_BONE_INFO*				m_pCBMappedBones = NULL;
+	XMFLOAT4X4*					m_pToWorldTransform = NULL;
+	XMFLOAT4X4*					m_pAnimationTransform = NULL;
 	D3D12_GPU_DESCRIPTOR_HANDLE	m_d3dCbvGPUDescriptorHandle;
 };

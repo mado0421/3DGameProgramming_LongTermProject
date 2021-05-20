@@ -489,3 +489,29 @@ Moving State에서 Weight값을 정해주는 부분을 수정하였다.
 
 발이 겹치거나, 동작이 안 맞거나 하는 부분이 있다.
 지금은 Object의 time 하나로 모든 것을 계산하고 있는데 발이 떠있는 상태 등을 확인해야 하므로 이동하기 시작했을 때의 time을 시작부분으로 정해주는 것도 좋을 것 같다.
+
+### 2021.05.20
+
+<img src="https://user-images.githubusercontent.com/21697638/118926050-a62c4580-b97a-11eb-82b0-9850abe6b5d0.gif" width="70%" height="70%"></img>
+
+Backward + Strafe좌우 를 매끄럽게 만들기 위해 Strafe좌우Backward를 만들고,
+앞뒤 이동이 반전되는 순간에 방향이 불연속적으로 바뀌는 것을 막기 위해 좌우 이동을 앞이나 뒤 방향을 향하지 않고 좌, 우로만 향하는 클립을 추가하였다.
+따라서 지금 사용되고 있는 애니메이션은 다음과 같다.
+
+	Humanoid_Idle.mac
+	Humanoid_WalkingForward.mac
+	Humanoid_WalkingLeftStrafe.mac
+	Humanoid_WalkingLeftStrafeForward.mac
+	Humanoid_WalkingLeftStrafeBack.mac
+	Humanoid_WalkingRightStrafe.mac
+	Humanoid_WalkingRightStrafeForward.mac
+	Humanoid_WalkingRightStrafeBack.mac
+	Humanoid_WalkingBackward.mac
+
+Blend가 되고 있는 도중에 캐릭터가 얇아지는 문제가 있다. (앞오른쪽 등)
+차이가 크게 나지 않는 클립을 섞어주어야 위의 문제가 적어질 것 같다. 지금은 앞으로 이동하는 클립과, 옆으로 이동하는 클립 간의 차이가 커서 생기는 것 같다.
+
+지금 있는 애니메이션은 크게 Idle과 Walk로 볼 수 있다.
+Idle에 추가로 Walk를 섞어주는 거라고 생각해야 한다.
+Walk 종류들끼리는 서로 Clip Length가 다르기 때문에 이를 맞춰줘야 한다. 또한, Move State에서 별개의 시간을 갖게 하여 이동 애니메이션이 재생될 때, 해당 시간을 가지고 Blend를 해야 한다.
+지금은 단순하게 수작업으로 모든 Clip의 Length를 Max에서 수정해줬지만 이것은 에셋을 만드는 디자이너의 의도와 다른 모션을 재생하게 하므로 문제가 있다.
