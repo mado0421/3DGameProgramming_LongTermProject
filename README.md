@@ -515,3 +515,57 @@ Blend가 되고 있는 도중에 캐릭터가 얇아지는 문제가 있다. (�
 Idle에 추가로 Walk를 섞어주는 거라고 생각해야 한다.
 Walk 종류들끼리는 서로 Clip Length가 다르기 때문에 이를 맞춰줘야 한다. 또한, Move State에서 별개의 시간을 갖게 하여 이동 애니메이션이 재생될 때, 해당 시간을 가지고 Blend를 해야 한다.
 지금은 단순하게 수작업으로 모든 Clip의 Length를 Max에서 수정해줬지만 이것은 에셋을 만드는 디자이너의 의도와 다른 모션을 재생하게 하므로 문제가 있다.
+
+### 2021.05.21
+
+Animation Blending
+- 같은 종류끼리는 길이를 맞춰야 함
+- Idle은 기본 모션
+- 부위에 따라 State를 달리 줄 때, Blend는?
+
+### 이번주 일정
+#### 21.05.24 - 21.05.30
+* BaseState, SubState, Action 구조를 구현
+
+### 2주 목표
+* Animation Blend
+* IK
+
+### 2021.05.21
+
+구조 설계는 다음과 같다.
+
+	
+	State, SubState, Action
+
+	- State: 키입력 처리, 기본적인 Animation 출력
+	- SubState: 특정 변수 조정, State Animation을 Overwrite
+	- Action: 상위 Animation을 Overwrite
+
+	Mask Struct도 있어야 함.
+	BoneMask::eUpperBody
+	BoneMask::eLowerBody
+	기본적으론 Bone의 Idx를 갖고 있는 배열
+	여기선 Pair로 처리해야 하나?
+	Mask가 가져야 할 정보: 몇 번 Bone에 얼마의 값. (스텐실 처럼)
+
+	애니메이션은 BaseState에서 먼저 애니메이션을 계산.	m_AnimCtrl->CalcAnimTransformFromBaseState(vecPairClipWeight, baseStateTime);
+	그 다음, SubState에서 계산된 애니메이션에 Blend.	m_AnimCtrl->BlendToPrevAnimTransform(vecPairClipWeight, time, Mask);
+	추가로 Action이 있다면 위의 결과값에 추가로 Blend.	m_AnimCtrl->BlendToPrevAnimTransform(vecPairClipWeight, time, Mask);
+
+	State는 한 순간에 단 하나만 존재.
+	State간 전환은 Object의 상태를 보고 State에서 판단.	if(IsPossibleToChangeStatdTo(strStateName)) ChangeStateTo(strStateName);
+	SubState의 추가 및 시간 갱신은 State에서 판단.			if(IsPossibleToAddSubState(strSubStateName))AddSubState(strSubStateName);
+	Action의 추가 및 시간 갱신은 State에서 판단.			if(IsPossibleToAddAction(strActionName))	AddAction(strActionName);
+
+	SubState는 여러 종류가 한 순간에 존재 할 수 있음.
+	하지만 이미 존재하는 SubState가 추가로 존재할 수는 없음.
+	이미 존재하는 SubState를 추가할 때에는 해당 SubState의 시간을 갱신함. 또는 아무 것도 하지 않음. (애초에 SubState는 유지되는 하위 State니까)
+
+	Action 또한 SubState와 같음.
+
+	HumanoidObject는 다음과 같은 변수를 가짐.
+	m_CurrState, m_vecCurrSubState, m_vecCurrAction;
+
+	State->GetPairClipWeight()로 Clip이랑 Weight Pair를 넘기지 말고 그냥 Update()에서 처리해버리거나 Render()에서 처리해버리거나 할 것.
+	그래야 SubState, Action에서도 일관성 있게 처리할 수 있음.

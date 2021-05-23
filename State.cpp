@@ -87,8 +87,6 @@ vector<pair<string, float>> HumanoidState_Moving::GetAnimClipNameList()
 			float x = normalizedDir.x / (abs(normalizedDir.x) + abs(normalizedDir.z));
 			float z = normalizedDir.z / (abs(normalizedDir.x) + abs(normalizedDir.z));
 
-			//if (0 < x)  result.push_back(pair<string, float>("Humanoid_WalkingRightStrafe", (1 - idleFactor) * x));
-			//if (0 > x)  result.push_back(pair<string, float>("Humanoid_WalkingLeftStrafe", (1 - idleFactor) * -x));
 			if (0 < z) result.push_back(pair<string, float>("Humanoid_WalkingForward", (1 - idleFactor) * z));
 			if (0 > z) result.push_back(pair<string, float>("Humanoid_WalkingBackward", (1 - idleFactor) * -z));
 			
