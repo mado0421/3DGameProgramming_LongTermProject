@@ -39,29 +39,66 @@ private:
 	unordered_map<string, AnimClip*> m_uomAnimClip;
 };
 
-class AnimationController {
+//class AnimationController {
+//public:
+//	AnimationController() = delete;
+//	AnimationController(ID3D12Device* pd3dDevice, 
+//		ID3D12GraphicsCommandList* pd3dCommandList,
+//		D3D12_CPU_DESCRIPTOR_HANDLE& cbvCpuHandle,
+//		D3D12_GPU_DESCRIPTOR_HANDLE& cbvGpuHandle);
+//	~AnimationController() { if (m_pd3dCBResource) m_pd3dCBResource->Release(); }
+//
+//public:
+//	void MakeAnimationTransform(const vector<pair<string, float>> vecPairClipNWeight, const float fTime);
+//	void SetAnimationTransform(ID3D12GraphicsCommandList* pd3dCommandList);
+//	XMMATRIX GetLatestToWorldTransformOfSpecificBone(const int boneIdx);
+//
+//protected:
+//	void InterpolateKeyframe(Keyframe k0, Keyframe k1, Keyframe k2, Keyframe k3, float t, Keyframe& out);
+//	XMFLOAT4 Interpolate(const XMFLOAT4 q0, const XMFLOAT4 q1, const XMFLOAT4 q2, const XMFLOAT4 q3, float t);
+//	XMFLOAT3 Interpolate(const XMFLOAT3 v0, const XMFLOAT3 v1, const XMFLOAT3 v2, const XMFLOAT3 v3, float t);
+//
+//protected:
+//	ID3D12Resource*				m_pd3dCBResource = NULL;
+//	CB_BONE_INFO*				m_pCBMappedBones = NULL;
+//	D3D12_GPU_DESCRIPTOR_HANDLE	m_d3dCbvGPUDescriptorHandle;
+//	XMFLOAT4X4*					m_pToWorldTransform = NULL;
+//	XMFLOAT4X4*					m_pAnimationTransform = NULL;
+//};
+
+
+class AnimatedObject;
+class BoneMask;
+
+
+// Object한테 vecAnimation을 받아서 toWorld와 animTransform을 채워주는 역할
+// Object한테 vecAnimation을 받아서 toWorld와 animTransform에 Blend 해주는 역할
+namespace AnimationCalculate {
+	void MakeAnimationTransform(const vector<pair<string, float>> vecPairClipNWeight, const float fTime, AnimatedObject* pTargetObj);
+	void BlendToAnimaionTransform(const vector<pair<string, float>> vecPairClipNWeight, const float fTime, AnimatedObject* pTargetObj, BoneMask* boneMask = NULL);
+
+	void InterpolateKeyframe(Keyframe k0, Keyframe k1, Keyframe k2, Keyframe k3, float t, Keyframe& out);
+	XMFLOAT3 Interpolate(const XMFLOAT3 v0, const XMFLOAT3 v1, const XMFLOAT3 v2, const XMFLOAT3 v3, float t);
+};
+
+// Object한테 vecAnimation을 받아서 animTransform을 GPU에 보내주는 역할
+class AnimationUploader {
 public:
-	AnimationController() = delete;
-	AnimationController(ID3D12Device* pd3dDevice, 
+	AnimationUploader() = delete;
+	AnimationUploader(ID3D12Device* pd3dDevice,
 		ID3D12GraphicsCommandList* pd3dCommandList,
 		D3D12_CPU_DESCRIPTOR_HANDLE& cbvCpuHandle,
 		D3D12_GPU_DESCRIPTOR_HANDLE& cbvGpuHandle);
-	~AnimationController() { if (m_pd3dCBResource) m_pd3dCBResource->Release(); }
+	~AnimationUploader() { 
+		if (m_pd3dCBResource) m_pd3dCBResource->Release();
+		if (m_pCBMappedBones) delete m_pCBMappedBones;
+	}
 
 public:
-	void MakeAnimationTransform(const vector<pair<string, float>> vecPairClipNWeight, const float fTime);
-	void SetAnimationTransform(ID3D12GraphicsCommandList* pd3dCommandList);
-	XMMATRIX GetLatestToWorldTransformOfSpecificBone(const int boneIdx);
-
-protected:
-	void InterpolateKeyframe(Keyframe k0, Keyframe k1, Keyframe k2, Keyframe k3, float t, Keyframe& out);
-	XMFLOAT4 Interpolate(const XMFLOAT4 q0, const XMFLOAT4 q1, const XMFLOAT4 q2, const XMFLOAT4 q3, float t);
-	XMFLOAT3 Interpolate(const XMFLOAT3 v0, const XMFLOAT3 v1, const XMFLOAT3 v2, const XMFLOAT3 v3, float t);
+	void SetAnimationTransform(ID3D12GraphicsCommandList* pd3dCommandList, AnimatedObject* pTargetObj);
 
 protected:
 	ID3D12Resource*				m_pd3dCBResource = NULL;
 	CB_BONE_INFO*				m_pCBMappedBones = NULL;
-	XMFLOAT4X4*					m_pToWorldTransform = NULL;
-	XMFLOAT4X4*					m_pAnimationTransform = NULL;
 	D3D12_GPU_DESCRIPTOR_HANDLE	m_d3dCbvGPUDescriptorHandle;
 };

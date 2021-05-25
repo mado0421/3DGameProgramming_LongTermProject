@@ -154,6 +154,7 @@
     </ClInclude>
     <ClInclude Include="Importer.h" />
     <ClInclude Include="Light.h" />
+    <ClInclude Include="Mask.h" />
     <ClInclude Include="Material.h" />
     <ClInclude Include="MathHelper.h" />
     <ClInclude Include="Mesh.h" />
@@ -182,6 +183,7 @@
     </ClCompile>
     <ClCompile Include="Importer.cpp" />
     <ClCompile Include="Light.cpp" />
+    <ClCompile Include="Mask.cpp" />
     <ClCompile Include="Material.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Model.cpp" />

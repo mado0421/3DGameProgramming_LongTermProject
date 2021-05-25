@@ -268,7 +268,7 @@ void Scene::Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12Graphics
 			}
 		}
 	}
-	g_AnimCtrl = new AnimationController(pd3dDevice, pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
+	g_AnimUploader = new AnimationUploader(pd3dDevice, pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
 
 	m_vecObject[0]->SetParent(m_vecAnimObject[0]);
 	m_vecObject[0]->SetPosition(XMFLOAT3(-0.028f, 0.0f, 0.08f));

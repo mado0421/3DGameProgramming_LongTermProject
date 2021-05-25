@@ -531,7 +531,7 @@ Animation Blending
 * Animation Blend
 * IK
 
-### 2021.05.21
+### 2021.05.24
 
 구조 설계는 다음과 같다.
 
@@ -569,3 +569,15 @@ Animation Blending
 
 	State->GetPairClipWeight()로 Clip이랑 Weight Pair를 넘기지 말고 그냥 Update()에서 처리해버리거나 Render()에서 처리해버리거나 할 것.
 	그래야 SubState, Action에서도 일관성 있게 처리할 수 있음.
+
+### 2021.05.25
+
+BaseState와 SubState를 간략하게 구현.
+BoneMask를 간략하게 구현.
+AnimationController는 기능을 분할하여 전역에 존재할 AnimationUploader와 namespace AnimationCalculator 로 분리.
+
+<img src="https://user-images.githubusercontent.com/21697638/119498880-1256e100-bda1-11eb-844e-5545aa1cbce4.gif" width="70%" height="70%"></img>
+
+Mask 자체는 문제 없이 작동하는 것 같으나 이렇게 나오는 것이 옳게 계산된 것인지는 잘 모르겠다.
+
+<img src="https://user-images.githubusercontent.com/21697638/119506184-a4161c80-bda8-11eb-913d-d86a4f6292cb.gif" width="70%" height="70%"></img>

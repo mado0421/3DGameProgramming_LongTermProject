@@ -10,6 +10,6 @@ ModelManager	gModelMng;
 MaterialManager gMaterialMng;
 AnimationManager gAnimMng;
 int gTestInt = 0;
-AnimationController* g_AnimCtrl;
+AnimationUploader* g_AnimUploader;
 
 UINT gnCbvSrvDescriptorIncrementSize = 0;

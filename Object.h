@@ -1,5 +1,6 @@
 #pragma once
 #include "Animation.h"
+#include "State.h"
 
 struct CB_OBJECT_INFO {
 	XMFLOAT4X4	xmf4x4World;
@@ -82,14 +83,17 @@ private:
 	DebugWindowMesh*			m_pDWMesh;
 };
 
-class State;
-
 class AnimatedObject : public Object {
 public:
 	AnimatedObject(
 		ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 		D3D12_CPU_DESCRIPTOR_HANDLE& d3dCbvCPUDescriptorStartHandle,
 		D3D12_GPU_DESCRIPTOR_HANDLE& d3dCbvGPUDescriptorStartHandle);
+	~AnimatedObject() {
+		if (m_pToWorldTransform)	delete m_pToWorldTransform;
+		if (m_pAnimationTransform)	delete m_pAnimationTransform;
+		if (m_pBoneMask)			delete m_pBoneMask;
+	}
 
 	virtual void SetState(const char* strStateName);
 	virtual XMMATRIX const GetBoneMatrix(int boneIdx);
@@ -97,9 +101,10 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void Update(float fTimeElapsed);
 
-protected:
-	State* m_currState;
-	unordered_map<string, State*> m_uomStates;
+public:
+	XMFLOAT4X4* m_pToWorldTransform		= NULL;
+	XMFLOAT4X4* m_pAnimationTransform	= NULL;
+	int*		m_pBoneMask				= NULL;
 };
 
 class HumanoidObject : public AnimatedObject {
@@ -109,5 +114,17 @@ public:
 		D3D12_CPU_DESCRIPTOR_HANDLE& d3dCbvCPUDescriptorStartHandle,
 		D3D12_GPU_DESCRIPTOR_HANDLE& d3dCbvGPUDescriptorStartHandle);
 
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void Input(UCHAR* pKeyBuffer);
+	virtual void Update(float fTimeElapsed);
+	void AddSubState(const char* strStateName);
+	void AddAction(const char* strStateName);
+	void QuitSubState(const char* strStateName);
+	void QuitAction(const char* strStateName);
+
+private:
+	HumanoidState* m_pCurState = NULL;
+	unordered_map<string, HumanoidState*> m_uomStates;
+	unordered_map<string, HumanoidState*> m_vecSubStates;
+	unordered_map<string, HumanoidState*> m_vecActions;
 };

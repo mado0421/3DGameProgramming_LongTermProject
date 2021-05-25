@@ -2,6 +2,7 @@ defaultDiffuseMap.dds
 defaultNormalMap.dds
 defaultSpecularMap.dds
 human.mm
+Humanoid_Aiming.mac
 Humanoid_Idle.mac
 Humanoid_Idle2.mac
 Humanoid_RunningForward.mac

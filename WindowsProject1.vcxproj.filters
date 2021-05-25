@@ -129,6 +129,9 @@
     <ClInclude Include="Transaction.h">
       <Filter>소스 파일\Object\Animation</Filter>
     </ClInclude>
+    <ClInclude Include="Mask.h">
+      <Filter>소스 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WindowsProject1.cpp">
@@ -191,6 +194,9 @@
     </ClCompile>
     <ClCompile Include="Transaction.cpp">
       <Filter>소스 파일\Object\Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="Mask.cpp">
+      <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
