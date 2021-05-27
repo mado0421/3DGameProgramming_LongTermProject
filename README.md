@@ -581,3 +581,17 @@ AnimationController는 기능을 분할하여 전역에 존재할 AnimationUploa
 Mask 자체는 문제 없이 작동하는 것 같으나 이렇게 나오는 것이 옳게 계산된 것인지는 잘 모르겠다.
 
 <img src="https://user-images.githubusercontent.com/21697638/119506184-a4161c80-bda8-11eb-913d-d86a4f6292cb.gif" width="70%" height="70%"></img>
+
+### 2021.05.27
+
+<img src="https://user-images.githubusercontent.com/21697638/119802372-73a1c000-bf19-11eb-9509-9e97a7cddcad.gif" width="70%" height="70%"></img>
+
+<img src="https://user-images.githubusercontent.com/21697638/119802886-e874fa00-bf19-11eb-9353-08aa1a05546b.png" width="70%" height="70%"></img>
+
+AnimCalc::Blend() 를 수정했다.
+그동안 Blend 결과물이 이렇게 나오는게 맞는지 잘 모르는 상태였는데 이번 결과물을 보고 의도와 다른 것을 확인했다.
+
+조준을 하고 이동을 하면 상체도 골반에 따라 흔들려야 한다.
+근데 지금은 Animation Clip을 보간해주는 것뿐이라 골반 흔들림 등에 영향을 받지 않는다.
+이동 애니메이션에 의해 골반이 이동하면 나머지 Bone들도 영향을 받아야 한다.
+Bone에 영향을 주는 식으로 해야 한다. 결과물을 보간하는 것만으론 의도한 결과물을 낼 수 없다.

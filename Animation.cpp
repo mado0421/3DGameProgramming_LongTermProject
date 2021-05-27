@@ -347,165 +347,134 @@ void AnimationCalculate::BlendToAnimaionTransform(const vector<pair<string, floa
 		해당하는 기존 결과물들은 XMLoadFloat4x4(&pAnimationTransform[i]) *= ( 1 - saturate( totalWeight ) )를 해주자.
 
 		clip 시간도 하나로 맞춰야 함.
-
-
 	*/
-	vector<AnimClip*> vecClipList;
-	float normalizedTime;
-	XMMATRIX mtxFront, mtxBack;
-	Keyframe result;
-	int i0, i1, i2, i3;
+	// For Animation Calc
+	XMMATRIX			xmmtxFront, xmmtxBack;
+	float				fNormalizedTime;
+	XMINT4				xmi4FrameIdx;
 
-	float totalWeight = 0;
+	float				totalWeight[64];
+	memset(totalWeight, 0, sizeof(float) * 64);
 
-	for (int i = 0; i < vecPairClipNWeight.size(); i++) {
-		vecClipList.push_back(gAnimMng.GetAnimClip(vecPairClipNWeight[i].first.c_str()));
-		totalWeight += vecPairClipNWeight[i].second;
-	}
 
-	Clamp(totalWeight, 0, 1);
 
 	if (boneMask) {
-		for (int i = 0; i < boneMask->boneIdxStencil.size(); i++) {
-			if (pTargetObj->m_pBoneMask[boneMask->boneIdxStencil[i].first] <= boneMask->boneIdxStencil[i].second) {
-				XMStoreFloat4x4(&pTargetObj->m_pAnimationTransform[boneMask->boneIdxStencil[i].first],
-					XMLoadFloat4x4(&pTargetObj->m_pAnimationTransform[boneMask->boneIdxStencil[i].first]) * (1 - totalWeight));
-				XMStoreFloat4x4(&pTargetObj->m_pToWorldTransform[boneMask->boneIdxStencil[i].first],
-					XMLoadFloat4x4(&pTargetObj->m_pToWorldTransform[boneMask->boneIdxStencil[i].first]) * (1 - totalWeight));
+		// 스텐실 값을 비교해서 유효한 totalWeight[boneIdx]에만 값을 넣어줌.
+		for (int i = 0; i < 64; i++) {
+			if (pTargetObj->m_pBoneMask[i] <= boneMask->affectedBoneInfo[i].stencil) {
+				pTargetObj->m_pBoneMask[i] = boneMask->affectedBoneInfo[i].stencil;
+				for (int j = 0; j < vecPairClipNWeight.size(); j++)
+					totalWeight[i] += vecPairClipNWeight[j].second * boneMask->affectedBoneInfo[i].weight;
 			}
+			Clamp(totalWeight[i], 0, 1);
 		}
 
-		for (int iClip = 0; iClip < vecClipList.size(); iClip++) {
-			float time = fTime;
-			while (time > vecClipList[iClip]->fClipLength) time -= vecClipList[iClip]->fClipLength;
-
-			for (int timeIdx = 0; timeIdx < vecClipList[iClip]->vecTimes.size(); timeIdx++) {
-				if (time == vecClipList[iClip]->vecTimes[timeIdx]) {
-
-					for (int i = 0; i < boneMask->boneIdxStencil.size(); i++) {
-						if (pTargetObj->m_pBoneMask[boneMask->boneIdxStencil[i].first] <= boneMask->boneIdxStencil[i].second) {
-							int iBone = boneMask->boneIdxStencil[i].first;
-
-							mtxFront = XMLoadFloat4x4(&vecClipList[iClip]->vecBone[iBone].toDressposeInv);
-							mtxBack = XMMatrixMultiply(
-								XMMatrixRotationQuaternion(XMLoadFloat4(&vecClipList[iClip]->vecBone[iBone].keys[timeIdx].xmf4QuatRotation)),
-								XMMatrixTranslationFromVector(XMLoadFloat3(&vecClipList[iClip]->vecBone[iBone].keys[timeIdx].xmf3Translation))
-							);
-							XMStoreFloat4x4(&pTargetObj->m_pAnimationTransform[iBone], XMLoadFloat4x4(&pTargetObj->m_pAnimationTransform[iBone]) + (XMMatrixMultiply(mtxFront, mtxBack) * vecPairClipNWeight[iClip].second));
-							XMStoreFloat4x4(&pTargetObj->m_pToWorldTransform[iBone], XMLoadFloat4x4(&pTargetObj->m_pToWorldTransform[iBone]) + (mtxBack * vecPairClipNWeight[iClip].second));
-						}
-					}
-					break;
-				}
-				if (vecClipList[iClip]->vecTimes[timeIdx] < time && time <= vecClipList[iClip]->vecTimes[timeIdx + 1]) {
-					i1 = timeIdx; i2 = timeIdx + 1;
-
-					if (timeIdx != 0)									i0 = i1 - 1;
-					else												i0 = 0;
-					if (i2 != vecClipList[iClip]->vecTimes.size() - 1)	i3 = i2 + 1;
-					else												i3 = i2;
-					// KeySelect End
-
-					normalizedTime = (time - vecClipList[iClip]->vecTimes[i1])
-						/ (vecClipList[iClip]->vecTimes[i2] - vecClipList[iClip]->vecTimes[i1]);
-
-					for (int i = 0; i < boneMask->boneIdxStencil.size(); i++) {
-						if (pTargetObj->m_pBoneMask[boneMask->boneIdxStencil[i].first] <= boneMask->boneIdxStencil[i].second) {
-							int iBone = boneMask->boneIdxStencil[i].first;
-
-							mtxFront = XMLoadFloat4x4(&vecClipList[iClip]->vecBone[iBone].toDressposeInv);
-							AnimationCalculate::InterpolateKeyframe(
-								vecClipList[iClip]->vecBone[iBone].keys[i0],
-								vecClipList[iClip]->vecBone[iBone].keys[i1],
-								vecClipList[iClip]->vecBone[iBone].keys[i2],
-								vecClipList[iClip]->vecBone[iBone].keys[i3],
-								normalizedTime,
-								result);
-
-							mtxBack = XMMatrixMultiply(
-								XMMatrixRotationQuaternion(XMLoadFloat4(&result.xmf4QuatRotation)),
-								XMMatrixTranslationFromVector(XMLoadFloat3(&result.xmf3Translation))
-							);
-							XMStoreFloat4x4(&pTargetObj->m_pAnimationTransform[iBone], XMLoadFloat4x4(&pTargetObj->m_pAnimationTransform[iBone]) + (XMMatrixMultiply(mtxFront, mtxBack) * vecPairClipNWeight[iClip].second));
-							XMStoreFloat4x4(&pTargetObj->m_pToWorldTransform[iBone], XMLoadFloat4x4(&pTargetObj->m_pToWorldTransform[iBone]) + (mtxBack * vecPairClipNWeight[iClip].second));
-						}
-					}
-
-
-					break;
-				}
-			}
+		// 일괄적으로 변경.
+		for (int i = 0; i < 64; i++) {
+			XMStoreFloat4x4(&pTargetObj->m_pAnimationTransform[i], XMLoadFloat4x4(&pTargetObj->m_pAnimationTransform[i]) * (1 - totalWeight[i]));
+			XMStoreFloat4x4(&pTargetObj->m_pToWorldTransform[i], XMLoadFloat4x4(&pTargetObj->m_pToWorldTransform[i]) * (1 - totalWeight[i]));
 		}
 
-		for (int i = 0; i < boneMask->boneIdxStencil.size(); i++) {
-			if (pTargetObj->m_pBoneMask[boneMask->boneIdxStencil[i].first] < boneMask->boneIdxStencil[i].second) {
-				pTargetObj->m_pBoneMask[boneMask->boneIdxStencil[i].first] = boneMask->boneIdxStencil[i].second;
+		// 처리.
+		for (int iClip = 0; iClip < vecPairClipNWeight.size(); iClip++) {
+
+			GetFrameIdxAndNormalizedTime(vecPairClipNWeight[iClip].first.c_str(), fTime, fNormalizedTime, xmi4FrameIdx);
+
+			for (int iBone = 0; iBone < gAnimMng.GetAnimClip(vecPairClipNWeight[iClip].first.c_str())->vecBone.size(); iBone++) {
+				if (totalWeight[iBone]) {
+
+					GetFrontAndBackMtx(vecPairClipNWeight[iClip].first.c_str(), fNormalizedTime, iBone, xmi4FrameIdx, xmmtxFront, xmmtxBack);
+					XMStoreFloat4x4(&pTargetObj->m_pAnimationTransform[iBone], XMLoadFloat4x4(&pTargetObj->m_pAnimationTransform[iBone]) + (XMMatrixMultiply(xmmtxFront, xmmtxBack) * vecPairClipNWeight[iClip].second * boneMask->affectedBoneInfo[iBone].weight));
+					XMStoreFloat4x4(&pTargetObj->m_pToWorldTransform[iBone], XMLoadFloat4x4(&pTargetObj->m_pToWorldTransform[iBone]) + (xmmtxBack * vecPairClipNWeight[iClip].second * boneMask->affectedBoneInfo[iBone].weight));
+				}
 			}
 		}
 	}
 	else {
+		// totalWeight[boneIdx] 값을 구함.
 		for (int i = 0; i < 64; i++) {
-			XMStoreFloat4x4(&pTargetObj->m_pAnimationTransform[i],
-				XMLoadFloat4x4(&pTargetObj->m_pAnimationTransform[i]) * (1 - totalWeight));
-			XMStoreFloat4x4(&pTargetObj->m_pToWorldTransform[i],
-				XMLoadFloat4x4(&pTargetObj->m_pToWorldTransform[i]) * (1 - totalWeight));
+			for (int j = 0; j < vecPairClipNWeight.size(); j++)
+				totalWeight[i] += vecPairClipNWeight[j].second;
+			Clamp(totalWeight[i], 0, 1);
 		}
-		for (int iClip = 0; iClip < vecClipList.size(); iClip++) {
-			float time = fTime;
-			while (time > vecClipList[iClip]->fClipLength) time -= vecClipList[iClip]->fClipLength;
 
-			for (int timeIdx = 0; timeIdx < vecClipList[iClip]->vecTimes.size(); timeIdx++) {
-				if (time == vecClipList[iClip]->vecTimes[timeIdx]) {
+		// 일괄적으로 변경.
+		for (int i = 0; i < 64; i++) {
+			XMStoreFloat4x4(&pTargetObj->m_pAnimationTransform[i], XMLoadFloat4x4(&pTargetObj->m_pAnimationTransform[i]) * (1 - totalWeight[i]));
+			XMStoreFloat4x4(&pTargetObj->m_pToWorldTransform[i], XMLoadFloat4x4(&pTargetObj->m_pToWorldTransform[i]) * (1 - totalWeight[i]));
+		}
 
-					for (int i = 0; i < vecClipList[iClip]->vecBone.size(); i++) {
+		// 처리.
+		for (int iClip = 0; iClip < vecPairClipNWeight.size(); iClip++) {
 
-						mtxFront = XMLoadFloat4x4(&vecClipList[iClip]->vecBone[i].toDressposeInv);
-						mtxBack = XMMatrixMultiply(
-							XMMatrixRotationQuaternion(XMLoadFloat4(&vecClipList[iClip]->vecBone[i].keys[timeIdx].xmf4QuatRotation)),
-							XMMatrixTranslationFromVector(XMLoadFloat3(&vecClipList[iClip]->vecBone[i].keys[timeIdx].xmf3Translation))
-						);
-						XMStoreFloat4x4(&pTargetObj->m_pAnimationTransform[i], XMLoadFloat4x4(&pTargetObj->m_pAnimationTransform[i]) + (XMMatrixMultiply(mtxFront, mtxBack) * vecPairClipNWeight[iClip].second));
-						XMStoreFloat4x4(&pTargetObj->m_pToWorldTransform[i], XMLoadFloat4x4(&pTargetObj->m_pToWorldTransform[i]) + (mtxBack * vecPairClipNWeight[iClip].second));
-					}
-					break;
-				}
-				if (vecClipList[iClip]->vecTimes[timeIdx] < time && time <= vecClipList[iClip]->vecTimes[timeIdx + 1]) {
-					i1 = timeIdx; i2 = timeIdx + 1;
+			GetFrameIdxAndNormalizedTime(vecPairClipNWeight[iClip].first.c_str(), fTime, fNormalizedTime, xmi4FrameIdx);
 
-					if (timeIdx != 0)									i0 = i1 - 1;
-					else												i0 = 0;
-					if (i2 != vecClipList[iClip]->vecTimes.size() - 1)	i3 = i2 + 1;
-					else												i3 = i2;
-					// KeySelect End
+			for (int iBone = 0; iBone < gAnimMng.GetAnimClip(vecPairClipNWeight[iClip].first.c_str())->vecBone.size(); iBone++) {
 
-					normalizedTime = (time - vecClipList[iClip]->vecTimes[i1])
-						/ (vecClipList[iClip]->vecTimes[i2] - vecClipList[iClip]->vecTimes[i1]);
+				GetFrontAndBackMtx(vecPairClipNWeight[iClip].first.c_str(), fNormalizedTime, iBone, xmi4FrameIdx, xmmtxFront, xmmtxBack);
+				XMStoreFloat4x4(&pTargetObj->m_pAnimationTransform[iBone], XMLoadFloat4x4(&pTargetObj->m_pAnimationTransform[iBone]) + (XMMatrixMultiply(xmmtxFront, xmmtxBack) * vecPairClipNWeight[iClip].second));
+				XMStoreFloat4x4(&pTargetObj->m_pToWorldTransform[iBone], XMLoadFloat4x4(&pTargetObj->m_pToWorldTransform[iBone]) + (xmmtxBack * vecPairClipNWeight[iClip].second));
 
-					for (int boneIdx = 0; boneIdx < vecClipList[iClip]->vecBone.size(); boneIdx++) {
-
-						mtxFront = XMLoadFloat4x4(&vecClipList[iClip]->vecBone[boneIdx].toDressposeInv);
-						AnimationCalculate::InterpolateKeyframe(
-							vecClipList[iClip]->vecBone[boneIdx].keys[i0],
-							vecClipList[iClip]->vecBone[boneIdx].keys[i1],
-							vecClipList[iClip]->vecBone[boneIdx].keys[i2],
-							vecClipList[iClip]->vecBone[boneIdx].keys[i3],
-							normalizedTime,
-							result);
-
-						mtxBack = XMMatrixMultiply(
-							XMMatrixRotationQuaternion(XMLoadFloat4(&result.xmf4QuatRotation)),
-							XMMatrixTranslationFromVector(XMLoadFloat3(&result.xmf3Translation))
-						);
-						XMStoreFloat4x4(&pTargetObj->m_pAnimationTransform[boneIdx], XMLoadFloat4x4(&pTargetObj->m_pAnimationTransform[boneIdx]) + (XMMatrixMultiply(mtxFront, mtxBack) * vecPairClipNWeight[iClip].second));
-						XMStoreFloat4x4(&pTargetObj->m_pToWorldTransform[boneIdx], XMLoadFloat4x4(&pTargetObj->m_pToWorldTransform[boneIdx]) + (mtxBack * vecPairClipNWeight[iClip].second));
-
-
-					}
-					break;
-				}
 			}
 		}
+	}
+}
 
+void AnimationCalculate::GetFrameIdxAndNormalizedTime(const char* strClipName, const float fTime, float& OutfNormalizedTime, XMINT4& OutIdx)
+{
+	AnimClip* clip = gAnimMng.GetAnimClip(strClipName);
+	float time = fTime;
+	while (time > clip->fClipLength) time -= clip->fClipLength;
+
+	for (int timeIdx = 0; timeIdx < clip->vecTimes.size(); timeIdx++) {
+		if (time == clip->vecTimes[timeIdx]) {
+
+			OutfNormalizedTime = 0;
+			OutIdx.x = OutIdx.y = OutIdx.z = OutIdx.w = timeIdx;
+			return;
+		}
+		if (clip->vecTimes[timeIdx] < time && time <= clip->vecTimes[timeIdx + 1]) {
+			OutIdx.y = timeIdx; OutIdx.z = timeIdx + 1;
+
+			if (timeIdx != 0)							OutIdx.x = OutIdx.y - 1;
+			else										OutIdx.x = 0;
+			if (OutIdx.z != clip->vecTimes.size() - 1)	OutIdx.w = OutIdx.z + 1;
+			else										OutIdx.w = OutIdx.z;
+			// KeySelect End
+
+			OutfNormalizedTime = (time - clip->vecTimes[OutIdx.y]) / (clip->vecTimes[OutIdx.z] - clip->vecTimes[OutIdx.y]);
+			return;
+		}
+	}
+}
+
+void AnimationCalculate::GetFrontAndBackMtx(const char* strClipName, const float fNormalizedTime, const int boneIdx, const XMINT4 frameIdx, XMMATRIX& xmmtxFront, XMMATRIX& xmmtxBack)
+{
+	AnimClip* clip = gAnimMng.GetAnimClip(strClipName);
+	Keyframe result;
+	if (0 == fNormalizedTime) {
+		xmmtxFront = XMLoadFloat4x4(&clip->vecBone[frameIdx.x].toDressposeInv);
+		xmmtxBack = XMMatrixMultiply(
+			XMMatrixRotationQuaternion(XMLoadFloat4(&clip->vecBone[boneIdx].keys[frameIdx.x].xmf4QuatRotation)),
+			XMMatrixTranslationFromVector(XMLoadFloat3(&clip->vecBone[boneIdx].keys[frameIdx.x].xmf3Translation))
+		);
+		return;
+	}
+	else {
+		xmmtxFront = XMLoadFloat4x4(&clip->vecBone[boneIdx].toDressposeInv);
+		AnimationCalculate::InterpolateKeyframe(
+			clip->vecBone[boneIdx].keys[frameIdx.x],
+			clip->vecBone[boneIdx].keys[frameIdx.y],
+			clip->vecBone[boneIdx].keys[frameIdx.z],
+			clip->vecBone[boneIdx].keys[frameIdx.w],
+			fNormalizedTime,
+			result);
+
+		xmmtxBack = XMMatrixMultiply(
+			XMMatrixRotationQuaternion(XMLoadFloat4(&result.xmf4QuatRotation)),
+			XMMatrixTranslationFromVector(XMLoadFloat3(&result.xmf3Translation))
+		);
+		return;
 	}
 }
 

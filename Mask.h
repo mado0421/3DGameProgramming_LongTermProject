@@ -1,5 +1,18 @@
 #pragma once
 
+struct AffectedBoneInfo {
+	int stencil;
+	float weight;
+	AffectedBoneInfo()
+		: stencil(0)
+		, weight(0.0f)
+	{}
+	AffectedBoneInfo(int stc, float weight)
+		: stencil(stc)
+		, weight(weight)
+	{}
+};
+
 class BoneMask {
 public:
 	enum class PreDefined {
@@ -10,55 +23,60 @@ public:
 		switch (option)
 		{
 		case BoneMask::PreDefined::eUpperBody:
-			boneIdxStencil.push_back(pair<int, int>(2, stencil));	// Spine
-			boneIdxStencil.push_back(pair<int, int>(3, stencil));	// Spine1
-			boneIdxStencil.push_back(pair<int, int>(4, stencil));	// Spine2
-			boneIdxStencil.push_back(pair<int, int>(5, stencil));	// Neck
-			boneIdxStencil.push_back(pair<int, int>(6, stencil));	// L Clavicle
-			boneIdxStencil.push_back(pair<int, int>(7, stencil));	// L UpperArm
-			boneIdxStencil.push_back(pair<int, int>(8, stencil));	// L Forearm
-			boneIdxStencil.push_back(pair<int, int>(9, stencil));	// L Hand
-			boneIdxStencil.push_back(pair<int, int>(10, stencil));	// L Finger0
-			boneIdxStencil.push_back(pair<int, int>(11, stencil));	// L Finger01
-			boneIdxStencil.push_back(pair<int, int>(13, stencil));	// L Finger1
-			boneIdxStencil.push_back(pair<int, int>(14, stencil));	// L Finger11
-			boneIdxStencil.push_back(pair<int, int>(16, stencil));	// L Finger2
-			boneIdxStencil.push_back(pair<int, int>(17, stencil));	// L Finger21
-			boneIdxStencil.push_back(pair<int, int>(19, stencil));	// L Finger3
-			boneIdxStencil.push_back(pair<int, int>(20, stencil));	// L Finger31
-			boneIdxStencil.push_back(pair<int, int>(22, stencil));	// L Finger4
-			boneIdxStencil.push_back(pair<int, int>(23, stencil));	// L Finger41
-			boneIdxStencil.push_back(pair<int, int>(25, stencil));	// R Clavicle
-			boneIdxStencil.push_back(pair<int, int>(26, stencil));	// R UpperArm
-			boneIdxStencil.push_back(pair<int, int>(27, stencil));	// R Forearm
-			boneIdxStencil.push_back(pair<int, int>(28, stencil));	// R Hand
-			boneIdxStencil.push_back(pair<int, int>(29, stencil));	// R Finger0
-			boneIdxStencil.push_back(pair<int, int>(30, stencil));	// R Finger01
-			boneIdxStencil.push_back(pair<int, int>(32, stencil));	// R Finger1
-			boneIdxStencil.push_back(pair<int, int>(33, stencil));	// R Finger11
-			boneIdxStencil.push_back(pair<int, int>(35, stencil));	// R Finger2
-			boneIdxStencil.push_back(pair<int, int>(36, stencil));	// R Finger21
-			boneIdxStencil.push_back(pair<int, int>(38, stencil));	// R Finger3
-			boneIdxStencil.push_back(pair<int, int>(39, stencil));	// R Finger31
-			boneIdxStencil.push_back(pair<int, int>(41, stencil));	// R Finger4
-			boneIdxStencil.push_back(pair<int, int>(42, stencil));	// R Finger41
-			boneIdxStencil.push_back(pair<int, int>(44, stencil));	// Head
+
+			affectedBoneInfo[2]  = AffectedBoneInfo( stencil, 0.1f );	// Spine
+			affectedBoneInfo[3]  = AffectedBoneInfo( stencil, 0.4f );	// Spine1
+			affectedBoneInfo[4]  = AffectedBoneInfo( stencil, 0.9f );	// Spine2
+			affectedBoneInfo[5]  = AffectedBoneInfo( stencil, 1.0f );	// Neck
+			affectedBoneInfo[6]  = AffectedBoneInfo( stencil, 1.0f );	// L Clavicle
+			affectedBoneInfo[7]  = AffectedBoneInfo( stencil, 1.0f );	// L UpperArm
+			affectedBoneInfo[8]  = AffectedBoneInfo( stencil, 1.0f );	// L Forearm
+			affectedBoneInfo[9]  = AffectedBoneInfo( stencil, 1.0f );	// L Hand
+			affectedBoneInfo[10] = AffectedBoneInfo( stencil, 1.0f );	// L Finger0
+			affectedBoneInfo[11] = AffectedBoneInfo( stencil, 1.0f );	// L Finger01
+			affectedBoneInfo[13] = AffectedBoneInfo( stencil, 1.0f );	// L Finger1
+			affectedBoneInfo[14] = AffectedBoneInfo( stencil, 1.0f );	// L Finger11
+			affectedBoneInfo[16] = AffectedBoneInfo( stencil, 1.0f );	// L Finger2
+			affectedBoneInfo[17] = AffectedBoneInfo( stencil, 1.0f );	// L Finger21
+			affectedBoneInfo[19] = AffectedBoneInfo( stencil, 1.0f );	// L Finger3
+			affectedBoneInfo[20] = AffectedBoneInfo( stencil, 1.0f );	// L Finger31
+			affectedBoneInfo[22] = AffectedBoneInfo( stencil, 1.0f );	// L Finger4
+			affectedBoneInfo[23] = AffectedBoneInfo( stencil, 1.0f );	// L Finger41
+			affectedBoneInfo[25] = AffectedBoneInfo( stencil, 1.0f );	// R Clavicle
+			affectedBoneInfo[26] = AffectedBoneInfo( stencil, 1.0f );	// R UpperArm
+			affectedBoneInfo[27] = AffectedBoneInfo( stencil, 1.0f );	// R Forearm
+			affectedBoneInfo[28] = AffectedBoneInfo( stencil, 1.0f );	// R Hand
+			affectedBoneInfo[29] = AffectedBoneInfo( stencil, 1.0f );	// R Finger0
+			affectedBoneInfo[30] = AffectedBoneInfo( stencil, 1.0f );	// R Finger01
+			affectedBoneInfo[32] = AffectedBoneInfo( stencil, 1.0f );	// R Finger1
+			affectedBoneInfo[33] = AffectedBoneInfo( stencil, 1.0f );	// R Finger11
+			affectedBoneInfo[35] = AffectedBoneInfo( stencil, 1.0f );	// R Finger2
+			affectedBoneInfo[36] = AffectedBoneInfo( stencil, 1.0f );	// R Finger21
+			affectedBoneInfo[38] = AffectedBoneInfo( stencil, 1.0f );	// R Finger3
+			affectedBoneInfo[39] = AffectedBoneInfo( stencil, 1.0f );	// R Finger31
+			affectedBoneInfo[41] = AffectedBoneInfo( stencil, 1.0f );	// R Finger4
+			affectedBoneInfo[42] = AffectedBoneInfo( stencil, 1.0f );	// R Finger41
+			affectedBoneInfo[44] = AffectedBoneInfo( stencil, 1.0f );	// Head
+
 			break;
 		case BoneMask::PreDefined::eLowerBody:
-			boneIdxStencil.push_back(pair<int, int>(1, stencil));	// Pelvis
-			boneIdxStencil.push_back(pair<int, int>(46, stencil));	// L Thigh
-			boneIdxStencil.push_back(pair<int, int>(47, stencil));	// L Calf
-			boneIdxStencil.push_back(pair<int, int>(48, stencil));	// L Foot
-			boneIdxStencil.push_back(pair<int, int>(49, stencil));	// L Toe0
-			boneIdxStencil.push_back(pair<int, int>(51, stencil));	// R Thigh
-			boneIdxStencil.push_back(pair<int, int>(52, stencil));	// R Calf
-			boneIdxStencil.push_back(pair<int, int>(53, stencil));	// R Foot
-			boneIdxStencil.push_back(pair<int, int>(54, stencil));	// R Toe0
+
+			affectedBoneInfo[1]	 = AffectedBoneInfo( stencil, 0.9f );	// Pelvis
+			affectedBoneInfo[2]	 = AffectedBoneInfo( stencil, 0.4f );	// Spine
+			affectedBoneInfo[3]	 = AffectedBoneInfo( stencil, 0.1f );	// Spine1
+			affectedBoneInfo[46] = AffectedBoneInfo( stencil, 1.0f );	// L Thigh
+			affectedBoneInfo[47] = AffectedBoneInfo( stencil, 1.0f );	// L Calf
+			affectedBoneInfo[48] = AffectedBoneInfo( stencil, 1.0f );	// L Foot
+			affectedBoneInfo[49] = AffectedBoneInfo( stencil, 1.0f );	// L Toe0
+			affectedBoneInfo[51] = AffectedBoneInfo( stencil, 1.0f );	// R Thigh
+			affectedBoneInfo[52] = AffectedBoneInfo( stencil, 1.0f );	// R Calf
+			affectedBoneInfo[53] = AffectedBoneInfo( stencil, 1.0f );	// R Foot
+			affectedBoneInfo[54] = AffectedBoneInfo( stencil, 1.0f );	// R Toe0
 			break;
 		default:
 			break;
 		}
 	}
 
-	vector<pair<int, int>> boneIdxStencil;
+	AffectedBoneInfo affectedBoneInfo[64];
 };

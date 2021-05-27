@@ -54,6 +54,9 @@
     <Filter Include="소스 파일\Object\Animation">
       <UniqueIdentifier>{acf69ee2-00be-4fa2-92c0-b2e8b3d0b538}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\Object\Mask">
+      <UniqueIdentifier>{e181df4a-4c7c-4a6d-9f16-0bab283289a2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Resource.h">
@@ -130,7 +133,7 @@
       <Filter>소스 파일\Object\Animation</Filter>
     </ClInclude>
     <ClInclude Include="Mask.h">
-      <Filter>소스 파일</Filter>
+      <Filter>소스 파일\Object\Mask</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -196,7 +199,7 @@
       <Filter>소스 파일\Object\Animation</Filter>
     </ClCompile>
     <ClCompile Include="Mask.cpp">
-      <Filter>소스 파일</Filter>
+      <Filter>소스 파일\Object\Mask</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
