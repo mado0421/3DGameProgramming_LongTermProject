@@ -312,28 +312,18 @@ vector<MESH_DATA> MeshDataImporter::FBXLoad(const char* filePath)
 			v = pVertex[iV];
 			Vertex temp;
 
-			temp.m_xmf3Pos = vecCP[v.ctrlPointIndex].position;
-			swap(temp.m_xmf3Pos.y, temp.m_xmf3Pos.z);
-			temp.m_xmf3Pos.z *= -1;
-			temp.m_xmf3Pos.x *= -1;
-			temp.m_xmf3Normal = v.normal;
-			swap(temp.m_xmf3Normal.y, temp.m_xmf3Normal.z);
-			temp.m_xmf3Normal.z *= -1;
-			temp.m_xmf3Normal.x *= -1;
-			temp.m_xmf3Tangent = v.tangent;
-			swap(temp.m_xmf3Tangent.y, temp.m_xmf3Tangent.z);
-			temp.m_xmf3Tangent.z *= -1;
-			temp.m_xmf3Tangent.x *= -1;
-			temp.m_xmf2UV = v.uv;
-			temp.m_xmf2UV.y *= -1;
-			temp.m_xmi4BoneIndices.x = vecCP[v.ctrlPointIndex].boneIndices[0];
-			temp.m_xmi4BoneIndices.y = vecCP[v.ctrlPointIndex].boneIndices[1];
-			temp.m_xmi4BoneIndices.z = vecCP[v.ctrlPointIndex].boneIndices[2];
-			temp.m_xmi4BoneIndices.w = vecCP[v.ctrlPointIndex].boneIndices[3];
-			temp.m_xmi4BoneWeights.x = vecCP[v.ctrlPointIndex].weights[0];
-			temp.m_xmi4BoneWeights.y = vecCP[v.ctrlPointIndex].weights[1];
-			temp.m_xmi4BoneWeights.z = vecCP[v.ctrlPointIndex].weights[2];
-			temp.m_xmi4BoneWeights.w = vecCP[v.ctrlPointIndex].weights[3];
+			temp.m_xmf3Pos				= vecCP[v.ctrlPointIndex].position;
+			temp.m_xmf3Normal			= v.normal;
+			temp.m_xmf3Tangent			= v.tangent;
+			temp.m_xmf2UV				= v.uv;
+			temp.m_xmi4BoneIndices.x	= vecCP[v.ctrlPointIndex].boneIndices[0];
+			temp.m_xmi4BoneIndices.y	= vecCP[v.ctrlPointIndex].boneIndices[1];
+			temp.m_xmi4BoneIndices.z	= vecCP[v.ctrlPointIndex].boneIndices[2];
+			temp.m_xmi4BoneIndices.w	= vecCP[v.ctrlPointIndex].boneIndices[3];
+			temp.m_xmi4BoneWeights.x	= vecCP[v.ctrlPointIndex].weights[0];
+			temp.m_xmi4BoneWeights.y	= vecCP[v.ctrlPointIndex].weights[1];
+			temp.m_xmi4BoneWeights.z	= vecCP[v.ctrlPointIndex].weights[2];
+			temp.m_xmi4BoneWeights.w	= vecCP[v.ctrlPointIndex].weights[3];
 			tempMesh.shape.push_back(temp);
 		}
 
@@ -458,14 +448,25 @@ AnimClip AnimClipDataImporter::Load(const char* filePath)
 	animClip.vecBone.resize(nBone);
 
 	for (int iBone = 0; iBone < nBone; iBone++) {
+		// toDresspose + toWorld * nKey
+		//int nFloat = 7 * (nKeys + 1);
+		//float* fIn = new float[nFloat];
+		//in.read((char*)fIn, sizeof(float) * nFloat);
+		//int offset = 0;
+		//animClip.vecBone[iBone].toDressposeInv = IImporter::GetMatrix(fIn, offset);
+		//for (int iKeys = 0; iKeys < nKeys; iKeys++) {
+		//	animClip.vecBone[iBone].keys.push_back(IImporter::GetKeyframe(fIn, offset));
+		//}
 
-		int nFloat = 7 * (nKeys + 1);
+		// toDresspose + toParent + local * nKey
+		in.read((char*)&animClip.vecBone[iBone].parentIdx, sizeof(int));
+
+		int nFloat = 7 * (nKeys + 2);
 		float* fIn = new float[nFloat];
 		in.read((char*)fIn, sizeof(float) * nFloat);
-
 		int offset = 0;
 		animClip.vecBone[iBone].toDressposeInv = IImporter::GetMatrix(fIn, offset);
-
+		animClip.vecBone[iBone].toParent = IImporter::GetMatrix(fIn, offset);
 		for (int iKeys = 0; iKeys < nKeys; iKeys++) {
 			animClip.vecBone[iBone].keys.push_back(IImporter::GetKeyframe(fIn, offset));
 		}

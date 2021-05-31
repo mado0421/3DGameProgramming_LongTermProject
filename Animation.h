@@ -10,7 +10,9 @@ struct CB_BONE_INFO {
 	XMFLOAT4X4 xmf4x4Transform[nMaxBone];
 };
 struct Bone {
-	XMFLOAT4X4 toDressposeInv;
+	XMFLOAT4X4	toDressposeInv;
+	XMFLOAT4X4	toParent;
+	int			parentIdx;
 	vector<Keyframe> keys;
 };
 
@@ -53,6 +55,8 @@ namespace AnimationCalculate {
 
 	void InterpolateKeyframe(Keyframe k0, Keyframe k1, Keyframe k2, Keyframe k3, float t, Keyframe& out);
 	XMFLOAT3 Interpolate(const XMFLOAT3 v0, const XMFLOAT3 v1, const XMFLOAT3 v2, const XMFLOAT3 v3, float t);
+
+
 };
 
 // Object한테 vecAnimation을 받아서 animTransform을 GPU에 보내주는 역할

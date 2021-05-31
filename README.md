@@ -595,3 +595,31 @@ AnimCalc::Blend() 를 수정했다.
 근데 지금은 Animation Clip을 보간해주는 것뿐이라 골반 흔들림 등에 영향을 받지 않는다.
 이동 애니메이션에 의해 골반이 이동하면 나머지 Bone들도 영향을 받아야 한다.
 Bone에 영향을 주는 식으로 해야 한다. 결과물을 보간하는 것만으론 의도한 결과물을 낼 수 없다.
+
+### 이번주 일정
+#### 21.05.31 - 21.06.06
+* Blend를 다른 방식으로 구현
+* Parser에서 toParent와 local Transfrom 행렬을 Export/Import 할 수 있게 구현
+
+### 2주 목표
+* Animation Blend
+
+### 2021.05.31
+
+기존 Blend 방식으론 기획 의도대로 작동하지 않음을 확인.
+수정을 위해 Blend 방식을 변경.
+각 Clip 별로 계산이 완료된 행렬들끼리 보간하는 것이 아니라 각 Clip들의 Local Transfrom끼리 보간을 하고 toWorld를 실시간으로 계산하는 방식으로 변경해야 함.
+
+toDressposeInv와 toWorld * nKey를 Clip에 저장하던 방식에서
+toDressposeInv, toParent, local Transform * nKey, parentIdx를 Clip에 저장하도록 변경하였다.
+toDressposeInv, toParent, parentIdx는 Bone Hierarchy Info로 따로 저장해야 하고
+local Transform만 Clip이 가지는게 맞지만 우선은 빠른 구현을 위해 Clip에 같이 담았다.
+
+본 프로젝트에서 import 하는 부분까지 문제 없이 구현하였고 겸사겸사 Parser의 세부사항을 수정하였다.
+
+Animation Blend에 대해 아는 내용이 적어 Unity를 참고하였다.
+Unity에서는 같은 Layer 내에서 State와 State 사이의 Transition이 있고, 이 때 1차적으로 Animation Blend가 된다.
+또한, Layer를 추가하여 동시에 여러 State를 적용할 수 있고, 이 때도 Layer끼리 Blend가 된다.
+이 때 필요한 weight와 mask 정보는 Layer가 갖는다.
+
+구현하려면 Transition 동안의 State와 Blend를 처리할 방법과 Layer Blend를 처리할 방법을 만들어야 한다.
