@@ -623,3 +623,16 @@ Unity에서는 같은 Layer 내에서 State와 State 사이의 Transition이 있
 이 때 필요한 weight와 mask 정보는 Layer가 갖는다.
 
 구현하려면 Transition 동안의 State와 Blend를 처리할 방법과 Layer Blend를 처리할 방법을 만들어야 한다.
+
+### 이번주 일정
+#### 21.06.07 - 21.06.13
+* 집에 생긴 일 때문에 정신 케어할 겸 일주일 휴식
+
+### 2주 목표
+* Animation Blend
+
+### 이번주 일정
+#### 21.06.14 - 21.06.20
+* 애니메이션 블렌드를 마저 끝내고 생각
+
+### 2주 목표
