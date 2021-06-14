@@ -9,8 +9,6 @@ class Mesh;
 class DebugWindowMesh;
 class MESH_DATA;
 
-using meshVec = vector<Mesh*>;
-
 class Object
 {
 	// Initialize
@@ -89,22 +87,18 @@ public:
 		ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 		D3D12_CPU_DESCRIPTOR_HANDLE& d3dCbvCPUDescriptorStartHandle,
 		D3D12_GPU_DESCRIPTOR_HANDLE& d3dCbvGPUDescriptorStartHandle);
-	~AnimatedObject() {
-		if (m_pToWorldTransform)	delete m_pToWorldTransform;
-		if (m_pAnimationTransform)	delete m_pAnimationTransform;
-		if (m_pBoneMask)			delete m_pBoneMask;
-	}
-
-	virtual void SetState(const char* strStateName);
-	virtual XMMATRIX const GetBoneMatrix(int boneIdx);
-
-	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList);
-	virtual void Update(float fTimeElapsed);
 
 public:
-	XMFLOAT4X4* m_pToWorldTransform		= NULL;
-	XMFLOAT4X4* m_pAnimationTransform	= NULL;
-	int*		m_pBoneMask				= NULL;
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual void Update(float fTimeElapsed);
+	virtual void Input(UCHAR* pKeyBuffer);
+
+public:
+	virtual XMMATRIX const GetBoneMatrix(int boneIdx);
+	
+	BoneHierarchy		m_boneHierarchyInfo;
+protected:
+	vector<StateLayer>	m_vecStateLayer;
 };
 
 class HumanoidObject : public AnimatedObject {
@@ -113,18 +107,4 @@ public:
 		ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 		D3D12_CPU_DESCRIPTOR_HANDLE& d3dCbvCPUDescriptorStartHandle,
 		D3D12_GPU_DESCRIPTOR_HANDLE& d3dCbvGPUDescriptorStartHandle);
-
-	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList);
-	virtual void Input(UCHAR* pKeyBuffer);
-	virtual void Update(float fTimeElapsed);
-	void AddSubState(const char* strStateName);
-	void AddAction(const char* strStateName);
-	void QuitSubState(const char* strStateName);
-	void QuitAction(const char* strStateName);
-
-private:
-	HumanoidState* m_pCurState = NULL;
-	unordered_map<string, HumanoidState*> m_uomStates;
-	unordered_map<string, HumanoidState*> m_vecSubStates;
-	unordered_map<string, HumanoidState*> m_vecActions;
 };

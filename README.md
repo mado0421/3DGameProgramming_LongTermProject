@@ -1,4 +1,5 @@
 
+
 # 종합설계
 > ### 큰 목표 우선순위
 > 1. 빛과 그림자 구현
@@ -628,11 +629,17 @@ Unity에서는 같은 Layer 내에서 State와 State 사이의 Transition이 있
 #### 21.06.07 - 21.06.13
 * 집에 생긴 일 때문에 정신 케어할 겸 일주일 휴식
 
-### 2주 목표
-* Animation Blend
-
 ### 이번주 일정
 #### 21.06.14 - 21.06.20
 * 애니메이션 블렌드를 마저 끝내고 생각
 
 ### 2주 목표
+* Animation Blend
+
+### 2021.06.14
+
+<img src="https://user-images.githubusercontent.com/21697638/121862792-22296b80-cd36-11eb-8f99-7245e43b4419.gif" width="70%" height="70%"></img>
+
+Layer 별로 BoneMask를 가지고 Blend하는데 성공.
+Layer 내에서 State 전환을 구현하면 될 듯.
+BoneMask를 어떻게 잘 조절해야 할 것 같다.

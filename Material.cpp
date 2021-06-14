@@ -12,7 +12,7 @@ Material::Material()
 
 void Material::Set(ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	gTextureMng.UseForShaderResource(diffuseMap.c_str(), pd3dCommandList, ROOTSIGNATURE_COLOR_TEXTURE);
-	gTextureMng.UseForShaderResource(normalMap.c_str(), pd3dCommandList, ROOTSIGNATURE_NORMAL_TEXTURE);
-	gTextureMng.UseForShaderResource(specularMap.c_str(), pd3dCommandList, ROOTSIGNATURE_DEPTH_TEXTURE);
+	g_TextureMng.UseForShaderResource(diffuseMap.c_str(), pd3dCommandList, ROOTSIGNATURE_COLOR_TEXTURE);
+	g_TextureMng.UseForShaderResource(normalMap.c_str(), pd3dCommandList, ROOTSIGNATURE_NORMAL_TEXTURE);
+	g_TextureMng.UseForShaderResource(specularMap.c_str(), pd3dCommandList, ROOTSIGNATURE_DEPTH_TEXTURE);
 }

@@ -168,7 +168,6 @@
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="Timer.h" />
-    <ClInclude Include="Transaction.h" />
     <ClInclude Include="Vertex.h" />
     <ClInclude Include="WindowsProject1.h" />
   </ItemGroup>
@@ -194,7 +193,6 @@
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="Timer.cpp" />
-    <ClCompile Include="Transaction.cpp" />
     <ClCompile Include="Vertex.cpp" />
     <ClCompile Include="WindowsProject1.cpp" />
   </ItemGroup>
@@ -241,6 +239,7 @@
     <None Include="Light.hlsli" />
   </ItemGroup>
   <ItemGroup>
+    <Text Include="Data\AssetsData.txt" />
     <Text Include="Data\LightData.txt" />
     <Text Include="Data\ObjectData.txt" />
   </ItemGroup>

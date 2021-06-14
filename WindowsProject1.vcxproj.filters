@@ -54,7 +54,7 @@
     <Filter Include="소스 파일\Object\Animation">
       <UniqueIdentifier>{acf69ee2-00be-4fa2-92c0-b2e8b3d0b538}</UniqueIdentifier>
     </Filter>
-    <Filter Include="소스 파일\Object\Mask">
+    <Filter Include="소스 파일\Object\Animation\Mask">
       <UniqueIdentifier>{e181df4a-4c7c-4a6d-9f16-0bab283289a2}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -129,11 +129,8 @@
     <ClInclude Include="State.h">
       <Filter>소스 파일\Object\Animation</Filter>
     </ClInclude>
-    <ClInclude Include="Transaction.h">
-      <Filter>소스 파일\Object\Animation</Filter>
-    </ClInclude>
     <ClInclude Include="Mask.h">
-      <Filter>소스 파일\Object\Mask</Filter>
+      <Filter>소스 파일\Object\Animation\Mask</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -195,11 +192,8 @@
     <ClCompile Include="State.cpp">
       <Filter>소스 파일\Object\Animation</Filter>
     </ClCompile>
-    <ClCompile Include="Transaction.cpp">
-      <Filter>소스 파일\Object\Animation</Filter>
-    </ClCompile>
     <ClCompile Include="Mask.cpp">
-      <Filter>소스 파일\Object\Mask</Filter>
+      <Filter>소스 파일\Object\Animation\Mask</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -237,5 +231,6 @@
   <ItemGroup>
     <Text Include="Data\ObjectData.txt" />
     <Text Include="Data\LightData.txt" />
+    <Text Include="Data\AssetsData.txt" />
   </ItemGroup>
 </Project>

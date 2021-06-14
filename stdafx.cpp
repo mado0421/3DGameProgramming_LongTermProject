@@ -5,10 +5,10 @@
 #include "Animation.h"
 #include "State.h"
 
-TextureManager	gTextureMng;
-ModelManager	gModelMng;
-MaterialManager gMaterialMng;
-AnimationManager gAnimMng;
+TextureManager	g_TextureMng;
+ModelManager	g_ModelMng;
+MaterialManager g_MaterialMng;
+AnimationManager g_AnimMng;
 int gTestInt = 0;
 AnimationUploader* g_AnimUploader;
 

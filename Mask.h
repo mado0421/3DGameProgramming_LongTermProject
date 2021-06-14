@@ -1,82 +1,69 @@
 #pragma once
 
-struct AffectedBoneInfo {
-	int stencil;
-	float weight;
-	AffectedBoneInfo()
-		: stencil(0)
-		, weight(0.0f)
-	{}
-	AffectedBoneInfo(int stc, float weight)
-		: stencil(stc)
-		, weight(weight)
-	{}
-};
-
-class BoneMask {
-public:
+struct BoneMask {
 	enum class PreDefined {
 		eUpperBody = 0,
-		eLowerBody = 1
+		eLowerBody = 1,
+		eNone
 	};
-	BoneMask(PreDefined option, const int stencil) {
+	BoneMask(PreDefined option = PreDefined::eNone) {
+		memset(weight, 0, sizeof(float) * 64);
 		switch (option)
 		{
 		case BoneMask::PreDefined::eUpperBody:
-
-			affectedBoneInfo[2]  = AffectedBoneInfo( stencil, 0.1f );	// Spine
-			affectedBoneInfo[3]  = AffectedBoneInfo( stencil, 0.4f );	// Spine1
-			affectedBoneInfo[4]  = AffectedBoneInfo( stencil, 0.9f );	// Spine2
-			affectedBoneInfo[5]  = AffectedBoneInfo( stencil, 1.0f );	// Neck
-			affectedBoneInfo[6]  = AffectedBoneInfo( stencil, 1.0f );	// L Clavicle
-			affectedBoneInfo[7]  = AffectedBoneInfo( stencil, 1.0f );	// L UpperArm
-			affectedBoneInfo[8]  = AffectedBoneInfo( stencil, 1.0f );	// L Forearm
-			affectedBoneInfo[9]  = AffectedBoneInfo( stencil, 1.0f );	// L Hand
-			affectedBoneInfo[10] = AffectedBoneInfo( stencil, 1.0f );	// L Finger0
-			affectedBoneInfo[11] = AffectedBoneInfo( stencil, 1.0f );	// L Finger01
-			affectedBoneInfo[13] = AffectedBoneInfo( stencil, 1.0f );	// L Finger1
-			affectedBoneInfo[14] = AffectedBoneInfo( stencil, 1.0f );	// L Finger11
-			affectedBoneInfo[16] = AffectedBoneInfo( stencil, 1.0f );	// L Finger2
-			affectedBoneInfo[17] = AffectedBoneInfo( stencil, 1.0f );	// L Finger21
-			affectedBoneInfo[19] = AffectedBoneInfo( stencil, 1.0f );	// L Finger3
-			affectedBoneInfo[20] = AffectedBoneInfo( stencil, 1.0f );	// L Finger31
-			affectedBoneInfo[22] = AffectedBoneInfo( stencil, 1.0f );	// L Finger4
-			affectedBoneInfo[23] = AffectedBoneInfo( stencil, 1.0f );	// L Finger41
-			affectedBoneInfo[25] = AffectedBoneInfo( stencil, 1.0f );	// R Clavicle
-			affectedBoneInfo[26] = AffectedBoneInfo( stencil, 1.0f );	// R UpperArm
-			affectedBoneInfo[27] = AffectedBoneInfo( stencil, 1.0f );	// R Forearm
-			affectedBoneInfo[28] = AffectedBoneInfo( stencil, 1.0f );	// R Hand
-			affectedBoneInfo[29] = AffectedBoneInfo( stencil, 1.0f );	// R Finger0
-			affectedBoneInfo[30] = AffectedBoneInfo( stencil, 1.0f );	// R Finger01
-			affectedBoneInfo[32] = AffectedBoneInfo( stencil, 1.0f );	// R Finger1
-			affectedBoneInfo[33] = AffectedBoneInfo( stencil, 1.0f );	// R Finger11
-			affectedBoneInfo[35] = AffectedBoneInfo( stencil, 1.0f );	// R Finger2
-			affectedBoneInfo[36] = AffectedBoneInfo( stencil, 1.0f );	// R Finger21
-			affectedBoneInfo[38] = AffectedBoneInfo( stencil, 1.0f );	// R Finger3
-			affectedBoneInfo[39] = AffectedBoneInfo( stencil, 1.0f );	// R Finger31
-			affectedBoneInfo[41] = AffectedBoneInfo( stencil, 1.0f );	// R Finger4
-			affectedBoneInfo[42] = AffectedBoneInfo( stencil, 1.0f );	// R Finger41
-			affectedBoneInfo[44] = AffectedBoneInfo( stencil, 1.0f );	// Head
+			weight[2]  = 0.1f ;	// Spine
+			weight[3]  = 0.4f ;	// Spine1
+			weight[4]  = 0.9f ;	// Spine2
+			weight[5]  = 1.0f ;	// Neck
+			weight[6]  = 1.0f ;	// L Clavicle
+			weight[7]  = 1.0f ;	// L UpperArm
+			weight[8]  = 1.0f ;	// L Forearm
+			weight[9]  = 1.0f ;	// L Hand
+			weight[10] = 1.0f ;	// L Finger0
+			weight[11] = 1.0f ;	// L Finger01
+			weight[13] = 1.0f ;	// L Finger1
+			weight[14] = 1.0f ;	// L Finger11
+			weight[16] = 1.0f ;	// L Finger2
+			weight[17] = 1.0f ;	// L Finger21
+			weight[19] = 1.0f ;	// L Finger3
+			weight[20] = 1.0f ;	// L Finger31
+			weight[22] = 1.0f ;	// L Finger4
+			weight[23] = 1.0f ;	// L Finger41
+			weight[25] = 1.0f ;	// R Clavicle
+			weight[26] = 1.0f ;	// R UpperArm
+			weight[27] = 1.0f ;	// R Forearm
+			weight[28] = 1.0f ;	// R Hand
+			weight[29] = 1.0f ;	// R Finger0
+			weight[30] = 1.0f ;	// R Finger01
+			weight[32] = 1.0f ;	// R Finger1
+			weight[33] = 1.0f ;	// R Finger11
+			weight[35] = 1.0f ;	// R Finger2
+			weight[36] = 1.0f ;	// R Finger21
+			weight[38] = 1.0f ;	// R Finger3
+			weight[39] = 1.0f ;	// R Finger31
+			weight[41] = 1.0f ;	// R Finger4
+			weight[42] = 1.0f ;	// R Finger41
+			weight[44] = 1.0f ;	// Head
 
 			break;
 		case BoneMask::PreDefined::eLowerBody:
+			weight[1]  = 0.9f ;	// Pelvis
+			weight[2]  = 0.4f ;	// Spine
+			weight[3]  = 0.1f ;	// Spine1
+			weight[46] = 1.0f ;	// L Thigh
+			weight[47] = 1.0f ;	// L Calf
+			weight[48] = 1.0f ;	// L Foot
+			weight[49] = 1.0f ;	// L Toe0
+			weight[51] = 1.0f ;	// R Thigh
+			weight[52] = 1.0f ;	// R Calf
+			weight[53] = 1.0f ;	// R Foot
+			weight[54] = 1.0f ;	// R Toe0
 
-			affectedBoneInfo[1]	 = AffectedBoneInfo( stencil, 0.9f );	// Pelvis
-			affectedBoneInfo[2]	 = AffectedBoneInfo( stencil, 0.4f );	// Spine
-			affectedBoneInfo[3]	 = AffectedBoneInfo( stencil, 0.1f );	// Spine1
-			affectedBoneInfo[46] = AffectedBoneInfo( stencil, 1.0f );	// L Thigh
-			affectedBoneInfo[47] = AffectedBoneInfo( stencil, 1.0f );	// L Calf
-			affectedBoneInfo[48] = AffectedBoneInfo( stencil, 1.0f );	// L Foot
-			affectedBoneInfo[49] = AffectedBoneInfo( stencil, 1.0f );	// L Toe0
-			affectedBoneInfo[51] = AffectedBoneInfo( stencil, 1.0f );	// R Thigh
-			affectedBoneInfo[52] = AffectedBoneInfo( stencil, 1.0f );	// R Calf
-			affectedBoneInfo[53] = AffectedBoneInfo( stencil, 1.0f );	// R Foot
-			affectedBoneInfo[54] = AffectedBoneInfo( stencil, 1.0f );	// R Toe0
 			break;
 		default:
 			break;
 		}
 	}
 
-	AffectedBoneInfo affectedBoneInfo[64];
+	float weight[64];
 };

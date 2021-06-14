@@ -365,7 +365,7 @@ void MaterialDataImporter::Load(const char* filePath)
 				else if (token.compare("s") == 0) { temp.specularMap = IImporter::GetPath(ss); }
 				else if (token.compare("f") == 0) { temp.fresnelFactor = IImporter::GetFloat3(ss); }
 			}
-			gMaterialMng.AddMaterial(temp);
+			g_MaterialMng.AddMaterial(temp);
 		}
 	}
 
@@ -396,20 +396,20 @@ void AssetListDataImporter::Load(
 		getline(ss, name, '.');
 		getline(ss, type, '\n');
 		if (type.compare("dds") == 0) {
-			if (gTextureMng.IsAleadyExist(name.c_str())) continue;
-			gTextureMng.LoadFromFile(name.c_str(), pd3dDevice, pd3dCommandList, srvCpuHandle, srvGpuHandle);
+			if (g_TextureMng.IsAleadyExist(name.c_str())) continue;
+			g_TextureMng.LoadFromFile(name.c_str(), pd3dDevice, pd3dCommandList, srvCpuHandle, srvGpuHandle);
 		}
 		if (type.compare("obj") == 0) {
-			if (gModelMng.IsAleadyExist(name.c_str())) continue;
-			gModelMng.AddModel(name.c_str(), pd3dDevice, pd3dCommandList);
+			if (g_ModelMng.IsAleadyExist(name.c_str())) continue;
+			g_ModelMng.AddModel(name.c_str(), pd3dDevice, pd3dCommandList);
 		}
 		if (type.compare("mm") == 0) {
-			if (gModelMng.IsAleadyExist(name.c_str())) continue;
-			gModelMng.AddFBXModel(name.c_str(), pd3dDevice, pd3dCommandList);
+			if (g_ModelMng.IsAleadyExist(name.c_str())) continue;
+			g_ModelMng.AddFBXModel(name.c_str(), pd3dDevice, pd3dCommandList);
 		}
 		if (type.compare("mac") == 0) {
-			if (gAnimMng.IsAleadyExist(name.c_str())) continue;
-			gAnimMng.AddAnimClip(name.c_str(), pd3dDevice, pd3dCommandList);
+			if (g_AnimMng.IsAleadyExist(name.c_str())) continue;
+			g_AnimMng.AddAnimClip(name.c_str(), pd3dDevice, pd3dCommandList);
 		}
 	}
 	return;
