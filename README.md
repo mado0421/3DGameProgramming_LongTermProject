@@ -643,3 +643,20 @@ Unity에서는 같은 Layer 내에서 State와 State 사이의 Transition이 있
 Layer 별로 BoneMask를 가지고 Blend하는데 성공.
 Layer 내에서 State 전환을 구현하면 될 듯.
 BoneMask를 어떻게 잘 조절해야 할 것 같다.
+
+### 이번주 일정
+#### 21.06.21 - 21.06.27
+* 블렌드 끝내기
+
+### 2021.06.21
+막연하게 '블렌드 끝내기' 라고 해두니 이게 끝인지 아닌지 감이 안 잡힌다.
+따라서 다음의 기능들을 구현하는 것으로 정정한다.
+1. Move Layer는 Default State에서 보행이동기반 블렌드. (속도에 따라)
+2. Action Layer는 State들 간에 Transition을 구현. (Transition 중간에 보간)
+
+<img src="https://user-images.githubusercontent.com/21697638/122705189-2e5e7d00-d290-11eb-9f99-94095959383f.gif" width="70%" height="70%"></img>
+
+Move Layer에서 '앞으로', '오른쪽 앞으로' 클립 블렌드.
+Action Layer에서 '조준' 클립 블렌드.
+
+이젠 얇아지거나 하는 문제가 없다.

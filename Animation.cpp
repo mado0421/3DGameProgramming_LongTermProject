@@ -100,26 +100,36 @@ void AnimationCalculate::GetFrameIdxAndNormalizedTime(AnimClip* clip, const floa
 		}
 	}
 }
-XMMATRIX AnimationCalculate::GetLocalTransform(AnimClip* clip, const int boneIdx, const float fNormalizedTime, const XMINT4 frameIdx)
+//XMMATRIX AnimationCalculate::GetLocalTransform(AnimClip* clip, const int boneIdx, const float fNormalizedTime, const XMINT4 frameIdx)
+//{
+//	if (0 == fNormalizedTime) 
+//		return XMMatrixMultiply(
+//			XMMatrixRotationQuaternion(XMLoadFloat4(&clip->vecBone[boneIdx].keys[frameIdx.x].xmf4QuatRotation)),
+//			XMMatrixTranslationFromVector(XMLoadFloat3(&clip->vecBone[boneIdx].keys[frameIdx.x].xmf3Translation)));
+//	
+//	Keyframe temp;
+//
+//	AnimationCalculate::InterpolateKeyframe(
+//		clip->vecBone[boneIdx].keys[frameIdx.x],
+//		clip->vecBone[boneIdx].keys[frameIdx.y],
+//		clip->vecBone[boneIdx].keys[frameIdx.z],
+//		clip->vecBone[boneIdx].keys[frameIdx.w],
+//		fNormalizedTime,
+//		temp);
+//
+//	return XMMatrixMultiply(
+//		XMMatrixRotationQuaternion(XMLoadFloat4(&temp.xmf4QuatRotation)),
+//		XMMatrixTranslationFromVector(XMLoadFloat3(&temp.xmf3Translation)));
+//}
+XMVECTOR AnimationCalculate::GetLocalTransform(AnimClip* clip, const int boneIdx, const float fNormalizedTime, const XMINT4 frameIdx)
 {
-	if (0 == fNormalizedTime) 
-		return XMMatrixMultiply(
-			XMMatrixRotationQuaternion(XMLoadFloat4(&clip->vecBone[boneIdx].keys[frameIdx.x].xmf4QuatRotation)),
-			XMMatrixTranslationFromVector(XMLoadFloat3(&clip->vecBone[boneIdx].keys[frameIdx.x].xmf3Translation)));
-	
-	Keyframe temp;
+	if (0 == fNormalizedTime)
+		return XMLoadFloat4(&clip->vecBone[boneIdx].keys[frameIdx.x].xmf4QuatRotation);
 
-	AnimationCalculate::InterpolateKeyframe(
-		clip->vecBone[boneIdx].keys[frameIdx.x],
-		clip->vecBone[boneIdx].keys[frameIdx.y],
-		clip->vecBone[boneIdx].keys[frameIdx.z],
-		clip->vecBone[boneIdx].keys[frameIdx.w],
-		fNormalizedTime,
-		temp);
-
-	return XMMatrixMultiply(
-		XMMatrixRotationQuaternion(XMLoadFloat4(&temp.xmf4QuatRotation)),
-		XMMatrixTranslationFromVector(XMLoadFloat3(&temp.xmf3Translation)));
+	return XMQuaternionSlerp(
+		XMLoadFloat4(&clip->vecBone[boneIdx].keys[frameIdx.y].xmf4QuatRotation), 
+		XMLoadFloat4(&clip->vecBone[boneIdx].keys[frameIdx.z].xmf4QuatRotation), 
+		fNormalizedTime);
 }
 void AnimationCalculate::AnimateLocalTransform(AnimatedObject* pObj, const float fTime, ClipPair vecClipPair, BoneMask* pMask)
 {
@@ -138,11 +148,11 @@ void AnimationCalculate::AnimateLocalTransform(AnimatedObject* pObj, const float
 	*/
 	pObj->m_boneHierarchyInfo.local;
 
-	XMMATRIX local[64];
+	XMVECTOR local[64];
 
 	// XMMATRIX init
 	for (int i = 0; i < 64; i++) 
-		local[i] = XMLoadFloat4x4(&pObj->m_boneHierarchyInfo.local[i]);
+		local[i] = XMLoadFloat4(&pObj->m_boneHierarchyInfo.local[i]);
 
 	// 1. Mask
 	if (pMask) {
@@ -174,7 +184,7 @@ void AnimationCalculate::AnimateLocalTransform(AnimatedObject* pObj, const float
 	}
 
 	for (int i = 0; i < 64; i++)
-		XMStoreFloat4x4(&pObj->m_boneHierarchyInfo.local[i], local[i]);
+		XMStoreFloat4(&pObj->m_boneHierarchyInfo.local[i], local[i]);
 }
 void AnimationCalculate::InterpolateKeyframe(Keyframe k0, Keyframe k1, Keyframe k2, Keyframe k3, float t, Keyframe& out)
 {
@@ -196,16 +206,17 @@ void AnimationCalculate::MakeToWorldTransform(BoneHierarchy& bh)
 
 	for (int i = 0; i < bh.nBone; i++) {
 		if (-1 != bh.parentIdx[i]) {
+			
 			XMStoreFloat4x4(&bh.toWorld[i],
 				XMMatrixMultiply( 
-					XMMatrixMultiply(XMLoadFloat4x4(&bh.local[i]), XMLoadFloat4x4(&bh.toParent[i])),
+					XMMatrixMultiply(XMMatrixRotationQuaternion(XMLoadFloat4(&bh.local[i])), XMLoadFloat4x4(&bh.toParent[i])),
 					XMLoadFloat4x4(&bh.toWorld[bh.parentIdx[i]])
 				)
 			);
 		}
 		else {
 			XMStoreFloat4x4(&bh.toWorld[i],
-				XMMatrixMultiply(XMLoadFloat4x4(&bh.local[i]), XMLoadFloat4x4(&bh.toParent[i]))
+				XMMatrixMultiply(XMMatrixRotationQuaternion(XMLoadFloat4(&bh.local[i])), XMLoadFloat4x4(&bh.toParent[i]))
 			);
 		}
 	}

@@ -32,7 +32,7 @@ struct BoneHierarchy {
 	XMFLOAT4X4	toDressposeInv[64];
 	XMFLOAT4X4	toParent[64];
 	XMFLOAT4X4	toWorld[64];
-	XMFLOAT4X4	local[64];
+	XMFLOAT4	local[64];
 	int			parentIdx[64];
 	int			nBone;
 
@@ -40,7 +40,7 @@ struct BoneHierarchy {
 		memset(toDressposeInv, NULL, sizeof(XMFLOAT4X4) * 64);
 		memset(toParent, NULL, sizeof(XMFLOAT4X4) * 64);
 		memset(toWorld, NULL, sizeof(XMFLOAT4X4) * 64);
-		memset(local, NULL, sizeof(XMFLOAT4X4) * 64);
+		memset(local, NULL, sizeof(XMFLOAT4) * 64);
 		memset(parentIdx, NULL, sizeof(int) * 64);
 		nBone = 0;
 	}
@@ -62,7 +62,8 @@ private:
 // Object한테 vecAnimation을 받아서 toWorld와 animTransform에 Blend 해주는 역할
 namespace AnimationCalculate {
 	void GetFrameIdxAndNormalizedTime(AnimClip* clip, const float fTime, float& OutfNormalizedTime, XMINT4& OutIdx);
-	XMMATRIX GetLocalTransform(AnimClip* clip, const int boneIdx, const float fNormalizedTime, const XMINT4 frameIdx);
+	//XMMATRIX GetLocalTransform(AnimClip* clip, const int boneIdx, const float fNormalizedTime, const XMINT4 frameIdx);
+	XMVECTOR GetLocalTransform(AnimClip* clip, const int boneIdx, const float fNormalizedTime, const XMINT4 frameIdx);
 	void AnimateLocalTransform(AnimatedObject* pObj, const float fTime, ClipPair vecClipPair, BoneMask* pMask = NULL);
 
 	void InterpolateKeyframe(Keyframe k0, Keyframe k1, Keyframe k2, Keyframe k3, float t, Keyframe& out);
