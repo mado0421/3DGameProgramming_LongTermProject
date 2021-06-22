@@ -660,3 +660,19 @@ Move Layer에서 '앞으로', '오른쪽 앞으로' 클립 블렌드.
 Action Layer에서 '조준' 클립 블렌드.
 
 이젠 얇아지거나 하는 문제가 없다.
+
+### 2021.06.22
+
+<img src="https://user-images.githubusercontent.com/21697638/122872786-e9a81400-d36b-11eb-8a9a-42d9901fbedc.gif" width="70%" height="70%"></img>
+
+	구현사항
+	- Layer Blend(weight를 기반으로 하는)
+	- State 전환에 따른 AnimClip 변화
+	- State Transition 도중의 부드러운 Blend
+	- Movement Layer의 보행 이동 기반 Blend
+	
+	개발 도중 겪은 내용들
+	- Blend를 하지 않는 단순 Animation 재생이라면 시간별 toWorld와 toDressposeInv만 가져도 계산할 수 있다.
+	- 이미 계산된 행렬을 가지고 계산하는 것은 모델이 얇아지거나 할 수 있다. (이유까지는 아직 잘 모르겠다)
+	- Blend를 목표로 한다면 시간별 local(특히 rotation 값을 갖고 있는 quaternion), BoneHierarchy의 toDressposeInv, toParent, parentIdx 등이 필요하다.
+	- Quaternion은 Blend 계산에 적합하다.

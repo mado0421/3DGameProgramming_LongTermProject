@@ -145,18 +145,18 @@ void AnimatedObject::Update(float fTimeElapsed)
 
 	memset(&m_boneHierarchyInfo.local, NULL, sizeof(XMFLOAT4) * 64);	// 이거 안해주면
 
-	for (int i = 0; i < m_vecStateLayer.size(); i++)
-		m_vecStateLayer[i].Update(fTimeElapsed);
+	for (int i = 0; i < m_vecpStateLayer.size(); i++)
+		m_vecpStateLayer[i]->Update(fTimeElapsed);
 
-	for (int i = 0; i < m_vecStateLayer.size(); i++)
-		m_vecStateLayer[i].Animate(this);
+	for (int i = 0; i < m_vecpStateLayer.size(); i++)
+		m_vecpStateLayer[i]->Animate(this);
 
 	AnimationCalculate::MakeToWorldTransform(m_boneHierarchyInfo); 
 }
 void AnimatedObject::Input(UCHAR* pKeyBuffer)
 {
-	for (int i = 0; i < m_vecStateLayer.size(); i++)
-		m_vecStateLayer[i].Input(pKeyBuffer);
+	for (int i = 0; i < m_vecpStateLayer.size(); i++)
+		m_vecpStateLayer[i]->Input(pKeyBuffer);
 }
 
 HumanoidObject::HumanoidObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, D3D12_CPU_DESCRIPTOR_HANDLE& d3dCbvCPUDescriptorStartHandle, D3D12_GPU_DESCRIPTOR_HANDLE& d3dCbvGPUDescriptorStartHandle)
@@ -164,17 +164,13 @@ HumanoidObject::HumanoidObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 {
 	m_boneHierarchyInfo = g_AnimMng.GetBoneHierarchyFromAnimClip("Humanoid_Idle");
 
-	{
-		StateHumanoidIdle* moveIdle = new StateHumanoidIdle(this);
-		StateLayer tempLayer;
-		tempLayer.ChangeStateTo(moveIdle);
-		m_vecStateLayer.push_back(tempLayer);
-	}
-	{
-		StateHumanoidAim* attackAim = new StateHumanoidAim(this);
-		StateLayer tempLayer;
-		tempLayer.ChangeStateTo(attackAim);
-		tempLayer.m_pMask = new BoneMask(BoneMask::PreDefined::eUpperBody);
-		m_vecStateLayer.push_back(tempLayer);
-	}
+	StateLayer* MovementLayer = new StateLayer();
+	StateLayer* ActionLayer = new StateLayer();
+
+	MovementLayer->ChangeStateTo(new StateHumanoidIdle(this, MovementLayer));
+	ActionLayer->ChangeStateTo(new StateHumanoidStand(this, ActionLayer));
+	ActionLayer->m_pMask = new BoneMask(BoneMask::PreDefined::eUpperBody);
+
+	m_vecpStateLayer.push_back(MovementLayer);
+	m_vecpStateLayer.push_back(ActionLayer);
 }

@@ -98,7 +98,7 @@ public:
 	
 	BoneHierarchy		m_boneHierarchyInfo;
 protected:
-	vector<StateLayer>	m_vecStateLayer;
+	vector<StateLayer*>	m_vecpStateLayer;
 };
 
 class HumanoidObject : public AnimatedObject {

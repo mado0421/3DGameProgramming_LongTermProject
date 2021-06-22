@@ -2,10 +2,10 @@
 
 class AnimatedObject;
 class BoneMask;
+class State;
+class StateLayer;
 
 using ClipPair = vector<pair<string, float>>;
-
-class State;
 
 struct Transition {
 	float	m_fTime = 0;
@@ -18,33 +18,26 @@ struct Transition {
 
 class State {
 public:
-	State(const char* animClipName, AnimatedObject* pObj) 
-		:m_strBaseAnimClip(animClipName), m_fTime(0), m_pObj(pObj) {}
+	State(AnimatedObject* pObj, StateLayer* pLayer)
+		:m_fTime(0), m_pObj(pObj), m_pLayer(pLayer) {}
 
 public:
+	virtual void Enter() { cout << "Enter\n"; }
+	virtual void Leave() { cout << "Leave\n"; }
 	virtual void Update(float fTimeElapsed) {}
 	virtual void Input( UCHAR* pKeyBuffer) {}
-	virtual ClipPair GetAnimateClipPair() { 
-		return ClipPair();
-	}
 	virtual XMVECTOR* GetRotation() { return NULL; }
 
 public:
-	virtual void Interrupted() {
-		if (m_pCurTransition && m_pCurTransition->m_bInterruptedCancel) {
-			delete m_pCurTransition;
-			m_pCurTransition = NULL;
-		}
-	}
-	void StartTransition(Transition* t) { m_pCurTransition = t; }
-
-public:
-	float		m_fTime;
+	float				m_fTime;
 protected:
-	vector<Transition*> m_pvTransition;
-	Transition*			m_pCurTransition = NULL;
-	string				m_strBaseAnimClip;
+	StateLayer*			m_pLayer = NULL;
 	AnimatedObject*		m_pObj = NULL;
+
+public: // for Test
+	float	m_fTimeToTransition;
+	bool	m_bTransition = false;
+	float	m_fDelay;
 };
 
 class StateLayer {
@@ -52,7 +45,6 @@ public:
 	void Update(float fTimeElapsed);
 	void Input(UCHAR* pKeyBuffer);
 	void Animate(AnimatedObject* pObj);
-	void Interrupted();
 	void ChangeStateTo(State* pState);
 
 public:
@@ -60,7 +52,7 @@ public:
 	BoneMask*	m_pMask = NULL;
 
 private:
-	State*		m_pState;
+	State*		m_pState = NULL;
 };
 
 /*
@@ -103,36 +95,40 @@ private:
 */
 class StateHumanoidIdle : public State {
 public:
-	StateHumanoidIdle(AnimatedObject* pObj);
+	StateHumanoidIdle(AnimatedObject* pObj, StateLayer* pLayer);
 
 public:
+	virtual void Enter() {}
+	virtual void Leave() {}
 	virtual void Update(float fTimeElapsed);
 	virtual void Input(UCHAR* pKeyBuffer);
-	virtual ClipPair GetAnimateClipPair();
 	virtual XMVECTOR* GetRotation();
 private:
 	XMFLOAT3	m_xmf3InputDir = XMFLOAT3(0, 0, 0);
 	float		m_fDragFactor = 1.0f;
 };
 
-//class StateHumanoidStand : public State {
-//public:
-//	StateHumanoidStand();
-//
-//public:
-//	virtual void Update(AnimatedObject* pObj, float fTimeElapsed);
-//	virtual void Input(AnimatedObject* pObj, UCHAR* pKeyBuffer);
-//	virtual ClipPair GetAnimateClipPair();
-//};
-//
-class StateHumanoidAim : public State {
+class StateHumanoidStand : public State {
 public:
-	StateHumanoidAim(AnimatedObject* pObj);
+	StateHumanoidStand(AnimatedObject* pObj, StateLayer* pLayer);
 
 public:
+	virtual void Enter() {}
+	virtual void Leave() {}
 	virtual void Update(float fTimeElapsed);
 	virtual void Input(UCHAR* pKeyBuffer);
-	virtual ClipPair GetAnimateClipPair();
+	virtual XMVECTOR* GetRotation();
+};
+
+class StateHumanoidAim : public State {
+public:
+	StateHumanoidAim(AnimatedObject* pObj, StateLayer* pLayer);
+
+public:
+	virtual void Enter() {}
+	virtual void Leave() {}
+	virtual void Update(float fTimeElapsed);
+	virtual void Input(UCHAR* pKeyBuffer);
 	virtual XMVECTOR* GetRotation();
 };
 
