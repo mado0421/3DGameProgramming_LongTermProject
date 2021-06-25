@@ -70,7 +70,12 @@ void TempTexture::SetByDepthBuffer(
 	m_d3dSrvGPUDescriptorHandle = srvGpuHandle;
 	srvGpuHandle.ptr += gnCbvSrvDescriptorIncrementSize;
 }
-void TempTexture::SetByDepthBuffer(ID3D12Device* pd3dDevice, UINT width, UINT height, D3D12_CPU_DESCRIPTOR_HANDLE& dsvCpuHandle, D3D12_CPU_DESCRIPTOR_HANDLE& srvCpuHandle, D3D12_GPU_DESCRIPTOR_HANDLE& srvGpuHandle, UINT nArraySize)
+void TempTexture::SetByDepthBuffer(
+	ID3D12Device* pd3dDevice, UINT width, UINT height, 
+	D3D12_CPU_DESCRIPTOR_HANDLE& dsvCpuHandle,
+	D3D12_CPU_DESCRIPTOR_HANDLE& srvCpuHandle, 
+	D3D12_GPU_DESCRIPTOR_HANDLE& srvGpuHandle, 
+	UINT nArraySize)
 {
 	if (!IsTexTypeIsNone()) { assert(!"이미 다른 용도로 만든 텍스처를 깊이버퍼 용도로 재설정 하려 하였습니다.\n"); return; }
 	m_TextureType = TextureType::DSV_SRV;
@@ -136,7 +141,11 @@ void TempTexture::SetByDepthBuffer(ID3D12Device* pd3dDevice, UINT width, UINT he
 	m_d3dSrvGPUDescriptorHandle = srvGpuHandle;
 	srvGpuHandle.ptr += gnCbvSrvDescriptorIncrementSize;
 }
-void TempTexture::SetByCubeDepthBuffer(ID3D12Device* pd3dDevice, UINT width, UINT height, D3D12_CPU_DESCRIPTOR_HANDLE& dsvCpuHandle, D3D12_CPU_DESCRIPTOR_HANDLE& srvCpuHandle, D3D12_GPU_DESCRIPTOR_HANDLE& srvGpuHandle)
+void TempTexture::SetByCubeDepthBuffer(
+	ID3D12Device* pd3dDevice, UINT width, UINT height, 
+	D3D12_CPU_DESCRIPTOR_HANDLE& dsvCpuHandle,
+	D3D12_CPU_DESCRIPTOR_HANDLE& srvCpuHandle,
+	D3D12_GPU_DESCRIPTOR_HANDLE& srvGpuHandle)
 {
 	if (!IsTexTypeIsNone()) { assert(!"이미 다른 용도로 만든 텍스처를 깊이버퍼 용도로 재설정 하려 하였습니다.\n"); return; }
 	m_TextureType = TextureType::DSV_SRV;
@@ -249,6 +258,74 @@ void TempTexture::SetByRenderTarget(
 	m_d3dSrvGPUDescriptorHandle = srvGpuHandle;
 	srvGpuHandle.ptr += gnCbvSrvDescriptorIncrementSize;
 }
+void TempTexture::SetByUnorderedAccessTexture(
+	ID3D12Device* pd3dDevice, UINT width, UINT height, 
+	D3D12_CPU_DESCRIPTOR_HANDLE& uavCpuHandle,
+	D3D12_GPU_DESCRIPTOR_HANDLE& uavGpuHandle,
+	D3D12_CPU_DESCRIPTOR_HANDLE& srvCpuHandle,
+	D3D12_GPU_DESCRIPTOR_HANDLE& srvGpuHandle)
+{
+	if (!IsTexTypeIsNone()) { assert(!"이미 다른 용도로 만든 텍스처를 후처리 텍스처 용도로 재설정 하려 하였습니다.\n"); return; }
+	m_TextureType = TextureType::UAV_SRV;
+
+	HRESULT hr = E_FAIL;
+
+	
+	//	후처리 텍스처는 SRV와 UAV 둘 다 만들어줘야 함.
+	D3D12_RESOURCE_DESC desc = {};
+	desc.Width = width;
+	desc.Height = height;
+	desc.MipLevels = 1;
+	desc.DepthOrArraySize = 1;
+	desc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	desc.Flags = D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
+	desc.SampleDesc.Count = 1;
+	desc.SampleDesc.Quality = 0;
+	desc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+	desc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
+	desc.Alignment = 0;
+
+	D3D12_HEAP_PROPERTIES hp;
+	hp.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+	hp.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+	hp.CreationNodeMask = 1;
+	hp.VisibleNodeMask = 1;
+	hp.Type = D3D12_HEAP_TYPE_DEFAULT;
+
+	hr = pd3dDevice->CreateCommittedResource(
+		&hp, D3D12_HEAP_FLAG_NONE, &desc, D3D12_RESOURCE_STATE_COMMON,
+		nullptr, IID_PPV_ARGS(&m_pd3dTexture));
+
+	D3D12_UNORDERED_ACCESS_VIEW_DESC uavDesc = {};	// = {}; 를 달아주니까 갑자기 됨
+	uavDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	uavDesc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2D;
+	uavDesc.Texture2D.MipSlice = 0;
+
+	//pd3dDevice->CreateUnorderedAccessView(m_pd3dTexture, nullptr, &uavDesc, uavCpuHandle);
+	//m_d3dUavCPUDescriptorHandle = uavCpuHandle;
+	//uavCpuHandle.ptr += gnCbvSrvDescriptorIncrementSize;
+
+	//m_d3dUavGPUDescriptorHandle = uavGpuHandle;
+	//uavGpuHandle.ptr += gnCbvSrvDescriptorIncrementSize;
+
+	pd3dDevice->CreateUnorderedAccessView(m_pd3dTexture, nullptr, &uavDesc, srvCpuHandle);
+	m_d3dUavCPUDescriptorHandle = srvCpuHandle;
+	srvCpuHandle.ptr += gnCbvSrvDescriptorIncrementSize;
+
+	m_d3dUavGPUDescriptorHandle = srvGpuHandle;
+	srvGpuHandle.ptr += gnCbvSrvDescriptorIncrementSize;
+
+	D3D12_RESOURCE_DESC d3dResourceDesc = m_pd3dTexture->GetDesc();
+
+	D3D12_SHADER_RESOURCE_VIEW_DESC d3dShaderResourceViewDesc
+		= GetShaderResourceViewDesc(d3dResourceDesc, RESOURCE_TEXTURE2D);
+
+	pd3dDevice->CreateShaderResourceView(m_pd3dTexture, &d3dShaderResourceViewDesc, srvCpuHandle);
+	srvCpuHandle.ptr += gnCbvSrvDescriptorIncrementSize;
+
+	m_d3dSrvGPUDescriptorHandle = srvGpuHandle;
+	srvGpuHandle.ptr += gnCbvSrvDescriptorIncrementSize;
+}
 void TempTexture::LoadFromFile(
 	const wchar_t* pszFileName,
 	ID3D12Device* pd3dDevice,
@@ -288,12 +365,24 @@ D3D12_CPU_DESCRIPTOR_HANDLE TempTexture::GetRtvCPUHandle() {
 	if (m_TextureType != TextureType::RTV_SRV) assert(!"렌더타겟 용도로 설정되지 않은 텍스처입니다.\n");
 	return m_d3dRtvCPUDescriptorHandle;
 }
+D3D12_CPU_DESCRIPTOR_HANDLE TempTexture::GetUavCPUHandle()
+{
+	if (m_TextureType != TextureType::UAV_SRV) assert(!"후처리 용도로 설정되지 않은 텍스처입니다.\n");
+	return m_d3dUavCPUDescriptorHandle;
+}
+D3D12_GPU_DESCRIPTOR_HANDLE TempTexture::GetUavGPUHandle()
+{
+	if (m_TextureType != TextureType::UAV_SRV) assert(!"후처리 용도로 설정되지 않은 텍스처입니다.\n");
+	return m_d3dUavGPUDescriptorHandle;
+}
 
 /*========================================================================
 * Texture Manager
 *=======================================================================*/
 TextureManager::TextureManager()
 	: m_pd3dDsvDescriptorHeap(nullptr)
+	, m_pd3dRtvDescriptorHeap(nullptr)
+	, m_pd3dUavDescriptorHeap(nullptr)
 {
 }
 void TextureManager::Initialize(ID3D12Device* pd3dDevice)
@@ -301,20 +390,16 @@ void TextureManager::Initialize(ID3D12Device* pd3dDevice)
 	m_uomTextures.clear();
 	if (m_pd3dDsvDescriptorHeap) m_pd3dDsvDescriptorHeap->Release();
 	if (m_pd3dRtvDescriptorHeap) m_pd3dRtvDescriptorHeap->Release();
+	if (m_pd3dUavDescriptorHeap) m_pd3dUavDescriptorHeap->Release();
 
 	CreateDsvDescriptorHeap(pd3dDevice);
 	CreateRtvDescriptorHeap(pd3dDevice);
+	CreateUavDescriptorHeap(pd3dDevice);
 	m_d3dDsvCPUDescriptorHandle = m_pd3dDsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
 	m_d3dRtvCPUDescriptorHandle = m_pd3dRtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+	m_d3dUavCPUDescriptorHandle = m_pd3dUavDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+	m_d3dUavGPUDescriptorHandle = m_pd3dUavDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
 }
-//TextureManager::TextureManager(ID3D12Device* pd3dDevice)
-//	: m_pd3dDsvDescriptorHeap(nullptr)
-//{
-//	CreateDsvDescriptorHeap(pd3dDevice);
-//	CreateRtvDescriptorHeap(pd3dDevice);
-//	m_d3dDsvCPUDescriptorHandle = m_pd3dDsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
-//	m_d3dRtvCPUDescriptorHandle = m_pd3dRtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
-//}
 void TextureManager::AddDepthBufferTexture(
 	const char* name, ID3D12Device* pd3dDevice, UINT width, UINT height, 
 	D3D12_CPU_DESCRIPTOR_HANDLE& srvCpuHandle,
@@ -325,14 +410,20 @@ void TextureManager::AddDepthBufferTexture(
 	
 	m_uomTextures[name] = temp;
 }
-void TextureManager::AddDepthBufferTextureArray(const char* name, UINT nArraySize, ID3D12Device* pd3dDevice, UINT width, UINT height, D3D12_CPU_DESCRIPTOR_HANDLE& srvCpuHandle, D3D12_GPU_DESCRIPTOR_HANDLE& srvGpuHandle)
+void TextureManager::AddDepthBufferTextureArray(
+	const char* name, UINT nArraySize, ID3D12Device* pd3dDevice, UINT width, UINT height,
+	D3D12_CPU_DESCRIPTOR_HANDLE& srvCpuHandle,
+	D3D12_GPU_DESCRIPTOR_HANDLE& srvGpuHandle)
 {
 	TempTexture* temp = new TempTexture();
 	temp->SetByDepthBuffer(pd3dDevice, width, height, m_d3dDsvCPUDescriptorHandle, srvCpuHandle, srvGpuHandle, nArraySize);
 
 	m_uomTextures[name] = temp;
 }
-void TextureManager::AddDepthBufferTextureCube(const char* name, ID3D12Device* pd3dDevice, UINT width, UINT height, D3D12_CPU_DESCRIPTOR_HANDLE& srvCpuHandle, D3D12_GPU_DESCRIPTOR_HANDLE& srvGpuHandle)
+void TextureManager::AddDepthBufferTextureCube(
+	const char* name, ID3D12Device* pd3dDevice, UINT width, UINT height,
+	D3D12_CPU_DESCRIPTOR_HANDLE& srvCpuHandle, 
+	D3D12_GPU_DESCRIPTOR_HANDLE& srvGpuHandle)
 {
 	TempTexture* temp = new TempTexture();
 	temp->SetByCubeDepthBuffer(pd3dDevice, width, height, m_d3dDsvCPUDescriptorHandle, srvCpuHandle, srvGpuHandle);
@@ -346,6 +437,18 @@ void TextureManager::AddRenderTargetTexture(
 {
 	TempTexture* temp = new TempTexture();
 	temp->SetByRenderTarget(pd3dDevice, width, height, m_d3dRtvCPUDescriptorHandle, srvCpuHandle, srvGpuHandle);
+
+	m_uomTextures[name] = temp;
+}
+void TextureManager::AddUnorderedAccessTexture(
+	const char* name, ID3D12Device* pd3dDevice, UINT width, UINT height, 
+	D3D12_CPU_DESCRIPTOR_HANDLE& srvCpuHandle, 
+	D3D12_GPU_DESCRIPTOR_HANDLE& srvGpuHandle)
+{
+	TempTexture* temp = new TempTexture();
+	temp->SetByUnorderedAccessTexture(pd3dDevice, width, height, 
+		m_d3dUavCPUDescriptorHandle, m_d3dUavGPUDescriptorHandle,
+		srvCpuHandle, srvGpuHandle);
 
 	m_uomTextures[name] = temp;
 }
@@ -378,6 +481,14 @@ void TextureManager::UseForShaderResource(const char* name, ID3D12GraphicsComman
 {
 	pd3dCommandList->SetGraphicsRootDescriptorTable(rootParameterIdx, m_uomTextures[name]->GetSrvGPUHandle());
 }
+void TextureManager::UseForComputeShaderResourceSRV(const char* name, ID3D12GraphicsCommandList* pd3dCommandList, UINT rootParameterIdx)
+{
+	pd3dCommandList->SetComputeRootDescriptorTable(rootParameterIdx, m_uomTextures[name]->GetSrvGPUHandle());
+}
+void TextureManager::UseForComputeShaderResourceUAV(const char* name, ID3D12GraphicsCommandList* pd3dCommandList, UINT rootParameterIdx)
+{
+	pd3dCommandList->SetComputeRootDescriptorTable(rootParameterIdx, m_uomTextures[name]->GetUavGPUHandle());
+}
 void TextureManager::CreateDsvDescriptorHeap(ID3D12Device* pd3dDevice)
 {
 	HRESULT hr = E_FAIL;
@@ -402,9 +513,29 @@ void TextureManager::CreateRtvDescriptorHeap(ID3D12Device* pd3dDevice)
 	d3dDescriptorHeapDesc.NodeMask			= 0;
 	hr = pd3dDevice->CreateDescriptorHeap(&d3dDescriptorHeapDesc, __uuidof(ID3D12DescriptorHeap), (void**)&m_pd3dRtvDescriptorHeap);
 }
+void TextureManager::CreateUavDescriptorHeap(ID3D12Device* pd3dDevice)
+{
+	HRESULT hr = E_FAIL;
+
+	D3D12_DESCRIPTOR_HEAP_DESC d3dDescriptorHeapDesc;
+	::ZeroMemory(&d3dDescriptorHeapDesc, sizeof(D3D12_DESCRIPTOR_HEAP_DESC));
+	d3dDescriptorHeapDesc.NumDescriptors = MAXNUMPOSTPROCESSINGTEXTURE;
+	d3dDescriptorHeapDesc.Type			= D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+	d3dDescriptorHeapDesc.Flags			= D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+	d3dDescriptorHeapDesc.NodeMask		= 0;
+	hr = pd3dDevice->CreateDescriptorHeap(&d3dDescriptorHeapDesc, __uuidof(ID3D12DescriptorHeap), (void**)&m_pd3dUavDescriptorHeap);
+}
 D3D12_CPU_DESCRIPTOR_HANDLE TextureManager::GetDsvCPUHandle(const char* name) {
 	return m_uomTextures[name]->GetDsvCPUHandle();
 }
 D3D12_CPU_DESCRIPTOR_HANDLE TextureManager::GetRtvCPUHandle(const char* name) {
 	return m_uomTextures[name]->GetRtvCPUHandle();
+}
+D3D12_CPU_DESCRIPTOR_HANDLE TextureManager::GetUavCPUHandle(const char* name)
+{
+	return m_uomTextures[name]->GetUavCPUHandle();
+}
+D3D12_GPU_DESCRIPTOR_HANDLE TextureManager::GetUavGPUHandle(const char* name)
+{
+	return m_uomTextures[name]->GetUavGPUHandle();
 }

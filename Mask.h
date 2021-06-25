@@ -1,6 +1,7 @@
 #pragma once
 
-struct BoneMask {
+class BoneMask {
+public:
 	enum class PreDefined {
 		eUpperBody = 0,
 		eLowerBody = 1,

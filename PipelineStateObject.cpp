@@ -135,14 +135,6 @@ D3D12_SHADER_BYTECODE PipelineStateObject::CreateGeometryShader(ID3DBlob** ppd3d
 
 	return(d3dShaderByteCode);
 }
-D3D12_SHADER_BYTECODE PipelineStateObject::CreateComputeShader(ID3DBlob** ppd3dShaderBlob)
-{
-	D3D12_SHADER_BYTECODE d3dShaderByteCode;
-	d3dShaderByteCode.BytecodeLength = 0;
-	d3dShaderByteCode.pShaderBytecode = NULL;
-
-	return(d3dShaderByteCode);
-}
 D3D12_SHADER_BYTECODE PipelineStateObject::CompileShaderFromFile(const WCHAR* pszFileName, LPCSTR pszShaderName, LPCSTR pszShaderProfile, ID3DBlob** ppd3dShaderBlob)
 {
 	UINT nCompileFlags = 0;
@@ -667,7 +659,6 @@ void AnimatedObjectPSO::CreatePipelineState(ID3D12Device* pd3dDevice, ID3D12Root
 
 	if (d3dPipelineStateDesc.InputLayout.pInputElementDescs) delete[] d3dPipelineStateDesc.InputLayout.pInputElementDescs;
 }
-
 D3D12_RASTERIZER_DESC AnimatedObjectPSO::CreateRasterizerState()
 {
 	D3D12_RASTERIZER_DESC d3dRasterizerDesc;
@@ -686,12 +677,10 @@ D3D12_RASTERIZER_DESC AnimatedObjectPSO::CreateRasterizerState()
 
 	return(d3dRasterizerDesc);
 }
-
 D3D12_SHADER_BYTECODE AnimatedObjectPSO::CreatePixelShader(ID3DBlob** ppd3dShaderBlob)
 {
 	return(CompileShaderFromFile(L"PixelShader.hlsl", "PS_PackGBuffer", "ps_5_1", ppd3dShaderBlob));
 }
-
 D3D12_SHADER_BYTECODE AnimatedObjectPSO::CreateVertexShader(ID3DBlob** ppd3dShaderBlob)
 {
 	return(CompileShaderFromFile(L"VertexShader.hlsl", "VS_AnimatedWVP", "vs_5_1", ppd3dShaderBlob));
@@ -728,7 +717,6 @@ void RenderSpotLightShadowAnimatedObjectPSO::CreatePipelineState(ID3D12Device* p
 
 	if (d3dPipelineStateDesc.InputLayout.pInputElementDescs) delete[] d3dPipelineStateDesc.InputLayout.pInputElementDescs;
 }
-
 D3D12_SHADER_BYTECODE RenderSpotLightShadowAnimatedObjectPSO::CreateVertexShader(ID3DBlob** ppd3dShaderBlob)
 {
 	return(CompileShaderFromFile(L"VertexShader.hlsl", "VS_RenderSpotLightShadowAnimatedObject", "vs_5_1", ppd3dShaderBlob));
@@ -765,7 +753,6 @@ void RenderPointLightShadowAnimatedObjectPSO::CreatePipelineState(ID3D12Device* 
 
 	if (d3dPipelineStateDesc.InputLayout.pInputElementDescs) delete[] d3dPipelineStateDesc.InputLayout.pInputElementDescs;
 }
-
 D3D12_SHADER_BYTECODE RenderPointLightShadowAnimatedObjectPSO::CreateVertexShader(ID3DBlob** ppd3dShaderBlob)
 {
 	return(CompileShaderFromFile(L"VertexShader.hlsl", "VS_RenderPointLightShadowAnimatedObject", "vs_5_1", ppd3dShaderBlob));
@@ -802,8 +789,41 @@ void RenderDirectionalShadowAnimatedObjectPSO::CreatePipelineState(ID3D12Device*
 
 	if (d3dPipelineStateDesc.InputLayout.pInputElementDescs) delete[] d3dPipelineStateDesc.InputLayout.pInputElementDescs;
 }
-
 D3D12_SHADER_BYTECODE RenderDirectionalShadowAnimatedObjectPSO::CreateVertexShader(ID3DBlob** ppd3dShaderBlob)
 {
 	return(CompileShaderFromFile(L"VertexShader.hlsl", "VS_RenderDirectionalLightShadowAnimatedObject", "vs_5_1", ppd3dShaderBlob));
+}
+
+void ComputePipelineStateObject::CreatePipelineState(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dRootSignature)
+{
+	m_pd3dPipelineState = NULL;
+	ID3DBlob* pd3dComputeShaderBlob = NULL;
+
+	D3D12_COMPUTE_PIPELINE_STATE_DESC d3dPipelineStateDesc = {};
+
+	d3dPipelineStateDesc.pRootSignature = pd3dRootSignature;
+	d3dPipelineStateDesc.CS = CreateComputeShader(&pd3dComputeShaderBlob);
+	d3dPipelineStateDesc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
+	HRESULT hResult = pd3dDevice->CreateComputePipelineState(&d3dPipelineStateDesc, __uuidof(ID3D12PipelineState), (void**)&m_pd3dPipelineState);
+
+	if (pd3dComputeShaderBlob) pd3dComputeShaderBlob->Release();
+}
+D3D12_SHADER_BYTECODE ComputePipelineStateObject::CreateComputeShader(ID3DBlob** ppd3dShaderBlob)
+{
+	return(CompileShaderFromFile(L"ComputeShader.hlsl", "CS_main", "cs_5_1", ppd3dShaderBlob));
+}
+D3D12_SHADER_BYTECODE ComputePipelineStateObject::CompileShaderFromFile(const WCHAR* pszFileName, LPCSTR pszShaderName, LPCSTR pszShaderProfile, ID3DBlob** ppd3dShaderBlob)
+{
+	UINT nCompileFlags = 0;
+
+	ID3DBlob* pd3dErrorBlob = NULL;
+	HRESULT result = ::D3DCompileFromFile(pszFileName, NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE, pszShaderName, pszShaderProfile, nCompileFlags, 0, ppd3dShaderBlob, &pd3dErrorBlob);
+	char* pErrorString = NULL;
+	if (pd3dErrorBlob)pErrorString = (char*)pd3dErrorBlob->GetBufferPointer();
+
+	D3D12_SHADER_BYTECODE d3dShaderByteCode;
+	d3dShaderByteCode.BytecodeLength = (*ppd3dShaderBlob)->GetBufferSize();
+	d3dShaderByteCode.pShaderBytecode = (*ppd3dShaderBlob)->GetBufferPointer();
+
+	return(d3dShaderByteCode);
 }

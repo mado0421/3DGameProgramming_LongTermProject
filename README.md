@@ -676,3 +676,35 @@ Action Layer에서 '조준' 클립 블렌드.
 	- 이미 계산된 행렬을 가지고 계산하는 것은 모델이 얇아지거나 할 수 있다. (이유까지는 아직 잘 모르겠다)
 	- Blend를 목표로 한다면 시간별 local(특히 rotation 값을 갖고 있는 quaternion), BoneHierarchy의 toDressposeInv, toParent, parentIdx 등이 필요하다.
 	- Quaternion은 Blend 계산에 적합하다.
+
+### 2021.06.24
+
+ComputeShader를 사용하여 Blur와 DoF, HDR, Bloom 정도를 목표로 하고 있다. 저걸로 구현하는 것이 맞는지는 하면서 알아가도록 하자.
+새로 브랜치를 생성하고 UAV와 SRV를 둘 다 만들어준 Texture 자원을 생성했다.
+
+    StructType A; 로 생성하는 것과
+    StructType A = {}; 로 생성하는 것이 차이가 있었다.
+    UAV를 생성할 때, uavDesc 구조체를 인자로 전달해야 하는데 이 때 문제가 있었다.
+
+### 2021.06.25
+
+ComputePipelineStateObject를 작성했다.
+ComputeRootSignature를 작성했다.
+Resource Barrier랑 Texture의 SRV, UAV(UAV는 SRV를 저장하던 Heap에 그대로 저장했다)생성하는 부분을 작성했다.
+
+ComputePSO를 적용하고, RootSignature도 Set 해준 상태에서 적용이 되는 것을 확인했다.
+
+Thread Index 값은 Group ID / Group Thread ID / Dispatch Thread ID 이렇게 셋이 있다.
+
+만약, 한 스레드 그룹에서 256개의 텍셀을 처리할 예정이고 dispatch 할 때, (width / 256, height, 1) 과 같이 넘긴다면 가로로 width / 256번, 세로로 height번 실행된다.
+
+이 때, 만약 CS에서 numThreads가 [numthreads(16, 16, 1)] 이고 Index 접근을 .xy 로 하게 한다면 
+<img src="https://user-images.githubusercontent.com/21697638/123380380-54568b00-d5ca-11eb-89f5-509847555cce.png" width="70%" height="70%"></img>
+위와 같이 x방향 16칸, y방향 16칸으로 256개의 thread를 사용하게 된다.
+근데 dispatch는 가로로 8번, 세로로 1080번을 했으므로 화면의 왼쪽 부분(가로 128, 세로 1080 픽셀)만 효과를 받게 된다.
+
+dispatch를 가로로 1920 / 256번, 세로로 1080번을 하겠다는건 가로로 길게 256픽셀씩 8번, 세로로 1080번을 하겠다는 의미이므로
+모든 화면에 적용하기 위해서는 스레드 그룹의 범위를 [16, 16, 1]이 아니라 [256, 1, 1]로 해야 의도한 대로 결과가 나온다.
+
+<img src="https://user-images.githubusercontent.com/21697638/123381323-8c120280-d5cb-11eb-8a20-4946ad8c75ad.png" width="70%" height="70%"></img>
+(G버퍼의 Color 텍스처.rgb에 (1.7f, 0.3f, 0.3f)를 곱해준 결과물)

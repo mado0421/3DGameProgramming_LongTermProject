@@ -17,6 +17,21 @@ protected:
 	virtual D3D12_SHADER_BYTECODE		CreateVertexShader(ID3DBlob** ppd3dShaderBlob);
 	virtual D3D12_SHADER_BYTECODE		CreatePixelShader(ID3DBlob** ppd3dShaderBlob);
 	virtual D3D12_SHADER_BYTECODE		CreateGeometryShader(ID3DBlob** ppd3dShaderBlob);
+	D3D12_SHADER_BYTECODE				CompileShaderFromFile(const WCHAR* pszFileName, LPCSTR pszShaderName, LPCSTR pszShaderProfile, ID3DBlob** ppd3dShaderBlob);
+
+protected:
+	ID3D12PipelineState* m_pd3dPipelineState = nullptr;
+};
+
+class ComputePipelineStateObject {
+public:
+	ComputePipelineStateObject() = default;
+	ComputePipelineStateObject(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dRootSignature) { CreatePipelineState(pd3dDevice, pd3dRootSignature); }
+	ID3D12PipelineState* GetPipelineState() { return m_pd3dPipelineState; }
+
+protected:
+	virtual void CreatePipelineState(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dRootSignature);
+protected:
 	virtual D3D12_SHADER_BYTECODE		CreateComputeShader(ID3DBlob** ppd3dShaderBlob);
 	D3D12_SHADER_BYTECODE				CompileShaderFromFile(const WCHAR* pszFileName, LPCSTR pszShaderName, LPCSTR pszShaderProfile, ID3DBlob** ppd3dShaderBlob);
 

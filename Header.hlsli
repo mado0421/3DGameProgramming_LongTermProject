@@ -37,6 +37,7 @@ cbuffer cbAnimationInfo					: register(b9)
 {
 	matrix		gmtxAnimation[64]		: packoffset(c0);
 };
+RWTexture2D<float4> gtxtPostProcessMap	: register(u10);
 
 struct VS_INPUT {
 	float3 position : POSITION;

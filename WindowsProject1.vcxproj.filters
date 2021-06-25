@@ -219,6 +219,9 @@
     <FxCompile Include="GeometryShader.hlsl">
       <Filter>소스 파일\HLSL</Filter>
     </FxCompile>
+    <FxCompile Include="ComputeShader.hlsl">
+      <Filter>소스 파일\HLSL</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Header.hlsli">
