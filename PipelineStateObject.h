@@ -26,7 +26,7 @@ protected:
 /*========================================================================
 * SRToRt PSO
 *
-* - 2 RTV
+* - 1 RTV
 * - 1 DSV
 * - DepthTest True
 * - FrontCounterClockwise False
@@ -43,6 +43,7 @@ protected:
 	virtual D3D12_SHADER_BYTECODE		CreatePixelShader(ID3DBlob** ppd3dShaderBlob);
 	virtual D3D12_SHADER_BYTECODE		CreateVertexShader(ID3DBlob** ppd3dShaderBlob);
 };
+
 
 /*========================================================================
 * PackGBuffer PSO
@@ -213,6 +214,7 @@ protected:
 	virtual D3D12_RASTERIZER_DESC		CreateRasterizerState();
 	virtual D3D12_SHADER_BYTECODE		CreateVertexShader(ID3DBlob** ppd3dShaderBlob);
 };
+
 
 /*========================================================================
 * AddLight PSO

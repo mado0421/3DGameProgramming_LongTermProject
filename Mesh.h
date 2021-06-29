@@ -29,6 +29,7 @@ class DebugWindowMesh
 {
 public:
 	DebugWindowMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, bool bIsPass2Screen = false);
+	DebugWindowMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float width, float height);
 	~DebugWindowMesh() {
 		if (m_pd3dVertexBuffer) m_pd3dVertexBuffer->Release();
 		if (m_pd3dVertexUploadBuffer) m_pd3dVertexUploadBuffer->Release();

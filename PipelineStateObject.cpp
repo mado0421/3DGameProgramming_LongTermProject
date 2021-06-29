@@ -865,7 +865,7 @@ void HorizontalBlurPSO::CreatePipelineState(ID3D12Device* pd3dDevice, ID3D12Root
 
 D3D12_SHADER_BYTECODE HorizontalBlurPSO::CreateComputeShader(ID3DBlob** ppd3dShaderBlob)
 {
-	return(CompileShaderFromFile(L"ComputeShader.hlsl", "CS_VerticalBlur", "cs_5_1", ppd3dShaderBlob));
+	return(CompileShaderFromFile(L"ComputeShader.hlsl", "CS_HorizontalBlur", "cs_5_1", ppd3dShaderBlob));
 }
 
 void SRToRtPSO::CreatePipelineState(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dRootSignature)
@@ -908,3 +908,4 @@ D3D12_SHADER_BYTECODE SRToRtPSO::CreateVertexShader(ID3DBlob** ppd3dShaderBlob)
 {
 	return(CompileShaderFromFile(L"VertexShader.hlsl", "VS_FlatScreen", "vs_5_1", ppd3dShaderBlob));
 }
+

@@ -143,7 +143,6 @@ float4 VS_RenderDirectionalLightShadowAnimatedObject(VS_INPUT input) : SV_POSITI
 VS_OUTPUT VS_FlatScreen(VS_INPUT input)
 {
 	VS_OUTPUT output;
-
 	output.positionW = (float3)mul(float4(input.position, 1.0f), gmtxGameObject);
 	output.position = float4(output.positionW, 1.0f);
 	output.uv = input.uv;

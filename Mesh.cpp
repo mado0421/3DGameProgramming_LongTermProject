@@ -187,10 +187,14 @@ DebugWindowMesh::DebugWindowMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	int i = 0;
 	XMFLOAT3 pos[4];
 	if (bIsPass2Screen) {
-		pos[i++] = XMFLOAT3(-1.0f,  1.0f, 0.0f);
-		pos[i++] = XMFLOAT3( 1.0f,  1.0f, 0.0f);
-		pos[i++] = XMFLOAT3(-1.0f, -1.0f, 0.0f);
-		pos[i++] = XMFLOAT3( 1.0f, -1.0f, 0.0f);
+		//pos[i++] = XMFLOAT3(-1.0f,  1.0f, 0.0f);
+		//pos[i++] = XMFLOAT3( 1.0f,  1.0f, 0.0f);
+		//pos[i++] = XMFLOAT3(-1.0f, -1.0f, 0.0f);
+		//pos[i++] = XMFLOAT3( 1.0f, -1.0f, 0.0f);
+		pos[i++] = XMFLOAT3(				0.0f,	 FRAME_BUFFER_HEIGHT, 0.0f);
+		pos[i++] = XMFLOAT3(  FRAME_BUFFER_WIDTH,	 FRAME_BUFFER_HEIGHT, 0.0f);
+		pos[i++] = XMFLOAT3(				0.0f,					0.0f, 0.0f);
+		pos[i++] = XMFLOAT3(  FRAME_BUFFER_WIDTH,					0.0f, 0.0f);
 	}
 	else {
 		pos[i++] = XMFLOAT3(0, 0, 0);
@@ -213,6 +217,45 @@ DebugWindowMesh::DebugWindowMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	pVertices[i++] = Vertex(pos[0], XMFLOAT3(0,0,-1), uv[0]);
 	pVertices[i++] = Vertex(pos[2], XMFLOAT3(0,0,-1), uv[2]);
 	pVertices[i++] = Vertex(pos[3], XMFLOAT3(0,0,-1), uv[3]);
+
+	m_pd3dVertexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pVertices, m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
+
+	m_d3dVertexBufferView.BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();
+	m_d3dVertexBufferView.StrideInBytes = m_nStride;
+	m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
+
+	delete[]pVertices;
+}
+
+DebugWindowMesh::DebugWindowMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float width, float height)
+{
+	m_nStride = sizeof(Vertex);
+	m_nVertices = 6;
+
+	Vertex* pVertices = new Vertex[m_nVertices];
+
+	int i = 0;
+	XMFLOAT3 pos[4];
+	pos[i++] = XMFLOAT3(-width,  height, 0.0f);
+	pos[i++] = XMFLOAT3( width,  height, 0.0f);
+	pos[i++] = XMFLOAT3(-width, -height, 0.0f);
+	pos[i++] = XMFLOAT3( width, -height, 0.0f);
+
+
+	i = 0;
+	XMFLOAT2 uv[4];
+	uv[i++] = XMFLOAT2(0, 0);
+	uv[i++] = XMFLOAT2(1, 0);
+	uv[i++] = XMFLOAT2(0, 1);
+	uv[i++] = XMFLOAT2(1, 1);
+
+	i = 0;
+	pVertices[i++] = Vertex(pos[0], XMFLOAT3(0, 0, -1), uv[0]);
+	pVertices[i++] = Vertex(pos[3], XMFLOAT3(0, 0, -1), uv[3]);
+	pVertices[i++] = Vertex(pos[1], XMFLOAT3(0, 0, -1), uv[1]);
+	pVertices[i++] = Vertex(pos[0], XMFLOAT3(0, 0, -1), uv[0]);
+	pVertices[i++] = Vertex(pos[2], XMFLOAT3(0, 0, -1), uv[2]);
+	pVertices[i++] = Vertex(pos[3], XMFLOAT3(0, 0, -1), uv[3]);
 
 	m_pd3dVertexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pVertices, m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
 

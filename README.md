@@ -699,7 +699,9 @@ Thread Index 값은 Group ID / Group Thread ID / Dispatch Thread ID 이렇게 �
 만약, 한 스레드 그룹에서 256개의 텍셀을 처리할 예정이고 dispatch 할 때, (width / 256, height, 1) 과 같이 넘긴다면 가로로 width / 256번, 세로로 height번 실행된다.
 
 이 때, 만약 CS에서 numThreads가 [numthreads(16, 16, 1)] 이고 Index 접근을 .xy 로 하게 한다면 
+
 <img src="https://user-images.githubusercontent.com/21697638/123380380-54568b00-d5ca-11eb-89f5-509847555cce.png" width="70%" height="70%"></img>
+
 위와 같이 x방향 16칸, y방향 16칸으로 256개의 thread를 사용하게 된다.
 근데 dispatch는 가로로 8번, 세로로 1080번을 했으므로 화면의 왼쪽 부분(가로 128, 세로 1080 픽셀)만 효과를 받게 된다.
 
@@ -707,4 +709,42 @@ dispatch를 가로로 1920 / 256번, 세로로 1080번을 하겠다는건 가로
 모든 화면에 적용하기 위해서는 스레드 그룹의 범위를 [16, 16, 1]이 아니라 [256, 1, 1]로 해야 의도한 대로 결과가 나온다.
 
 <img src="https://user-images.githubusercontent.com/21697638/123381323-8c120280-d5cb-11eb-8a20-4946ad8c75ad.png" width="70%" height="70%"></img>
+
 (G버퍼의 Color 텍스처.rgb에 (1.7f, 0.3f, 0.3f)를 곱해준 결과물)
+
+### 이번주 일정
+#### 21.06.28 - 21.07.05
+* Post Process 준비
+* Blur 구현
+
+### 2주 목표
+* Blur 효과 구현
+* Depth Of Field 효과 구현(다만 상황에 따라 HDR 효과로 변경될 수 있음)
+
+### 주요 목표
+- Blur, HDR
+- DoF, Bloom
+- Particle
+- Collision Check
+- IK
+- Extra Bone
+
+Blur와 HDR을 각각 1주, DoF와 Bloom을 각각 1주씩 잡고 최대 일정을 4~6주로 계산.
+Particle을 2~4주로 계산.
+Collision Check를 8주로 계산하면 큰 일정들을 쳐내는데 최대 4달 반이 소요될 것.
+11월 중순쯤이면 뭔가 나와있어야 한다.
+
+### 2021.06.29
+
+<img src="https://user-images.githubusercontent.com/21697638/123766527-bb917980-d901-11eb-9b51-8f87e195089e.png" width="70%" height="70%"></img>
+
+<img src="https://user-images.githubusercontent.com/21697638/123766638-d2d06700-d901-11eb-99c7-1a7d28871e12.png" width="70%" height="70%"></img>
+
+1. 그동안 후면버퍼(rtv와 dsv)를 OMSet하는 줄을 기준으로 RenderPass1과 RenderPass2로 나누던 것을 Render로 합치고, Render()의 인자로 후면버퍼 핸들을 전해줘서 Render() 함수 내부에서 OMSet으로 후면버퍼를 지정할 수 있게 변경.
+2. 렌더타겟용으로 텍스처를 두 개 더 만들고(각각 정사이즈 Screen 텍스처와 1/16사이즈 SmallScreen 텍스처), 컴퓨트 쉐이더에서 접근하기 위해 UAV로도 묶은 1/16사이즈 Blur_Vertical, Blur_Horizontal 텍스처를 생성.
+3. G-Buffer의 내용을 합친 것과 Light 결과물을 Screen 텍스처에 담고 해당 텍스처를 1/16사이즈의 평면 메쉬에 입히고 좌상단 1/16공간을 제외한 나머지는 검은 전체 화면을 SmallScreen에 렌더링.
+4. 렌더링하면서 텍스처 크기를 넘어간 부분(원래 검은 부분)은 전부 잘리고 원래 G-Buffer와 Lighting 결과물만 1/16사이즈 텍스처에 저장됨.
+5. 작은 해상도의 텍스처를 대상으로 수직, 수평 방향으로 Dispatch 하게 작성.
+
+여기까지 진행함.
+처음 Horizontal CS에서 SampleLevel()을 가지고 직접 Screen 텍스처에서 읽어오는 것도 되지 않을까 싶음.

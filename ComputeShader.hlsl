@@ -10,11 +10,13 @@ void CS_main( uint3 DTid : SV_DispatchThreadID )
 [numthreads(256, 1, 1)]
 void CS_VerticalBlur(uint3 DTid : SV_DispatchThreadID)
 {
-	gtxtPostProcessMap[DTid.xy] = gtxtColorMap[DTid.xy];
+	gtxtPostProcessMap[DTid.xy] = float4(gtxtColorMap[DTid.xy].xyz * float3(1.2f, 0.8f, 0.8f), gtxtColorMap[DTid.xy].w);
+	//gtxtPostProcessMap[DTid.xy] = gtxtColorMap[DTid.xy];
 }
 
 [numthreads(1, 256, 1)]
 void CS_HorizontalBlur(uint3 DTid : SV_DispatchThreadID)
 {
-	gtxtPostProcessMap[DTid.xy] = gtxtColorMap[DTid.xy];
+	gtxtPostProcessMap[DTid.xy] = float4(gtxtColorMap[DTid.xy].xyz * float3(1.2f, 0.8f, 0.8f), gtxtColorMap[DTid.xy].w);
+	//gtxtPostProcessMap[DTid.xy] = gtxtColorMap[DTid.xy];
 }

@@ -116,6 +116,23 @@ DebugWindowObject::DebugWindowObject(
 	CreateCBV(pd3dDevice, d3dCbvCPUDescriptorStartHandle);
 	SetCbvGpuHandle(d3dCbvGPUDescriptorStartHandle);
 }
+DebugWindowObject::DebugWindowObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, 
+	D3D12_CPU_DESCRIPTOR_HANDLE& d3dCbvCPUDescriptorStartHandle, 
+	D3D12_GPU_DESCRIPTOR_HANDLE& d3dCbvGPUDescriptorStartHandle, 
+	float width, float height)
+	: Object(pd3dDevice, pd3dCommandList, d3dCbvCPUDescriptorStartHandle, d3dCbvGPUDescriptorStartHandle)
+{
+	m_xmf4x4Local = Matrix4x4::Identity();
+	m_pDWMesh = new DebugWindowMesh(pd3dDevice, pd3dCommandList, width, height);
+
+	UINT ncbElementBytes = ((sizeof(CB_OBJECT_INFO) + 255) & ~255);
+
+	m_pd3dCBResource = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes,
+		D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
+
+	CreateCBV(pd3dDevice, d3dCbvCPUDescriptorStartHandle);
+	SetCbvGpuHandle(d3dCbvGPUDescriptorStartHandle);
+}
 void DebugWindowObject::Render(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	pd3dCommandList->SetGraphicsRootDescriptorTable(ROOTSIGNATURE_OBJECTS, m_d3dCbvGPUDescriptorHandle);
