@@ -23,20 +23,25 @@ protected:
 	ID3D12PipelineState* m_pd3dPipelineState = nullptr;
 };
 
-class ComputePipelineStateObject {
+/*========================================================================
+* SRToRt PSO
+*
+* - 2 RTV
+* - 1 DSV
+* - DepthTest True
+* - FrontCounterClockwise False
+* - VS_PackGBuffer
+* - PS_PackGBuffer
+*=======================================================================*/
+class SRToRtPSO : public PipelineStateObject
+{
 public:
-	ComputePipelineStateObject() = default;
-	ComputePipelineStateObject(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dRootSignature) { CreatePipelineState(pd3dDevice, pd3dRootSignature); }
-	ID3D12PipelineState* GetPipelineState() { return m_pd3dPipelineState; }
-
+	SRToRtPSO(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dRootSignature) { CreatePipelineState(pd3dDevice, pd3dRootSignature); }
 protected:
 	virtual void CreatePipelineState(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dRootSignature);
-protected:
-	virtual D3D12_SHADER_BYTECODE		CreateComputeShader(ID3DBlob** ppd3dShaderBlob);
-	D3D12_SHADER_BYTECODE				CompileShaderFromFile(const WCHAR* pszFileName, LPCSTR pszShaderName, LPCSTR pszShaderProfile, ID3DBlob** ppd3dShaderBlob);
 
-protected:
-	ID3D12PipelineState* m_pd3dPipelineState = nullptr;
+	virtual D3D12_SHADER_BYTECODE		CreatePixelShader(ID3DBlob** ppd3dShaderBlob);
+	virtual D3D12_SHADER_BYTECODE		CreateVertexShader(ID3DBlob** ppd3dShaderBlob);
 };
 
 /*========================================================================
@@ -270,4 +275,56 @@ public:
 protected:
 	virtual D3D12_RASTERIZER_DESC		CreateRasterizerState();
 	virtual D3D12_SHADER_BYTECODE		CreatePixelShader(ID3DBlob** ppd3dShaderBlob);
+};
+
+
+
+
+/*========================================================================
+* PostProcess PSOs
+*=======================================================================*/
+class ComputePipelineStateObject {
+public:
+	ComputePipelineStateObject() = default;
+	ComputePipelineStateObject(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dRootSignature) { CreatePipelineState(pd3dDevice, pd3dRootSignature); }
+	ID3D12PipelineState* GetPipelineState() { return m_pd3dPipelineState; }
+
+protected:
+	virtual void CreatePipelineState(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dRootSignature);
+protected:
+	virtual D3D12_SHADER_BYTECODE		CreateComputeShader(ID3DBlob** ppd3dShaderBlob);
+	D3D12_SHADER_BYTECODE				CompileShaderFromFile(const WCHAR* pszFileName, LPCSTR pszShaderName, LPCSTR pszShaderProfile, ID3DBlob** ppd3dShaderBlob);
+
+protected:
+	ID3D12PipelineState* m_pd3dPipelineState = nullptr;
+};
+
+/*========================================================================
+* VerticalBlurPSO
+*
+* - CS_VerticalBlur
+*=======================================================================*/
+class VerticalBlurPSO : public ComputePipelineStateObject
+{
+public:
+	VerticalBlurPSO(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dRootSignature) { CreatePipelineState(pd3dDevice, pd3dRootSignature); }
+protected:	
+	virtual void CreatePipelineState(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dRootSignature);
+
+	virtual D3D12_SHADER_BYTECODE		CreateComputeShader(ID3DBlob** ppd3dShaderBlob);
+};
+
+/*========================================================================
+* HorizontalBlurPSO
+*
+* - CS_HorizontalBlur
+*=======================================================================*/
+class HorizontalBlurPSO : public ComputePipelineStateObject
+{
+public:
+	HorizontalBlurPSO(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dRootSignature) { CreatePipelineState(pd3dDevice, pd3dRootSignature); }
+protected:
+	virtual void CreatePipelineState(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dRootSignature);
+
+	virtual D3D12_SHADER_BYTECODE		CreateComputeShader(ID3DBlob** ppd3dShaderBlob);
 };

@@ -34,18 +34,22 @@ void Framework::Update()
 	D3D12_CPU_DESCRIPTOR_HANDLE d3dDsvCPUDescriptorHandle = m_pd3dDsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
 	m_pd3dCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
 
-	//======================================
-	// RenderPass1
-	if (m_pCurrentScene) m_pCurrentScene->RenderPass1();
-	m_pd3dCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
-	//======================================
+	////======================================
+	//// RenderPass1
+	//if (m_pCurrentScene) m_pCurrentScene->RenderPass1();
+	//m_pd3dCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
+	////======================================
 
-	//아웃풋머지 단계에 어떤 RT를 쓸건지 정하는건가봄
-	m_pd3dCommandList->OMSetRenderTargets(1, &d3dRtvCPUDescriptorHandle, TRUE, &d3dDsvCPUDescriptorHandle);
-	//m_pd3dCommandList->OMSetRenderTargets(1, &d3dRtvCPUDescriptorHandle, TRUE, NULL);
+	////아웃풋머지 단계에 어떤 RT를 쓸건지 정하는건가봄
+	//m_pd3dCommandList->OMSetRenderTargets(1, &d3dRtvCPUDescriptorHandle, TRUE, &d3dDsvCPUDescriptorHandle);
+	////m_pd3dCommandList->OMSetRenderTargets(1, &d3dRtvCPUDescriptorHandle, TRUE, NULL);
 
 
-	if (m_pCurrentScene) m_pCurrentScene->RenderPass2();
+	//if (m_pCurrentScene) m_pCurrentScene->RenderPass2();
+
+	if (m_pCurrentScene) m_pCurrentScene->Render(d3dRtvCPUDescriptorHandle, d3dDsvCPUDescriptorHandle);
+
+
 
 	d3dResourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
 	d3dResourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;

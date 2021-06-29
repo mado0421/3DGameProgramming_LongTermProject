@@ -7,13 +7,14 @@ void CS_main( uint3 DTid : SV_DispatchThreadID )
 	//gtxtPostProcessMap[DTid.xy] = float4(1,1,1,1);
 }
 
+[numthreads(256, 1, 1)]
+void CS_VerticalBlur(uint3 DTid : SV_DispatchThreadID)
+{
+	gtxtPostProcessMap[DTid.xy] = gtxtColorMap[DTid.xy];
+}
 
-/*
-스레드 그룹 ID / 그룹 스레드 ID / 배분 스레드 ID
-[8, 				[16, 16, 1]
-				= 256
-
-
-
-
-*/
+[numthreads(1, 256, 1)]
+void CS_HorizontalBlur(uint3 DTid : SV_DispatchThreadID)
+{
+	gtxtPostProcessMap[DTid.xy] = gtxtColorMap[DTid.xy];
+}
