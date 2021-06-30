@@ -56,8 +56,6 @@ public:
 
 public:
 	virtual void Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
-	virtual void RenderPass1();
-	virtual void RenderPass2();
 	virtual void Render(D3D12_CPU_DESCRIPTOR_HANDLE hBckBufRtv, D3D12_CPU_DESCRIPTOR_HANDLE hBckBufDsv);
 	virtual void Update(float fTimeElapsed);
 	virtual void Input(UCHAR* pKeyBuffer, float fTimeElapsed);

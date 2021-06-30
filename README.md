@@ -748,3 +748,13 @@ Collision Check를 8주로 계산하면 큰 일정들을 쳐내는데 최대 4�
 
 여기까지 진행함.
 처음 Horizontal CS에서 SampleLevel()을 가지고 직접 Screen 텍스처에서 읽어오는 것도 되지 않을까 싶음.
+
+### 2021.06.30
+
+<img src="https://user-images.githubusercontent.com/21697638/123892914-6784a480-d996-11eb-9386-6713c3afc65e.png" width="70%" height="70%"></img>
+
+Blur가 된다.
+가중치는 FunctionTest Project에서 구해서 직접 넣어줬다.
+int gBlurRadius 를 전역에 두면 모든 픽셀이 검게 나오는 문제가 있었는데 이유는 모르겠음.
+
+내일 화이자 백신을 맞을 예정이므로 일정이 어떻게 될 지 모르겠다.
