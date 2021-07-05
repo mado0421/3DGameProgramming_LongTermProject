@@ -9,7 +9,7 @@ TextureManager	g_TextureMng;
 ModelManager	g_ModelMng;
 MaterialManager g_MaterialMng;
 AnimationManager g_AnimMng;
-int gTestInt = 0;
+int gTestInt = 2;
 AnimationUploader* g_AnimUploader;
 
 UINT gnCbvSrvDescriptorIncrementSize = 0;

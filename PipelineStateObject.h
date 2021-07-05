@@ -330,3 +330,42 @@ protected:
 
 	virtual D3D12_SHADER_BYTECODE		CreateComputeShader(ID3DBlob** ppd3dShaderBlob);
 };
+
+
+/*=============================================================================
+* HDR ToneMapping
+* - FirstPass CPSO
+* - SecondPass CPSO
+* - ToneMapping PSO
+*============================================================================*/
+class HDRFstPassCPSO : public ComputePipelineStateObject
+{
+public:
+	HDRFstPassCPSO(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dRootSignature) 
+	{ CreatePipelineState(pd3dDevice, pd3dRootSignature); }
+protected:
+	virtual void CreatePipelineState(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dRootSignature);
+
+	virtual D3D12_SHADER_BYTECODE		CreateComputeShader(ID3DBlob** ppd3dShaderBlob);
+};
+class HDRScdPassCPSO : public ComputePipelineStateObject
+{
+public:
+	HDRScdPassCPSO(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dRootSignature)
+	{ CreatePipelineState(pd3dDevice, pd3dRootSignature); }
+protected:
+	virtual void CreatePipelineState(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dRootSignature);
+
+	virtual D3D12_SHADER_BYTECODE		CreateComputeShader(ID3DBlob** ppd3dShaderBlob);
+};
+class HDRToneMappingPSO : public PipelineStateObject
+{
+public:
+	HDRToneMappingPSO(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dRootSignature) 
+	{ CreatePipelineState(pd3dDevice, pd3dRootSignature); }
+protected:
+	virtual void CreatePipelineState(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dRootSignature);
+
+	virtual D3D12_SHADER_BYTECODE		CreateVertexShader(ID3DBlob** ppd3dShaderBlob);
+	virtual D3D12_SHADER_BYTECODE		CreatePixelShader(ID3DBlob** ppd3dShaderBlob);
+};

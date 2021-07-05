@@ -38,6 +38,8 @@ cbuffer cbAnimationInfo					: register(b9)
 	matrix		gmtxAnimation[64]		: packoffset(c0);
 };
 RWTexture2D<float4> gtxtPostProcessMap	: register(u10);
+RWStructuredBuffer<float> gfAvgLum		: register(u11);
+
 
 struct VS_INPUT {
 	float3 position : POSITION;
@@ -78,3 +80,5 @@ float3 WorldPosFromLinearDepth(float2 uv) {
 	result = mul(result, gmtxViewInv);
 	return result.xyz;
 }
+
+static const float4 LUM_FACTOR = float4(0.299, 0.587, 0.114, 0);

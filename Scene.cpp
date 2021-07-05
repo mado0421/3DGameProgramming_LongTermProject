@@ -76,7 +76,7 @@ ID3D12RootSignature* Scene::CreateRootSignature()
 	d3dDescriptorRange[9].RegisterSpace = 0;
 	d3dDescriptorRange[9].OffsetInDescriptorsFromTableStart = 0;
 
-	D3D12_ROOT_PARAMETER pd3dRootParameters[11];
+	D3D12_ROOT_PARAMETER pd3dRootParameters[12];
 
 	pd3dRootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 	pd3dRootParameters[0].Descriptor.ShaderRegister = ROOTSIGNATURE_PASSCONSTANTS;
@@ -132,6 +132,11 @@ ID3D12RootSignature* Scene::CreateRootSignature()
 	pd3dRootParameters[10].DescriptorTable.NumDescriptorRanges = 1;
 	pd3dRootParameters[10].DescriptorTable.pDescriptorRanges = &d3dDescriptorRange[9];
 	pd3dRootParameters[10].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+
+	pd3dRootParameters[11].ParameterType = D3D12_ROOT_PARAMETER_TYPE_UAV;
+	pd3dRootParameters[11].Descriptor.ShaderRegister = ROOTSIGNATURE_HDRLUMBUFFER;
+	pd3dRootParameters[11].Descriptor.RegisterSpace = 0;
+	pd3dRootParameters[11].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
 	D3D12_STATIC_SAMPLER_DESC d3dSamplerDesc[2];
 	::ZeroMemory(&d3dSamplerDesc, sizeof(D3D12_STATIC_SAMPLER_DESC) * 2);
@@ -209,11 +214,85 @@ void Scene::Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12Graphics
 	CreateDescriptorHeap();
 
 
-	/*========================================================================
+	/*==============================================================================
 	* PassConstants 생성
-	*=======================================================================*/
+	*=============================================================================*/
 	CreatePassInfoShaderResource();
+	{
+		int totalBckBufPixels 
+			= (FRAME_BUFFER_WIDTH * FRAME_BUFFER_WIDTH) / (16 * 1024);
 
+		HRESULT hr = E_FAIL;
+
+
+
+		//	후처리 텍스처는 SRV와 UAV 둘 다 만들어줘야 함.
+		//D3D12_RESOURCE_DESC desc;
+		//desc.Dimension			= D3D12_RESOURCE_DIMENSION_BUFFER;
+		//desc.Flags				= D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
+		//desc.Format				= DXGI_FORMAT_UNKNOWN;
+		//desc.DepthOrArraySize	= 1;
+		//desc.Width				= sizeof(float) * totalBckBufPixels;
+		//desc.Height				= 1;
+		//desc.MipLevels			= 1;
+		//desc.SampleDesc.Count	= 1;
+		//desc.SampleDesc.Quality = 0;
+		//desc.Alignment			= 0;
+		//desc.Layout				= D3D12_TEXTURE_LAYOUT_UNKNOWN;
+
+		//D3D12_HEAP_PROPERTIES hp;
+		//hp.CPUPageProperty		= D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+		//hp.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+		//hp.CreationNodeMask		= 1;
+		//hp.VisibleNodeMask		= 1;
+		//hp.Type					= D3D12_HEAP_TYPE_DEFAULT;
+		D3D12_HEAP_PROPERTIES hp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
+		D3D12_RESOURCE_DESC desc = CD3DX12_RESOURCE_DESC::Buffer(totalBckBufPixels * sizeof(float),
+			D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS);
+
+		hr = pd3dDevice->CreateCommittedResource(
+			&hp,
+			D3D12_HEAP_FLAG_NONE,
+			&desc,
+			D3D12_RESOURCE_STATE_COMMON,
+			nullptr,
+			IID_PPV_ARGS(&m_pd3duabHDRAvgLum));
+
+		//hr = pd3dDevice->CreateCommittedResource(
+		//	&hp, D3D12_HEAP_FLAG_NONE, &desc,
+		//	D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
+		//	nullptr, IID_PPV_ARGS(&m_pd3duabHDRAvgLum));
+
+		D3D12_UNORDERED_ACCESS_VIEW_DESC uavDesc = {};
+		uavDesc.Format						= DXGI_FORMAT_UNKNOWN;
+		uavDesc.ViewDimension				= D3D12_UAV_DIMENSION_BUFFER;
+		uavDesc.Buffer.NumElements			= totalBckBufPixels * sizeof(float);
+		uavDesc.Buffer.StructureByteStride	= 1;
+		uavDesc.Buffer.Flags				= D3D12_BUFFER_UAV_FLAG_NONE;
+
+		m_pd3dDevice->CreateUnorderedAccessView(m_pd3duabHDRAvgLum, nullptr,
+			&uavDesc, m_d3dSrvCPUDescriptorStartHandle);
+		m_d3dSrvCPUDescriptorStartHandle.ptr += gnCbvSrvDescriptorIncrementSize;
+		m_d3dCbvGPUuabHDRAvgLumHandle = m_d3dSrvGPUDescriptorStartHandle;
+		m_d3dSrvGPUDescriptorStartHandle.ptr += gnCbvSrvDescriptorIncrementSize;	// 여기까지 됨
+
+
+
+		//// 여기에서 뭔가 안 됨.
+		//// SRV 버퍼로 보는 디스크립터는 원래 안되나???
+		//D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+		//srvDesc.Format						= DXGI_FORMAT_UNKNOWN;
+		//srvDesc.ViewDimension				= D3D12_SRV_DIMENSION_BUFFER;
+		//srvDesc.Buffer.NumElements			= totalBckBufPixels;
+		//srvDesc.Buffer.StructureByteStride	= sizeof(float);
+		//srvDesc.Buffer.FirstElement			= 0;
+		//srvDesc.Buffer.Flags				= D3D12_BUFFER_SRV_FLAG_NONE;
+
+		//m_pd3dDevice->CreateShaderResourceView(m_pd3duabHDRAvgLum, 
+		//	&srvDesc, m_d3dSrvCPUDescriptorStartHandle);
+		//m_d3dSrvCPUDescriptorStartHandle.ptr += gnCbvSrvDescriptorIncrementSize;
+		//m_d3dSrvGPUDescriptorStartHandle.ptr += gnCbvSrvDescriptorIncrementSize;
+	}
 
 
 
@@ -221,24 +300,17 @@ void Scene::Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12Graphics
 	* 텍스쳐
 	*=======================================================================*/
 	g_TextureMng.Initialize(m_pd3dDevice);
-	g_TextureMng.AddUnorderedAccessTexture("Blur_Vertical", m_pd3dDevice, FRAME_BUFFER_WIDTH/4, FRAME_BUFFER_HEIGHT/4, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
-	g_TextureMng.AddUnorderedAccessTexture("Blur_Horizontal", m_pd3dDevice, FRAME_BUFFER_WIDTH/4, FRAME_BUFFER_HEIGHT/4, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
-	//g_TextureMng.AddUnorderedAccessTexture("PostProcessTexture", m_pd3dDevice, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
+	g_TextureMng.AddUnorderedAccessTexture("Blur_Vertical", m_pd3dDevice, FRAME_BUFFER_WIDTH/2, FRAME_BUFFER_HEIGHT/2, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
+	g_TextureMng.AddUnorderedAccessTexture("Blur_Horizontal", m_pd3dDevice, FRAME_BUFFER_WIDTH/2, FRAME_BUFFER_HEIGHT/2, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
 	g_TextureMng.AddDepthBufferTexture("GBuffer_Depth", m_pd3dDevice, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
 	g_TextureMng.AddRenderTargetTexture("GBuffer_Color", m_pd3dDevice, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
 	g_TextureMng.AddRenderTargetTexture("GBuffer_Normal", m_pd3dDevice, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
 	g_TextureMng.AddRenderTargetTexture("Screen", m_pd3dDevice, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
-	g_TextureMng.AddRenderTargetTexture("SmallScreen", m_pd3dDevice, FRAME_BUFFER_WIDTH/4, FRAME_BUFFER_HEIGHT/4, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
-
-	// Post Process!!! 
+	g_TextureMng.AddRenderTargetTexture("SmallScreen", m_pd3dDevice, FRAME_BUFFER_WIDTH/2, FRAME_BUFFER_HEIGHT/2, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
 
 	g_TextureMng.LoadFromFile("defaultDiffuseMap", m_pd3dDevice, m_pd3dCommandList, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
 	g_TextureMng.LoadFromFile("defaultNormalMap", m_pd3dDevice, m_pd3dCommandList, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
 	g_TextureMng.LoadFromFile("defaultSpecularMap", m_pd3dDevice, m_pd3dCommandList, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
-
-	//g_TextureMng.LoadFromFile("mech_diff", m_pd3dDevice, m_pd3dCommandList, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
-	//g_TextureMng.LoadFromFile("specularTest",  m_pd3dDevice, m_pd3dCommandList, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
-
 
 	/*========================================================================
 	* 마테리얼
@@ -314,8 +386,8 @@ void Scene::Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12Graphics
 	DebugWindowObject* smallScreen
 		= new DebugWindowObject(m_pd3dDevice, m_pd3dCommandList,
 			m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle,
-			0.25f, 0.25f);
-	smallScreen->Move(XMFLOAT3(-0.75f, 0.75f, 0));
+			0.5f, 0.5f);
+	smallScreen->Move(XMFLOAT3(-0.5f, 0.5f, 0));
 	m_vecDebugWindow.push_back(smallScreen);
 
 
@@ -588,8 +660,8 @@ void Scene::Render(D3D12_CPU_DESCRIPTOR_HANDLE hBckBufRtv, D3D12_CPU_DESCRIPTOR_
 	/*========================================================================
 	* Pass 2. Post Process
 	*=======================================================================*/
-	bool bPostProcessing = false;
-	if (bPostProcessing) {
+	//bool bPostProcessing = true;
+	if (gTestInt == 1) {
 		/*========================================================================
 		* DownScaling
 		*=======================================================================*/
@@ -628,8 +700,8 @@ void Scene::Render(D3D12_CPU_DESCRIPTOR_HANDLE hBckBufRtv, D3D12_CPU_DESCRIPTOR_
 		g_TextureMng.UseForComputeShaderResourceSRV("SmallScreen", m_pd3dCommandList, ROOTSIGNATURE_COLOR_TEXTURE);
 		g_TextureMng.UseForComputeShaderResourceUAV("Blur_Vertical", m_pd3dCommandList, ROOTSIGNATURE_POSTPROCESS_TEXTURE);
 
-		UINT numGroups = (UINT)ceilf((FRAME_BUFFER_WIDTH / 4) / 256.0f);
-		m_pd3dCommandList->Dispatch(numGroups, FRAME_BUFFER_HEIGHT / 4, 1);
+		UINT numGroups = (UINT)ceilf((FRAME_BUFFER_WIDTH / 2) / 256.0f);
+		m_pd3dCommandList->Dispatch(numGroups, FRAME_BUFFER_HEIGHT / 2, 1);
 
 		/*========================================================================
 		* Horizontal Blur
@@ -647,8 +719,8 @@ void Scene::Render(D3D12_CPU_DESCRIPTOR_HANDLE hBckBufRtv, D3D12_CPU_DESCRIPTOR_
 		g_TextureMng.UseForComputeShaderResourceSRV("Blur_Vertical", m_pd3dCommandList, ROOTSIGNATURE_COLOR_TEXTURE);
 		g_TextureMng.UseForComputeShaderResourceUAV("Blur_Horizontal", m_pd3dCommandList, ROOTSIGNATURE_POSTPROCESS_TEXTURE);
 
-		numGroups = (UINT)ceilf((FRAME_BUFFER_HEIGHT / 4) / 256.0f);
-		m_pd3dCommandList->Dispatch(FRAME_BUFFER_WIDTH / 4, numGroups, 1);
+		numGroups = (UINT)ceilf((FRAME_BUFFER_HEIGHT / 2) / 256.0f);
+		m_pd3dCommandList->Dispatch(FRAME_BUFFER_WIDTH / 2, numGroups, 1);
 
 		d3dResourceBarrier[0].Transition.pResource = g_TextureMng.GetTextureResource("Blur_Horizontal");
 		d3dResourceBarrier[0].Transition.StateBefore = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
@@ -668,6 +740,31 @@ void Scene::Render(D3D12_CPU_DESCRIPTOR_HANDLE hBckBufRtv, D3D12_CPU_DESCRIPTOR_
 		m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["SRToRt"]);
 
 		g_TextureMng.UseForShaderResource("Blur_Horizontal", m_pd3dCommandList, ROOTSIGNATURE_COLOR_TEXTURE);
+
+		m_pd3dCommandList->ClearDepthStencilView(hBckBufDsv, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
+		m_pd3dCommandList->OMSetRenderTargets(1, &hBckBufRtv, TRUE, &hBckBufDsv);
+		m_vecDebugWindow[0]->Render(m_pd3dCommandList);
+	}
+	else if (gTestInt == 2) {
+		m_pd3dCommandList->SetComputeRootSignature(m_pd3dRootSignature);
+		m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["HDR_First"]);
+
+
+		g_TextureMng.UseForComputeShaderResourceSRV("Screen", m_pd3dCommandList, ROOTSIGNATURE_COLOR_TEXTURE);
+		m_pd3dCommandList->SetComputeRootUnorderedAccessView(ROOTSIGNATURE_HDRLUMBUFFER, m_pd3duabHDRAvgLum->GetGPUVirtualAddress());
+
+		UINT numGroups = (UINT)ceilf(FRAME_BUFFER_WIDTH / 1024.0f);
+		m_pd3dCommandList->Dispatch(numGroups, FRAME_BUFFER_HEIGHT, 1);
+
+		m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["HDR_Second"]);
+
+		m_pd3dCommandList->Dispatch(1, 1, 1);
+
+		m_pd3dCommandList->SetGraphicsRootSignature(m_pd3dRootSignature);
+		m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["HDR_Last"]);
+
+		g_TextureMng.UseForShaderResource("Screen", m_pd3dCommandList, ROOTSIGNATURE_COLOR_TEXTURE);
+		m_pd3dCommandList->SetGraphicsRootUnorderedAccessView(ROOTSIGNATURE_HDRLUMBUFFER, m_pd3duabHDRAvgLum->GetGPUVirtualAddress());
 
 		m_pd3dCommandList->ClearDepthStencilView(hBckBufDsv, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
 		m_pd3dCommandList->OMSetRenderTargets(1, &hBckBufRtv, TRUE, &hBckBufDsv);
@@ -738,20 +835,23 @@ void Scene::Input(UCHAR* pKeyBuffer, float fTimeElapsed)
 	if (pKeyBuffer[KeyCode::_X] & 0xF0) { m_pCamera->Rotate(-50 * fTimeElapsed, 0, 0); }
 
 	//if (pKeyBuffer[KeyCode::_J] & 0xF0) { dynamic_cast<HumanoidObject*>(m_vecAnimObject[0])->WalkForward(); }
-	if (pKeyBuffer[KeyCode::_U] & 0xF0) gTestInt = 1;
-	if (pKeyBuffer[KeyCode::_I] & 0xF0) gTestInt = 0;
+	//if (pKeyBuffer[KeyCode::_U] & 0xF0) gTestInt = 1;
+	//if (pKeyBuffer[KeyCode::_I] & 0xF0) gTestInt = 0;
 
 	if (pKeyBuffer[KeyCode::_1] & 0xF0) {
-		m_pCamera->SetPosition(XMFLOAT3(0, 1, 0));
-		m_pCamera->SetLookAt(XMFLOAT3(0, 1, 1));
+		//m_pCamera->SetPosition(XMFLOAT3(0, 1, 0));
+		//m_pCamera->SetLookAt(XMFLOAT3(0, 1, 1));
+		gTestInt = 0;
 	}
 	if (pKeyBuffer[KeyCode::_2] & 0xF0) {
-		m_pCamera->SetPosition(XMFLOAT3(0, 1, 3));
-		m_pCamera->SetLookAt(XMFLOAT3(0, 1, 0));
+		//m_pCamera->SetPosition(XMFLOAT3(0, 1, 3));
+		//m_pCamera->SetLookAt(XMFLOAT3(0, 1, 0));
+		gTestInt = 1;
 	}
 	if (pKeyBuffer[KeyCode::_3] & 0xF0) {
-		m_pCamera->SetPosition(XMFLOAT3(0, 1, -3));
-		m_pCamera->SetLookAt(XMFLOAT3(0, 1, 0));
+		//m_pCamera->SetPosition(XMFLOAT3(0, 1, -3));
+		//m_pCamera->SetLookAt(XMFLOAT3(0, 1, 0));
+		gTestInt = 2;
 	}
 	if (pKeyBuffer[KeyCode::_4] & 0xF0) {
 		m_pCamera->SetPosition(XMFLOAT3(3, 1, 3));
@@ -766,8 +866,8 @@ void Scene::Input(UCHAR* pKeyBuffer, float fTimeElapsed)
 		m_pCamera->SetLookAt(XMFLOAT3(0, 0, 0));
 	}
 
-	if (pKeyBuffer[KeyCode::_N] & 0xF0) { test = true; }
-	if (pKeyBuffer[KeyCode::_M] & 0xF0) { test = false; }
+	//if (pKeyBuffer[KeyCode::_N] & 0xF0) { test = true; }
+	//if (pKeyBuffer[KeyCode::_M] & 0xF0) { test = false; }
 		////if (test) {
 		////	ReloadLight();
 		////	test = false; 
@@ -822,7 +922,19 @@ void Scene::CreatePSO()
 
 	SRToRtPSO SRToRtPso = SRToRtPSO(m_pd3dDevice, m_pd3dRootSignature);
 	m_uomPipelineStates["SRToRt"] = SRToRtPso.GetPipelineState();
-	
+
+
+	/*=========================================================================
+	* HDR
+	=========================================================================*/
+	HDRFstPassCPSO HDRFstPassCpso = HDRFstPassCPSO(m_pd3dDevice, m_pd3dRootSignature);
+	m_uomPipelineStates["HDR_First"] = HDRFstPassCpso.GetPipelineState();
+
+	HDRScdPassCPSO HDRScdPassCpso = HDRScdPassCPSO(m_pd3dDevice, m_pd3dRootSignature);
+	m_uomPipelineStates["HDR_Second"] = HDRScdPassCpso.GetPipelineState();
+
+	HDRToneMappingPSO HDRToneMappingPso = HDRToneMappingPSO(m_pd3dDevice, m_pd3dRootSignature);
+	m_uomPipelineStates["HDR_Last"] = HDRToneMappingPso.GetPipelineState();
 }
 void Scene::UpdatePassInfoAboutCamera()
 {
@@ -846,7 +958,6 @@ void Scene::CreatePassInfoShaderResource()
 {
 	UINT ncbElementBytes = ((sizeof(CB_PASS_INFO) + 255) & ~255); //256의 배수
 	m_pd3dcbPassInfo = ::CreateBufferResource(m_pd3dDevice, m_pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
-
 
 	D3D12_GPU_VIRTUAL_ADDRESS		d3dGpuVirtualAddress;
 	D3D12_CONSTANT_BUFFER_VIEW_DESC d3dCBVDesc;

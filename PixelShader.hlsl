@@ -116,3 +116,24 @@ float4 PS_AddLight(VS_OUTPUT input) : SV_TARGET{
 	}
 	return float4(result, 1.0f);
 }
+
+
+/*=============================================================================
+* HDR
+=============================================================================*/
+float3 ToneMapping(float3 vColor) {
+	float MiddleGrey = 0.229f;
+	float LumWhiteSqr = 5.789f;
+	float LumScale = dot(vColor, LUM_FACTOR);
+
+	LumScale *= MiddleGrey / gfAvgLum[0];
+	LumScale = (LumScale + LumScale * LumScale / LumWhiteSqr) / (1.0f + LumScale);
+
+	return vColor * LumScale;
+}
+
+float4 PS_HDRToneMapping(VS_OUTPUT input) : SV_TARGET{
+	float3 vColor = gtxtColorMap.Sample(gSamplerState, input.uv).rgb;
+	vColor = ToneMapping(vColor);
+	return float4(vColor, 1.0f);
+}

@@ -106,8 +106,10 @@ void TempTexture::SetByDepthBuffer(
 	d3dClearValue.DepthStencil.Depth	= 1.0f;
 	d3dClearValue.DepthStencil.Stencil	= 0;
 
-	pd3dDevice->CreateCommittedResource(&d3dHeapProperties, D3D12_HEAP_FLAG_NONE, &d3dResourceDesc,
-		D3D12_RESOURCE_STATE_GENERIC_READ, &d3dClearValue, __uuidof(ID3D12Resource), (void**)&m_pd3dTexture);
+	pd3dDevice->CreateCommittedResource(
+		&d3dHeapProperties, D3D12_HEAP_FLAG_NONE, &d3dResourceDesc,
+		D3D12_RESOURCE_STATE_GENERIC_READ, &d3dClearValue, 
+		__uuidof(ID3D12Resource), (void**)&m_pd3dTexture);
 
 	D3D12_TEX2D_ARRAY_DSV tex;
 	tex.MipSlice		= 0;
@@ -300,13 +302,6 @@ void TempTexture::SetByUnorderedAccessTexture(
 	uavDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
 	uavDesc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2D;
 	uavDesc.Texture2D.MipSlice = 0;
-
-	//pd3dDevice->CreateUnorderedAccessView(m_pd3dTexture, nullptr, &uavDesc, uavCpuHandle);
-	//m_d3dUavCPUDescriptorHandle = uavCpuHandle;
-	//uavCpuHandle.ptr += gnCbvSrvDescriptorIncrementSize;
-
-	//m_d3dUavGPUDescriptorHandle = uavGpuHandle;
-	//uavGpuHandle.ptr += gnCbvSrvDescriptorIncrementSize;
 
 	pd3dDevice->CreateUnorderedAccessView(m_pd3dTexture, nullptr, &uavDesc, srvCpuHandle);
 	m_d3dUavCPUDescriptorHandle = srvCpuHandle;

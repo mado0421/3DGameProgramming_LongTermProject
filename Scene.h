@@ -43,6 +43,8 @@ protected:
 
 	LightManager*								m_LightMng;
 
+	ID3D12Resource*								m_pd3duabHDRAvgLum;
+	D3D12_GPU_DESCRIPTOR_HANDLE					m_d3dCbvGPUuabHDRAvgLumHandle;
 	ID3D12Resource*								m_pd3dcbPassInfo;
 	CB_PASS_INFO*								m_pcbMappedPassInfo;
 	D3D12_GPU_DESCRIPTOR_HANDLE					m_d3dCbvGPUPassInfoHandle;
