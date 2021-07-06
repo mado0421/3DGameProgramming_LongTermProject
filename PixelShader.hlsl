@@ -133,7 +133,11 @@ float3 ToneMapping(float3 vColor) {
 }
 
 float4 PS_HDRToneMapping(VS_OUTPUT input) : SV_TARGET{
+	float fBloomScale = 0.9f;
 	float3 vColor = gtxtColorMap.Sample(gSamplerState, input.uv).rgb;
+
+	vColor += fBloomScale * gtxtNormalMap.Sample(gSamplerState, input.uv).rgb;
+
 	vColor = ToneMapping(vColor);
 	return float4(vColor, 1.0f);
 }

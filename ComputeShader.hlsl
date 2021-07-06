@@ -116,16 +116,18 @@ void CS_HorizontalBlur(
 }
 
 /*=============================================================================
-* HDR
+* HDR, Bloom
 =============================================================================*/
 static const uint2 RES = uint2(1920 / 4, 1080 / 4);
 static const uint DOMAIN = (1920 * 1080) / 16;
 static const uint GroupSize = DOMAIN * 1024;
 groupshared float SharedPositions[1024];
 
+#define BLOOM
+
 float DownScale4x4(uint2 curPixel, uint GTid) {
 	float avgLum = 0.0f;
-	if (curPixel.y < RES.y) {
+	//if (curPixel.y < RES.y) {
 		int3 nFullResPos = int3(curPixel * 4, 0);
 		float4 downScaled = float4(0, 0, 0, 0);
 		[unroll]
@@ -137,10 +139,14 @@ float DownScale4x4(uint2 curPixel, uint GTid) {
 		}
 
 		downScaled /= 16.0;
+#ifdef BLOOM
+		gtxtPostProcessMap[curPixel.xy] = downScaled;
+#else
 
+#endif
 		avgLum = dot(downScaled, LUM_FACTOR);
 		SharedPositions[GTid] = avgLum;
-	}
+	//}
 	GroupMemoryBarrierWithGroupSync();
 
 	return avgLum;
@@ -187,7 +193,7 @@ void DownScale4to1(uint DTid, uint GTid, uint Gid, float avgLum) {
 void CS_DownScaleFirstPass(uint3 Gid : SV_GroupID,
 	uint3 DTid : SV_DispatchThreadID,
 	uint3 GTid : SV_GroupThreadID) {
-	uint2 curPixel = uint2(DTid.x % RES.x, DTid.x / RES.x);
+	uint2 curPixel = uint2(DTid.x % RES.x, DTid.y % RES.y);
 
 	float avgLum = DownScale4x4(curPixel, GTid.x);
 	avgLum = DownScale1024to4(DTid.x, GTid.x, avgLum);
@@ -248,4 +254,19 @@ void CS_DownScaleSecondPass(uint3 Gid : SV_GroupID,
 		fFinalLumValue /= 64.0;
 		gfAvgLum[0] = fFinalLumValue;
 	}
+}
+
+static const float fBloomThreshols = 0.5f;
+
+[numthreads(1024,1,1)]
+void CS_Bloom(uint3 DTid : SV_DispatchThreadID) {
+	uint2 curPixel = uint2(DTid.x % RES.x, DTid.y % RES.y);
+	//if (curPixel.y < RES.y) {
+		float4 color = gtxtColorMap.Load(int3(curPixel, 0));
+		float Lum = dot(color, LUM_FACTOR);
+		float avgLum = gfAvgLum[0];
+
+		float colorScale = saturate(Lum - avgLum * fBloomThreshols);
+		gtxtPostProcessMap[curPixel.xy] = color * colorScale;
+	//}
 }

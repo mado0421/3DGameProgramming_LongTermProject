@@ -828,7 +828,7 @@ D3D12_SHADER_BYTECODE ComputePipelineStateObject::CompileShaderFromFile(const WC
 	return(d3dShaderByteCode);
 }
 
-void VerticalBlurPSO::CreatePipelineState(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dRootSignature)
+void VerticalBlurCPSO::CreatePipelineState(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dRootSignature)
 {
 	m_pd3dPipelineState = NULL;
 	ID3DBlob* pd3dComputeShaderBlob = NULL;
@@ -843,12 +843,12 @@ void VerticalBlurPSO::CreatePipelineState(ID3D12Device* pd3dDevice, ID3D12RootSi
 	if (pd3dComputeShaderBlob) pd3dComputeShaderBlob->Release();
 }
 
-D3D12_SHADER_BYTECODE VerticalBlurPSO::CreateComputeShader(ID3DBlob** ppd3dShaderBlob)
+D3D12_SHADER_BYTECODE VerticalBlurCPSO::CreateComputeShader(ID3DBlob** ppd3dShaderBlob)
 {
 	return(CompileShaderFromFile(L"ComputeShader.hlsl", "CS_VerticalBlur", "cs_5_1", ppd3dShaderBlob));
 }
 
-void HorizontalBlurPSO::CreatePipelineState(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dRootSignature)
+void HorizontalBlurCPSO::CreatePipelineState(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dRootSignature)
 {
 	m_pd3dPipelineState = NULL;
 	ID3DBlob* pd3dComputeShaderBlob = NULL;
@@ -863,7 +863,7 @@ void HorizontalBlurPSO::CreatePipelineState(ID3D12Device* pd3dDevice, ID3D12Root
 	if (pd3dComputeShaderBlob) pd3dComputeShaderBlob->Release();
 }
 
-D3D12_SHADER_BYTECODE HorizontalBlurPSO::CreateComputeShader(ID3DBlob** ppd3dShaderBlob)
+D3D12_SHADER_BYTECODE HorizontalBlurCPSO::CreateComputeShader(ID3DBlob** ppd3dShaderBlob)
 {
 	return(CompileShaderFromFile(L"ComputeShader.hlsl", "CS_HorizontalBlur", "cs_5_1", ppd3dShaderBlob));
 }
@@ -986,4 +986,24 @@ D3D12_SHADER_BYTECODE HDRToneMappingPSO::CreateVertexShader(ID3DBlob** ppd3dShad
 D3D12_SHADER_BYTECODE HDRToneMappingPSO::CreatePixelShader(ID3DBlob** ppd3dShaderBlob)
 {
 	return(CompileShaderFromFile(L"PixelShader.hlsl", "PS_HDRToneMapping", "ps_5_1", ppd3dShaderBlob));
+}
+
+void BloomCPSO::CreatePipelineState(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dRootSignature)
+{
+	m_pd3dPipelineState = NULL;
+	ID3DBlob* pd3dComputeShaderBlob = NULL;
+
+	D3D12_COMPUTE_PIPELINE_STATE_DESC d3dPipelineStateDesc = {};
+
+	d3dPipelineStateDesc.pRootSignature = pd3dRootSignature;
+	d3dPipelineStateDesc.CS = CreateComputeShader(&pd3dComputeShaderBlob);
+	d3dPipelineStateDesc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
+	HRESULT hResult = pd3dDevice->CreateComputePipelineState(&d3dPipelineStateDesc, __uuidof(ID3D12PipelineState), (void**)&m_pd3dPipelineState);
+
+	if (pd3dComputeShaderBlob) pd3dComputeShaderBlob->Release();
+}
+
+D3D12_SHADER_BYTECODE BloomCPSO::CreateComputeShader(ID3DBlob** ppd3dShaderBlob)
+{
+	return(CompileShaderFromFile(L"ComputeShader.hlsl", "CS_Bloom", "cs_5_1", ppd3dShaderBlob));
 }

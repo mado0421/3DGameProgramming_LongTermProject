@@ -300,13 +300,14 @@ void Scene::Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12Graphics
 	* ÅØ½ºÃÄ
 	*=======================================================================*/
 	g_TextureMng.Initialize(m_pd3dDevice);
-	g_TextureMng.AddUnorderedAccessTexture("Blur_Vertical", m_pd3dDevice, FRAME_BUFFER_WIDTH/2, FRAME_BUFFER_HEIGHT/2, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
-	g_TextureMng.AddUnorderedAccessTexture("Blur_Horizontal", m_pd3dDevice, FRAME_BUFFER_WIDTH/2, FRAME_BUFFER_HEIGHT/2, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
+	g_TextureMng.AddUnorderedAccessTexture("DownScaled", m_pd3dDevice, FRAME_BUFFER_WIDTH / 4, FRAME_BUFFER_HEIGHT / 4, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
+	g_TextureMng.AddUnorderedAccessTexture("Blur_Vertical", m_pd3dDevice, FRAME_BUFFER_WIDTH/4, FRAME_BUFFER_HEIGHT/4, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
+	g_TextureMng.AddUnorderedAccessTexture("Blur_Horizontal", m_pd3dDevice, FRAME_BUFFER_WIDTH/4, FRAME_BUFFER_HEIGHT/4, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
 	g_TextureMng.AddDepthBufferTexture("GBuffer_Depth", m_pd3dDevice, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
 	g_TextureMng.AddRenderTargetTexture("GBuffer_Color", m_pd3dDevice, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
 	g_TextureMng.AddRenderTargetTexture("GBuffer_Normal", m_pd3dDevice, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
 	g_TextureMng.AddRenderTargetTexture("Screen", m_pd3dDevice, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
-	g_TextureMng.AddRenderTargetTexture("SmallScreen", m_pd3dDevice, FRAME_BUFFER_WIDTH/2, FRAME_BUFFER_HEIGHT/2, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
+	//g_TextureMng.AddRenderTargetTexture("SmallScreen", m_pd3dDevice, FRAME_BUFFER_WIDTH/2, FRAME_BUFFER_HEIGHT/2, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
 
 	g_TextureMng.LoadFromFile("defaultDiffuseMap", m_pd3dDevice, m_pd3dCommandList, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
 	g_TextureMng.LoadFromFile("defaultNormalMap", m_pd3dDevice, m_pd3dCommandList, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
@@ -661,66 +662,164 @@ void Scene::Render(D3D12_CPU_DESCRIPTOR_HANDLE hBckBufRtv, D3D12_CPU_DESCRIPTOR_
 	* Pass 2. Post Process
 	*=======================================================================*/
 	//bool bPostProcessing = true;
-	if (gTestInt == 1) {
-		/*========================================================================
-		* DownScaling
-		*=======================================================================*/
-		m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["SRToRt"]);
+	//if (gTestInt == 1) {
+	//	/*========================================================================
+	//	* DownScaling
+	//	*=======================================================================*/
+	//	m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["SRToRt"]);
 
-		d3dResourceBarrier[0].Transition.pResource = g_TextureMng.GetTextureResource("Screen");
-		d3dResourceBarrier[0].Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
-		d3dResourceBarrier[0].Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
-		d3dResourceBarrier[1].Transition.pResource = g_TextureMng.GetTextureResource("SmallScreen");
-		d3dResourceBarrier[1].Transition.StateBefore = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
-		d3dResourceBarrier[1].Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
-		m_pd3dCommandList->ResourceBarrier(2, d3dResourceBarrier);
-		g_TextureMng.UseForShaderResource("Screen", m_pd3dCommandList, ROOTSIGNATURE_COLOR_TEXTURE);
+	//	d3dResourceBarrier[0].Transition.pResource = g_TextureMng.GetTextureResource("Screen");
+	//	d3dResourceBarrier[0].Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
+	//	d3dResourceBarrier[0].Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+	//	d3dResourceBarrier[1].Transition.pResource = g_TextureMng.GetTextureResource("SmallScreen");
+	//	d3dResourceBarrier[1].Transition.StateBefore = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+	//	d3dResourceBarrier[1].Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
+	//	m_pd3dCommandList->ResourceBarrier(2, d3dResourceBarrier);
+	//	g_TextureMng.UseForShaderResource("Screen", m_pd3dCommandList, ROOTSIGNATURE_COLOR_TEXTURE);
 
-		screenRtv = g_TextureMng.GetRtvCPUHandle("SmallScreen");
-		m_pd3dCommandList->ClearRenderTargetView(screenRtv, pfClearColor, 0, NULL);
-		m_pd3dCommandList->OMSetRenderTargets(1, &screenRtv, TRUE, NULL);
+	//	screenRtv = g_TextureMng.GetRtvCPUHandle("SmallScreen");
+	//	m_pd3dCommandList->ClearRenderTargetView(screenRtv, pfClearColor, 0, NULL);
+	//	m_pd3dCommandList->OMSetRenderTargets(1, &screenRtv, TRUE, NULL);
 
-		m_vecDebugWindow[1]->Render(m_pd3dCommandList);
+	//	m_vecDebugWindow[1]->Render(m_pd3dCommandList);
 
-		d3dResourceBarrier[0].Transition.pResource = g_TextureMng.GetTextureResource("Screen");
-		d3dResourceBarrier[0].Transition.StateBefore = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
-		d3dResourceBarrier[0].Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
-		d3dResourceBarrier[1].Transition.pResource = g_TextureMng.GetTextureResource("SmallScreen");
-		d3dResourceBarrier[1].Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
-		d3dResourceBarrier[1].Transition.StateAfter = D3D12_RESOURCE_STATE_GENERIC_READ;
-		m_pd3dCommandList->ResourceBarrier(2, d3dResourceBarrier);
+	//	d3dResourceBarrier[0].Transition.pResource = g_TextureMng.GetTextureResource("Screen");
+	//	d3dResourceBarrier[0].Transition.StateBefore = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+	//	d3dResourceBarrier[0].Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
+	//	d3dResourceBarrier[1].Transition.pResource = g_TextureMng.GetTextureResource("SmallScreen");
+	//	d3dResourceBarrier[1].Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
+	//	d3dResourceBarrier[1].Transition.StateAfter = D3D12_RESOURCE_STATE_GENERIC_READ;
+	//	m_pd3dCommandList->ResourceBarrier(2, d3dResourceBarrier);
 
-		/*========================================================================
-		* Vertical Blue
-		*=======================================================================*/
+	//	/*========================================================================
+	//	* Vertical Blue
+	//	*=======================================================================*/
+	//	m_pd3dCommandList->SetComputeRootSignature(m_pd3dRootSignature);
+
+	//	m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["Blur_Vertical"]);
+
+	//	g_TextureMng.UseForComputeShaderResourceSRV("SmallScreen", m_pd3dCommandList, ROOTSIGNATURE_COLOR_TEXTURE);
+	//	g_TextureMng.UseForComputeShaderResourceUAV("Blur_Vertical", m_pd3dCommandList, ROOTSIGNATURE_POSTPROCESS_TEXTURE);
+
+	//	UINT numGroups = (UINT)ceilf((FRAME_BUFFER_WIDTH / 2) / 256.0f);
+	//	m_pd3dCommandList->Dispatch(numGroups, FRAME_BUFFER_HEIGHT / 2, 1);
+
+	//	/*========================================================================
+	//	* Horizontal Blur
+	//	*=======================================================================*/
+	//	d3dResourceBarrier[0].Transition.pResource = g_TextureMng.GetTextureResource("Blur_Horizontal");
+	//	d3dResourceBarrier[0].Transition.StateBefore = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+	//	d3dResourceBarrier[0].Transition.StateAfter = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
+	//	d3dResourceBarrier[1].Transition.pResource = g_TextureMng.GetTextureResource("Blur_Vertical");
+	//	d3dResourceBarrier[1].Transition.StateBefore = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
+	//	d3dResourceBarrier[1].Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+	//	m_pd3dCommandList->ResourceBarrier(2, d3dResourceBarrier);
+
+	//	m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["Blur_Horizontal"]);
+
+	//	g_TextureMng.UseForComputeShaderResourceSRV("Blur_Vertical", m_pd3dCommandList, ROOTSIGNATURE_COLOR_TEXTURE);
+	//	g_TextureMng.UseForComputeShaderResourceUAV("Blur_Horizontal", m_pd3dCommandList, ROOTSIGNATURE_POSTPROCESS_TEXTURE);
+
+	//	numGroups = (UINT)ceilf((FRAME_BUFFER_HEIGHT / 2) / 256.0f);
+	//	m_pd3dCommandList->Dispatch(FRAME_BUFFER_WIDTH / 2, numGroups, 1);
+
+	//	d3dResourceBarrier[0].Transition.pResource = g_TextureMng.GetTextureResource("Blur_Horizontal");
+	//	d3dResourceBarrier[0].Transition.StateBefore = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
+	//	d3dResourceBarrier[0].Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+	//	d3dResourceBarrier[1].Transition.pResource = g_TextureMng.GetTextureResource("Blur_Vertical");
+	//	d3dResourceBarrier[1].Transition.StateBefore = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+	//	d3dResourceBarrier[1].Transition.StateAfter = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
+	//	d3dResourceBarrier[2].Transition.pResource = g_TextureMng.GetTextureResource("SmallScreen");
+	//	d3dResourceBarrier[2].Transition.StateBefore = D3D12_RESOURCE_STATE_GENERIC_READ;
+	//	d3dResourceBarrier[2].Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+	//	m_pd3dCommandList->ResourceBarrier(3, d3dResourceBarrier);
+
+	//	/*===========================================================================
+	//	* Final Result
+	//	*==========================================================================*/
+	//	m_pd3dCommandList->SetGraphicsRootSignature(m_pd3dRootSignature);
+	//	m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["SRToRt"]);
+
+	//	g_TextureMng.UseForShaderResource("Blur_Horizontal", m_pd3dCommandList, ROOTSIGNATURE_COLOR_TEXTURE);
+
+	//	m_pd3dCommandList->ClearDepthStencilView(hBckBufDsv, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
+	//	m_pd3dCommandList->OMSetRenderTargets(1, &hBckBufRtv, TRUE, &hBckBufDsv);
+	//	m_vecDebugWindow[0]->Render(m_pd3dCommandList);
+	//}
+	//else 
+	if (gTestInt == 2) {
+
+		/*===========================================================================
+		* Post Process List
+		* - Calc AvgLum
+		* - HDR Rendering to 'Screen' Texture, 
+			DownScaled Rendering to 'DownScaled' Texture.
+		* - Bloom Threshold Rendering to 'PostProcess_Temp1' Texture.
+		* - Vertical Blur Bloom Threshold Rendering to 'PostProcess_Temp2' Texture.
+		* - Horizontal to 'PostProcess_Temp1' Texture.
+		* - 'PostProcess_Temp1' Add to 'Screen'
+		*==========================================================================*/
 		m_pd3dCommandList->SetComputeRootSignature(m_pd3dRootSignature);
 
-		m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["Blur_Vertical"]);
 
-		g_TextureMng.UseForComputeShaderResourceSRV("SmallScreen", m_pd3dCommandList, ROOTSIGNATURE_COLOR_TEXTURE);
-		g_TextureMng.UseForComputeShaderResourceUAV("Blur_Vertical", m_pd3dCommandList, ROOTSIGNATURE_POSTPROCESS_TEXTURE);
+		/*===========================================================================
+		* Calc AvgLum and store to 'gfAvgLum' Buffer.
+		* Render to 'DownScaled' Texture.
+		*==========================================================================*/
+		m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["HDR_First"]);
 
-		UINT numGroups = (UINT)ceilf((FRAME_BUFFER_WIDTH / 2) / 256.0f);
-		m_pd3dCommandList->Dispatch(numGroups, FRAME_BUFFER_HEIGHT / 2, 1);
 
-		/*========================================================================
-		* Horizontal Blur
-		*=======================================================================*/
-		d3dResourceBarrier[0].Transition.pResource = g_TextureMng.GetTextureResource("Blur_Horizontal");
+		d3dResourceBarrier[0].Transition.pResource = g_TextureMng.GetTextureResource("DownScaled");
 		d3dResourceBarrier[0].Transition.StateBefore = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
 		d3dResourceBarrier[0].Transition.StateAfter = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
-		d3dResourceBarrier[1].Transition.pResource = g_TextureMng.GetTextureResource("Blur_Vertical");
-		d3dResourceBarrier[1].Transition.StateBefore = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
+		d3dResourceBarrier[1].Transition.pResource = g_TextureMng.GetTextureResource("Screen");
+		d3dResourceBarrier[1].Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
 		d3dResourceBarrier[1].Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
 		m_pd3dCommandList->ResourceBarrier(2, d3dResourceBarrier);
 
-		m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["Blur_Horizontal"]);
+		g_TextureMng.UseForComputeShaderResourceSRV(
+			"Screen", m_pd3dCommandList, ROOTSIGNATURE_COLOR_TEXTURE);					// Render Result
+		g_TextureMng.UseForComputeShaderResourceUAV(
+			"DownScaled", m_pd3dCommandList, ROOTSIGNATURE_POSTPROCESS_TEXTURE);		// DownScaled
+		m_pd3dCommandList->SetComputeRootUnorderedAccessView(
+			ROOTSIGNATURE_HDRLUMBUFFER, m_pd3duabHDRAvgLum->GetGPUVirtualAddress());	// AvgLum Buff
 
-		g_TextureMng.UseForComputeShaderResourceSRV("Blur_Vertical", m_pd3dCommandList, ROOTSIGNATURE_COLOR_TEXTURE);
-		g_TextureMng.UseForComputeShaderResourceUAV("Blur_Horizontal", m_pd3dCommandList, ROOTSIGNATURE_POSTPROCESS_TEXTURE);
+		UINT numGroups = (UINT)ceilf(FRAME_BUFFER_WIDTH / 1024.0f);
+		m_pd3dCommandList->Dispatch(numGroups, FRAME_BUFFER_HEIGHT, 1);
 
-		numGroups = (UINT)ceilf((FRAME_BUFFER_HEIGHT / 2) / 256.0f);
-		m_pd3dCommandList->Dispatch(FRAME_BUFFER_WIDTH / 2, numGroups, 1);
+		/*===========================================================================
+		* Calc FinalAvgLum and store to 'gfAvgLum' Buffer's [0].
+		*==========================================================================*/
+		m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["HDR_Second"]);
+
+		m_pd3dCommandList->Dispatch(1, 1, 1);
+
+		/*===========================================================================
+		* Bloom Rendering to 'Blur_Horizontal' Texture.
+		*==========================================================================*/
+		m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["PP_Bloom"]);
+
+		d3dResourceBarrier[0].Transition.pResource = g_TextureMng.GetTextureResource("DownScaled");
+		d3dResourceBarrier[0].Transition.StateBefore = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
+		d3dResourceBarrier[0].Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+		d3dResourceBarrier[1].Transition.pResource = g_TextureMng.GetTextureResource("Blur_Horizontal");
+		d3dResourceBarrier[1].Transition.StateBefore = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE ;
+		d3dResourceBarrier[1].Transition.StateAfter = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
+		m_pd3dCommandList->ResourceBarrier(2, d3dResourceBarrier);
+
+		g_TextureMng.UseForComputeShaderResourceSRV(
+			"DownScaled", m_pd3dCommandList, ROOTSIGNATURE_COLOR_TEXTURE);
+		g_TextureMng.UseForComputeShaderResourceUAV(
+			"Blur_Horizontal", m_pd3dCommandList, ROOTSIGNATURE_POSTPROCESS_TEXTURE);
+
+		numGroups = (UINT)ceilf((FRAME_BUFFER_WIDTH / 4) / 1024.0f);
+		m_pd3dCommandList->Dispatch(numGroups, FRAME_BUFFER_HEIGHT / 4, 1);
+
+
+		/*===========================================================================
+		* Bloom Blur Vertical
+		*==========================================================================*/
+		m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["Blur_Vertical"]);
 
 		d3dResourceBarrier[0].Transition.pResource = g_TextureMng.GetTextureResource("Blur_Horizontal");
 		d3dResourceBarrier[0].Transition.StateBefore = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
@@ -728,47 +827,64 @@ void Scene::Render(D3D12_CPU_DESCRIPTOR_HANDLE hBckBufRtv, D3D12_CPU_DESCRIPTOR_
 		d3dResourceBarrier[1].Transition.pResource = g_TextureMng.GetTextureResource("Blur_Vertical");
 		d3dResourceBarrier[1].Transition.StateBefore = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
 		d3dResourceBarrier[1].Transition.StateAfter = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
-		d3dResourceBarrier[2].Transition.pResource = g_TextureMng.GetTextureResource("SmallScreen");
-		d3dResourceBarrier[2].Transition.StateBefore = D3D12_RESOURCE_STATE_GENERIC_READ;
-		d3dResourceBarrier[2].Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
-		m_pd3dCommandList->ResourceBarrier(3, d3dResourceBarrier);
+		m_pd3dCommandList->ResourceBarrier(2, d3dResourceBarrier);
 
-		/*========================================================================
-		* Final Result
-		*=======================================================================*/
-		m_pd3dCommandList->SetGraphicsRootSignature(m_pd3dRootSignature);
-		m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["SRToRt"]);
+		g_TextureMng.UseForComputeShaderResourceSRV(
+			"Blur_Horizontal", m_pd3dCommandList, ROOTSIGNATURE_COLOR_TEXTURE);
+		g_TextureMng.UseForComputeShaderResourceUAV(
+			"Blur_Vertical", m_pd3dCommandList, ROOTSIGNATURE_POSTPROCESS_TEXTURE);
 
-		g_TextureMng.UseForShaderResource("Blur_Horizontal", m_pd3dCommandList, ROOTSIGNATURE_COLOR_TEXTURE);
+		numGroups = (UINT)ceilf((FRAME_BUFFER_WIDTH / 4) / 256.0f);
+		m_pd3dCommandList->Dispatch(numGroups, FRAME_BUFFER_HEIGHT / 4, 1);
 
-		m_pd3dCommandList->ClearDepthStencilView(hBckBufDsv, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
-		m_pd3dCommandList->OMSetRenderTargets(1, &hBckBufRtv, TRUE, &hBckBufDsv);
-		m_vecDebugWindow[0]->Render(m_pd3dCommandList);
-	}
-	else if (gTestInt == 2) {
-		m_pd3dCommandList->SetComputeRootSignature(m_pd3dRootSignature);
-		m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["HDR_First"]);
+		/*===========================================================================
+		* Bloom Blur Horizontal
+		*==========================================================================*/
+		m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["Blur_Horizontal"]);
 
+		d3dResourceBarrier[0].Transition.pResource = g_TextureMng.GetTextureResource("Blur_Vertical");
+		d3dResourceBarrier[0].Transition.StateBefore = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
+		d3dResourceBarrier[0].Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+		d3dResourceBarrier[1].Transition.pResource = g_TextureMng.GetTextureResource("Blur_Horizontal");
+		d3dResourceBarrier[1].Transition.StateBefore = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+		d3dResourceBarrier[1].Transition.StateAfter = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
+		m_pd3dCommandList->ResourceBarrier(2, d3dResourceBarrier);
 
-		g_TextureMng.UseForComputeShaderResourceSRV("Screen", m_pd3dCommandList, ROOTSIGNATURE_COLOR_TEXTURE);
-		m_pd3dCommandList->SetComputeRootUnorderedAccessView(ROOTSIGNATURE_HDRLUMBUFFER, m_pd3duabHDRAvgLum->GetGPUVirtualAddress());
+		g_TextureMng.UseForComputeShaderResourceSRV(
+			"Blur_Vertical", m_pd3dCommandList, ROOTSIGNATURE_COLOR_TEXTURE);
+		g_TextureMng.UseForComputeShaderResourceUAV(
+			"Blur_Horizontal", m_pd3dCommandList, ROOTSIGNATURE_POSTPROCESS_TEXTURE);
 
-		UINT numGroups = (UINT)ceilf(FRAME_BUFFER_WIDTH / 1024.0f);
-		m_pd3dCommandList->Dispatch(numGroups, FRAME_BUFFER_HEIGHT, 1);
+		numGroups = (UINT)ceilf((FRAME_BUFFER_HEIGHT / 4) / 256.0f);
+		m_pd3dCommandList->Dispatch(FRAME_BUFFER_WIDTH / 4, numGroups, 1);
 
-		m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["HDR_Second"]);
-
-		m_pd3dCommandList->Dispatch(1, 1, 1);
-
+		/*===========================================================================
+		* Screen Render
+		*==========================================================================*/
 		m_pd3dCommandList->SetGraphicsRootSignature(m_pd3dRootSignature);
 		m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["HDR_Last"]);
 
-		g_TextureMng.UseForShaderResource("Screen", m_pd3dCommandList, ROOTSIGNATURE_COLOR_TEXTURE);
-		m_pd3dCommandList->SetGraphicsRootUnorderedAccessView(ROOTSIGNATURE_HDRLUMBUFFER, m_pd3duabHDRAvgLum->GetGPUVirtualAddress());
+		d3dResourceBarrier[0].Transition.pResource = g_TextureMng.GetTextureResource("Blur_Horizontal");
+		d3dResourceBarrier[0].Transition.StateBefore = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
+		d3dResourceBarrier[0].Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE ;
+		m_pd3dCommandList->ResourceBarrier(1, d3dResourceBarrier);
 
-		m_pd3dCommandList->ClearDepthStencilView(hBckBufDsv, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
+		g_TextureMng.UseForShaderResource(
+			"Screen", m_pd3dCommandList, ROOTSIGNATURE_COLOR_TEXTURE);
+		g_TextureMng.UseForShaderResource(
+			"Blur_Horizontal", m_pd3dCommandList, ROOTSIGNATURE_NORMAL_TEXTURE);
+		m_pd3dCommandList->SetGraphicsRootUnorderedAccessView(
+			ROOTSIGNATURE_HDRLUMBUFFER, m_pd3duabHDRAvgLum->GetGPUVirtualAddress());
+
+		m_pd3dCommandList->ClearDepthStencilView(hBckBufDsv, 
+			D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
 		m_pd3dCommandList->OMSetRenderTargets(1, &hBckBufRtv, TRUE, &hBckBufDsv);
 		m_vecDebugWindow[0]->Render(m_pd3dCommandList);
+
+		d3dResourceBarrier[0].Transition.pResource = g_TextureMng.GetTextureResource("Screen");
+		d3dResourceBarrier[0].Transition.StateBefore = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE ;
+		d3dResourceBarrier[0].Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
+		m_pd3dCommandList->ResourceBarrier(1, d3dResourceBarrier);
 	}
 	else {
 		m_pd3dCommandList->SetGraphicsRootSignature(m_pd3dRootSignature);
@@ -914,27 +1030,35 @@ void Scene::CreatePSO()
 	DebugDepthPSO DebugDepthPso = DebugDepthPSO(m_pd3dDevice, m_pd3dRootSignature);
 	m_uomPipelineStates["DebugDepth"] = DebugDepthPso.GetPipelineState();
 
-	VerticalBlurPSO VerticalBlurPso = VerticalBlurPSO(m_pd3dDevice, m_pd3dRootSignature);
+
+	/*============================================================================
+	* Blur
+	============================================================================*/
+	VerticalBlurCPSO VerticalBlurPso = VerticalBlurCPSO(m_pd3dDevice, m_pd3dRootSignature);
 	m_uomPipelineStates["Blur_Vertical"] = VerticalBlurPso.GetPipelineState();
-
-	HorizontalBlurPSO HorizontalBlurPso = HorizontalBlurPSO(m_pd3dDevice, m_pd3dRootSignature);
+	HorizontalBlurCPSO HorizontalBlurPso = HorizontalBlurCPSO(m_pd3dDevice, m_pd3dRootSignature);
 	m_uomPipelineStates["Blur_Horizontal"] = HorizontalBlurPso.GetPipelineState();
-
 	SRToRtPSO SRToRtPso = SRToRtPSO(m_pd3dDevice, m_pd3dRootSignature);
 	m_uomPipelineStates["SRToRt"] = SRToRtPso.GetPipelineState();
 
 
-	/*=========================================================================
+	/*============================================================================
 	* HDR
-	=========================================================================*/
+	============================================================================*/
 	HDRFstPassCPSO HDRFstPassCpso = HDRFstPassCPSO(m_pd3dDevice, m_pd3dRootSignature);
 	m_uomPipelineStates["HDR_First"] = HDRFstPassCpso.GetPipelineState();
-
 	HDRScdPassCPSO HDRScdPassCpso = HDRScdPassCPSO(m_pd3dDevice, m_pd3dRootSignature);
 	m_uomPipelineStates["HDR_Second"] = HDRScdPassCpso.GetPipelineState();
-
 	HDRToneMappingPSO HDRToneMappingPso = HDRToneMappingPSO(m_pd3dDevice, m_pd3dRootSignature);
 	m_uomPipelineStates["HDR_Last"] = HDRToneMappingPso.GetPipelineState();
+
+	/*============================================================================
+	* Bloom
+	============================================================================*/
+	BloomCPSO BloomCpso = BloomCPSO(m_pd3dDevice, m_pd3dRootSignature);
+	m_uomPipelineStates["PP_Bloom"] = BloomCpso.GetPipelineState();
+
+
 }
 void Scene::UpdatePassInfoAboutCamera()
 {

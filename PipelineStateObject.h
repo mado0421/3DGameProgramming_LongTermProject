@@ -301,36 +301,31 @@ protected:
 	ID3D12PipelineState* m_pd3dPipelineState = nullptr;
 };
 
-/*========================================================================
-* VerticalBlurPSO
-*
-* - CS_VerticalBlur
-*=======================================================================*/
-class VerticalBlurPSO : public ComputePipelineStateObject
+/*=============================================================================
+* Blur
+* - VerticalBlurCPSO
+* - HorizontalBlurCPSO
+*============================================================================*/
+class VerticalBlurCPSO : public ComputePipelineStateObject
 {
 public:
-	VerticalBlurPSO(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dRootSignature) { CreatePipelineState(pd3dDevice, pd3dRootSignature); }
+	VerticalBlurCPSO(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dRootSignature) 
+	{ CreatePipelineState(pd3dDevice, pd3dRootSignature); }
 protected:	
 	virtual void CreatePipelineState(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dRootSignature);
 
 	virtual D3D12_SHADER_BYTECODE		CreateComputeShader(ID3DBlob** ppd3dShaderBlob);
 };
-
-/*========================================================================
-* HorizontalBlurPSO
-*
-* - CS_HorizontalBlur
-*=======================================================================*/
-class HorizontalBlurPSO : public ComputePipelineStateObject
+class HorizontalBlurCPSO : public ComputePipelineStateObject
 {
 public:
-	HorizontalBlurPSO(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dRootSignature) { CreatePipelineState(pd3dDevice, pd3dRootSignature); }
+	HorizontalBlurCPSO(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dRootSignature) 
+	{ CreatePipelineState(pd3dDevice, pd3dRootSignature); }
 protected:
 	virtual void CreatePipelineState(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dRootSignature);
 
 	virtual D3D12_SHADER_BYTECODE		CreateComputeShader(ID3DBlob** ppd3dShaderBlob);
 };
-
 
 /*=============================================================================
 * HDR ToneMapping
@@ -369,3 +364,19 @@ protected:
 	virtual D3D12_SHADER_BYTECODE		CreateVertexShader(ID3DBlob** ppd3dShaderBlob);
 	virtual D3D12_SHADER_BYTECODE		CreatePixelShader(ID3DBlob** ppd3dShaderBlob);
 };
+
+/*=============================================================================
+* Bloom
+* - BloomCPSO
+*============================================================================*/
+class BloomCPSO : public ComputePipelineStateObject
+{
+public:
+	BloomCPSO(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dRootSignature) 
+	{ CreatePipelineState(pd3dDevice, pd3dRootSignature); }
+protected:
+	virtual void CreatePipelineState(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dRootSignature);
+
+	virtual D3D12_SHADER_BYTECODE		CreateComputeShader(ID3DBlob** ppd3dShaderBlob);
+};
+
