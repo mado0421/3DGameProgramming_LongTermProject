@@ -120,49 +120,48 @@ void CS_HorizontalBlur(
 =============================================================================*/
 static const uint2 RES = uint2(1920 / 4, 1080 / 4);
 static const uint DOMAIN = (1920 * 1080) / 16;
-static const uint GroupSize = DOMAIN * 1024;
+static const uint GroupSize = 1024;
+//static const uint GroupSize = DOMAIN * 1024;
 groupshared float SharedPositions[1024];
 
 #define BLOOM
 
 float DownScale4x4(uint2 curPixel, uint GTid) {
 	float avgLum = 0.0f;
-	//if (curPixel.y < RES.y) {
-		int3 nFullResPos = int3(curPixel * 4, 0);
-		float4 downScaled = float4(0, 0, 0, 0);
+	int3 nFullResPos = int3(curPixel * 4, 0);
+	float4 downScaled = float4(0, 0, 0, 0);
+	[unroll]
+	for (int i = 0; i < 4; i++) {
 		[unroll]
-		for (int i = 0; i < 4; i++) {
-			[unroll]
-			for (int j = 0; j < 4; j++) {
-				downScaled += gtxtColorMap.Load(nFullResPos, int2(j, i));
-			}
+		for (int j = 0; j < 4; j++) {
+			downScaled += gtxtColorMap.Load(nFullResPos, int2(j, i));
 		}
+	}
 
-		downScaled /= 16.0;
+	downScaled /= 16.0;
 #ifdef BLOOM
-		gtxtPostProcessMap[curPixel.xy] = downScaled;
+	gtxtPostProcessMap[curPixel.xy] = downScaled;
 #else
 
 #endif
-		avgLum = dot(downScaled, LUM_FACTOR);
-		SharedPositions[GTid] = avgLum;
-	//}
+	avgLum = dot(downScaled, LUM_FACTOR);
+	SharedPositions[GTid] = avgLum;
 	GroupMemoryBarrierWithGroupSync();
 
 	return avgLum;
 }
-float DownScale1024to4(uint DTid, uint GTid, float avgLum) {
+float DownScale1024to4(uint DTidx, uint GTid, float avgLum) {
 	[unroll]
 	for (uint groupSize = 4, step1 = 1, step2 = 2, step3 = 3;
 		groupSize < 1024;
 		groupSize *= 4, step1 *= 4, step2 *= 4, step3 *= 4) {
 		if (GTid % groupSize == 0) {
 			float stepAvgLum = avgLum;
-			stepAvgLum += DTid + step1 < DOMAIN ?
+			stepAvgLum += DTidx + step1 < 1920 ?
 				SharedPositions[GTid + step1] : avgLum;
-			stepAvgLum += DTid + step2 < DOMAIN ?
+			stepAvgLum += DTidx + step2 < 1920 ?
 				SharedPositions[GTid + step2] : avgLum;
-			stepAvgLum += DTid + step3 < DOMAIN ?
+			stepAvgLum += DTidx + step3 < 1920 ?
 				SharedPositions[GTid + step3] : avgLum;
 			avgLum = stepAvgLum;
 			SharedPositions[GTid] = stepAvgLum;
@@ -172,20 +171,20 @@ float DownScale1024to4(uint DTid, uint GTid, float avgLum) {
 	}
 	return avgLum;
 }
-void DownScale4to1(uint DTid, uint GTid, uint Gid, float avgLum) {
+void DownScale4to1(uint DTidx, uint GTid, uint Gidy, float avgLum) {
 	if (GTid == 0) {
 		float fFinalAvgLum = avgLum;
 
-		fFinalAvgLum += DTid + 256 < DOMAIN ?
+		fFinalAvgLum += DTidx + 256 < 1920 ?
 			SharedPositions[GTid + 256] : avgLum;
-		fFinalAvgLum += DTid + 512 < DOMAIN ?
+		fFinalAvgLum += DTidx + 512 < 1920 ?
 			SharedPositions[GTid + 512] : avgLum;
-		fFinalAvgLum += DTid + 768 < DOMAIN ?
+		fFinalAvgLum += DTidx + 768 < 1920 ?
 			SharedPositions[GTid + 768] : avgLum;
 
 		fFinalAvgLum /= 1024.0;
 
-		gfAvgLum[Gid] = fFinalAvgLum;
+		gfAvgLum[Gidy] = fFinalAvgLum;
 	}
 }
 
@@ -193,25 +192,33 @@ void DownScale4to1(uint DTid, uint GTid, uint Gid, float avgLum) {
 void CS_DownScaleFirstPass(uint3 Gid : SV_GroupID,
 	uint3 DTid : SV_DispatchThreadID,
 	uint3 GTid : SV_GroupThreadID) {
-	uint2 curPixel = uint2(DTid.x % RES.x, DTid.y % RES.y);
+
+	// Resolution 제한을 두는 이유는
+	// gtxtPostProcessMap[xy]에 넣어야 하는데
+	// 그 크기가 RES만큼이기 때문.
+	// y는 어짜피 Dispatch를 2, RES.y, 1 만큼 할거라 ㄱㅊ음
+	uint2 curPixel = uint2(DTid.x%RES.x, DTid.y);
 
 	float avgLum = DownScale4x4(curPixel, GTid.x);
 	avgLum = DownScale1024to4(DTid.x, GTid.x, avgLum);
-	DownScale4to1(DTid.x, GTid.x, Gid.x, avgLum);
+	DownScale4to1(DTid.x, GTid.x, Gid.y, avgLum);
 }
 
-groupshared float SharedAvgFinal[64];
+groupshared float SharedAvgFinal[1024];
 
-[numthreads(64, 1, 1)]
+[numthreads(1024, 1, 1)]
 void CS_DownScaleSecondPass(uint3 Gid : SV_GroupID,
 	uint3 GTid : SV_GroupThreadID,
 	uint3 DTid : SV_DispatchThreadID) {
 
+	// 앞에서 저장한 1, 270, 1 의 결과물 (Gid 270까지의 버퍼 내용)
 	float avgLum = 0.0f;
+	if (DTid.x < 270) avgLum = gfAvgLum[DTid.x];
 	SharedAvgFinal[DTid.x] = avgLum;
 
 	GroupMemoryBarrierWithGroupSync();
 
+	// 1024 -> 256
 	if (DTid.x % 4 == 0) {
 		float stepAvgLum = avgLum;
 		stepAvgLum += DTid.x + 1 < GroupSize ?
@@ -227,6 +234,7 @@ void CS_DownScaleSecondPass(uint3 Gid : SV_GroupID,
 
 	GroupMemoryBarrierWithGroupSync();
 
+	// 256 -> 64
 	if (DTid.x % 16 == 0) {
 		float stepAvgLum = avgLum;
 		stepAvgLum += DTid.x + 4 < GroupSize ?
@@ -242,21 +250,66 @@ void CS_DownScaleSecondPass(uint3 Gid : SV_GroupID,
 
 	GroupMemoryBarrierWithGroupSync();
 
-	if (DTid.x == 0) {
-		float fFinalLumValue = avgLum;
-		fFinalLumValue += DTid.x + 16 < GroupSize ?
+	// 64 -> 16
+	if (DTid.x % 64 == 0) {
+		float stepAvgLum = avgLum;
+		stepAvgLum += DTid.x + 16 < GroupSize ?
 			SharedAvgFinal[DTid.x + 16] : avgLum;
-		fFinalLumValue += DTid.x + 32 < GroupSize ?
-			SharedAvgFinal[DTid.x + 32] : avgLum;
-		fFinalLumValue += DTid.x + 48 < GroupSize ?
+		stepAvgLum += DTid.x + 24 < GroupSize ?
+			SharedAvgFinal[DTid.x + 24] : avgLum;
+		stepAvgLum += DTid.x + 48 < GroupSize ?
 			SharedAvgFinal[DTid.x + 48] : avgLum;
 
-		fFinalLumValue /= 64.0;
+		avgLum = stepAvgLum;
+		SharedAvgFinal[DTid.x] = stepAvgLum;
+	}
+
+	GroupMemoryBarrierWithGroupSync();
+
+	//if (DTid.x == 0) {
+	//	float fFinalLumValue = avgLum;
+	//	fFinalLumValue += DTid.x + 64 < GroupSize ?
+	//		SharedAvgFinal[DTid.x + 64] : avgLum;
+	//	fFinalLumValue += DTid.x + 128 < GroupSize ?
+	//		SharedAvgFinal[DTid.x + 128] : avgLum;
+	//	fFinalLumValue += DTid.x + 192 < GroupSize ?
+	//		SharedAvgFinal[DTid.x + 192] : avgLum;
+
+	//	fFinalLumValue /= 512.0;
+	//	gfAvgLum[0] = fFinalLumValue;
+	//}
+	// 16 -> 4
+	if (DTid.x % 64 == 0) {
+		float stepAvgLum = avgLum;
+		stepAvgLum += DTid.x + 64 < GroupSize ?
+			SharedAvgFinal[DTid.x + 64] : avgLum;
+		stepAvgLum += DTid.x + 128 < GroupSize ?
+			SharedAvgFinal[DTid.x + 128] : avgLum;
+		stepAvgLum += DTid.x + 192 < GroupSize ?
+			SharedAvgFinal[DTid.x + 192] : avgLum;
+
+		avgLum = stepAvgLum;
+		SharedAvgFinal[DTid.x] = stepAvgLum;
+	}
+
+	GroupMemoryBarrierWithGroupSync();
+
+	// 4 -> 1
+	if (DTid.x == 0) {
+		float fFinalLumValue = avgLum;
+		fFinalLumValue += DTid.x + 256 < GroupSize ?
+			SharedAvgFinal[DTid.x + 256] : avgLum;
+		fFinalLumValue += DTid.x + 512 < GroupSize ?
+			SharedAvgFinal[DTid.x + 512] : avgLum;
+		fFinalLumValue += DTid.x + 768 < GroupSize ?
+			SharedAvgFinal[DTid.x + 768] : avgLum;
+
+		fFinalLumValue /= 1024.0;
 		gfAvgLum[0] = fFinalLumValue;
 	}
 }
 
-static const float fBloomThreshols = 0.5f;
+static const float fBloomThreshols = 0.8f;
 
 [numthreads(1024,1,1)]
 void CS_Bloom(uint3 DTid : SV_DispatchThreadID) {

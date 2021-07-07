@@ -220,7 +220,8 @@ void Scene::Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12Graphics
 	CreatePassInfoShaderResource();
 	{
 		int totalBckBufPixels 
-			= (FRAME_BUFFER_WIDTH * FRAME_BUFFER_WIDTH) / (16 * 1024);
+			= FRAME_BUFFER_WIDTH * 2;
+		//= (FRAME_BUFFER_WIDTH * FRAME_BUFFER_WIDTH) / (16 * 1024);
 
 		HRESULT hr = E_FAIL;
 
@@ -784,8 +785,21 @@ void Scene::Render(D3D12_CPU_DESCRIPTOR_HANDLE hBckBufRtv, D3D12_CPU_DESCRIPTOR_
 		m_pd3dCommandList->SetComputeRootUnorderedAccessView(
 			ROOTSIGNATURE_HDRLUMBUFFER, m_pd3duabHDRAvgLum->GetGPUVirtualAddress());	// AvgLum Buff
 
-		UINT numGroups = (UINT)ceilf(FRAME_BUFFER_WIDTH / 1024.0f);
-		m_pd3dCommandList->Dispatch(numGroups, FRAME_BUFFER_HEIGHT, 1);
+		UINT numGroups;
+		//UINT numGroups = (UINT)ceilf(FRAME_BUFFER_WIDTH / 1024.0f);
+		m_pd3dCommandList->Dispatch(1, FRAME_BUFFER_HEIGHT / 4, 1);
+		/*
+		이 부분은 모르는 상태에서 보면 정말 어렵다.
+		따라서 메모를 적어둔다.
+
+		한 스레드 그룹은 [numthreads(1024, 1, 1,)]로 되어있다.
+		CS_DownScaleFirstPass()는 x축 방향으로 1024개씩 접근하고,
+		가로세로 1/4까지만 읽으면 되기 때문에 1920 / 4, 1080 / 4 인 480, 270
+		480은 1024 한 번에 끝.
+		270은 1024, 1, 1이니까 270번
+
+		이렇게 하면 gfAvgLum[270]까지 내용이 찬다.
+		*/
 
 		/*===========================================================================
 		* Calc FinalAvgLum and store to 'gfAvgLum' Buffer's [0].
@@ -793,6 +807,9 @@ void Scene::Render(D3D12_CPU_DESCRIPTOR_HANDLE hBckBufRtv, D3D12_CPU_DESCRIPTOR_
 		m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["HDR_Second"]);
 
 		m_pd3dCommandList->Dispatch(1, 1, 1);
+		/*
+		270까지 찬 내용을 다운스케일 해서 하나로 만들고 그걸 gfAvgLum[0]에 넣어줌.
+		*/
 
 		/*===========================================================================
 		* Bloom Rendering to 'Blur_Horizontal' Texture.
