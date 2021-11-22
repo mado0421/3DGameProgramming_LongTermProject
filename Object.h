@@ -2,6 +2,10 @@
 #include "Animation.h"
 #include "State.h"
 
+#include "Transform.h"
+
+
+
 struct CB_OBJECT_INFO {
 	XMFLOAT4X4	xmf4x4World;
 };
@@ -67,6 +71,18 @@ protected:
 	double		m_time;
 	XMFLOAT3	m_xmf3Velocity;
 	Object*		m_pParent;
+
+protected:
+	list<Component*> m_Components;
+
+protected:
+	// 못 찾으면 nullptr을 반환함.
+	Component* FindComponentByName(const char* strName) {
+		for_each(m_Components.cbegin(), m_Components.cend(), 
+			[&strName](Component* c) { if (c->isEqualTo(strName)) return c->GetInstance(); }
+		);
+		return nullptr;
+	}
 };
 
 class DebugWindowObject : public Object {

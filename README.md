@@ -821,3 +821,82 @@ Bloom 효과는 구현했으니 평균 휘도 구하는 코드를 책을 참고�
 아직도 헷갈리는 부분이 너무 많다... 
 
 <img src="https://user-images.githubusercontent.com/21697638/124716563-30d2ff00-df3f-11eb-96ec-16d1a6e96cfd.png" width="70%" height="70%"></img>
+
+
+### 이번주 일정
+#### 21.07.12 - 21.07.18
+* Multi Thread Rendering
+
+### 2주 목표
+* Multi Thread Rendering
+
+백신 1차 접종 맞고 푹 쉬었음.
+
+### 2021.07.13
+
+멀티스레드 사용법을 먼저 리마인드. 예전에 들었던 멀티스레드 프로그래밍 강의 내용을 어떤 분이 정리해두신게 있어서 참고했다.
+
+### 2021.07.14
+
+[Tips and experience of DX12 Engine development . (slideshare.net)](https://www.slideshare.net/dgtman/tips-and-experience-of-dx12-engine-development)
+
+멀티스레드를 사용할만한 부분은
+- G-buffer 생성 시에 오브젝트들을 스레드 별로 나눠 그리기
+- 그림자 깊이맵을 스레드 별로 나눠 그리기
+
+정도가 있을 것 같다.
+
+미리 CmdList를 여러 개 생성해서 들고 있다가 필요한 부분에서 새 스레드를 생성해서 명령을 넣는 방법을 먼저 해보고... 다른 방법도 좀 찾아보고... 해봐야 할 것 같음.
+
+### 2021.07.15
+
+<img src="https://user-images.githubusercontent.com/21697638/125733034-af46b913-bb07-446d-8a42-59c32ca1dc64.png" width="70%" height="70%"></img>
+
+<img src="https://user-images.githubusercontent.com/21697638/125733135-cfa488ca-5875-43f8-8e6c-4b2331707c3e.png" width="70%" height="70%"></img>
+
+AnimUploader를 전역에 하나 만들던 것에서 각 AnimatedObject 별로 하나씩 갖게 하였다. (모든 객체가 각자 애니메이션 데이터를 업로드 할 수 있도록)
+사람 오브젝트에게 간단한 AI를 만들어서 무작위 방향으로 움직이도록 만들고, 721개를 (1개는 플레이어가 조종) 생성했다.
+
+프레임 한 장 그릴 때 걸리는 시간을 줄이는게 목표.
+
+절두체 컬링이나 인스턴싱 같은걸 쓰지 않고 오로지 멀티스레드 렌더링만으로 프레임을 줄여보자.
+
+### 이번주 일정
+#### 21.11.08 - 21.11.14
+* Collision Detection
+
+### 2주 목표
+* Collision Handling
+
+여름에 에어컨 없이 작은 방 안에 갇혀 있다보니 그대로 작업을 놨는데 그게 그대로 지금까지 이어졌다.
+완전 푹 쉬었음...
+멀티스레드 렌더링을 시도해보면 나쁠건 없어 보이지만 일단 초기 목표였던 충돌검사와 충돌처리를 먼저 간단하게 끝내고 나서 다시 생각해보는게 어떨까 싶어 기존 일정이었던 멀티스레드 렌더링을 치웠다.
+
+물리엔진을 만들 것도 아니고, Physx를 붙일 것도 아니기 때문에 매우 간단한 충돌 검사와 이후 보정 등만 해야 한다.
+일단 만들어보고 성능적인 문제가 크면 그 때 공간분할이든 뭐든 추가하고 그게 아니라면 따로 추가하지 않는다.
+(60프레임 방어를 못할 경우)
+
+
+### 이번주 일정
+#### 21.11.14 - 21.11.21
+* Collision Detection
+
+### 2021.11.15
+BoundingOrientedBox 를 사용해서 Intersects()로 검사하는 테스트 코드를 작성했다.
+깃허브  데스크탑의 git: 'remote-https' is not a git command. See 'git --help'. 라는 오류 때문에 갑자기 푸시가 되지 않는다.
+
+### 2021.11.16
+시스템 환경변수 문제였던 것 같아 예전에 추가했던 환경변수들을 정리하고, \AppData\Local\GitHubDesktop 와 \AppData\Roaming\GitHub Desktop 를 삭제한 뒤, 재설치했다.
+모든 git과 관련된 프로그램을 삭제하고, 파이참, 아나콘다 등도 삭제했다.
+다시 publish branch와 push가 된다.
+
+### 이번주 일정
+#### 21.11.22 - 21.11.28
+* Component
+* Collision Detection
+
+### 2021.11.22
+기존 코드에 깔끔하게 Collider를 추가할 방법이 떠오르지 않아 Component 방식을 다시 한 번 시도해보기로 했다.
+Transform, MeshRenderer, SkinnedMeshRenderer, Collider(또는 BoxCollider, SphereCollider로 나누거나) Component를 작성하고 테스트 할 예정.
+Component Class를 작성하고 Transform과 MeshRenderer Class가 Component를 상속받도록 작성하였다.
+MeshRenderer는 같은 Object가 가지고 있는  Transform에 접근할 수 있어야 하므로 Object 내부에서 Component를 이름으로 찾을 수 있는 함수를 추가하였다.

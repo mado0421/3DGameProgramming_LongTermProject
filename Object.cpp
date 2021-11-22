@@ -13,8 +13,8 @@ Object::Object(
 	D3D12_GPU_DESCRIPTOR_HANDLE& d3dCbvGPUDescriptorStartHandle)
 {
 	m_xmf4x4Local			= Matrix4x4::Identity();
-	Mesh * pMesh			= new Mesh(pd3dDevice, pd3dCommandList);
-	m_xmf3Velocity = XMFLOAT3(0, 0, 0);
+	//Mesh * pMesh			= new Mesh(pd3dDevice, pd3dCommandList);
+	m_xmf3Velocity			= XMFLOAT3(0, 0, 0);
 
 	UINT ncbElementBytes = ((sizeof(CB_OBJECT_INFO) + 255) & ~255);
 
