@@ -7,5 +7,6 @@
 { name PistolMat d pistol_albedo n pistol_normal f 0.1 0.1 0.1 }
 { name WallBottomMat d ArcadedWoodPanels_albedo n ArcadedWoodPanels_normal f 0.1 0.1 0.1 }
 { name WallTopMat d Leather_Tufted_albedo n Leather_Tufted_normal f 0.1 0.1 0.1 }
+{ name MechMat d Mech_albedo f 0.1 0.1 0.1 }
 
 #End

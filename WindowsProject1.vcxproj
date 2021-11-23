@@ -150,9 +150,6 @@
     <ClInclude Include="DDSTextureLoader12.h" />
     <ClInclude Include="Define.h" />
     <ClInclude Include="Framework.h" />
-    <ClInclude Include="IComponent.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-    </ClInclude>
     <ClInclude Include="Importer.h" />
     <ClInclude Include="Light.h" />
     <ClInclude Include="Mask.h" />
@@ -181,9 +178,6 @@
     <ClCompile Include="d3dUtil.cpp" />
     <ClCompile Include="DDSTextureLoader12.cpp" />
     <ClCompile Include="Framework.cpp" />
-    <ClCompile Include="IComponent.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="Importer.cpp" />
     <ClCompile Include="Light.cpp" />
     <ClCompile Include="Mask.cpp" />
@@ -258,6 +252,7 @@
   <ItemGroup>
     <Text Include="Data\AssetsData.txt" />
     <Text Include="Data\LightData.txt" />
+    <Text Include="Data\MaterialData.txt" />
     <Text Include="Data\ObjectData.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

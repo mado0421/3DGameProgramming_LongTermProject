@@ -10,10 +10,12 @@ ArcadedWoodPanels_albedo.dds
 ArcadedWoodPanels_normal.dds
 Leather_Tufted_albedo.dds
 Leather_Tufted_normal.dds
+Mech_albedo.dds
 human.mm
 10x10Floor.mm
 pistol.mm
 10x1wall.mm
+Mech.mm
 Humanoid_Aiming.mac
 Humanoid_Idle.mac
 Humanoid_Idle2.mac

@@ -73,12 +73,12 @@ protected:
 	Object*		m_pParent;
 
 protected:
-	list<Component*> m_Components;
+	vector<Component*> m_Components;
 
-protected:
+public:
 	// 못 찾으면 nullptr을 반환함.
 	Component* FindComponentByName(const char* strName) {
-		for_each(m_Components.cbegin(), m_Components.cend(), 
+		for_each(m_Components.begin(), m_Components.end(), 
 			[&strName](Component* c) { if (c->isEqualTo(strName)) return c->GetInstance(); }
 		);
 		return nullptr;
@@ -99,6 +99,14 @@ public:
 
 private:
 	DebugWindowMesh*			m_pDWMesh;
+};
+
+class Screen {
+public:
+	Screen();
+	~Screen();
+
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList);
 };
 
 class AnimatedObject : public Object {

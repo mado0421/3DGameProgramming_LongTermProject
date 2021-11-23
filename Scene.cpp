@@ -363,8 +363,8 @@ void Scene::Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12Graphics
 	}
 	g_AnimUploader = new AnimationUploader(pd3dDevice, pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
 
-	m_vecObject[0]->SetParent(m_vecAnimObject[0]);
-	m_vecObject[0]->SetPosition(XMFLOAT3(-0.028f, 0.0f, 0.08f));
+	//m_vecObject[0]->SetParent(m_vecAnimObject[0]);
+	//m_vecObject[0]->SetPosition(XMFLOAT3(-0.028f, 0.0f, 0.08f));
 
 	/*========================================================================
 	* Pass 2 전용 디버그 윈도우 생성
@@ -647,9 +647,9 @@ void Scene::Render(D3D12_CPU_DESCRIPTOR_HANDLE hBckBufRtv, D3D12_CPU_DESCRIPTOR_
 		if (m_LightMng->GetIsShadow(i)) {
 			switch (m_LightMng->GetLightType(i))
 			{
-			case LightType::LIGHT_SPOT: g_TextureMng.UseForShaderResource(m_LightMng->GetShadowMapName(i).c_str(), m_pd3dCommandList, ROOTSIGNATURE_SHADOW_TEXTURE); break;
-			case LightType::LIGHT_POINT: g_TextureMng.UseForShaderResource(m_LightMng->GetShadowMapName(i).c_str(), m_pd3dCommandList, ROOTSIGNATURE_CUBE_TEXTURE); break;
-			case LightType::LIGHT_DIRECTIONAL:g_TextureMng.UseForShaderResource(m_LightMng->GetShadowMapName(i).c_str(), m_pd3dCommandList, ROOTSIGNATURE_SHADOWARRAY_TEXTURE); break;
+			case LightType::LIGHT_SPOT:			g_TextureMng.UseForShaderResource(m_LightMng->GetShadowMapName(i).c_str(), m_pd3dCommandList, ROOTSIGNATURE_SHADOW_TEXTURE);		break;
+			case LightType::LIGHT_POINT:		g_TextureMng.UseForShaderResource(m_LightMng->GetShadowMapName(i).c_str(), m_pd3dCommandList, ROOTSIGNATURE_CUBE_TEXTURE);			break;
+			case LightType::LIGHT_DIRECTIONAL:	g_TextureMng.UseForShaderResource(m_LightMng->GetShadowMapName(i).c_str(), m_pd3dCommandList, ROOTSIGNATURE_SHADOWARRAY_TEXTURE);	break;
 			case LightType::LIGHT_NONE:
 			default:
 				break;
@@ -938,10 +938,10 @@ void Scene::Update(float fTimeElapsed)
 
 	for (auto iter = m_vecObject.begin(); iter != m_vecObject.end(); iter++) (*iter)->Update(fTimeElapsed);
 	for (auto iter = m_vecAnimObject.begin(); iter != m_vecAnimObject.end(); iter++) (*iter)->Update(fTimeElapsed);
-	m_pCamera->SetPosition(
-		Vector3::Add(Vector3::Add(m_vecAnimObject[0]->GetPosition(), Vector3::Multiply(-2.5, m_vecAnimObject[0]->GetLook())), XMFLOAT3(0, 2, 0))
-	);
-	m_pCamera->SetLookAtPosition(Vector3::Add(m_vecAnimObject[0]->GetPosition(), XMFLOAT3(0, 1, 0)));
+	//m_pCamera->SetPosition(
+	//	Vector3::Add(Vector3::Add(m_vecAnimObject[0]->GetPosition(), Vector3::Multiply(-2.5, m_vecAnimObject[0]->GetLook())), XMFLOAT3(0, 2, 0))
+	//);
+	//m_pCamera->SetLookAtPosition(Vector3::Add(m_vecAnimObject[0]->GetPosition(), XMFLOAT3(0, 1, 0)));
 
 	//if (!gTestInt) {
 
@@ -1009,7 +1009,7 @@ void Scene::Input(UCHAR* pKeyBuffer, float fTimeElapsed)
 		//m_vecObject[0]->Move(XMFLOAT3(0, 0, 0.1 * fTimeElapsed));
 
 
-	dynamic_cast<HumanoidObject*>(m_vecAnimObject[0])->Input(pKeyBuffer);
+	//dynamic_cast<HumanoidObject*>(m_vecAnimObject[0])->Input(pKeyBuffer);
 }
 
 void Scene::CreatePSO()

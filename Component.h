@@ -13,7 +13,7 @@ public:
 	bool isEqualTo(const char* strName);
 
 protected:
-	const Object* m_pObject = nullptr;
+	Object* m_pObject = nullptr;
 	const string m_strName	= "";
 };
 

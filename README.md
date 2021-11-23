@@ -900,3 +900,6 @@ BoundingOrientedBox 를 사용해서 Intersects()로 검사하는 테스트 코�
 Transform, MeshRenderer, SkinnedMeshRenderer, Collider(또는 BoxCollider, SphereCollider로 나누거나) Component를 작성하고 테스트 할 예정.
 Component Class를 작성하고 Transform과 MeshRenderer Class가 Component를 상속받도록 작성하였다.
 MeshRenderer는 같은 Object가 가지고 있는  Transform에 접근할 수 있어야 하므로 Object 내부에서 Component를 이름으로 찾을 수 있는 함수를 추가하였다.
+
+### 2021.11.23
+코드 리팩토링.

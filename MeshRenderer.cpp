@@ -1,5 +1,8 @@
 #include "stdafx.h"
 #include "MeshRenderer.h"
+#include "Object.h"
+#include "Model.h"
+#include "Material.h"
 
 MeshRenderer::MeshRenderer(
 	Object* pObject,
@@ -28,23 +31,14 @@ void MeshRenderer::Render(ID3D12GraphicsCommandList* pd3dCommandList)
 	UINT ncbElementBytes = ((sizeof(XMFLOAT4X4) + 255) & ~255);
 	memset(m_pCBMappedWorldTransform, NULL, ncbElementBytes);
 
-	//if(m_pObject)
+	dynamic_cast<Transform*>(m_pObject->FindComponentByName("Transform"))->GetLocalTransform();
+		
+	XMStoreFloat4x4(
+		m_pCBMappedWorldTransform, 
+		XMMatrixTranspose(dynamic_cast<Transform*>(m_pObject->FindComponentByName("Transform"))->GetLocalTransform()));
 
-
-	//if (m_pParent) {
-	//	XMMATRIX xmmtxParentWorld = dynamic_cast<HumanoidObject*>(m_pParent)->GetWorldTransform();
-	//	XMMATRIX xmmtxParentBoneInv = dynamic_cast<HumanoidObject*>(m_pParent)->GetBoneMatrix(28);	// 9: L Hand, 28: R Hand
-	//	xmmtxParentBoneInv = XMMatrixMultiply(XMMatrixRotationRollPitchYaw(0, XMConvertToRadians(-90), XMConvertToRadians(-90)), xmmtxParentBoneInv);
-
-	//	XMMATRIX result = XMMatrixMultiply(XMLoadFloat4x4(&m_xmf4x4Local), xmmtxParentBoneInv);
-	//	result = XMMatrixMultiply(result, xmmtxParentWorld);
-
-	//	XMStoreFloat4x4(&m_pCBMappedObjects->xmf4x4World, XMMatrixTranspose(result));
-	//}
-	//else			XMStoreFloat4x4(&m_pCBMappedObjects->xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4Local)));
-
-	//g_MaterialMng.SetMaterial(material.c_str(), pd3dCommandList);
-	//g_ModelMng.Render(model.c_str(), pd3dCommandList);
+	g_MaterialMng.SetMaterial(m_strMaterialName.c_str(), pd3dCommandList);
+	g_ModelMng.Render(m_strModelName.c_str(), pd3dCommandList);
 }
 
 void MeshRenderer::CreateConstantBufferView(ID3D12Device* pd3dDevice, D3D12_CPU_DESCRIPTOR_HANDLE& d3dCbvCPUDescriptorStartHandle)

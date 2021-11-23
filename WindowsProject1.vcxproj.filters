@@ -45,9 +45,6 @@
     <Filter Include="소스 파일\Object\Material">
       <UniqueIdentifier>{b54c3872-916b-4d2b-a03a-9b846cf9cb20}</UniqueIdentifier>
     </Filter>
-    <Filter Include="소스 파일\Object\Component">
-      <UniqueIdentifier>{52e09938-e893-4a9e-aa96-b7c41853bd32}</UniqueIdentifier>
-    </Filter>
     <Filter Include="소스 파일\etc\FileIO">
       <UniqueIdentifier>{3039cdb3-d862-4227-aaeb-b83d276ad2d0}</UniqueIdentifier>
     </Filter>
@@ -113,9 +110,6 @@
     </ClInclude>
     <ClInclude Include="Vertex.h">
       <Filter>소스 파일\Object\Mesh</Filter>
-    </ClInclude>
-    <ClInclude Include="IComponent.h">
-      <Filter>소스 파일\Object\Component</Filter>
     </ClInclude>
     <ClInclude Include="DDSTextureLoader12.h">
       <Filter>소스 파일\etc\FileIO</Filter>
@@ -185,9 +179,6 @@
     </ClCompile>
     <ClCompile Include="Vertex.cpp">
       <Filter>소스 파일\Object\Mesh</Filter>
-    </ClCompile>
-    <ClCompile Include="IComponent.cpp">
-      <Filter>소스 파일\Object\Component</Filter>
     </ClCompile>
     <ClCompile Include="DDSTextureLoader12.cpp">
       <Filter>소스 파일\etc\FileIO</Filter>
@@ -262,5 +253,6 @@
     <Text Include="Data\ObjectData.txt" />
     <Text Include="Data\LightData.txt" />
     <Text Include="Data\AssetsData.txt" />
+    <Text Include="Data\MaterialData.txt" />
   </ItemGroup>
 </Project>
