@@ -11,6 +11,12 @@
 #include "Model.h"
 #include "State.h"
 
+#include "Components.h"
+
+
+
+
+
 ID3D12RootSignature* Scene::CreateRootSignature()
 {
 	ID3D12RootSignature* pd3dGraphicsRootSignature = NULL;
@@ -202,9 +208,6 @@ void Scene::Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12Graphics
 	* 카메라 설정
 	*=======================================================================*/
 	m_pCamera = new FollowCamera();
-	//m_pCamera->SetPosition(XMFLOAT3(0, 0, -1));
-	//m_pCamera->SetLookAt(XMFLOAT3(0, 0, 0));
-
 	m_pCamera->SetPosition(XMFLOAT3(0, 2, -3));
 	m_pCamera->SetLookAt(XMFLOAT3(0, 1, 1));
 
@@ -228,25 +231,6 @@ void Scene::Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12Graphics
 
 
 		//	후처리 텍스처는 SRV와 UAV 둘 다 만들어줘야 함.
-		//D3D12_RESOURCE_DESC desc;
-		//desc.Dimension			= D3D12_RESOURCE_DIMENSION_BUFFER;
-		//desc.Flags				= D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
-		//desc.Format				= DXGI_FORMAT_UNKNOWN;
-		//desc.DepthOrArraySize	= 1;
-		//desc.Width				= sizeof(float) * totalBckBufPixels;
-		//desc.Height				= 1;
-		//desc.MipLevels			= 1;
-		//desc.SampleDesc.Count	= 1;
-		//desc.SampleDesc.Quality = 0;
-		//desc.Alignment			= 0;
-		//desc.Layout				= D3D12_TEXTURE_LAYOUT_UNKNOWN;
-
-		//D3D12_HEAP_PROPERTIES hp;
-		//hp.CPUPageProperty		= D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
-		//hp.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
-		//hp.CreationNodeMask		= 1;
-		//hp.VisibleNodeMask		= 1;
-		//hp.Type					= D3D12_HEAP_TYPE_DEFAULT;
 		D3D12_HEAP_PROPERTIES hp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
 		D3D12_RESOURCE_DESC desc = CD3DX12_RESOURCE_DESC::Buffer(totalBckBufPixels * sizeof(float),
 			D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS);
@@ -258,11 +242,6 @@ void Scene::Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12Graphics
 			D3D12_RESOURCE_STATE_COMMON,
 			nullptr,
 			IID_PPV_ARGS(&m_pd3duabHDRAvgLum));
-
-		//hr = pd3dDevice->CreateCommittedResource(
-		//	&hp, D3D12_HEAP_FLAG_NONE, &desc,
-		//	D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
-		//	nullptr, IID_PPV_ARGS(&m_pd3duabHDRAvgLum));
 
 		D3D12_UNORDERED_ACCESS_VIEW_DESC uavDesc = {};
 		uavDesc.Format						= DXGI_FORMAT_UNKNOWN;
@@ -276,23 +255,6 @@ void Scene::Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12Graphics
 		m_d3dSrvCPUDescriptorStartHandle.ptr += gnCbvSrvDescriptorIncrementSize;
 		m_d3dCbvGPUuabHDRAvgLumHandle = m_d3dSrvGPUDescriptorStartHandle;
 		m_d3dSrvGPUDescriptorStartHandle.ptr += gnCbvSrvDescriptorIncrementSize;	// 여기까지 됨
-
-
-
-		//// 여기에서 뭔가 안 됨.
-		//// SRV 버퍼로 보는 디스크립터는 원래 안되나???
-		//D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
-		//srvDesc.Format						= DXGI_FORMAT_UNKNOWN;
-		//srvDesc.ViewDimension				= D3D12_SRV_DIMENSION_BUFFER;
-		//srvDesc.Buffer.NumElements			= totalBckBufPixels;
-		//srvDesc.Buffer.StructureByteStride	= sizeof(float);
-		//srvDesc.Buffer.FirstElement			= 0;
-		//srvDesc.Buffer.Flags				= D3D12_BUFFER_SRV_FLAG_NONE;
-
-		//m_pd3dDevice->CreateShaderResourceView(m_pd3duabHDRAvgLum, 
-		//	&srvDesc, m_d3dSrvCPUDescriptorStartHandle);
-		//m_d3dSrvCPUDescriptorStartHandle.ptr += gnCbvSrvDescriptorIncrementSize;
-		//m_d3dSrvGPUDescriptorStartHandle.ptr += gnCbvSrvDescriptorIncrementSize;
 	}
 
 
@@ -325,8 +287,6 @@ void Scene::Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12Graphics
 	* 모델
 	*=======================================================================*/
 	g_ModelMng.Initialize();
-	//g_ModelMng.AddModel("mech", m_pd3dDevice, m_pd3dCommandList);
-	//g_ModelMng.AddModel("floor", m_pd3dDevice, m_pd3dCommandList);
 
 
 	/*========================================================================
@@ -343,55 +303,78 @@ void Scene::Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12Graphics
 
 	for (int i = 0; i < vecObjDesc.size(); i++) {
 		if (strcmp(vecObjDesc[i].model.c_str(), "") != 0) {
-			if (vecObjDesc[i].isAnimated) {
-				HumanoidObject* tempObj = new HumanoidObject(m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
-				tempObj->Move(vecObjDesc[i].position);
-				tempObj->Rotate(vecObjDesc[i].rotation);
-				tempObj->SetModel(vecObjDesc[i].model.c_str());
-				tempObj->SetMaterial(vecObjDesc[i].material.c_str());
-				m_vecAnimObject.push_back(tempObj);
-			}
-			else {
-				Object* tempObj = new Object(m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
-				tempObj->Move(vecObjDesc[i].position);
-				tempObj->Rotate(vecObjDesc[i].rotation);
-				tempObj->SetModel(vecObjDesc[i].model.c_str());
-				tempObj->SetMaterial(vecObjDesc[i].material.c_str());
+			//if (vecObjDesc[i].isAnimated) {
+			//	HumanoidObject* tempObj = new HumanoidObject(m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
+			//	tempObj->Move(vecObjDesc[i].position);
+			//	tempObj->Rotate(vecObjDesc[i].rotation);
+			//	tempObj->SetModel(vecObjDesc[i].model.c_str());
+			//	tempObj->SetMaterial(vecObjDesc[i].material.c_str());
+			//	m_vecAnimObject.push_back(tempObj);
+			//}
+			//else {
+				//Object* tempObj = new Object(m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
+				//tempObj->Move(vecObjDesc[i].position);
+				//tempObj->Rotate(vecObjDesc[i].rotation);
+				//tempObj->SetModel(vecObjDesc[i].model.c_str());
+				//tempObj->SetMaterial(vecObjDesc[i].material.c_str());
+				//m_vecObject.push_back(tempObj);
+
+
+				Object* tempObj = new Object();
+
+				TransformComponent* transform = new TransformComponent(tempObj);
+				MeshRendererComponent* meshRenderer = new MeshRendererComponent(
+					tempObj, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
+
+				transform->Translate(vecObjDesc[i].position);
+				transform->RotateXYZDegree(vecObjDesc[i].rotation);
+
+				meshRenderer->SetModelByName(vecObjDesc[i].model.c_str());
+				meshRenderer->SetMaterialByName(vecObjDesc[i].material.c_str());
+
+				tempObj->AddComponent(transform);
+				tempObj->AddComponent(meshRenderer);
+
+				if (i == 0) {
+					ControllerComponent* controller = new ControllerComponent(tempObj);
+					tempObj->AddComponent(controller);
+				}
+
+
+
 				m_vecObject.push_back(tempObj);
-			}
+
+
+
+			//}
 		}
 	}
-	g_AnimUploader = new AnimationUploader(pd3dDevice, pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
+	//g_AnimUploader = new AnimationUploader(pd3dDevice, pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
 
 	//m_vecObject[0]->SetParent(m_vecAnimObject[0]);
 	//m_vecObject[0]->SetPosition(XMFLOAT3(-0.028f, 0.0f, 0.08f));
 
 	/*========================================================================
-	* Pass 2 전용 디버그 윈도우 생성
-	*=======================================================================*/
-	//for (int i = 0; i < 3; i++) {
-	//	DebugWindowObject* temp = new DebugWindowObject(m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
-	//	//temp->Move(XMFLOAT3(-0.5f * i, 1, 0));
-
-	//	m_vecDebugWindow.push_back(temp);
-	//}
-
-	/*========================================================================
 	* Pass 2 전용 전체 화면 사각형
 	*=======================================================================*/
-	DebugWindowObject* tempScreen 
-		= new DebugWindowObject(m_pd3dDevice, m_pd3dCommandList,
+	//DebugWindowObject* tempScreen 
+	//	= new DebugWindowObject(m_pd3dDevice, m_pd3dCommandList,
+	//		m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle,
+	//		1.0f, 1.0f);
+	//m_vecDebugWindow.push_back(tempScreen);
+
+	//DebugWindowObject* smallScreen
+	//	= new DebugWindowObject(m_pd3dDevice, m_pd3dCommandList,
+	//		m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle,
+	//		0.5f, 0.5f);
+	//smallScreen->Move(XMFLOAT3(-0.5f, 0.5f, 0));
+	//m_vecDebugWindow.push_back(smallScreen);
+
+	Screen* tempScreen
+		= new Screen(m_pd3dDevice, m_pd3dCommandList,
 			m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle,
 			1.0f, 1.0f);
-	m_vecDebugWindow.push_back(tempScreen);
-
-	DebugWindowObject* smallScreen
-		= new DebugWindowObject(m_pd3dDevice, m_pd3dCommandList,
-			m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle,
-			0.5f, 0.5f);
-	smallScreen->Move(XMFLOAT3(-0.5f, 0.5f, 0));
-	m_vecDebugWindow.push_back(smallScreen);
-
+	m_vecScreenObject.push_back(tempScreen);
 
 
 
@@ -526,8 +509,8 @@ void Scene::Render(D3D12_CPU_DESCRIPTOR_HANDLE hBckBufRtv, D3D12_CPU_DESCRIPTOR_
 
 	m_pd3dCommandList->OMSetRenderTargets(2, rtvHandle, FALSE, &dsvHandle);
 
-	m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["AnimatedObject"]);
-	for (auto iter = m_vecAnimObject.begin(); iter != m_vecAnimObject.end(); iter++) (*iter)->Render(m_pd3dCommandList);
+	//m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["AnimatedObject"]);
+	//for (auto iter = m_vecAnimObject.begin(); iter != m_vecAnimObject.end(); iter++) (*iter)->Render(m_pd3dCommandList);
 	m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["PackGBuffer"]);
 	for (auto iter = m_vecObject.begin(); iter != m_vecObject.end(); iter++) (*iter)->Render(m_pd3dCommandList);
 
@@ -567,16 +550,16 @@ void Scene::Render(D3D12_CPU_DESCRIPTOR_HANDLE hBckBufRtv, D3D12_CPU_DESCRIPTOR_
 				m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["SpotLightShadow"]);
 				for (int i = 0; i < m_vecObject.size(); i++) m_vecObject[i]->Render(m_pd3dCommandList);
 
-				m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["SpotLightShadowAnim"]);
-				for (auto iter = m_vecAnimObject.begin(); iter != m_vecAnimObject.end(); iter++) (*iter)->Render(m_pd3dCommandList);
+				//m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["SpotLightShadowAnim"]);
+				//for (auto iter = m_vecAnimObject.begin(); iter != m_vecAnimObject.end(); iter++) (*iter)->Render(m_pd3dCommandList);
 				break;
 			case LightType::LIGHT_POINT:
 
 				m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["PointLightShadow"]);
 				for (int i = 0; i < m_vecObject.size(); i++) m_vecObject[i]->Render(m_pd3dCommandList);
 
-				m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["PointLightShadowAnim"]);
-				for (auto iter = m_vecAnimObject.begin(); iter != m_vecAnimObject.end(); iter++) (*iter)->Render(m_pd3dCommandList);
+				//m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["PointLightShadowAnim"]);
+				//for (auto iter = m_vecAnimObject.begin(); iter != m_vecAnimObject.end(); iter++) (*iter)->Render(m_pd3dCommandList);
 				break;
 			case LightType::LIGHT_DIRECTIONAL:
 
@@ -584,8 +567,8 @@ void Scene::Render(D3D12_CPU_DESCRIPTOR_HANDLE hBckBufRtv, D3D12_CPU_DESCRIPTOR_
 				m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["DirectionalLightShadow"]);
 				for (int i = 0; i < m_vecObject.size(); i++) m_vecObject[i]->Render(m_pd3dCommandList);
 
-				m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["DirectionalLightShadowAnim"]);
-				for (auto iter = m_vecAnimObject.begin(); iter != m_vecAnimObject.end(); iter++) (*iter)->Render(m_pd3dCommandList);
+				//m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["DirectionalLightShadowAnim"]);
+				//for (auto iter = m_vecAnimObject.begin(); iter != m_vecAnimObject.end(); iter++) (*iter)->Render(m_pd3dCommandList);
 				break;
 			case LightType::LIGHT_NONE:
 			default:
@@ -633,7 +616,8 @@ void Scene::Render(D3D12_CPU_DESCRIPTOR_HANDLE hBckBufRtv, D3D12_CPU_DESCRIPTOR_
 	g_TextureMng.UseForShaderResource("GBuffer_Depth", m_pd3dCommandList, ROOTSIGNATURE_DEPTH_TEXTURE);
 	g_TextureMng.UseForShaderResource("GBuffer_Color", m_pd3dCommandList, ROOTSIGNATURE_COLOR_TEXTURE);
 	//g_TextureMng.UseForShaderResource("PostProcessTexture", m_pd3dCommandList, ROOTSIGNATURE_COLOR_TEXTURE);
-	m_vecDebugWindow[0]->Render(m_pd3dCommandList);
+	//m_vecDebugWindow[0]->Render(m_pd3dCommandList);
+	m_vecScreenObject[0]->Render(m_pd3dCommandList);
 
 
 	/*========================================================================
@@ -656,7 +640,8 @@ void Scene::Render(D3D12_CPU_DESCRIPTOR_HANDLE hBckBufRtv, D3D12_CPU_DESCRIPTOR_
 			}
 		}
 
-		m_vecDebugWindow[0]->Render(m_pd3dCommandList);
+		//m_vecDebugWindow[0]->Render(m_pd3dCommandList);
+		m_vecScreenObject[0]->Render(m_pd3dCommandList);
 	}
 
 	/*========================================================================
@@ -896,7 +881,8 @@ void Scene::Render(D3D12_CPU_DESCRIPTOR_HANDLE hBckBufRtv, D3D12_CPU_DESCRIPTOR_
 		m_pd3dCommandList->ClearDepthStencilView(hBckBufDsv, 
 			D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
 		m_pd3dCommandList->OMSetRenderTargets(1, &hBckBufRtv, TRUE, &hBckBufDsv);
-		m_vecDebugWindow[0]->Render(m_pd3dCommandList);
+		//m_vecDebugWindow[0]->Render(m_pd3dCommandList);
+		m_vecScreenObject[0]->Render(m_pd3dCommandList);
 
 		d3dResourceBarrier[0].Transition.pResource = g_TextureMng.GetTextureResource("Screen");
 		d3dResourceBarrier[0].Transition.StateBefore = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE ;
@@ -911,7 +897,8 @@ void Scene::Render(D3D12_CPU_DESCRIPTOR_HANDLE hBckBufRtv, D3D12_CPU_DESCRIPTOR_
 
 		m_pd3dCommandList->ClearDepthStencilView(hBckBufDsv, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
 		m_pd3dCommandList->OMSetRenderTargets(1, &hBckBufRtv, TRUE, &hBckBufDsv);
-		m_vecDebugWindow[0]->Render(m_pd3dCommandList);
+		//m_vecDebugWindow[0]->Render(m_pd3dCommandList);
+		m_vecScreenObject[0]->Render(m_pd3dCommandList);
 	}
 
 	/*========================================================================
@@ -937,7 +924,7 @@ void Scene::Update(float fTimeElapsed)
 	::memcpy(&m_pcbMappedPassInfo->m_xmfCurrentTime, &m_fCurrentTime, sizeof(float));
 
 	for (auto iter = m_vecObject.begin(); iter != m_vecObject.end(); iter++) (*iter)->Update(fTimeElapsed);
-	for (auto iter = m_vecAnimObject.begin(); iter != m_vecAnimObject.end(); iter++) (*iter)->Update(fTimeElapsed);
+	//for (auto iter = m_vecAnimObject.begin(); iter != m_vecAnimObject.end(); iter++) (*iter)->Update(fTimeElapsed);
 	//m_pCamera->SetPosition(
 	//	Vector3::Add(Vector3::Add(m_vecAnimObject[0]->GetPosition(), Vector3::Multiply(-2.5, m_vecAnimObject[0]->GetLook())), XMFLOAT3(0, 2, 0))
 	//);
@@ -960,8 +947,8 @@ void Scene::Input(UCHAR* pKeyBuffer, float fTimeElapsed)
 	//if (pKeyBuffer[KeyCode::_A] & 0xF0) { m_pCamera->MoveLeft(2); }
 	//if (pKeyBuffer[KeyCode::_S] & 0xF0) { m_pCamera->MoveBackward(2); }
 	//if (pKeyBuffer[KeyCode::_D] & 0xF0) { m_pCamera->MoveRight(2); }
-	if (pKeyBuffer[KeyCode::_R] & 0xF0) { m_pCamera->MoveUp(2); }
-	if (pKeyBuffer[KeyCode::_F] & 0xF0) { m_pCamera->MoveDown(2); }
+	//if (pKeyBuffer[KeyCode::_R] & 0xF0) { m_pCamera->MoveUp(2); }
+	//if (pKeyBuffer[KeyCode::_F] & 0xF0) { m_pCamera->MoveDown(2); }
 	if (pKeyBuffer[KeyCode::_Q] & 0xF0) { m_pCamera->Rotate(0, -50 * fTimeElapsed, 0); }
 	if (pKeyBuffer[KeyCode::_E] & 0xF0) { m_pCamera->Rotate(0, 50 * fTimeElapsed, 0); }
 	if (pKeyBuffer[KeyCode::_Z] & 0xF0) { m_pCamera->Rotate(50 * fTimeElapsed, 0, 0); }
@@ -1010,6 +997,9 @@ void Scene::Input(UCHAR* pKeyBuffer, float fTimeElapsed)
 
 
 	//dynamic_cast<HumanoidObject*>(m_vecAnimObject[0])->Input(pKeyBuffer);
+
+	for_each(m_vecObject.begin(), m_vecObject.end(), [pKeyBuffer](Object* o) {o->Input(pKeyBuffer); });
+
 }
 
 void Scene::CreatePSO()

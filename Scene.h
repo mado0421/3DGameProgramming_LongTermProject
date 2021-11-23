@@ -2,11 +2,11 @@
 #include "stdafx.h"
 
 class Object;
-class AnimatedObject;
-class DebugWindowObject;
+class Screen;
+//class AnimatedObject;
+//class DebugWindowObject;
 class Camera;
 class RenderToTextureClass;
-class ShadowMapRenderer;
 class Framework;
 class Texture;
 class LightManager;
@@ -36,9 +36,10 @@ protected:
 	D3D12_GPU_DESCRIPTOR_HANDLE	m_d3dSrvGPUDescriptorStartHandle;
 
 
-	vector<DebugWindowObject*>					m_vecDebugWindow;
+	//vector<DebugWindowObject*>					m_vecDebugWindow;
 	vector<Object*>								m_vecObject;
-	vector<AnimatedObject*>						m_vecAnimObject;
+	vector<Screen*>								m_vecScreenObject;
+	//vector<AnimatedObject*>						m_vecAnimObject;
 	unordered_map<string, ID3D12PipelineState*> m_uomPipelineStates;
 
 	LightManager*								m_LightMng;

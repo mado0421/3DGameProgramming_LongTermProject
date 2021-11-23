@@ -1,0 +1,32 @@
+#pragma once
+#include "Component.h"
+
+/*
+	TransformComponent Component is Component for Object Coordnation.
+*/
+class TransformComponent : public Component
+{
+public:
+	TransformComponent() = delete;
+	TransformComponent(Object* pObject);
+	~TransformComponent();
+
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList) {}
+	virtual void Update(float fTimeElapsed) {}
+	virtual void InputEvent(UCHAR* pKeyBuffer) {}
+
+	void SetPosition(const XMFLOAT3& xmf3Position);
+	void SetPosition(const float& fX, const float& fY, const float& fZ);
+	void Translate(const XMFLOAT3& xmf3Val);
+	void Translate(const float& fX, const float& fY, const float& fZ);
+	void RotateXYZDegree(const XMFLOAT3& xmf3Val);
+	void RotateXYZDegree(const float& fX, const float& fY, const float& fZ);
+
+	XMMATRIX GetLocalTransform();
+	XMFLOAT3 const GetLookVector();
+	XMFLOAT3 const GetPosition();
+
+private:
+	XMFLOAT4X4	m_xmf4x4Local;
+};
+

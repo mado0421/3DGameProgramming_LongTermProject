@@ -903,3 +903,10 @@ MeshRenderer는 같은 Object가 가지고 있는  Transform에 접근할 수 �
 
 ### 2021.11.23
 코드 리팩토링.
+
+- Component를 추가하기 위해, Object에서 불필요한 부분을 모두 들어냈다.
+- Mesh를 상속받지 않고 별개로 존재하던 DebugWindowMesh(디버깅용 작은 평면 메쉬로 쓰다가 이후에 RTT용도로도 사용) 클래스를 정리하고 DebugWindowObject 또한 삭제했다. 이는 Screen을 띄우는 용도로만 사용하는 개별 클래스로 따로 변경했다.
+- Animation 파트를 전부 들어내고 AnimatedObject 또한 잠시 주석처리하였다.
+- MeshRenderer, Transform, Controller Component를 작성하고 정상 작동 확인했다.
+
+Collider Component를 내일 추가하고 정상작동 확인하면 SkinnedMeshRenderer와 Rigidbody 역할을 할 Component를 작성하도록 하자.

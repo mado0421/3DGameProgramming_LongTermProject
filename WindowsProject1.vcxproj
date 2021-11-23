@@ -143,56 +143,71 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Animation.h" />
+    <ClInclude Include="Animation.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Component.h" />
+    <ClInclude Include="Components.h" />
+    <ClInclude Include="ControllerComponent.h" />
     <ClInclude Include="d3dUtil.h" />
     <ClInclude Include="DDSTextureLoader12.h" />
     <ClInclude Include="Define.h" />
     <ClInclude Include="Framework.h" />
     <ClInclude Include="Importer.h" />
     <ClInclude Include="Light.h" />
-    <ClInclude Include="Mask.h" />
+    <ClInclude Include="Mask.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="Material.h" />
     <ClInclude Include="MathHelper.h" />
     <ClInclude Include="Mesh.h" />
-    <ClInclude Include="MeshRenderer.h" />
+    <ClInclude Include="MeshRendererComponent.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="PipelineStateObject.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="Scene.h" />
-    <ClInclude Include="State.h" />
+    <ClInclude Include="State.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="Timer.h" />
-    <ClInclude Include="Transform.h" />
+    <ClInclude Include="TransformComponent.h" />
     <ClInclude Include="Vertex.h" />
     <ClInclude Include="WindowsProject1.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Animation.cpp" />
+    <ClCompile Include="Animation.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Component.cpp" />
+    <ClCompile Include="ControllerComponent.cpp" />
     <ClCompile Include="d3dUtil.cpp" />
     <ClCompile Include="DDSTextureLoader12.cpp" />
     <ClCompile Include="Framework.cpp" />
     <ClCompile Include="Importer.cpp" />
     <ClCompile Include="Light.cpp" />
-    <ClCompile Include="Mask.cpp" />
+    <ClCompile Include="Mask.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="Material.cpp" />
     <ClCompile Include="Mesh.cpp" />
-    <ClCompile Include="MeshRenderer.cpp" />
+    <ClCompile Include="MeshRendererComponent.cpp" />
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="Object.cpp" />
     <ClCompile Include="PipelineStateObject.cpp" />
     <ClCompile Include="Scene.cpp" />
-    <ClCompile Include="State.cpp" />
+    <ClCompile Include="State.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="Timer.cpp" />
-    <ClCompile Include="Transform.cpp" />
+    <ClCompile Include="TransformComponent.cpp" />
     <ClCompile Include="Vertex.cpp" />
     <ClCompile Include="WindowsProject1.cpp" />
   </ItemGroup>

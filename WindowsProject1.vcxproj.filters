@@ -57,11 +57,14 @@
     <Filter Include="소스 파일\Component">
       <UniqueIdentifier>{b93c48ed-ad7a-4734-ba59-d143b8a4af95}</UniqueIdentifier>
     </Filter>
-    <Filter Include="소스 파일\Component\Transform">
-      <UniqueIdentifier>{2e7e23a9-d84c-4123-bc62-0d4a2a2a437f}</UniqueIdentifier>
+    <Filter Include="소스 파일\Component\Controller">
+      <UniqueIdentifier>{539cb7db-c497-48dd-b4a2-ffb05cdeb69d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="소스 파일\Component\MeshRenderer">
+    <Filter Include="소스 파일\Component\MeshRendererComponent">
       <UniqueIdentifier>{8ff2f8e0-adb1-41da-86cf-2c3d68640173}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Component\TransformComponent">
+      <UniqueIdentifier>{2e7e23a9-d84c-4123-bc62-0d4a2a2a437f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -138,11 +141,17 @@
     <ClInclude Include="Component.h">
       <Filter>소스 파일\Component</Filter>
     </ClInclude>
-    <ClInclude Include="Transform.h">
-      <Filter>소스 파일\Component\Transform</Filter>
+    <ClInclude Include="TransformComponent.h">
+      <Filter>소스 파일\Component\TransformComponent</Filter>
     </ClInclude>
-    <ClInclude Include="MeshRenderer.h">
-      <Filter>소스 파일\Component\MeshRenderer</Filter>
+    <ClInclude Include="MeshRendererComponent.h">
+      <Filter>소스 파일\Component\MeshRendererComponent</Filter>
+    </ClInclude>
+    <ClInclude Include="Components.h">
+      <Filter>소스 파일\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="ControllerComponent.h">
+      <Filter>소스 파일\Component\Controller</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -207,11 +216,14 @@
     <ClCompile Include="Component.cpp">
       <Filter>소스 파일\Component</Filter>
     </ClCompile>
-    <ClCompile Include="Transform.cpp">
-      <Filter>소스 파일\Component\Transform</Filter>
+    <ClCompile Include="TransformComponent.cpp">
+      <Filter>소스 파일\Component\TransformComponent</Filter>
     </ClCompile>
-    <ClCompile Include="MeshRenderer.cpp">
-      <Filter>소스 파일\Component\MeshRenderer</Filter>
+    <ClCompile Include="MeshRendererComponent.cpp">
+      <Filter>소스 파일\Component\MeshRendererComponent</Filter>
+    </ClCompile>
+    <ClCompile Include="ControllerComponent.cpp">
+      <Filter>소스 파일\Component\Controller</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

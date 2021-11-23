@@ -131,10 +131,10 @@ enum KeyCode {
 class TextureManager;
 class ModelManager;
 class MaterialManager;
-class AnimationManager;
-class AnimationUploader;
-extern AnimationUploader*	g_AnimUploader;
-extern AnimationManager		g_AnimMng;
+//class AnimationManager;
+//class AnimationUploader;
+//extern AnimationUploader*	g_AnimUploader;
+//extern AnimationManager		g_AnimMng;
 extern MaterialManager		g_MaterialMng;
 extern TextureManager		g_TextureMng;
 extern ModelManager			g_ModelMng;

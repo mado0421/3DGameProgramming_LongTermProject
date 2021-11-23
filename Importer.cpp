@@ -408,8 +408,8 @@ void AssetListDataImporter::Load(
 			g_ModelMng.AddFBXModel(name.c_str(), pd3dDevice, pd3dCommandList);
 		}
 		if (type.compare("mac") == 0) {
-			if (g_AnimMng.IsAleadyExist(name.c_str())) continue;
-			g_AnimMng.AddAnimClip(name.c_str(), pd3dDevice, pd3dCommandList);
+			//if (g_AnimMng.IsAleadyExist(name.c_str())) continue;
+			//g_AnimMng.AddAnimClip(name.c_str(), pd3dDevice, pd3dCommandList);
 		}
 	}
 	return;
