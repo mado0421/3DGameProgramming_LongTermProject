@@ -910,3 +910,33 @@ MeshRenderer는 같은 Object가 가지고 있는  Transform에 접근할 수 �
 - MeshRenderer, Transform, Controller Component를 작성하고 정상 작동 확인했다.
 
 Collider Component를 내일 추가하고 정상작동 확인하면 SkinnedMeshRenderer와 Rigidbody 역할을 할 Component를 작성하도록 하자.
+
+### 2021.11.24
+Collider Component 작성.
+
+충돌 관련 처리는 순서가 중요하다.
+한 프레임 내에서 CheckCollision(), SolveConstraint(), Update() 순서로 진행하자.
+Scene::CheckCollision() 에선 모든 Object에 대해 다른 Object와의 충돌 여부를 검사한다.
+
+    // Scene
+    for( i ; i < size ; i++ )
+	    for( j = i + 1 ; j < size ; j++ )
+		    [i]->CheckCollision([j]);
+		    
+	// Object
+	// 따로 충돌여부를 Scene 단까지 반환하지 않는다.
+	for( i ; i < myCollider.size ; i++ )
+		for( j ; j < otherObjectCollider.size ; j++ )
+			[i]->CheckIntersect([j]);
+	
+	// ColliderComponent
+	if(collide) {
+		m_vecpIntersectedCollider.push_back(other);
+		return true;
+	}
+ColliderComponent에서 충돌한다고 판정나면 Component 내에 저장한다. (Object 내에 저장하지 않기 위해)
+A Object의 Collider가 B Object의 여러 Collider와 Intersect 할 수 있고, 감지된 Collider가 B Object의 '벽, 바닥 감지용 Collider'인지, 'Hitbox Collider'인지 모르기 때문에 Collider를 전부 저장한다.
+
+SolveConstraint() 단에서 해당 Collider가 어떤 용도인지 체크하고,  맞는 처리를 한다.
+
+Update()는 충돌처리 외의 부분을 하면 될 듯.

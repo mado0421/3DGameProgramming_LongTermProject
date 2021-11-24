@@ -12,8 +12,6 @@ public:
 	virtual void Update(float fTimeElapsed);
 	virtual void InputEvent(UCHAR* pKeyBuffer);
 
-
-
 public:
 	float m_fSpeed = 1.0f;
 

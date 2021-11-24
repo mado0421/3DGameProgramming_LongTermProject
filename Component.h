@@ -16,8 +16,12 @@ public:
 	virtual void Update(float fTimeElapsed) = 0;
 	virtual void InputEvent(UCHAR* pKeyBuffer) = 0;
 
+	void SetActive(bool bActive);
+
+
 protected:
-	Object* m_pObject = nullptr;
-	const string m_strName	= "";
+	const string	m_strName	= "";
+	Object*			m_pObject	= nullptr;
+	bool			m_bEnabled	= true;
 };
 

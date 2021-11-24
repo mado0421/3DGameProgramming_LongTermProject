@@ -60,10 +60,13 @@
     <Filter Include="소스 파일\Component\Controller">
       <UniqueIdentifier>{539cb7db-c497-48dd-b4a2-ffb05cdeb69d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="소스 파일\Component\MeshRendererComponent">
+    <Filter Include="소스 파일\Component\Collider">
+      <UniqueIdentifier>{ece6963c-f33c-4cc9-81a5-a5ec416c6c4c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Component\MeshRenderer">
       <UniqueIdentifier>{8ff2f8e0-adb1-41da-86cf-2c3d68640173}</UniqueIdentifier>
     </Filter>
-    <Filter Include="소스 파일\Component\TransformComponent">
+    <Filter Include="소스 파일\Component\Transform">
       <UniqueIdentifier>{2e7e23a9-d84c-4123-bc62-0d4a2a2a437f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -142,16 +145,19 @@
       <Filter>소스 파일\Component</Filter>
     </ClInclude>
     <ClInclude Include="TransformComponent.h">
-      <Filter>소스 파일\Component\TransformComponent</Filter>
+      <Filter>소스 파일\Component\Transform</Filter>
     </ClInclude>
     <ClInclude Include="MeshRendererComponent.h">
-      <Filter>소스 파일\Component\MeshRendererComponent</Filter>
+      <Filter>소스 파일\Component\MeshRenderer</Filter>
     </ClInclude>
     <ClInclude Include="Components.h">
       <Filter>소스 파일\Component</Filter>
     </ClInclude>
     <ClInclude Include="ControllerComponent.h">
       <Filter>소스 파일\Component\Controller</Filter>
+    </ClInclude>
+    <ClInclude Include="ColliderComponent.h">
+      <Filter>소스 파일\Component\Collider</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -217,13 +223,16 @@
       <Filter>소스 파일\Component</Filter>
     </ClCompile>
     <ClCompile Include="TransformComponent.cpp">
-      <Filter>소스 파일\Component\TransformComponent</Filter>
+      <Filter>소스 파일\Component\Transform</Filter>
     </ClCompile>
     <ClCompile Include="MeshRendererComponent.cpp">
-      <Filter>소스 파일\Component\MeshRendererComponent</Filter>
+      <Filter>소스 파일\Component\MeshRenderer</Filter>
     </ClCompile>
     <ClCompile Include="ControllerComponent.cpp">
       <Filter>소스 파일\Component\Controller</Filter>
+    </ClCompile>
+    <ClCompile Include="ColliderComponent.cpp">
+      <Filter>소스 파일\Component\Collider</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

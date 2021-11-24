@@ -948,11 +948,16 @@ void Scene::Input(UCHAR* pKeyBuffer, float fTimeElapsed)
 	//if (pKeyBuffer[KeyCode::_S] & 0xF0) { m_pCamera->MoveBackward(2); }
 	//if (pKeyBuffer[KeyCode::_D] & 0xF0) { m_pCamera->MoveRight(2); }
 	//if (pKeyBuffer[KeyCode::_R] & 0xF0) { m_pCamera->MoveUp(2); }
-	//if (pKeyBuffer[KeyCode::_F] & 0xF0) { m_pCamera->MoveDown(2); }
-	if (pKeyBuffer[KeyCode::_Q] & 0xF0) { m_pCamera->Rotate(0, -50 * fTimeElapsed, 0); }
-	if (pKeyBuffer[KeyCode::_E] & 0xF0) { m_pCamera->Rotate(0, 50 * fTimeElapsed, 0); }
+	////if (pKeyBuffer[KeyCode::_F] & 0xF0) { m_pCamera->MoveDown(2); }
+	//if (pKeyBuffer[KeyCode::_Q] & 0xF0) { m_pCamera->Rotate(0, -50 * fTimeElapsed, 0); }
+	//if (pKeyBuffer[KeyCode::_E] & 0xF0) { m_pCamera->Rotate(0, 50 * fTimeElapsed, 0); }
 	if (pKeyBuffer[KeyCode::_Z] & 0xF0) { m_pCamera->Rotate(50 * fTimeElapsed, 0, 0); }
 	if (pKeyBuffer[KeyCode::_X] & 0xF0) { m_pCamera->Rotate(-50 * fTimeElapsed, 0, 0); }
+
+
+
+	if (pKeyBuffer[KeyCode::_Q] & 0xF0) { m_vecObject[0]->FindComponentByName("Controller")->SetActive(false); }
+	if (pKeyBuffer[KeyCode::_E] & 0xF0) { m_vecObject[0]->FindComponentByName("Controller")->SetActive(true); }
 
 	//if (pKeyBuffer[KeyCode::_J] & 0xF0) { dynamic_cast<HumanoidObject*>(m_vecAnimObject[0])->WalkForward(); }
 	//if (pKeyBuffer[KeyCode::_U] & 0xF0) gTestInt = 1;

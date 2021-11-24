@@ -27,6 +27,8 @@ MeshRendererComponent::~MeshRendererComponent()
 
 void MeshRendererComponent::Render(ID3D12GraphicsCommandList* pd3dCommandList)
 {
+	if (!m_bEnabled) return;
+
 	pd3dCommandList->SetGraphicsRootDescriptorTable(ROOTSIGNATURE_OBJECTS, m_d3dCbvGPUDescriptorHandle);
 	UINT ncbElementBytes = ((sizeof(XMFLOAT4X4) + 255) & ~255);
 	memset(m_pCBMappedWorldTransform, NULL, ncbElementBytes);

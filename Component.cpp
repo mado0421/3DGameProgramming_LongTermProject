@@ -20,3 +20,8 @@ bool Component::isEqualTo(const char* strName)
 {
     return (strcmp(strName, m_strName.c_str()) == 0);
 }
+
+void Component::SetActive(bool bActive)
+{
+    m_bEnabled = bActive;
+}
