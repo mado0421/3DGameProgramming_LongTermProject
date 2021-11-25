@@ -59,9 +59,12 @@ public:
 
 public:
 	virtual void Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
-	virtual void Render(D3D12_CPU_DESCRIPTOR_HANDLE hBckBufRtv, D3D12_CPU_DESCRIPTOR_HANDLE hBckBufDsv);
+
+	virtual void CheckCollsion();
+	virtual void SolveConstraint();
+	virtual void Input(UCHAR* pKeyBuffer);
 	virtual void Update(float fTimeElapsed);
-	virtual void Input(UCHAR* pKeyBuffer, float fTimeElapsed);
+	virtual void Render(D3D12_CPU_DESCRIPTOR_HANDLE hBckBufRtv, D3D12_CPU_DESCRIPTOR_HANDLE hBckBufDsv);
 
 	virtual void Release();
 

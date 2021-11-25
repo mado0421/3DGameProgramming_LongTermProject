@@ -18,19 +18,18 @@ class Object
 	// Initialize
 public:
 	Object();
-	virtual ~Object() {
-		for_each(m_vecComponents.begin(), m_vecComponents.end(), [](Component* c) { delete c; });
-	}
-
-protected:
+	virtual ~Object();
 
 public:
+	virtual void CheckCollsion(const Object& other);
+	virtual void SolveConstraint();
+	virtual void Input(UCHAR* pKeyBuffer);
 	virtual void Update(float fTimeElapsed);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList);
-	virtual void Input(UCHAR* pKeyBuffer);
+
+public:
 	virtual void Move(const XMFLOAT3 xmf3Vector);
 	virtual void Rotate(const XMFLOAT3 xmf3Vector);
-public:
 	virtual void SetParent(Object* pObject) { m_pParent = pObject; }
 	virtual void SetState(const char* strStateName) {};
 	virtual void SetVelocity(const XMFLOAT3 xmf3Vector) { m_xmf3Velocity = xmf3Vector; }
@@ -42,34 +41,35 @@ public:
 	virtual XMMATRIX const GetBoneMatrix(int boneIdx) { return XMMatrixIdentity(); }
 	virtual XMFLOAT3 const GetVelocity() { return m_xmf3Velocity; }
 
-protected:
-	double		m_time;
-	XMFLOAT3	m_xmf3Velocity;
-	Object*		m_pParent;
-
-protected:
-	vector<Component*> m_vecComponents;
-
 public:
 	// 못 찾으면 nullptr을 반환함.
-	Component* FindComponentByName(const char* strName) {
+	Component* FindComponentByName(const char* strName) const {
 		for (int i = 0; i < m_vecComponents.size(); i++) {
 			if (m_vecComponents[i]->isEqualTo(strName))
 				return m_vecComponents[i]->GetInstance();
 		}
-
-
-		//for_each(m_vecComponents.begin(), m_vecComponents.end(),
-		//	[&strName](Component* c) { 
-		//		if (c->isEqualTo(strName))
-		//			return c->GetInstance();
-		//	}
-		//);
 		return nullptr;
+	}
+	vector<Component*> FindComponentsByName(const char* strName) const {
+		vector<Component*> result;
+
+		for (int i = 0; i < m_vecComponents.size(); i++) {
+			if (m_vecComponents[i]->isEqualTo(strName))
+				result.push_back(m_vecComponents[i]->GetInstance());
+		}
+
+		return result;
 	}
 	void AddComponent(Component* component) {
 		m_vecComponents.push_back(component);
 	}
+
+protected:
+	float		m_fTime			= 0;
+	XMFLOAT3	m_xmf3Velocity	= XMFLOAT3(0, 0, 0);
+	Object*		m_pParent		= nullptr;
+
+	vector<Component*> m_vecComponents;
 };
 
 //class DebugWindowObject : public Object {

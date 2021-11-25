@@ -940,3 +940,9 @@ A Object의 Collider가 B Object의 여러 Collider와 Intersect 할 수 있고,
 SolveConstraint() 단에서 해당 Collider가 어떤 용도인지 체크하고,  맞는 처리를 한다.
 
 Update()는 충돌처리 외의 부분을 하면 될 듯.
+
+### 2021.11.25
+한 Object 내에 지면판정용 Collider와 피격판정용 Collider를 넣어뒀을 때, CheckCollsion()에서 지금 충돌한 Collider가 지면판정용인지, 피격판정용인지 알 수 없다는 문제가 있다.
+유니티에서는 한 gameobject 내에 같은 타입의 Collider(예를 들어 BoxCollider 두 개 이상)를 각자 다른 용도로 사용할 수 없다는 글이 있었고 이를 구현하려면 Child Object를 생성해서 Collider를 넣어주는 식으로 구현해야 한다.
+
+그 외에 InputEvent()에서 인자로 흐른 시간을 받고 있어서 이를 정리했다.

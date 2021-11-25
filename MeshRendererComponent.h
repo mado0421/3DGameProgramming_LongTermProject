@@ -14,9 +14,9 @@ public:
 		D3D12_GPU_DESCRIPTOR_HANDLE& d3dCbvGPUDescriptorStartHandle);
 	~MeshRendererComponent();
 
-	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList);
-	virtual void Update(float fTimeElapsed) {}
 	virtual void InputEvent(UCHAR* pKeyBuffer) {}
+	virtual void Update(float fTimeElapsed) {}
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList);
 
 	void SetModelByName(const char* strModelName);
 	void SetMaterialByName(const char* strMaterialName);

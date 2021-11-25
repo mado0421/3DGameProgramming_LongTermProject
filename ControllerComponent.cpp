@@ -11,14 +11,6 @@ ControllerComponent::~ControllerComponent()
 {
 }
 
-void ControllerComponent::Update(float fTimeElapsed)
-{
-	if (!m_bEnabled) return;
-
-	dynamic_cast<TransformComponent*>(m_pObject->FindComponentByName("Transform"))
-		->Translate(Vector3::Multiply(fTimeElapsed, m_xmf3Direction));
-}
-
 void ControllerComponent::InputEvent(UCHAR* pKeyBuffer)
 {
 	m_xmf3Direction = XMFLOAT3(0, 0, 0);
@@ -28,4 +20,12 @@ void ControllerComponent::InputEvent(UCHAR* pKeyBuffer)
 	if (pKeyBuffer[KeyCode::_D] & 0xF0) { m_xmf3Direction.x += m_fSpeed; }
 	if (pKeyBuffer[KeyCode::_R] & 0xF0) { m_xmf3Direction.y += m_fSpeed; }
 	if (pKeyBuffer[KeyCode::_F] & 0xF0) { m_xmf3Direction.y -= m_fSpeed; }
+}
+
+void ControllerComponent::Update(float fTimeElapsed)
+{
+	if (!m_bEnabled) return;
+
+	dynamic_cast<TransformComponent*>(m_pObject->FindComponentByName("Transform"))
+		->Translate(Vector3::Multiply(fTimeElapsed, m_xmf3Direction));
 }

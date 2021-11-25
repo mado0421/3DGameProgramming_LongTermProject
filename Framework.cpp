@@ -7,7 +7,7 @@ void Framework::Update()
 	m_Timer.Tick(0.0f);
 	float fTimeElapsed = m_Timer.GetTimeElapsed();
 
-	Input(fTimeElapsed);
+	Input();
 	if (m_pCurrentScene) m_pCurrentScene->Update(fTimeElapsed);
 
 	HRESULT hResult = m_pd3dCommandAllocator->Reset();
@@ -70,11 +70,11 @@ void Framework::Update()
 	::SetWindowText(m_hWnd, m_pszFrameRate);
 }
 
-void Framework::Input(float fTimeElapsed)
+void Framework::Input()
 {
 	static UCHAR pKeysBuffer[256];
 	bool bProcessedByScene = false;
-	if (GetKeyboardState(pKeysBuffer) && m_pCurrentScene) m_pCurrentScene->Input(pKeysBuffer, fTimeElapsed);
+	if (GetKeyboardState(pKeysBuffer) && m_pCurrentScene) m_pCurrentScene->Input(pKeysBuffer);
 }
 void Framework::OnCreate(HINSTANCE hInstance, HWND hWnd)
 {

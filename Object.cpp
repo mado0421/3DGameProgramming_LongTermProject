@@ -6,23 +6,43 @@
 #include "State.h"
 #include "Animation.h"
 #include "Mask.h"
+#include "Components.h"
+
 
 Object::Object()
 {
 }
+
+Object::~Object()
+{
+	for_each(m_vecComponents.begin(), m_vecComponents.end(), [](Component* c) { delete c; });
+}
+
+void Object::CheckCollsion(const Object& other)
+{
+	vector<Component*> l_vecpMyCollider = FindComponentsByName("Collider");
+	vector<Component*> l_vecpOtherCollider = other.FindComponentsByName("Collider");
+
+	for (int i = 0; i < l_vecpMyCollider.size(); i++) 
+		for (int j = 0; j < l_vecpOtherCollider.size(); j++) 
+			dynamic_cast<ColliderComponent*>(l_vecpMyCollider[i])
+			->CheckCollision(dynamic_cast<ColliderComponent*>(l_vecpOtherCollider[j]));
+}
+void Object::SolveConstraint()
+{
+}
+void Object::Input(UCHAR* pKeyBuffer)
+{
+	for_each(m_vecComponents.begin(), m_vecComponents.end(), [pKeyBuffer](Component* c) { c->InputEvent(pKeyBuffer); });
+}
 void Object::Update(float fTimeElapsed)
 {
-	m_time += fTimeElapsed;
+	m_fTime += fTimeElapsed;
 	for_each(m_vecComponents.begin(), m_vecComponents.end(), [fTimeElapsed](Component* c) { c->Update(fTimeElapsed); });
 }
 void Object::Render(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	for_each(m_vecComponents.begin(), m_vecComponents.end(), [pd3dCommandList](Component* c) { c->Render(pd3dCommandList); });
-}
-void Object::Input(UCHAR* pKeyBuffer)
-{
-	for_each(m_vecComponents.begin(), m_vecComponents.end(), [pKeyBuffer](Component* c) { c->InputEvent(pKeyBuffer); });
-
 }
 void Object::Move(const XMFLOAT3 xmf3Vector)
 {

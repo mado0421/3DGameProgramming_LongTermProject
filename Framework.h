@@ -54,7 +54,7 @@ private:
 
 public:
 	void Update();
-	void Input(float fTimeElapsed);
+	void Input();
 	void OnDestroy();
 	void OnCreate(HINSTANCE hInstance, HWND hWnd);
 	void OnProcessingWindowMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
