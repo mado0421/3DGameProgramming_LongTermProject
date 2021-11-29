@@ -18,15 +18,14 @@ Object::~Object()
 	for_each(m_vecComponents.begin(), m_vecComponents.end(), [](Component* c) { delete c; });
 }
 
-void Object::CheckCollsion(const Object& other)
+void Object::CheckCollsion(Object& other)
 {
-	vector<Component*> l_vecpMyCollider = FindComponentsByName("Collider");
-	vector<Component*> l_vecpOtherCollider = other.FindComponentsByName("Collider");
+	vector<ColliderComponent*> l_vecpMyCollider = FindComponents<ColliderComponent>();
+	vector<ColliderComponent*> l_vecpOtherCollider = other.FindComponents<ColliderComponent>();
 
 	for (int i = 0; i < l_vecpMyCollider.size(); i++) 
 		for (int j = 0; j < l_vecpOtherCollider.size(); j++) 
-			dynamic_cast<ColliderComponent*>(l_vecpMyCollider[i])
-			->CheckCollision(dynamic_cast<ColliderComponent*>(l_vecpOtherCollider[j]));
+			l_vecpMyCollider[i]->CheckCollision(l_vecpOtherCollider[j]);
 }
 void Object::SolveConstraint()
 {

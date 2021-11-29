@@ -18,9 +18,7 @@ public:
 		const float fRadius);
 	~ColliderComponent();
 
-	virtual void InputEvent(UCHAR* pKeyBuffer) {}
 	virtual void Update(float fTimeElapsed);
-	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList) {}
 
 	void CheckCollision(ColliderComponent* other);
 

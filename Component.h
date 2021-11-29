@@ -12,9 +12,10 @@ public:
 	virtual Component* GetInstance();
 	bool isEqualTo(const char* strName);
 
-	virtual void InputEvent(UCHAR* pKeyBuffer) = 0;
-	virtual void Update(float fTimeElapsed) = 0;
-	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList) = 0;
+	virtual void SolveConstraint() {}
+	virtual void InputEvent(UCHAR* pKeyBuffer) {}
+	virtual void Update(float fTimeElapsed) {}
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList) {}
 
 	void SetActive(bool bActive);
 

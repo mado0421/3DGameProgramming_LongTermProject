@@ -10,7 +10,6 @@ public:
 
 	virtual void InputEvent(UCHAR* pKeyBuffer);
 	virtual void Update(float fTimeElapsed);
-	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList) {}
 
 public:
 	float m_fSpeed = 1.0f;

@@ -284,8 +284,8 @@ void Scene::Input(UCHAR* pKeyBuffer)
 
 
 
-	if (pKeyBuffer[KeyCode::_Q] & 0xF0) { m_vecObject[0]->FindComponentByName("Controller")->SetActive(false); }
-	if (pKeyBuffer[KeyCode::_E] & 0xF0) { m_vecObject[0]->FindComponentByName("Controller")->SetActive(true); }
+	if (pKeyBuffer[KeyCode::_Q] & 0xF0) { m_vecObject[0]->FindComponent<ControllerComponent>()->SetActive(false); }
+	if (pKeyBuffer[KeyCode::_E] & 0xF0) { m_vecObject[0]->FindComponent<ControllerComponent>()->SetActive(true); }
 
 	//if (pKeyBuffer[KeyCode::_J] & 0xF0) { dynamic_cast<HumanoidObject*>(m_vecAnimObject[0])->WalkForward(); }
 	//if (pKeyBuffer[KeyCode::_U] & 0xF0) gTestInt = 1;

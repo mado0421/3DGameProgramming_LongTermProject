@@ -946,3 +946,21 @@ Update()는 충돌처리 외의 부분을 하면 될 듯.
 유니티에서는 한 gameobject 내에 같은 타입의 Collider(예를 들어 BoxCollider 두 개 이상)를 각자 다른 용도로 사용할 수 없다는 글이 있었고 이를 구현하려면 Child Object를 생성해서 Collider를 넣어주는 식으로 구현해야 한다.
 
 그 외에 InputEvent()에서 인자로 흐른 시간을 받고 있어서 이를 정리했다.
+
+### 2021.11.29
+
+	// 이 방식을 쓰면 한 Object 안에 있는 모든 Component에 대해서
+	// 원하는 자료형으로 변환이 되는 Component만 찾아서 반환시킬 수 있다.
+	template<typename t>
+	vector<t*> FindComponents() {
+		vector<t*> result;
+
+		for (Parent* at : m_vecpParent) {
+			t* as = at->GetDerived<t*>();
+			if (nullptr != as)
+				result.push_back(as);
+		}
+		return result;
+	}
+한 Object의 모든 Collider를 찾을 때, 그 Object와 해당 Object의 Child Object들까지 전부 찾아서 모든 Component에 대해 검사한다.
+시간이 오래 걸릴 것 같기도 해서 걱정되는데 실제로 돌려보고 프레임 유지가 힘들 것 같다 싶으면 고민해보는 것으로.

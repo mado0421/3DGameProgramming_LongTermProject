@@ -11,10 +11,6 @@ public:
 	TransformComponent(Object* pObject);
 	~TransformComponent();
 
-	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList) {}
-	virtual void Update(float fTimeElapsed) {}
-	virtual void InputEvent(UCHAR* pKeyBuffer) {}
-
 	void SetPosition(const XMFLOAT3& xmf3Position);
 	void SetPosition(const float& fX, const float& fY, const float& fZ);
 	void Translate(const XMFLOAT3& xmf3Val);

@@ -21,7 +21,7 @@ public:
 	virtual ~Object();
 
 public:
-	virtual void CheckCollsion(const Object& other);
+	virtual void CheckCollsion(Object& other);
 	virtual void SolveConstraint();
 	virtual void Input(UCHAR* pKeyBuffer);
 	virtual void Update(float fTimeElapsed);
@@ -43,50 +43,65 @@ public:
 
 public:
 	// 못 찾으면 nullptr을 반환함.
-	Component* FindComponentByName(const char* strName) const {
-		for (int i = 0; i < m_vecComponents.size(); i++) {
-			if (m_vecComponents[i]->isEqualTo(strName))
-				return m_vecComponents[i]->GetInstance();
+	//Component* FindComponentByName(const char* strName) const {
+	//	for (int i = 0; i < m_vecComponents.size(); i++) {
+	//		if (m_vecComponents[i]->isEqualTo(strName))
+	//			return m_vecComponents[i]->GetInstance();
+	//	}
+	//	return nullptr;
+	//}
+
+
+	template<typename t>
+	t* FindComponent() {
+		for (Component* c : m_vecComponents) {
+			t* as = dynamic_cast<t*>(c);
+			if (nullptr != as) return as;
 		}
 		return nullptr;
 	}
-	vector<Component*> FindComponentsByName(const char* strName) const {
-		vector<Component*> result;
 
-		for (int i = 0; i < m_vecComponents.size(); i++) {
-			if (m_vecComponents[i]->isEqualTo(strName))
-				result.push_back(m_vecComponents[i]->GetInstance());
-		}
+	template<typename t>
+	vector<t*> FindComponents() {
+		vector<t*> result;
+
+		FindComponentsReq(result);
 
 		return result;
 	}
+
+	//vector<Component*> FindComponentsByName(const char* strName) const {
+	//	vector<Component*> result;
+	//	for (int i = 0; i < m_vecComponents.size(); i++) {
+	//		if (m_vecComponents[i]->isEqualTo(strName))
+	//			result.push_back(m_vecComponents[i]->GetInstance());
+	//	}
+	//	return result;
+	//}
 	void AddComponent(Component* component) {
 		m_vecComponents.push_back(component);
 	}
 
 protected:
-	float		m_fTime			= 0;
-	XMFLOAT3	m_xmf3Velocity	= XMFLOAT3(0, 0, 0);
-	Object*		m_pParent		= nullptr;
+	template<typename t>
+	void FindComponentsReq(vector<t*>& result) {
+		for (Component* c : m_vecComponents) {
+			t* as = dynamic_cast<t*>(c);
+			if (nullptr != as)
+				result.push_back(as);
+		}
+
+		for (Object* c : m_vecpChild) c->FindComponentsReq<t>(result);
+	}
+
+protected:
+	float			m_fTime			= 0;
+	XMFLOAT3		m_xmf3Velocity	= XMFLOAT3(0, 0, 0);
+	Object*			m_pParent		= nullptr;
+	vector<Object*> m_vecpChild;
 
 	vector<Component*> m_vecComponents;
 };
-
-//class DebugWindowObject : public Object {
-//public:
-//	DebugWindowObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
-//		D3D12_CPU_DESCRIPTOR_HANDLE& d3dCbvCPUDescriptorStartHandle,
-//		D3D12_GPU_DESCRIPTOR_HANDLE& d3dCbvGPUDescriptorStartHandle,
-//		bool bIsPass2Screen = false);
-//	DebugWindowObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
-//		D3D12_CPU_DESCRIPTOR_HANDLE& d3dCbvCPUDescriptorStartHandle,
-//		D3D12_GPU_DESCRIPTOR_HANDLE& d3dCbvGPUDescriptorStartHandle,
-//		float width, float height);
-//	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList);
-//
-//private:
-//	DebugWindowMesh*			m_pDWMesh;
-//};
 
 class Screen {
 public:

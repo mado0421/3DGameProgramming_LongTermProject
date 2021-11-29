@@ -26,6 +26,5 @@ void ControllerComponent::Update(float fTimeElapsed)
 {
 	if (!m_bEnabled) return;
 
-	dynamic_cast<TransformComponent*>(m_pObject->FindComponentByName("Transform"))
-		->Translate(Vector3::Multiply(fTimeElapsed, m_xmf3Direction));
+	m_pObject->FindComponent<TransformComponent>()->Translate(Vector3::Multiply(fTimeElapsed, m_xmf3Direction));
 }
