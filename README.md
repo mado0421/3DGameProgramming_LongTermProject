@@ -964,3 +964,21 @@ Update()는 충돌처리 외의 부분을 하면 될 듯.
 	}
 한 Object의 모든 Collider를 찾을 때, 그 Object와 해당 Object의 Child Object들까지 전부 찾아서 모든 Component에 대해 검사한다.
 시간이 오래 걸릴 것 같기도 해서 걱정되는데 실제로 돌려보고 프레임 유지가 힘들 것 같다 싶으면 고민해보는 것으로.
+
+### 2021.12.06
+ObjectData.data의 구조를 다음과 같은 방식으로 변경 예정.
+
+	{
+		"ObjectName001", "TagName", "ParentName"
+		"Transform", "0, 0, 0", "0, 270, 0"
+		"SkinnedMeshRenderer", "heavyGuardModel", "heavyGuardMat"
+		"BoxCollider", "0, 0.3, 0", "1, 2, 1", "0, 0, 0, 1"
+		"Character", "100"
+		"Controller", "5"
+	}
+	{
+		"GroundCheck", "CollisionDetector", "ObjectName001"
+		"Transform", "0, -0.3, 0", "0, 0, 0"
+		"SphereCollider", "0, 0, 0", "1.5"
+		"Rigidbody"
+	}
