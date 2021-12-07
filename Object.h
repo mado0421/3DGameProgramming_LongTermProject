@@ -42,16 +42,6 @@ public:
 	virtual XMFLOAT3 const GetVelocity() { return m_xmf3Velocity; }
 
 public:
-	// 못 찾으면 nullptr을 반환함.
-	//Component* FindComponentByName(const char* strName) const {
-	//	for (int i = 0; i < m_vecComponents.size(); i++) {
-	//		if (m_vecComponents[i]->isEqualTo(strName))
-	//			return m_vecComponents[i]->GetInstance();
-	//	}
-	//	return nullptr;
-	//}
-
-
 	template<typename t>
 	t* FindComponent() {
 		for (Component* c : m_vecComponents) {
@@ -70,14 +60,6 @@ public:
 		return result;
 	}
 
-	//vector<Component*> FindComponentsByName(const char* strName) const {
-	//	vector<Component*> result;
-	//	for (int i = 0; i < m_vecComponents.size(); i++) {
-	//		if (m_vecComponents[i]->isEqualTo(strName))
-	//			result.push_back(m_vecComponents[i]->GetInstance());
-	//	}
-	//	return result;
-	//}
 	void AddComponent(Component* component) {
 		m_vecComponents.push_back(component);
 	}
