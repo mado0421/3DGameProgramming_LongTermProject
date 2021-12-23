@@ -69,6 +69,15 @@
     <Filter Include="소스 파일\Component\Transform">
       <UniqueIdentifier>{2e7e23a9-d84c-4123-bc62-0d4a2a2a437f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\Component\Animations">
+      <UniqueIdentifier>{505e4e25-7faf-4cb4-91f1-492d0bb1e12e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Component\Animations\SkinnedMeshRenderer">
+      <UniqueIdentifier>{d91ebb9f-3a20-4e1a-83b3-e6137b404b1a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Component\Animations\Animator">
+      <UniqueIdentifier>{caf9c0f8-1c0c-4ffc-9ed1-064eb01ef669}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Resource.h">
@@ -159,6 +168,12 @@
     <ClInclude Include="ColliderComponent.h">
       <Filter>소스 파일\Component\Collider</Filter>
     </ClInclude>
+    <ClInclude Include="SkinnedMeshRendererComponent.h">
+      <Filter>소스 파일\Component\Animations\SkinnedMeshRenderer</Filter>
+    </ClInclude>
+    <ClInclude Include="AnimatorComponent.h">
+      <Filter>소스 파일\Component\Animations\Animator</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WindowsProject1.cpp">
@@ -233,6 +248,12 @@
     </ClCompile>
     <ClCompile Include="ColliderComponent.cpp">
       <Filter>소스 파일\Component\Collider</Filter>
+    </ClCompile>
+    <ClCompile Include="SkinnedMeshRendererComponent.cpp">
+      <Filter>소스 파일\Component\Animations\SkinnedMeshRenderer</Filter>
+    </ClCompile>
+    <ClCompile Include="AnimatorComponent.cpp">
+      <Filter>소스 파일\Component\Animations\Animator</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

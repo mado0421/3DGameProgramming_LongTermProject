@@ -146,6 +146,7 @@
     <ClInclude Include="Animation.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClInclude>
+    <ClInclude Include="AnimatorComponent.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="ColliderComponent.h" />
     <ClInclude Include="Component.h" />
@@ -169,6 +170,7 @@
     <ClInclude Include="PipelineStateObject.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="Scene.h" />
+    <ClInclude Include="SkinnedMeshRendererComponent.h" />
     <ClInclude Include="State.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClInclude>
@@ -184,6 +186,7 @@
     <ClCompile Include="Animation.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="AnimatorComponent.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="ColliderComponent.cpp" />
     <ClCompile Include="Component.cpp" />
@@ -203,6 +206,7 @@
     <ClCompile Include="Object.cpp" />
     <ClCompile Include="PipelineStateObject.cpp" />
     <ClCompile Include="Scene.cpp" />
+    <ClCompile Include="SkinnedMeshRendererComponent.cpp" />
     <ClCompile Include="State.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>

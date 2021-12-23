@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "TransformComponent.h"
+#include "Object.h"
 
 
 TransformComponent::TransformComponent(Object* pObject)
@@ -90,6 +91,14 @@ void TransformComponent::RotateXYZDegree(const float& fX, const float& fY, const
 XMMATRIX TransformComponent::GetLocalTransform()
 {
 	return XMLoadFloat4x4(&m_xmf4x4Local);
+}
+XMMATRIX TransformComponent::GetWorldTransform()
+{
+	if (nullptr != m_pObject->m_pParent) {
+		TransformComponent* l_pParentTransform = m_pObject->FindComponent<TransformComponent>();
+		return XMMatrixMultiply(XMLoadFloat4x4(&m_xmf4x4Local), l_pParentTransform->GetWorldTransform());
+	}
+	else return XMLoadFloat4x4(&m_xmf4x4Local);
 }
 XMFLOAT3 const TransformComponent::GetLookVector()
 {

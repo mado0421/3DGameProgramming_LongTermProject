@@ -51,8 +51,21 @@ public:
 		return nullptr;
 	}
 
+
 	template<typename t>
 	vector<t*> FindComponents() {
+		vector<t*> result;
+
+		for (Component* c : m_vecComponents) {
+			t* as = dynamic_cast<t*>(c);
+			if (nullptr != as) result.push_back(as);
+		}
+
+		return result;
+	}
+
+	template<typename t>
+	vector<t*> FindComponentsInChildren() {
 		vector<t*> result;
 
 		FindComponentsReq(result);
@@ -76,7 +89,7 @@ protected:
 		for (Object* c : m_vecpChild) c->FindComponentsReq<t>(result);
 	}
 
-protected:
+public:
 	float			m_fTime			= 0;
 	XMFLOAT3		m_xmf3Velocity	= XMFLOAT3(0, 0, 0);
 	Object*			m_pParent		= nullptr;

@@ -19,10 +19,11 @@ public:
 	void RotateXYZDegree(const float& fX, const float& fY, const float& fZ);
 
 	XMMATRIX GetLocalTransform();
+	XMMATRIX GetWorldTransform();
 	XMFLOAT3 const GetLookVector();
 	XMFLOAT3 const GetPosition();
 
-private:
+protected:
 	XMFLOAT4X4	m_xmf4x4Local;
 };
 
