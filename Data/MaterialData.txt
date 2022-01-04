@@ -1,12 +1,13 @@
 #Material
 
-#{ name DefaultMaterial d defaultDiffuseMap n defaultNormalMap s defaultSpecularMap f 0.1 0.1 0.1 }
-#{ name MechMat d mech_diff f 0.1 0.1 0.1 }
-#{ name TestMat s specularTest f 0.1 0.1 0.1 }
-{ name CobblestoneMat d CobblestoneOld_albedo n CobblestoneOld_normal s CobblestoneOld_roughness f 0.1 0.1 0.1 }
+#{ name CobblestoneMat d CobblestoneOld_albedo n CobblestoneOld_normal s CobblestoneOld_roughness f 0.1 0.1 0.1 }
+#{ name WallBottomMat d ArcadedWoodPanels_albedo n ArcadedWoodPanels_normal f 0.1 0.1 0.1 }
+#{ name WallTopMat d Leather_Tufted_albedo n Leather_Tufted_normal f 0.1 0.1 0.1 }
 { name PistolMat d pistol_albedo n pistol_normal f 0.1 0.1 0.1 }
-{ name WallBottomMat d ArcadedWoodPanels_albedo n ArcadedWoodPanels_normal f 0.1 0.1 0.1 }
-{ name WallTopMat d Leather_Tufted_albedo n Leather_Tufted_normal f 0.1 0.1 0.1 }
 { name MechMat d Mech_albedo f 0.1 0.1 0.1 }
+{ name BoxMat d Wood_Decking1_albedo n Wood_Decking1_normal s Wood_Decking1_roughness f 0.1 0.1 0.1 }
+{ name CobblestoneMat d CobblestoneOld_albedo n CobblestoneOld_normal s CobblestoneOld_roughness f 0.1 0.1 0.1 }
+{ name WallTopMat d Leather_Tufted_albedo n Leather_Tufted_normal f 0.1 0.1 0.1 }
+{ name WallBottomMat d ArcadedWoodPanels_albedo n ArcadedWoodPanels_normal f 0.1 0.1 0.1 }
 
 #End

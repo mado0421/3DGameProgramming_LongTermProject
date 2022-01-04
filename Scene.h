@@ -35,7 +35,11 @@ protected:
 
 
 	vector<Object*>								m_vecObject;
-	vector<Object*>								m_vecAnimObject;
+
+	// for Render
+	vector<Object*>								m_vecNonAnimObjectRenderGroup;
+	vector<Object*>								m_vecAnimObjectRenderGroup;
+
 	vector<Screen*>								m_vecScreenObject;
 	unordered_map<string, ID3D12PipelineState*> m_uomPipelineStates;
 
@@ -74,6 +78,8 @@ protected:
 
 	void CreatePassInfoShaderResource();
 	void UpdatePassInfoAboutCamera();
+
+	void BuildObject();
 
 protected:
 	/*==============================================================================

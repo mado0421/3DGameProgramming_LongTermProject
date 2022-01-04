@@ -6,7 +6,7 @@
 #include "Mask.h"
 
 AnimatorComponent::AnimatorComponent(Object* pObject, const char* strClipNameForBoneHierarchy)
-	:Component(pObject, "Animator")
+	:Component(pObject)
 {
 	memset(m_arrToDressInv,		NULL, sizeof(XMFLOAT4X4) * MAX_BONE_NUM);
 	memset(m_arrToParent,		NULL, sizeof(XMFLOAT4X4) * MAX_BONE_NUM);

@@ -4,13 +4,27 @@
 #include "Object.h"
 
 HumanoidControllerComponent::HumanoidControllerComponent(Object* pObject, Object* pWeapon)
-	:Component(pObject, "HumanoidController")
+	:Component(pObject)
 	, m_pWeaponObject(pWeapon)
 {
 }
 
 HumanoidControllerComponent::~HumanoidControllerComponent()
 {
+}
+
+void HumanoidControllerComponent::SolveConstraint()
+{
+	vector<ColliderComponent*> c = m_pObject->FindComponents<ColliderComponent>();
+
+	static int n = 0;
+
+	if (!c.empty()) 
+		if(c[0]->m_vecpCollided.size())
+		{
+			cout << n << " collided!!!\n";
+			n++;
+		}
 }
 
 void HumanoidControllerComponent::Update(float fTimeElapsed)

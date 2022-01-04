@@ -4,7 +4,7 @@
 #include "Components.h"
 
 WeaponControllerComponent::WeaponControllerComponent(Object* pObject, Object* pMuzzle, Object* pBullet)
-	:Component(pObject, "WeaponController")
+	:Component(pObject)
 	, m_pBullet(pBullet)
 	, m_pMuzzle(pMuzzle)
 	, m_fCooltime(0.5f)

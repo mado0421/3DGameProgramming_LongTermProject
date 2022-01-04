@@ -1,56 +1,103 @@
 #include "stdafx.h"
 #include "Components.h"
+#include "Object.h"
 
-ColliderComponent::ColliderComponent(
-	Object* pObject,
-	const char* strTag,
-	const XMFLOAT3& xmf3Center,
-	const XMFLOAT3& xmf3Extents,
-	const XMFLOAT4& xmf4Orientation)
-	:Component(pObject, "Collider")
-	, m_strTag(strTag)
+ColliderComponent::ColliderComponent(Object* pObject)
+	:Component(pObject)
 {
-	m_pBox = new BoundingOrientedBox(xmf3Center, xmf3Extents, xmf4Orientation);
-}
-
-ColliderComponent::ColliderComponent(
-	Object* pObject,
-	const char* strTag,
-	const XMFLOAT3& xmf3Center, 
-	const float fRadius)
-	:Component(pObject, "Collider")
-	, m_strTag(strTag)
-{
-	m_pSh = new BoundingSphere(xmf3Center, fRadius);
 }
 
 ColliderComponent::~ColliderComponent()
 {
-	if (m_pBox) delete m_pBox;
-	if (m_pSh)	delete m_pSh;
 }
 
 void ColliderComponent::Update(float fTimeElapsed)
 {
-	m_vecpCollidedCollider.clear();
+	m_vecpCollided.clear();
 }
 
-void ColliderComponent::CheckCollision(ColliderComponent* other)
+BoxColliderComponent::BoxColliderComponent(
+	Object* pObject, 
+	const XMFLOAT3& xmf3Center,
+	const XMFLOAT3& xmf3Extents, 
+	const XMFLOAT4& xmf4Orientation)
+	:ColliderComponent(pObject)
 {
-	if (!m_bEnabled || !other->m_bEnabled) return;
-
-	if (isIntersect(*other)) m_vecpCollidedCollider.push_back(other);
+	m_box = BoundingOrientedBox(xmf3Center, xmf3Extents, xmf4Orientation);
 }
 
-bool ColliderComponent::isIntersect(const ColliderComponent& other)
+BoxColliderComponent::~BoxColliderComponent()
 {
-	if (m_pBox) {
-		if (other.m_pBox)	return m_pBox->Intersects(*other.m_pBox);
-		else				return m_pBox->Intersects(*other.m_pSh);
-	}
-	else {	//m_pBS
-		if (other.m_pBox)	return m_pSh->Intersects(*other.m_pBox);
-		else				return m_pSh->Intersects(*other.m_pSh);
-	}
-	return false;	// 여기까지 오면 안 됨
+}
+
+void BoxColliderComponent::Update(float fTimeElapsed)
+{
+	if (!m_bEnabled) return;
+
+	m_vecpCollided.clear();
+
+	TransformComponent* transform = m_pObject->FindComponent<TransformComponent>();
+	m_box.Center		= transform->GetPosition();
+	m_box.Orientation	= transform->GetRotationQuaternion();
+}
+
+void BoxColliderComponent::CheckCollision(Object* other)
+{
+	if (!m_bEnabled) return;
+
+	BoxColliders	boxes	= other->FindComponents<BoxColliderComponent>();
+	SphereColliders spheres	= other->FindComponents<SphereColliderComponent>();
+
+	for_each(boxes.begin(), boxes.end(), [&](BoxColliderComponent* b) { 
+		if (b->m_bEnabled && m_box.Intersects(b->GetBoundingBox())) m_vecpCollided.push_back(b); });
+
+	for_each(spheres.begin(), spheres.end(), [&](SphereColliderComponent* s) {
+		if (s->m_bEnabled && m_box.Intersects(s->GetBoundingSphere())) m_vecpCollided.push_back(s); });
+}
+
+BoundingOrientedBox& BoxColliderComponent::GetBoundingBox()
+{
+	return m_box;
+}
+
+SphereColliderComponent::SphereColliderComponent(
+	Object* pObject,
+	const XMFLOAT3& xmf3Center, 
+	const float fRadius)
+	:ColliderComponent(pObject)
+{
+	m_sphere = BoundingSphere(xmf3Center, fRadius);
+}
+
+SphereColliderComponent::~SphereColliderComponent()
+{
+}
+
+void SphereColliderComponent::Update(float fTimeElapsed)
+{
+	if (!m_bEnabled) return;
+
+	m_vecpCollided.clear();
+
+	TransformComponent* transform = m_pObject->FindComponent<TransformComponent>();
+	m_sphere.Center = transform->GetPosition();
+}
+
+void SphereColliderComponent::CheckCollision(Object* other)
+{
+	if (!m_bEnabled) return;
+
+	BoxColliders	boxes = other->FindComponents<BoxColliderComponent>();
+	SphereColliders spheres = other->FindComponents<SphereColliderComponent>();
+
+	for_each(boxes.begin(), boxes.end(), [&](BoxColliderComponent* b) {
+		if (b->m_bEnabled && m_sphere.Intersects(b->GetBoundingBox())) m_vecpCollided.push_back(b); });
+
+	for_each(spheres.begin(), spheres.end(), [&](SphereColliderComponent* s) {
+		if (s->m_bEnabled && m_sphere.Intersects(s->GetBoundingSphere())) m_vecpCollided.push_back(s); });
+}
+
+BoundingSphere& SphereColliderComponent::GetBoundingSphere()
+{
+	return m_sphere;
 }

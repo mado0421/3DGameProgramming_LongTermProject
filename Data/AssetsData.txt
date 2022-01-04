@@ -6,6 +6,9 @@ CobblestoneOld_normal.dds
 CobblestoneOld_roughness.dds
 pistol_albedo.dds
 pistol_normal.dds
+Wood_Decking1_albedo.dds
+Wood_Decking1_normal.dds
+Wood_Decking1_roughness.dds
 ArcadedWoodPanels_albedo.dds
 ArcadedWoodPanels_normal.dds
 Leather_Tufted_albedo.dds
@@ -16,6 +19,9 @@ human.mm
 pistol.mm
 10x1wall.mm
 Mech.mm
+1x1Box_20220104.mm
+10x1wall_around_20220104.mm
+10x10Floor_20220104.mm
 Humanoid_Aiming.mac
 Humanoid_Idle.mac
 Humanoid_Idle2.mac

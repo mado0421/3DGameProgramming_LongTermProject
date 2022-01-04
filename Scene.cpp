@@ -25,7 +25,7 @@ void Scene::Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12Graphics
 	* 카메라 설정
 	*=======================================================================*/
 	m_pCamera = new FollowCamera();
-	m_pCamera->SetPosition(XMFLOAT3(0, 2, -3));
+	m_pCamera->SetPosition(XMFLOAT3(0, 2, -7));
 	m_pCamera->SetLookAt(XMFLOAT3(0, 1, 1));
 
 	/*========================================================================
@@ -116,109 +116,16 @@ void Scene::Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12Graphics
 	* Pass 1 전용 오브젝트 데이터 로드 및 생성
 	*=======================================================================*/
 
-	{
-		{
-			// muzzle, empty object for weapon
-			Object* muzzle = new Object();
-			TransformComponent* mTransform = new TransformComponent(muzzle);
-			mTransform->Translate(0, 0, 0.3f);
-			muzzle->AddComponent(mTransform);
-			m_vecObject.push_back(muzzle);
-
-			// weapon
-			Object* weapon = new Object();
-
-			TransformComponent* wTransform = new TransformComponent(weapon);
-			WeaponControllerComponent* wcc = new WeaponControllerComponent(weapon, muzzle, nullptr);
-			MeshRendererComponent* mrc = new MeshRendererComponent(weapon, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
-
-			mrc->SetModelByName("pistol");
-			mrc->SetMaterialByName("PistolMat");
-
-			weapon->AddComponent(wTransform);
-			weapon->AddComponent(wcc);
-			weapon->AddComponent(mrc);
-			m_vecObject.push_back(weapon);
-		}
-		{
-			// player
-			Object* player = new Object();
-
-			TransformComponent* transform = new TransformComponent(player);
-			SkinnedMeshRendererComponent* skinnedMeshRenderer = new SkinnedMeshRendererComponent(player, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
-			HumanoidControllerComponent* humanoidController = new HumanoidControllerComponent(player, m_vecObject[1]);
-			HumanoidAnimatorComponent* humanoidAnimator = new HumanoidAnimatorComponent(player, "Humanoid_Idle");
-			InputManagerComponent* controller = new InputManagerComponent(player);
-
-			skinnedMeshRenderer->SetModelByName("human");
-			skinnedMeshRenderer->SetMaterialByName("DefaultMaterial");
-
-			player->AddComponent(transform);
-			player->AddComponent(skinnedMeshRenderer);
-			player->AddComponent(humanoidController);
-			player->AddComponent(humanoidAnimator);
-			player->AddComponent(controller);
-
-			//m_vecObject.push_back(player);
-
-			m_vecAnimObject.push_back(player);
-			m_vecObject[1]->m_pParent = m_vecAnimObject[0];
-		}
-	}
-
-
-
-	//ObjectDataImporter objDataImporter;
-	//vector<OBJECT_DESC> vecObjDesc = objDataImporter.Load("Data/ObjectData.txt");
-	//for (int i = 0; i < vecObjDesc.size(); i++) {
-	//	if (strcmp(vecObjDesc[i].model.c_str(), "") != 0) {
-	//		if (vecObjDesc[i].isAnimated) {
-	//			HumanoidObject* tempObj = new HumanoidObject(m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
-	//			tempObj->Move(vecObjDesc[i].position);
-	//			tempObj->Rotate(vecObjDesc[i].rotation);
-	//			tempObj->SetModel(vecObjDesc[i].model.c_str());
-	//			tempObj->SetMaterial(vecObjDesc[i].material.c_str());
-	//			m_vecAnimObject.push_back(tempObj);
-	//		}
-	//		else {
-	//			Object* tempObj = new Object(m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
-	//			tempObj->Move(vecObjDesc[i].position);
-	//			tempObj->Rotate(vecObjDesc[i].rotation);
-	//			tempObj->SetModel(vecObjDesc[i].model.c_str());
-	//			tempObj->SetMaterial(vecObjDesc[i].material.c_str());
-	//			m_vecObject.push_back(tempObj);
-	//		}
-	//	}
-	//}
-	// 
-	//g_AnimUploader = new AnimationUploader(pd3dDevice, pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
-
-	//m_vecObject[0]->SetParent(m_vecAnimObject[0]);
-	//m_vecObject[0]->SetPosition(XMFLOAT3(-0.028f, 0.0f, 0.08f));
+	BuildObject();
 
 	/*========================================================================
 	* Pass 2 전용 전체 화면 사각형
 	*=======================================================================*/
-	//DebugWindowObject* tempScreen 
-	//	= new DebugWindowObject(m_pd3dDevice, m_pd3dCommandList,
-	//		m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle,
-	//		1.0f, 1.0f);
-	//m_vecDebugWindow.push_back(tempScreen);
-
-	//DebugWindowObject* smallScreen
-	//	= new DebugWindowObject(m_pd3dDevice, m_pd3dCommandList,
-	//		m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle,
-	//		0.5f, 0.5f);
-	//smallScreen->Move(XMFLOAT3(-0.5f, 0.5f, 0));
-	//m_vecDebugWindow.push_back(smallScreen);
-
 	Screen* tempScreen
 		= new Screen(m_pd3dDevice, m_pd3dCommandList,
 			m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle,
 			1.0f, 1.0f);
 	m_vecScreenObject.push_back(tempScreen);
-
-
 
 	/*========================================================================
 	* 광원과 광원별 그림자 텍스처 생성
@@ -282,23 +189,25 @@ void Scene::Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12Graphics
 
 void Scene::CheckCollsion()
 {
-	// 지금은 Non-Animated Object끼리만 충돌검사를 하고 있음.
-	// 이후에 추가하세여.
-	for (int i = 0; i < m_vecObject.size(); i++) 
+	for (int i = 0; i < m_vecObject.size(); i++) {
+		BoxColliders	myBoxes		= m_vecObject[i]->FindComponents<BoxColliderComponent>();
+		SphereColliders mySpheres	= m_vecObject[i]->FindComponents<SphereColliderComponent>();
+
 		for (int j = i + 1; j < m_vecObject.size(); j++) {
-			m_vecObject[i]->CheckCollsion(*m_vecObject[j]);
+			for_each(myBoxes.begin(), myBoxes.end(), [&](BoxColliderComponent* b) { b->CheckCollision(m_vecObject[j]); });
+			for_each(mySpheres.begin(), mySpheres.end(), [&](SphereColliderComponent* s) { s->CheckCollision(m_vecObject[j]); });
 		}
-	
+	}
 }
 
 void Scene::SolveConstraint()
 {
+	for_each(m_vecObject.begin(), m_vecObject.end(), [](Object* o) {o->SolveConstraint(); });
 }
 
 void Scene::Input(UCHAR* pKeyBuffer)
 {
 	for_each(m_vecObject.begin(), m_vecObject.end(), [pKeyBuffer](Object* o) {o->Input(pKeyBuffer); });
-	for_each(m_vecAnimObject.begin(), m_vecAnimObject.end(), [pKeyBuffer](Object* o) {o->Input(pKeyBuffer); });
 }
 void Scene::Update(float fTimeElapsed)
 {
@@ -307,9 +216,10 @@ void Scene::Update(float fTimeElapsed)
 	m_fCurrentTime += fTimeElapsed;
 	::memcpy(&m_pcbMappedPassInfo->m_xmfCurrentTime, &m_fCurrentTime, sizeof(float));
 
-	//for (auto iter = m_vecObject.begin(); iter != m_vecObject.end(); iter++) (*iter)->Update(fTimeElapsed);
+	CheckCollsion();
+	SolveConstraint();
+
 	for_each(m_vecObject.begin(), m_vecObject.end(), [fTimeElapsed](Object* o) {o->Update(fTimeElapsed); });
-	for_each(m_vecAnimObject.begin(), m_vecAnimObject.end(), [fTimeElapsed](Object* o) {o->Update(fTimeElapsed); });
 
 }
 void Scene::Render(D3D12_CPU_DESCRIPTOR_HANDLE hBckBufRtv, D3D12_CPU_DESCRIPTOR_HANDLE hBckBufDsv)
@@ -384,9 +294,9 @@ void Scene::Render(D3D12_CPU_DESCRIPTOR_HANDLE hBckBufRtv, D3D12_CPU_DESCRIPTOR_
 	m_pd3dCommandList->OMSetRenderTargets(2, rtvHandle, FALSE, &dsvHandle);
 
 	m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["AnimatedObject"]);
-	for (auto iter = m_vecAnimObject.begin(); iter != m_vecAnimObject.end(); iter++) (*iter)->Render(m_pd3dCommandList);
+	for (auto iter = m_vecAnimObjectRenderGroup.begin(); iter != m_vecAnimObjectRenderGroup.end(); iter++) (*iter)->Render(m_pd3dCommandList);
 	m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["PackGBuffer"]);
-	for (auto iter = m_vecObject.begin(); iter != m_vecObject.end(); iter++) (*iter)->Render(m_pd3dCommandList);
+	for (auto iter = m_vecNonAnimObjectRenderGroup.begin(); iter != m_vecNonAnimObjectRenderGroup.end(); iter++) (*iter)->Render(m_pd3dCommandList);
 
 	d3dResourceBarrier[0].Transition.pResource = g_TextureMng.GetTextureResource("GBuffer_Depth");
 	d3dResourceBarrier[0].Transition.StateBefore = D3D12_RESOURCE_STATE_DEPTH_WRITE;
@@ -422,28 +332,32 @@ void Scene::Render(D3D12_CPU_DESCRIPTOR_HANDLE hBckBufRtv, D3D12_CPU_DESCRIPTOR_
 			case LightType::LIGHT_SPOT:
 
 				m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["SpotLightShadow"]);
-				for (int i = 0; i < m_vecObject.size(); i++) m_vecObject[i]->Render(m_pd3dCommandList);
+				for (int i = 0; i < m_vecNonAnimObjectRenderGroup.size(); i++) m_vecNonAnimObjectRenderGroup[i]->Render(m_pd3dCommandList);
 
 				m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["SpotLightShadowAnim"]);
-				for (auto iter = m_vecAnimObject.begin(); iter != m_vecAnimObject.end(); iter++) (*iter)->Render(m_pd3dCommandList);
+				for (int i = 0; i < m_vecAnimObjectRenderGroup.size(); i++) m_vecAnimObjectRenderGroup[i]->Render(m_pd3dCommandList);
 				break;
+
 			case LightType::LIGHT_POINT:
 
 				m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["PointLightShadow"]);
-				for (int i = 0; i < m_vecObject.size(); i++) m_vecObject[i]->Render(m_pd3dCommandList);
+				for (int i = 0; i < m_vecNonAnimObjectRenderGroup.size(); i++) m_vecNonAnimObjectRenderGroup[i]->Render(m_pd3dCommandList);
 
 				m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["PointLightShadowAnim"]);
-				for (auto iter = m_vecAnimObject.begin(); iter != m_vecAnimObject.end(); iter++) (*iter)->Render(m_pd3dCommandList);
+				for (int i = 0; i < m_vecAnimObjectRenderGroup.size(); i++) m_vecAnimObjectRenderGroup[i]->Render(m_pd3dCommandList);
 				break;
+
 			case LightType::LIGHT_DIRECTIONAL:
 
 				m_LightMng->UpdateDirectionalLightOrthographicLH(m_pCamera->GetViewMatrix(), i);
+
 				m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["DirectionalLightShadow"]);
-				for (int i = 0; i < m_vecObject.size(); i++) m_vecObject[i]->Render(m_pd3dCommandList);
+				for (int i = 0; i < m_vecNonAnimObjectRenderGroup.size(); i++) m_vecNonAnimObjectRenderGroup[i]->Render(m_pd3dCommandList);
 
 				m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["DirectionalLightShadowAnim"]);
-				for (auto iter = m_vecAnimObject.begin(); iter != m_vecAnimObject.end(); iter++) (*iter)->Render(m_pd3dCommandList);
+				for (int i = 0; i < m_vecAnimObjectRenderGroup.size(); i++) m_vecAnimObjectRenderGroup[i]->Render(m_pd3dCommandList);
 				break;
+
 			case LightType::LIGHT_NONE:
 			default:
 				break;
@@ -1092,6 +1006,113 @@ void Scene::UpdatePassInfoAboutCamera()
 	::memcpy(&m_pcbMappedPassInfo->m_xmf3CameraPosition, &m_pCamera->GetPosition(), sizeof(XMFLOAT3));
 
 
+}
+
+void Scene::BuildObject()
+{
+	{
+		// muzzle, empty object for weapon
+		Object* muzzle = new Object();
+		TransformComponent* mTransform = new TransformComponent(muzzle);
+		mTransform->Translate(0, 0, 0.3f);
+		muzzle->AddComponent(mTransform);
+		m_vecObject.push_back(muzzle);
+
+		// weapon
+		Object* weapon = new Object();
+
+		TransformComponent* wTransform = new TransformComponent(weapon);
+		WeaponControllerComponent* wcc = new WeaponControllerComponent(weapon, muzzle, nullptr);
+		MeshRendererComponent* mrc = new MeshRendererComponent(weapon, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
+
+		mrc->SetModelByName("pistol");
+		mrc->SetMaterialByName("PistolMat");
+
+		weapon->AddComponent(wTransform);
+		weapon->AddComponent(wcc);
+		weapon->AddComponent(mrc);
+		m_vecObject.push_back(weapon);
+		m_vecNonAnimObjectRenderGroup.push_back(weapon);
+	}
+	{
+		// player
+		Object* player = new Object();
+
+		TransformComponent* transform = new TransformComponent(player);
+		SkinnedMeshRendererComponent* skinnedMeshRenderer = new SkinnedMeshRendererComponent(player, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
+		HumanoidControllerComponent* humanoidController = new HumanoidControllerComponent(player, m_vecNonAnimObjectRenderGroup[0]);
+		HumanoidAnimatorComponent* humanoidAnimator = new HumanoidAnimatorComponent(player, "Humanoid_Idle");
+		InputManagerComponent* controller = new InputManagerComponent(player);
+		BoxColliderComponent* boxCollider = new BoxColliderComponent(player, XMFLOAT3(0, 0, 0), XMFLOAT3(0.5f, 0.5f, 0.5f), XMFLOAT4(0, 0, 0, 1));
+
+		skinnedMeshRenderer->SetModelByName("human");
+		skinnedMeshRenderer->SetMaterialByName("DefaultMaterial");
+		transform->Translate(0, 0, -3);
+
+		player->AddComponent(transform);
+		player->AddComponent(skinnedMeshRenderer);
+		player->AddComponent(humanoidController);
+		player->AddComponent(humanoidAnimator);
+		player->AddComponent(controller);
+		player->AddComponent(boxCollider);
+
+		m_vecObject.push_back(player);
+		m_vecAnimObjectRenderGroup.push_back(player);
+		m_vecNonAnimObjectRenderGroup[0]->m_pParent = m_vecAnimObjectRenderGroup[0];
+	}
+	{
+		Object* box = new Object();
+
+		TransformComponent* transform = new TransformComponent(box);
+		MeshRendererComponent* mrc = new MeshRendererComponent(box, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
+		BoxColliderComponent* boxCollider = new BoxColliderComponent(box, XMFLOAT3(0, 0, 0), XMFLOAT3(0.5f, 0.5f, 0.5f), XMFLOAT4(0, 0, 0, 1));
+
+		mrc->SetModelByName("1x1Box_20220104");
+		mrc->SetMaterialByName("BoxMat");
+		transform->Translate(0, 0, 3);
+
+		box->AddComponent(transform);
+		box->AddComponent(boxCollider);
+		box->AddComponent(mrc);
+
+		m_vecObject.push_back(box);
+		m_vecNonAnimObjectRenderGroup.push_back(box);
+	}
+	{
+		Object* room = new Object();
+
+		TransformComponent* transform = new TransformComponent(room);
+		MeshRendererComponent* mrc0 = new MeshRendererComponent(room, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
+		MeshRendererComponent* mrc1 = new MeshRendererComponent(room, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
+
+		mrc0->SetModelByName("10x10Floor_20220104");
+		mrc0->SetMaterialByName("CobblestoneMat");
+		mrc1->SetModelByName("10x1wall_around_20220104");
+		mrc1->SetMaterialByName("WallBottomMat");
+
+		room->AddComponent(transform);
+		room->AddComponent(mrc0);
+		room->AddComponent(mrc1);
+
+		m_vecObject.push_back(room);
+		m_vecNonAnimObjectRenderGroup.push_back(room);
+	}
+	{
+		Object* room = new Object();
+
+		TransformComponent* transform = new TransformComponent(room);
+		MeshRendererComponent* mrc = new MeshRendererComponent(room, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
+
+		mrc->SetModelByName("10x1wall_around_20220104");
+		mrc->SetMaterialByName("WallTopMat");
+		transform->Translate(0, 1, 0);
+
+		room->AddComponent(transform);
+		room->AddComponent(mrc);
+
+		m_vecObject.push_back(room);
+		m_vecNonAnimObjectRenderGroup.push_back(room);
+	}
 }
 
 void Scene::ReloadLight()

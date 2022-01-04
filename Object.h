@@ -14,7 +14,6 @@ public:
 	virtual ~Object();
 
 public:
-	virtual void CheckCollsion(Object& other);
 	virtual void SolveConstraint();
 	virtual void Input(UCHAR* pKeyBuffer);
 	virtual void Update(float fTimeElapsed);
@@ -26,7 +25,6 @@ public:
 public:
 	template<typename t>
 	t* FindComponent();
-
 
 	template<typename t>
 	vector<t*> FindComponents();

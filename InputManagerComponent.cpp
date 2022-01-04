@@ -3,7 +3,7 @@
 #include "Object.h"
 
 InputManagerComponent::InputManagerComponent(Object* pObject)
-	:Component(pObject, "Controller")
+	:Component(pObject)
 {
 }
 

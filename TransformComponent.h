@@ -25,6 +25,7 @@ public:
 	XMFLOAT3 const GetUpVector();
 	XMFLOAT3 const GetRightVector();
 	XMFLOAT3 const GetPosition();
+	XMFLOAT4 const GetRotationQuaternion();
 
 protected:
 	XMFLOAT4X4	m_xmf4x4Local;

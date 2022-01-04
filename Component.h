@@ -6,11 +6,10 @@ class Component
 {
 public:
 	Component() = delete;
-	Component(Object* pObject, const char* strName);
+	Component(Object* pObject);
 	~Component();
 
 	virtual Component* GetInstance();
-	bool isEqualTo(const char* strName);
 
 	virtual void SolveConstraint() {}
 	virtual void Update(float fTimeElapsed) {}
@@ -18,12 +17,8 @@ public:
 
 	void SetActive(bool bActive);
 
-
-protected:
-	const string	m_strName	= "";
+public:
 	Object*			m_pObject	= nullptr;
 	bool			m_bEnabled	= true;
-
-public:
 };
 

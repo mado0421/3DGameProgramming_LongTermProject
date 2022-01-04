@@ -3,11 +3,11 @@
 #include "Object.h"
 
 
-Component::Component(Object* pObject, const char* strName)
+Component::Component(Object* pObject)
     : m_pObject(pObject)
-    , m_strName(strName)
 {
 }
+
 Component::~Component()
 {
 }
@@ -15,10 +15,6 @@ Component::~Component()
 Component* Component::GetInstance()
 {
     return this;
-}
-bool Component::isEqualTo(const char* strName)
-{
-    return (strcmp(strName, m_strName.c_str()) == 0);
 }
 
 void Component::SetActive(bool bActive)

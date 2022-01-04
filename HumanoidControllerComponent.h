@@ -9,6 +9,10 @@ public:
 	~HumanoidControllerComponent();
 
 public:
+
+	// for Test!!
+	virtual void SolveConstraint();
+
 	virtual void Update(float fTimeElapsed);
 
 	float		m_fTime = 0;

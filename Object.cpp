@@ -16,18 +16,9 @@ Object::~Object()
 	for_each(m_vecComponents.begin(), m_vecComponents.end(), [](Component* c) { delete c; });
 }
 
-void Object::CheckCollsion(Object& other)
-{
-	vector<ColliderComponent*> l_vecpMyCollider = FindComponents<ColliderComponent>();
-	vector<ColliderComponent*> l_vecpOtherCollider = other.FindComponents<ColliderComponent>();
-
-	for (int i = 0; i < l_vecpMyCollider.size(); i++) 
-		for (int j = 0; j < l_vecpOtherCollider.size(); j++) 
-			l_vecpMyCollider[i]->CheckCollision(l_vecpOtherCollider[j]);
-}
-
 void Object::SolveConstraint()
 {
+	for_each(m_vecComponents.begin(), m_vecComponents.end(), [](Component* c) { c->SolveConstraint(); });
 }
 
 void Object::Input(UCHAR* pKeyBuffer)

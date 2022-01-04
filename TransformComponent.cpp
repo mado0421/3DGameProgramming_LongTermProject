@@ -4,7 +4,7 @@
 
 
 TransformComponent::TransformComponent(Object* pObject)
-	: Component(pObject, "Transform")
+	: Component(pObject)
 	, m_xmf4x4Local(Matrix4x4::Identity())
 {
 }
@@ -120,4 +120,11 @@ XMFLOAT3 const TransformComponent::GetRightVector()
 XMFLOAT3 const TransformComponent::GetPosition()
 {
 	return XMFLOAT3(m_xmf4x4Local._41, m_xmf4x4Local._42, m_xmf4x4Local._43);
+}
+
+XMFLOAT4 const TransformComponent::GetRotationQuaternion()
+{
+	XMFLOAT4 result;
+	XMStoreFloat4(&result, XMQuaternionRotationMatrix(GetWorldTransform()));
+	return result;
 }

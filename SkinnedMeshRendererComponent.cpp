@@ -11,7 +11,7 @@ SkinnedMeshRendererComponent::SkinnedMeshRendererComponent(
 	ID3D12GraphicsCommandList* pd3dCommandList, 
 	D3D12_CPU_DESCRIPTOR_HANDLE& d3dCbvCPUDescriptorStartHandle, 
 	D3D12_GPU_DESCRIPTOR_HANDLE& d3dCbvGPUDescriptorStartHandle)
-	:Component(pObject, "SkinnedMeshRenderer")
+	:Component(pObject)
 {
 	UINT ncbElementBytes = ((sizeof(XMFLOAT4X4) + 255) & ~255);
 
