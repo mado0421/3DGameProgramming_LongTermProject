@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "MeshRendererComponent.h"
+#include "Components.h"
 #include "Object.h"
 #include "Model.h"
 #include "Material.h"
@@ -37,7 +37,7 @@ void MeshRendererComponent::Render(ID3D12GraphicsCommandList* pd3dCommandList)
 
 	XMStoreFloat4x4(
 		m_pCBMappedWorldTransform,
-		XMMatrixTranspose(m_pObject->FindComponent<TransformComponent>()->GetLocalTransform()));
+		XMMatrixTranspose(m_pObject->FindComponent<TransformComponent>()->GetWorldTransform()));
 
 	g_MaterialMng.SetMaterial(m_strMaterialName.c_str(), pd3dCommandList);
 	g_ModelMng.Render(m_strModelName.c_str(), pd3dCommandList);

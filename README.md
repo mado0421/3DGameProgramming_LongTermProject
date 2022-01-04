@@ -1,5 +1,3 @@
-
-
 # 종합설계
 > ### 큰 목표 우선순위
 > 1. 빛과 그림자 구현
@@ -986,3 +984,29 @@ ObjectData.data의 구조를 다음과 같은 방식으로 변경 예정.
 ### 2021.12.07
 목표를 제대로 정할 필요가 있음.
 최종목표는 '데모 시연이 가능한 게임 개발'
+
+### 2021.12.27
+A, B, C 순서대로 상속 관계일 때
+
+    A* c = new C();
+    dynamic_cast<B*>(c)->f();
+
+를 하면 B가 아니라 C의 f()가 호출된다.
+위의 A, B, C를 각각 Component, AnimatorComponent, HumanoidAnimatorComponent로 보고 f()를 Update()로 바꿔보면 될 것이다.
+
+### 2022.01.04
+Happy New Year~
+
+충돌체 구현을 위해 컴포넌트 구조로 변경하였다.
+
+작업한 내용:
+	- DebugWindowMesh와 DebugWindowObject, AnimatedObject 같은 class들을 삭제하였다. 급하게 개발하면서 만들어둔 내용을 쳐냈다.
+	- Object 내에서 이동, 가속도, 부모의 월드변환행렬 받아오기 등의 일을 하던 함수들 전부 삭제하였다.
+	- **Transform, MeshRenderer, SkinnedMeshRenderer, HumanoidController, WeaponController, HumanoidAnimator, InputManager 등의 Component를 작성하고 이를 Object에 추가하여 사용하게 하였다.**
+	- 다만, batch 처리를 위해 Object들의 관리는 Non-Animated / Animated로 나눠서 관리한다. (그렇지 않으면 Object 하나 그릴 때마다 Animation 여부에 따라 SetPSO 해줘야 한다)
+	- 코드를 일부 정리하였다. (예를 들어, Importer.h에서 불필요한 include header들을 삭제하였다)
+	- AnimationUploader class를 삭제하고 SkinnedMeshRenderer Component에 넣어서 Object 별로 다른 애니메이션 클립을 재생할 수 있게됨
+	- **State class를 삭제하였다.** 혼자서 개발하다보니 State를 만들고 작성하고 하는건 코스트에 맞지 않다고 생각했다. 앞으로 ~Controller Component와 ~Animator Component에서 해당 class의 역할을 하게 될 것.
+	- ObjectData.data 파일을 읽어서 Import를 하는건 중단하였다. 어떤 Object가 어떤 Component를 갖고, 어떤 값을 가지게 되는지 등을 전부 자동화 한다고 해서 작업시간이 크게 단축되거나 할 것 같지 않다. (어쨌든 내가 손으로 작성해야 하므로) 
+	- template 방식을 사용하여 FindComponent() 함수를 작성하였다. 이제 m_pObject->FindComponent< TransformComponent >()->GetLookVector() 와 같이 사용할 수 있다.
+	- Collider Component를 일부 작성해뒀다. 

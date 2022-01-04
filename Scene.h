@@ -3,8 +3,6 @@
 
 class Object;
 class Screen;
-//class AnimatedObject;
-//class DebugWindowObject;
 class Camera;
 class RenderToTextureClass;
 class Framework;
@@ -36,10 +34,9 @@ protected:
 	D3D12_GPU_DESCRIPTOR_HANDLE	m_d3dSrvGPUDescriptorStartHandle;
 
 
-	//vector<DebugWindowObject*>					m_vecDebugWindow;
 	vector<Object*>								m_vecObject;
+	vector<Object*>								m_vecAnimObject;
 	vector<Screen*>								m_vecScreenObject;
-	//vector<AnimatedObject*>						m_vecAnimObject;
 	unordered_map<string, ID3D12PipelineState*> m_uomPipelineStates;
 
 	LightManager*								m_LightMng;

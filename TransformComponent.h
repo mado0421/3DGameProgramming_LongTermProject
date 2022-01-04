@@ -11,6 +11,7 @@ public:
 	TransformComponent(Object* pObject);
 	~TransformComponent();
 
+	void SetLocalTransform(const XMMATRIX& xmmtxTransform);
 	void SetPosition(const XMFLOAT3& xmf3Position);
 	void SetPosition(const float& fX, const float& fY, const float& fZ);
 	void Translate(const XMFLOAT3& xmf3Val);
@@ -21,6 +22,8 @@ public:
 	XMMATRIX GetLocalTransform();
 	XMMATRIX GetWorldTransform();
 	XMFLOAT3 const GetLookVector();
+	XMFLOAT3 const GetUpVector();
+	XMFLOAT3 const GetRightVector();
 	XMFLOAT3 const GetPosition();
 
 protected:

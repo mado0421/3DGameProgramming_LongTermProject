@@ -13,7 +13,6 @@ public:
 	bool isEqualTo(const char* strName);
 
 	virtual void SolveConstraint() {}
-	virtual void InputEvent(UCHAR* pKeyBuffer) {}
 	virtual void Update(float fTimeElapsed) {}
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList) {}
 

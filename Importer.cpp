@@ -4,6 +4,7 @@
 #include "Model.h"
 #include "Animation.h"
 
+
 XMFLOAT3 IImporter::GetFloat3(stringstream& ss)
 {
 	XMFLOAT3 xmf3Pos;
@@ -48,6 +49,67 @@ string IImporter::GetPath(stringstream& ss)
 	ss >> path;
 
 	return path;
+}
+
+VertexIdx IImporter::GetIdx(stringstream& ss)
+{
+	string token;
+	VertexIdx output;
+	char* str_buff = new char[256];
+	char* tok;
+	char* next_tok = NULL;
+	char seps[] = " ,\t\n/";
+
+	getline(ss, token, ' ');
+	strcpy_s(str_buff, 256, token.c_str());
+	tok = strtok_s(str_buff, seps, &next_tok);
+	output.vid = atoi(tok) - 1;
+	tok = strtok_s(next_tok, seps, &next_tok);
+	output.vtid = atoi(tok) - 1;
+	tok = strtok_s(next_tok, seps, &next_tok);
+	output.vnid = atoi(tok) - 1;
+
+	return output;
+}
+
+XMFLOAT4X4 IImporter::GetMatrix(const float* fIn, int& offset)
+{
+	int i = 0;
+	XMFLOAT4X4 result;
+	XMFLOAT4 r;
+	XMFLOAT3 t;
+
+	r.x = fIn[offset + i++];
+	r.y = fIn[offset + i++];
+	r.z = fIn[offset + i++];
+	r.w = fIn[offset + i++];
+	t.x = fIn[offset + i++];
+	t.y = fIn[offset + i++];
+	t.z = fIn[offset + i++];
+
+	offset += i;
+
+	XMStoreFloat4x4(&result,
+		XMMatrixMultiply(
+			XMMatrixRotationQuaternion(XMLoadFloat4(&r)),
+			XMMatrixTranslationFromVector(XMLoadFloat3(&t))));
+
+	return result;
+}
+
+Keyframe IImporter::GetKeyframe(const float* fIn, int& offset)
+{
+	Keyframe result;
+	int i = 0;
+	result.xmf4QuatRotation.x = fIn[offset + i++];
+	result.xmf4QuatRotation.y = fIn[offset + i++];
+	result.xmf4QuatRotation.z = fIn[offset + i++];
+	result.xmf4QuatRotation.w = fIn[offset + i++];
+	result.xmf3Translation.x = fIn[offset + i++];
+	result.xmf3Translation.y = fIn[offset + i++];
+	result.xmf3Translation.z = fIn[offset + i++];
+	offset += i;
+	return result;
 }
 
 vector<OBJECT_DESC> ObjectDataImporter::Load(const char* filePath) {
@@ -408,8 +470,8 @@ void AssetListDataImporter::Load(
 			g_ModelMng.AddFBXModel(name.c_str(), pd3dDevice, pd3dCommandList);
 		}
 		if (type.compare("mac") == 0) {
-			//if (g_AnimMng.IsAleadyExist(name.c_str())) continue;
-			//g_AnimMng.AddAnimClip(name.c_str(), pd3dDevice, pd3dCommandList);
+			if (g_AnimMng.IsAleadyExist(name.c_str())) continue;
+			g_AnimMng.AddAnimClip(name.c_str(), pd3dDevice, pd3dCommandList);
 		}
 	}
 	return;

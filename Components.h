@@ -1,8 +1,11 @@
 #pragma once
 #include "MeshRendererComponent.h"
 #include "TransformComponent.h"
-#include "ControllerComponent.h"
+#include "InputManagerComponent.h"
 #include "ColliderComponent.h"
 
 #include "SkinnedMeshRendererComponent.h"
-#include "AnimatorComponent.h
+#include "AnimatorComponent.h"
+#include "HumanoidControllerComponent.h"
+
+#include "WeaponControllerComponent.h"

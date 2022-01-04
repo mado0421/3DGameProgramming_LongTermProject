@@ -1,13 +1,6 @@
 #pragma once
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <sstream>
-#include <vector>
-#include <DirectXMath.h>
 #include "Light.h"
 #include "Vertex.h"
-#include "Animation.h"
 
 using SHAPE = vector<Vertex>;
 
@@ -30,6 +23,8 @@ struct OBJECT_DESC {
 	bool		isAnimated = false;
 };
 
+struct Keyframe;
+
 class IImporter {
 protected:
 	XMFLOAT3	GetFloat3(stringstream& ss);
@@ -37,62 +32,10 @@ protected:
 	float		GetFloat(stringstream& ss);
 	bool		GetBool(stringstream& ss);
 	string		GetPath(stringstream& ss);
-	VertexIdx GetIdx(stringstream& ss) {
-		string token;
-		VertexIdx output;
-		char* str_buff = new char[256];
-		char* tok;
-		char* next_tok = NULL;
-		char seps[] = " ,\t\n/";
+	VertexIdx	GetIdx(stringstream& ss);
 
-		getline(ss, token, ' ');
-		strcpy_s(str_buff, 256, token.c_str());
-		tok = strtok_s(str_buff, seps, &next_tok);
-		output.vid = atoi(tok) - 1;
-		tok = strtok_s(next_tok, seps, &next_tok);
-		output.vtid = atoi(tok) - 1;
-		tok = strtok_s(next_tok, seps, &next_tok);
-		output.vnid = atoi(tok) - 1;
-
-		return output;
-	}
-
-	XMFLOAT4X4 GetMatrix(const float* fIn, int& offset) {
-		int i = 0;
-		XMFLOAT4X4 result;
-		XMFLOAT4 r;
-		XMFLOAT3 t;
-
-		r.x = fIn[offset + i++];
-		r.y = fIn[offset + i++];
-		r.z = fIn[offset + i++];
-		r.w = fIn[offset + i++];
-		t.x = fIn[offset + i++];
-		t.y = fIn[offset + i++];
-		t.z = fIn[offset + i++];
-
-		offset += i;
-
-		XMStoreFloat4x4(&result,
-				XMMatrixMultiply(
-					XMMatrixRotationQuaternion(XMLoadFloat4(&r)),
-					XMMatrixTranslationFromVector(XMLoadFloat3(&t))));
-
-		return result;
-	}
-	Keyframe GetKeyframe(const float* fIn, int& offset) {
-		Keyframe result;
-		int i = 0;
-		result.xmf4QuatRotation.x = fIn[offset + i++];
-		result.xmf4QuatRotation.y = fIn[offset + i++];
-		result.xmf4QuatRotation.z = fIn[offset + i++];
-		result.xmf4QuatRotation.w = fIn[offset + i++];
-		result.xmf3Translation.x = fIn[offset + i++];
-		result.xmf3Translation.y = fIn[offset + i++];
-		result.xmf3Translation.z = fIn[offset + i++];
-		offset += i;
-		return result;
-	}
+	XMFLOAT4X4	GetMatrix(const float* fIn, int& offset);
+	Keyframe	GetKeyframe(const float* fIn, int& offset);
 };
 
 
@@ -121,6 +64,9 @@ public:
 		D3D12_CPU_DESCRIPTOR_HANDLE& srvCpuHandle,
 		D3D12_GPU_DESCRIPTOR_HANDLE& srvGpuHandle);
 };
+
+struct AnimClip;
+
 class AnimClipDataImporter : public IImporter {
 public:
 	AnimClip Load(const char* filePath);

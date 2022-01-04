@@ -45,6 +45,8 @@
 #include "MathHelper.h"
 #include "DDSTextureLoader12.h"
 
+#include <string>
+#include <sstream>
 
 using namespace DirectX;
 using namespace DirectX::PackedVector;
@@ -59,6 +61,8 @@ using Microsoft::WRL::ComPtr;
 #define MAXNUMCBV 1024
 #define MAXNUMSRV 128
 #define MAXNUMLIGHT 32
+
+#define MAX_BONE_NUM 64
 
 #define SHADOWMAPSIZE 2048
 
@@ -83,10 +87,16 @@ using Microsoft::WRL::ComPtr;
 #define RESOURCE_BUFFER				0x05
 
 enum KeyCode {
+	_LMB	= 1,
+	_RMB	= 2,
+	_MMB	= 4,
+	_BS		= 8,
 	_Tab	= 9,
+	_ENTER	= 13,
 	_Shift	= 16,
 	_Ctrl	= 17,
 	_Alt	= 18,
+	_ESC	= 27,
 	_Space	= 32,
 
 	_0 = 48,
@@ -131,10 +141,8 @@ enum KeyCode {
 class TextureManager;
 class ModelManager;
 class MaterialManager;
-//class AnimationManager;
-//class AnimationUploader;
-//extern AnimationUploader*	g_AnimUploader;
-//extern AnimationManager		g_AnimMng;
+class AnimationManager;
+extern AnimationManager		g_AnimMng;
 extern MaterialManager		g_MaterialMng;
 extern TextureManager		g_TextureMng;
 extern ModelManager			g_ModelMng;

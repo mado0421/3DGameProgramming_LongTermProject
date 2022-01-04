@@ -3,11 +3,9 @@
 #include "Mesh.h"
 #include "Model.h"
 #include "Material.h"
-#include "State.h"
 #include "Animation.h"
 #include "Mask.h"
 #include "Components.h"
-
 
 Object::Object()
 {
@@ -27,123 +25,34 @@ void Object::CheckCollsion(Object& other)
 		for (int j = 0; j < l_vecpOtherCollider.size(); j++) 
 			l_vecpMyCollider[i]->CheckCollision(l_vecpOtherCollider[j]);
 }
+
 void Object::SolveConstraint()
 {
 }
+
 void Object::Input(UCHAR* pKeyBuffer)
 {
-	for_each(m_vecComponents.begin(), m_vecComponents.end(), [pKeyBuffer](Component* c) { c->InputEvent(pKeyBuffer); });
+	// Input 받을 애만 처리하겠다.
+	InputManagerComponent* l_pInputMng = FindComponent<InputManagerComponent>();
+	if (nullptr != l_pInputMng) l_pInputMng->InputEvent(pKeyBuffer);
 }
+
 void Object::Update(float fTimeElapsed)
 {
 	m_fTime += fTimeElapsed;
 	for_each(m_vecComponents.begin(), m_vecComponents.end(), [fTimeElapsed](Component* c) { c->Update(fTimeElapsed); });
 }
+
 void Object::Render(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	for_each(m_vecComponents.begin(), m_vecComponents.end(), [pd3dCommandList](Component* c) { c->Render(pd3dCommandList); });
 }
-void Object::Move(const XMFLOAT3 xmf3Vector)
+
+void Object::AddComponent(Component* component)
 {
-}
-void Object::Rotate(const XMFLOAT3 angle)
-{
+	m_vecComponents.push_back(component);
 }
 
-//DebugWindowObject::DebugWindowObject(
-//	ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
-//	D3D12_CPU_DESCRIPTOR_HANDLE& d3dCbvCPUDescriptorStartHandle,
-//	D3D12_GPU_DESCRIPTOR_HANDLE& d3dCbvGPUDescriptorStartHandle, 
-//	bool bIsPass2Screen)
-//	: Object(pd3dDevice, pd3dCommandList, d3dCbvCPUDescriptorStartHandle, d3dCbvGPUDescriptorStartHandle)
-//{
-//	m_xmf4x4Local = Matrix4x4::Identity();
-//	m_pDWMesh = new DebugWindowMesh(pd3dDevice, pd3dCommandList, bIsPass2Screen);
-//
-//	UINT ncbElementBytes = ((sizeof(CB_OBJECT_INFO) + 255) & ~255);
-//
-//	m_pd3dCBResource = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes,
-//		D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
-//
-//	CreateCBV(pd3dDevice, d3dCbvCPUDescriptorStartHandle);
-//	SetCbvGpuHandle(d3dCbvGPUDescriptorStartHandle);
-//}
-//DebugWindowObject::DebugWindowObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, 
-//	D3D12_CPU_DESCRIPTOR_HANDLE& d3dCbvCPUDescriptorStartHandle, 
-//	D3D12_GPU_DESCRIPTOR_HANDLE& d3dCbvGPUDescriptorStartHandle, 
-//	float width, float height)
-//	: Object(pd3dDevice, pd3dCommandList, d3dCbvCPUDescriptorStartHandle, d3dCbvGPUDescriptorStartHandle)
-//{
-//	m_xmf4x4Local = Matrix4x4::Identity();
-//	m_pDWMesh = new DebugWindowMesh(pd3dDevice, pd3dCommandList, width, height);
-//
-//	UINT ncbElementBytes = ((sizeof(CB_OBJECT_INFO) + 255) & ~255);
-//
-//	m_pd3dCBResource = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes,
-//		D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
-//
-//	CreateCBV(pd3dDevice, d3dCbvCPUDescriptorStartHandle);
-//	SetCbvGpuHandle(d3dCbvGPUDescriptorStartHandle);
-//}
-//void DebugWindowObject::Render(ID3D12GraphicsCommandList* pd3dCommandList)
-//{
-//	pd3dCommandList->SetGraphicsRootDescriptorTable(ROOTSIGNATURE_OBJECTS, m_d3dCbvGPUDescriptorHandle);
-//	UINT ncbElementBytes = ((sizeof(CB_OBJECT_INFO) + 255) & ~255);
-//	memset(m_pCBMappedObjects, NULL, ncbElementBytes);
-//	XMStoreFloat4x4(&m_pCBMappedObjects->xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4Local)));
-//
-//	m_pDWMesh->Render(pd3dCommandList);
-//}
-//
-//AnimatedObject::AnimatedObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, D3D12_CPU_DESCRIPTOR_HANDLE& d3dCbvCPUDescriptorStartHandle, D3D12_GPU_DESCRIPTOR_HANDLE& d3dCbvGPUDescriptorStartHandle)
-//	:Object(pd3dDevice, pd3dCommandList, d3dCbvCPUDescriptorStartHandle, d3dCbvGPUDescriptorStartHandle)
-//{
-//}
-//XMMATRIX const AnimatedObject::GetBoneMatrix(int boneIdx)
-//{
-//	return XMLoadFloat4x4(&m_boneHierarchyInfo.toWorld[boneIdx] );
-//}
-//void AnimatedObject::Render(ID3D12GraphicsCommandList* pd3dCommandList)
-//{
-//	g_AnimUploader->SetAnimationTransform(pd3dCommandList, m_boneHierarchyInfo);
-//	Object::Render(pd3dCommandList);
-//}
-//void AnimatedObject::Update(float fTimeElapsed)
-//{
-//	m_time += fTimeElapsed;
-//
-//	memset(&m_boneHierarchyInfo.local, NULL, sizeof(XMFLOAT4) * 64);	// 이거 안해주면
-//
-//	for (int i = 0; i < m_vecpStateLayer.size(); i++)
-//		m_vecpStateLayer[i]->Update(fTimeElapsed);
-//
-//	for (int i = 0; i < m_vecpStateLayer.size(); i++)
-//		m_vecpStateLayer[i]->Animate(this);
-//
-//	AnimationCalculate::MakeToWorldTransform(m_boneHierarchyInfo); 
-//}
-//void AnimatedObject::Input(UCHAR* pKeyBuffer)
-//{
-//	for (int i = 0; i < m_vecpStateLayer.size(); i++)
-//		m_vecpStateLayer[i]->Input(pKeyBuffer);
-//}
-//
-//HumanoidObject::HumanoidObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, D3D12_CPU_DESCRIPTOR_HANDLE& d3dCbvCPUDescriptorStartHandle, D3D12_GPU_DESCRIPTOR_HANDLE& d3dCbvGPUDescriptorStartHandle)
-//	:AnimatedObject(pd3dDevice, pd3dCommandList, d3dCbvCPUDescriptorStartHandle, d3dCbvGPUDescriptorStartHandle)
-//{
-//	m_boneHierarchyInfo = g_AnimMng.GetBoneHierarchyFromAnimClip("Humanoid_Idle");
-//
-//	StateLayer* MovementLayer = new StateLayer();
-//	StateLayer* ActionLayer = new StateLayer();
-//
-//	MovementLayer->ChangeStateTo(new StateHumanoidIdle(this, MovementLayer));
-//	ActionLayer->ChangeStateTo(new StateHumanoidStand(this, ActionLayer));
-//	ActionLayer->m_pMask = new BoneMask(BoneMask::PreDefined::eUpperBody);
-//
-//	m_vecpStateLayer.push_back(MovementLayer);
-//	m_vecpStateLayer.push_back(ActionLayer);
-//}
-//
 Screen::Screen(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, D3D12_CPU_DESCRIPTOR_HANDLE& d3dCbvCPUDescriptorStartHandle, D3D12_GPU_DESCRIPTOR_HANDLE& d3dCbvGPUDescriptorStartHandle, float width, float height)
 {
 	m_pScreenMesh = new Mesh(pd3dDevice, pd3dCommandList, width, height);

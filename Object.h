@@ -1,21 +1,14 @@
 #pragma once
-#include "Animation.h"
-#include "State.h"
-
-#include "TransformComponent.h"
-
-
+#include "Component.h"
 
 struct CB_OBJECT_INFO {
 	XMFLOAT4X4	xmf4x4World;
 };
 class Mesh;
-class DebugWindowMesh;
 class MESH_DATA;
 
 class Object
 {
-	// Initialize
 public:
 	Object();
 	virtual ~Object();
@@ -28,70 +21,27 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList);
 
 public:
-	virtual void Move(const XMFLOAT3 xmf3Vector);
-	virtual void Rotate(const XMFLOAT3 xmf3Vector);
 	virtual void SetParent(Object* pObject) { m_pParent = pObject; }
-	virtual void SetState(const char* strStateName) {};
-	virtual void SetVelocity(const XMFLOAT3 xmf3Vector) { m_xmf3Velocity = xmf3Vector; }
-
-	//virtual XMMATRIX const GetWorldTransform() {
-	//	if (m_pParent) return XMMatrixMultiply(XMLoadFloat4x4(&m_xmf4x4Local), m_pParent->GetWorldTransform());
-	//	else return XMLoadFloat4x4(&m_xmf4x4Local);
-	//}
-	virtual XMMATRIX const GetBoneMatrix(int boneIdx) { return XMMatrixIdentity(); }
-	virtual XMFLOAT3 const GetVelocity() { return m_xmf3Velocity; }
 
 public:
 	template<typename t>
-	t* FindComponent() {
-		for (Component* c : m_vecComponents) {
-			t* as = dynamic_cast<t*>(c);
-			if (nullptr != as) return as;
-		}
-		return nullptr;
-	}
+	t* FindComponent();
 
 
 	template<typename t>
-	vector<t*> FindComponents() {
-		vector<t*> result;
-
-		for (Component* c : m_vecComponents) {
-			t* as = dynamic_cast<t*>(c);
-			if (nullptr != as) result.push_back(as);
-		}
-
-		return result;
-	}
+	vector<t*> FindComponents();
 
 	template<typename t>
-	vector<t*> FindComponentsInChildren() {
-		vector<t*> result;
+	vector<t*> FindComponentsInChildren();
 
-		FindComponentsReq(result);
-
-		return result;
-	}
-
-	void AddComponent(Component* component) {
-		m_vecComponents.push_back(component);
-	}
+	void AddComponent(Component* component);
 
 protected:
 	template<typename t>
-	void FindComponentsReq(vector<t*>& result) {
-		for (Component* c : m_vecComponents) {
-			t* as = dynamic_cast<t*>(c);
-			if (nullptr != as)
-				result.push_back(as);
-		}
-
-		for (Object* c : m_vecpChild) c->FindComponentsReq<t>(result);
-	}
+	void FindComponentsReq(vector<t*>& result);
 
 public:
 	float			m_fTime			= 0;
-	XMFLOAT3		m_xmf3Velocity	= XMFLOAT3(0, 0, 0);
 	Object*			m_pParent		= nullptr;
 	vector<Object*> m_vecpChild;
 
@@ -117,31 +67,47 @@ private:
 
 };
 
-//class AnimatedObject : public Object {
-//public:
-//	AnimatedObject(
-//		ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
-//		D3D12_CPU_DESCRIPTOR_HANDLE& d3dCbvCPUDescriptorStartHandle,
-//		D3D12_GPU_DESCRIPTOR_HANDLE& d3dCbvGPUDescriptorStartHandle);
-//
-//public:
-//	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList);
-//	virtual void Update(float fTimeElapsed);
-//	virtual void Input(UCHAR* pKeyBuffer);
-//
-//public:
-//	virtual XMMATRIX const GetBoneMatrix(int boneIdx);
-//	
-//	BoneHierarchy		m_boneHierarchyInfo;
-//protected:
-//	vector<StateLayer*>	m_vecpStateLayer;
-//};
-//
-//class HumanoidObject : public AnimatedObject {
-//public:
-//	HumanoidObject(
-//		ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
-//		D3D12_CPU_DESCRIPTOR_HANDLE& d3dCbvCPUDescriptorStartHandle,
-//		D3D12_GPU_DESCRIPTOR_HANDLE& d3dCbvGPUDescriptorStartHandle);
-//};
-//
+template<typename t>
+inline t* Object::FindComponent()
+{
+	for (Component* c : m_vecComponents) {
+		t* as = dynamic_cast<t*>(c);
+		if (nullptr != as) return as;
+	}
+	return nullptr;
+}
+
+template<typename t>
+inline vector<t*> Object::FindComponents()
+{
+	vector<t*> result;
+
+	for (Component* c : m_vecComponents) {
+		t* as = dynamic_cast<t*>(c);
+		if (nullptr != as) result.push_back(as);
+	}
+
+	return result;
+}
+
+template<typename t>
+inline vector<t*> Object::FindComponentsInChildren()
+{
+	vector<t*> result;
+
+	FindComponentsReq(result);
+
+	return result;
+}
+
+template<typename t>
+inline void Object::FindComponentsReq(vector<t*>& result)
+{
+	for (Component* c : m_vecComponents) {
+		t* as = dynamic_cast<t*>(c);
+		if (nullptr != as)
+			result.push_back(as);
+	}
+
+	for (Object* c : m_vecpChild) c->FindComponentsReq<t>(result);
+}

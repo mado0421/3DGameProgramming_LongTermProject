@@ -94,43 +94,6 @@ Mesh::Mesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 	pVertices[i++] = Vertex(pos[4], normal[5], tangent[5], uv[11]);
 	pVertices[i++] = Vertex(pos[5], normal[5], tangent[5], uv[12]);
 
-	//pVertices[i++] = Vertex(pos[0], normal[0], tangent[0], bitangent[0], uv[0]);
-	//pVertices[i++] = Vertex(pos[2], normal[0], tangent[0], bitangent[0], uv[5]);
-	//pVertices[i++] = Vertex(pos[1], normal[0], tangent[0], bitangent[0], uv[1]);
-	//pVertices[i++] = Vertex(pos[0], normal[0], tangent[0], bitangent[0], uv[0]);
-	//pVertices[i++] = Vertex(pos[3], normal[0], tangent[0], bitangent[0], uv[4]);
-	//pVertices[i++] = Vertex(pos[2], normal[0], tangent[0], bitangent[0], uv[5]);
-	//pVertices[i++] = Vertex(pos[1], normal[1], tangent[1], bitangent[1], uv[1]);
-	//pVertices[i++] = Vertex(pos[4], normal[1], tangent[1], bitangent[1], uv[6]);
-	//pVertices[i++] = Vertex(pos[0], normal[1], tangent[1], bitangent[1], uv[2]);
-	//pVertices[i++] = Vertex(pos[1], normal[1], tangent[1], bitangent[1], uv[1]);
-	//pVertices[i++] = Vertex(pos[5], normal[1], tangent[1], bitangent[1], uv[5]);
-	//pVertices[i++] = Vertex(pos[4], normal[1], tangent[1], bitangent[1], uv[6]);
-	//pVertices[i++] = Vertex(pos[2], normal[2], tangent[2], bitangent[2], uv[2]);
-	//pVertices[i++] = Vertex(pos[5], normal[2], tangent[2], bitangent[2], uv[7]);
-	//pVertices[i++] = Vertex(pos[1], normal[2], tangent[2], bitangent[2], uv[3]);
-	//pVertices[i++] = Vertex(pos[2], normal[2], tangent[2], bitangent[2], uv[2]);
-	//pVertices[i++] = Vertex(pos[6], normal[2], tangent[2], bitangent[2], uv[6]);
-	//pVertices[i++] = Vertex(pos[5], normal[2], tangent[2], bitangent[2], uv[7]);
-	//pVertices[i++] = Vertex(pos[3], normal[3], tangent[3], bitangent[3], uv[4]);
-	//pVertices[i++] = Vertex(pos[6], normal[3], tangent[3], bitangent[3], uv[9]);
-	//pVertices[i++] = Vertex(pos[2], normal[3], tangent[3], bitangent[3], uv[5]);
-	//pVertices[i++] = Vertex(pos[3], normal[3], tangent[3], bitangent[3], uv[4]);
-	//pVertices[i++] = Vertex(pos[7], normal[3], tangent[3], bitangent[3], uv[8]);
-	//pVertices[i++] = Vertex(pos[6], normal[3], tangent[3], bitangent[3], uv[9]);
-	//pVertices[i++] = Vertex(pos[0], normal[4], tangent[4], bitangent[4], uv[5]);
-	//pVertices[i++] = Vertex(pos[7], normal[4], tangent[4], bitangent[4], uv[10]);
-	//pVertices[i++] = Vertex(pos[3], normal[4], tangent[4], bitangent[4], uv[6]);
-	//pVertices[i++] = Vertex(pos[0], normal[4], tangent[4], bitangent[4], uv[5]);
-	//pVertices[i++] = Vertex(pos[4], normal[4], tangent[4], bitangent[4], uv[9]);
-	//pVertices[i++] = Vertex(pos[7], normal[4], tangent[4], bitangent[4], uv[10]);
-	//pVertices[i++] = Vertex(pos[7], normal[5], tangent[5], bitangent[5], uv[8]);
-	//pVertices[i++] = Vertex(pos[5], normal[5], tangent[5], bitangent[5], uv[12]);
-	//pVertices[i++] = Vertex(pos[6], normal[5], tangent[5], bitangent[5], uv[9]);
-	//pVertices[i++] = Vertex(pos[7], normal[5], tangent[5], bitangent[5], uv[8]);
-	//pVertices[i++] = Vertex(pos[4], normal[5], tangent[5], bitangent[5], uv[11]);
-	//pVertices[i++] = Vertex(pos[5], normal[5], tangent[5], bitangent[5], uv[12]);
-
 	m_pd3dVertexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pVertices, m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
 
 	m_d3dVertexBufferView.BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();

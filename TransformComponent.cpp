@@ -12,6 +12,11 @@ TransformComponent::~TransformComponent()
 {
 }
 
+void TransformComponent::SetLocalTransform(const XMMATRIX& xmmtxTransform)
+{
+	XMStoreFloat4x4(&m_xmf4x4Local, xmmtxTransform);
+}
+
 void TransformComponent::SetPosition(const XMFLOAT3& xmf3Position)
 {
 	m_xmf4x4Local._41 = xmf3Position.x;
@@ -95,14 +100,22 @@ XMMATRIX TransformComponent::GetLocalTransform()
 XMMATRIX TransformComponent::GetWorldTransform()
 {
 	if (nullptr != m_pObject->m_pParent) {
-		TransformComponent* l_pParentTransform = m_pObject->FindComponent<TransformComponent>();
+		TransformComponent* l_pParentTransform = m_pObject->m_pParent->FindComponent<TransformComponent>();
 		return XMMatrixMultiply(XMLoadFloat4x4(&m_xmf4x4Local), l_pParentTransform->GetWorldTransform());
 	}
 	else return XMLoadFloat4x4(&m_xmf4x4Local);
 }
 XMFLOAT3 const TransformComponent::GetLookVector()
 {
-	return XMFLOAT3(m_xmf4x4Local._31, m_xmf4x4Local._32, m_xmf4x4Local._33);
+	return Vector3::Normalize(XMFLOAT3(m_xmf4x4Local._31, m_xmf4x4Local._32, m_xmf4x4Local._33));
+}
+XMFLOAT3 const TransformComponent::GetUpVector()
+{
+	return Vector3::Normalize(XMFLOAT3(m_xmf4x4Local._21, m_xmf4x4Local._22, m_xmf4x4Local._23));
+}
+XMFLOAT3 const TransformComponent::GetRightVector()
+{
+	return Vector3::Normalize(XMFLOAT3(m_xmf4x4Local._11, m_xmf4x4Local._12, m_xmf4x4Local._13));
 }
 XMFLOAT3 const TransformComponent::GetPosition()
 {

@@ -9,7 +9,6 @@
 #include "Importer.h"
 #include "Vertex.h"
 #include "Model.h"
-#include "State.h"
 
 #include "Components.h"
 
@@ -116,57 +115,82 @@ void Scene::Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12Graphics
 	/*========================================================================
 	* Pass 1 전용 오브젝트 데이터 로드 및 생성
 	*=======================================================================*/
-	ObjectDataImporter objDataImporter;
-	vector<OBJECT_DESC> vecObjDesc = objDataImporter.Load("Data/ObjectData.txt");
 
-	for (int i = 0; i < vecObjDesc.size(); i++) {
-		if (strcmp(vecObjDesc[i].model.c_str(), "") != 0) {
-			//if (vecObjDesc[i].isAnimated) {
-			//	HumanoidObject* tempObj = new HumanoidObject(m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
-			//	tempObj->Move(vecObjDesc[i].position);
-			//	tempObj->Rotate(vecObjDesc[i].rotation);
-			//	tempObj->SetModel(vecObjDesc[i].model.c_str());
-			//	tempObj->SetMaterial(vecObjDesc[i].material.c_str());
-			//	m_vecAnimObject.push_back(tempObj);
-			//}
-			//else {
-				//Object* tempObj = new Object(m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
-				//tempObj->Move(vecObjDesc[i].position);
-				//tempObj->Rotate(vecObjDesc[i].rotation);
-				//tempObj->SetModel(vecObjDesc[i].model.c_str());
-				//tempObj->SetMaterial(vecObjDesc[i].material.c_str());
-				//m_vecObject.push_back(tempObj);
+	{
+		{
+			// muzzle, empty object for weapon
+			Object* muzzle = new Object();
+			TransformComponent* mTransform = new TransformComponent(muzzle);
+			mTransform->Translate(0, 0, 0.3f);
+			muzzle->AddComponent(mTransform);
+			m_vecObject.push_back(muzzle);
 
+			// weapon
+			Object* weapon = new Object();
 
-				Object* tempObj = new Object();
+			TransformComponent* wTransform = new TransformComponent(weapon);
+			WeaponControllerComponent* wcc = new WeaponControllerComponent(weapon, muzzle, nullptr);
+			MeshRendererComponent* mrc = new MeshRendererComponent(weapon, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
 
-				TransformComponent* transform = new TransformComponent(tempObj);
-				MeshRendererComponent* meshRenderer = new MeshRendererComponent(
-					tempObj, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
+			mrc->SetModelByName("pistol");
+			mrc->SetMaterialByName("PistolMat");
 
-				transform->Translate(vecObjDesc[i].position);
-				transform->RotateXYZDegree(vecObjDesc[i].rotation);
+			weapon->AddComponent(wTransform);
+			weapon->AddComponent(wcc);
+			weapon->AddComponent(mrc);
+			m_vecObject.push_back(weapon);
+		}
+		{
+			// player
+			Object* player = new Object();
 
-				meshRenderer->SetModelByName(vecObjDesc[i].model.c_str());
-				meshRenderer->SetMaterialByName(vecObjDesc[i].material.c_str());
+			TransformComponent* transform = new TransformComponent(player);
+			SkinnedMeshRendererComponent* skinnedMeshRenderer = new SkinnedMeshRendererComponent(player, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
+			HumanoidControllerComponent* humanoidController = new HumanoidControllerComponent(player, m_vecObject[1]);
+			HumanoidAnimatorComponent* humanoidAnimator = new HumanoidAnimatorComponent(player, "Humanoid_Idle");
+			InputManagerComponent* controller = new InputManagerComponent(player);
 
-				tempObj->AddComponent(transform);
-				tempObj->AddComponent(meshRenderer);
+			skinnedMeshRenderer->SetModelByName("human");
+			skinnedMeshRenderer->SetMaterialByName("DefaultMaterial");
 
-				if (i == 0) {
-					ControllerComponent* controller = new ControllerComponent(tempObj);
-					tempObj->AddComponent(controller);
-				}
+			player->AddComponent(transform);
+			player->AddComponent(skinnedMeshRenderer);
+			player->AddComponent(humanoidController);
+			player->AddComponent(humanoidAnimator);
+			player->AddComponent(controller);
 
+			//m_vecObject.push_back(player);
 
-
-				m_vecObject.push_back(tempObj);
-
-
-
-			//}
+			m_vecAnimObject.push_back(player);
+			m_vecObject[1]->m_pParent = m_vecAnimObject[0];
 		}
 	}
+
+
+
+	//ObjectDataImporter objDataImporter;
+	//vector<OBJECT_DESC> vecObjDesc = objDataImporter.Load("Data/ObjectData.txt");
+	//for (int i = 0; i < vecObjDesc.size(); i++) {
+	//	if (strcmp(vecObjDesc[i].model.c_str(), "") != 0) {
+	//		if (vecObjDesc[i].isAnimated) {
+	//			HumanoidObject* tempObj = new HumanoidObject(m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
+	//			tempObj->Move(vecObjDesc[i].position);
+	//			tempObj->Rotate(vecObjDesc[i].rotation);
+	//			tempObj->SetModel(vecObjDesc[i].model.c_str());
+	//			tempObj->SetMaterial(vecObjDesc[i].material.c_str());
+	//			m_vecAnimObject.push_back(tempObj);
+	//		}
+	//		else {
+	//			Object* tempObj = new Object(m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
+	//			tempObj->Move(vecObjDesc[i].position);
+	//			tempObj->Rotate(vecObjDesc[i].rotation);
+	//			tempObj->SetModel(vecObjDesc[i].model.c_str());
+	//			tempObj->SetMaterial(vecObjDesc[i].material.c_str());
+	//			m_vecObject.push_back(tempObj);
+	//		}
+	//	}
+	//}
+	// 
 	//g_AnimUploader = new AnimationUploader(pd3dDevice, pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
 
 	//m_vecObject[0]->SetParent(m_vecAnimObject[0]);
@@ -258,6 +282,8 @@ void Scene::Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12Graphics
 
 void Scene::CheckCollsion()
 {
+	// 지금은 Non-Animated Object끼리만 충돌검사를 하고 있음.
+	// 이후에 추가하세여.
 	for (int i = 0; i < m_vecObject.size(); i++) 
 		for (int j = i + 1; j < m_vecObject.size(); j++) {
 			m_vecObject[i]->CheckCollsion(*m_vecObject[j]);
@@ -271,68 +297,8 @@ void Scene::SolveConstraint()
 
 void Scene::Input(UCHAR* pKeyBuffer)
 {
-	//if (pKeyBuffer[KeyCode::_W] & 0xF0) { m_pCamera->MoveForward(2); }
-	//if (pKeyBuffer[KeyCode::_A] & 0xF0) { m_pCamera->MoveLeft(2); }
-	//if (pKeyBuffer[KeyCode::_S] & 0xF0) { m_pCamera->MoveBackward(2); }
-	//if (pKeyBuffer[KeyCode::_D] & 0xF0) { m_pCamera->MoveRight(2); }
-	//if (pKeyBuffer[KeyCode::_R] & 0xF0) { m_pCamera->MoveUp(2); }
-	////if (pKeyBuffer[KeyCode::_F] & 0xF0) { m_pCamera->MoveDown(2); }
-	//if (pKeyBuffer[KeyCode::_Q] & 0xF0) { m_pCamera->Rotate(0, -50 * fTimeElapsed, 0); }
-	//if (pKeyBuffer[KeyCode::_E] & 0xF0) { m_pCamera->Rotate(0, 50 * fTimeElapsed, 0); }
-	if (pKeyBuffer[KeyCode::_Z] & 0xF0) { m_pCamera->Rotate(50 * 0.01f, 0, 0); }
-	if (pKeyBuffer[KeyCode::_X] & 0xF0) { m_pCamera->Rotate(-50 * 0.01f, 0, 0); }
-
-
-
-	if (pKeyBuffer[KeyCode::_Q] & 0xF0) { m_vecObject[0]->FindComponent<ControllerComponent>()->SetActive(false); }
-	if (pKeyBuffer[KeyCode::_E] & 0xF0) { m_vecObject[0]->FindComponent<ControllerComponent>()->SetActive(true); }
-
-	//if (pKeyBuffer[KeyCode::_J] & 0xF0) { dynamic_cast<HumanoidObject*>(m_vecAnimObject[0])->WalkForward(); }
-	//if (pKeyBuffer[KeyCode::_U] & 0xF0) gTestInt = 1;
-	//if (pKeyBuffer[KeyCode::_I] & 0xF0) gTestInt = 0;
-
-	if (pKeyBuffer[KeyCode::_1] & 0xF0) {
-		//m_pCamera->SetPosition(XMFLOAT3(0, 1, 0));
-		//m_pCamera->SetLookAt(XMFLOAT3(0, 1, 1));
-		gTestInt = 0;
-	}
-	if (pKeyBuffer[KeyCode::_2] & 0xF0) {
-		//m_pCamera->SetPosition(XMFLOAT3(0, 1, 3));
-		//m_pCamera->SetLookAt(XMFLOAT3(0, 1, 0));
-		gTestInt = 1;
-	}
-	if (pKeyBuffer[KeyCode::_3] & 0xF0) {
-		//m_pCamera->SetPosition(XMFLOAT3(0, 1, -3));
-		//m_pCamera->SetLookAt(XMFLOAT3(0, 1, 0));
-		gTestInt = 2;
-	}
-	if (pKeyBuffer[KeyCode::_4] & 0xF0) {
-		m_pCamera->SetPosition(XMFLOAT3(3, 1, 3));
-		m_pCamera->SetLookAt(XMFLOAT3(0, 1, 0));
-	}
-	if (pKeyBuffer[KeyCode::_5] & 0xF0) {
-		m_pCamera->SetPosition(XMFLOAT3(3, 3, 3));
-		m_pCamera->SetLookAt(XMFLOAT3(0, 0, 0));
-	}
-	if (pKeyBuffer[KeyCode::_6] & 0xF0) {
-		m_pCamera->SetPosition(XMFLOAT3(3, 3, 3));
-		m_pCamera->SetLookAt(XMFLOAT3(0, 0, 0));
-	}
-
-	//if (pKeyBuffer[KeyCode::_N] & 0xF0) { test = true; }
-	//if (pKeyBuffer[KeyCode::_M] & 0xF0) { test = false; }
-		////if (test) {
-		////	ReloadLight();
-		////	test = false; 
-		////}m_vecObject[0]->Move(XMFLOAT3(0.1, 0, 0));
-		
-		//m_vecObject[0]->Move(XMFLOAT3(0, 0, 0.1 * fTimeElapsed));
-
-
-	//dynamic_cast<HumanoidObject*>(m_vecAnimObject[0])->Input(pKeyBuffer);
-
 	for_each(m_vecObject.begin(), m_vecObject.end(), [pKeyBuffer](Object* o) {o->Input(pKeyBuffer); });
-
+	for_each(m_vecAnimObject.begin(), m_vecAnimObject.end(), [pKeyBuffer](Object* o) {o->Input(pKeyBuffer); });
 }
 void Scene::Update(float fTimeElapsed)
 {
@@ -341,22 +307,9 @@ void Scene::Update(float fTimeElapsed)
 	m_fCurrentTime += fTimeElapsed;
 	::memcpy(&m_pcbMappedPassInfo->m_xmfCurrentTime, &m_fCurrentTime, sizeof(float));
 
-	for (auto iter = m_vecObject.begin(); iter != m_vecObject.end(); iter++) (*iter)->Update(fTimeElapsed);
-	//for (auto iter = m_vecAnimObject.begin(); iter != m_vecAnimObject.end(); iter++) (*iter)->Update(fTimeElapsed);
-	//m_pCamera->SetPosition(
-	//	Vector3::Add(Vector3::Add(m_vecAnimObject[0]->GetPosition(), Vector3::Multiply(-2.5, m_vecAnimObject[0]->GetLook())), XMFLOAT3(0, 2, 0))
-	//);
-	//m_pCamera->SetLookAtPosition(Vector3::Add(m_vecAnimObject[0]->GetPosition(), XMFLOAT3(0, 1, 0)));
-
-	//if (!gTestInt) {
-
-	//	for (auto iter = m_vecObject.begin(); iter != m_vecObject.end(); iter++) (*iter)->Update(fTimeElapsed);
-	//	for (auto iter = m_vecAnimObject.begin(); iter != m_vecAnimObject.end(); iter++) (*iter)->Update(fTimeElapsed);
-	//	m_pCamera->SetPosition(
-	//		Vector3::Add(Vector3::Add(m_vecAnimObject[0]->GetPosition(), Vector3::Multiply(-2.5, m_vecAnimObject[0]->GetLook())), XMFLOAT3(0, 2, 0))
-	//	);
-	//	m_pCamera->SetLookAtPosition(Vector3::Add(m_vecAnimObject[0]->GetPosition(), XMFLOAT3(0,1,0)));
-	//}
+	//for (auto iter = m_vecObject.begin(); iter != m_vecObject.end(); iter++) (*iter)->Update(fTimeElapsed);
+	for_each(m_vecObject.begin(), m_vecObject.end(), [fTimeElapsed](Object* o) {o->Update(fTimeElapsed); });
+	for_each(m_vecAnimObject.begin(), m_vecAnimObject.end(), [fTimeElapsed](Object* o) {o->Update(fTimeElapsed); });
 
 }
 void Scene::Render(D3D12_CPU_DESCRIPTOR_HANDLE hBckBufRtv, D3D12_CPU_DESCRIPTOR_HANDLE hBckBufDsv)
@@ -430,8 +383,8 @@ void Scene::Render(D3D12_CPU_DESCRIPTOR_HANDLE hBckBufRtv, D3D12_CPU_DESCRIPTOR_
 
 	m_pd3dCommandList->OMSetRenderTargets(2, rtvHandle, FALSE, &dsvHandle);
 
-	//m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["AnimatedObject"]);
-	//for (auto iter = m_vecAnimObject.begin(); iter != m_vecAnimObject.end(); iter++) (*iter)->Render(m_pd3dCommandList);
+	m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["AnimatedObject"]);
+	for (auto iter = m_vecAnimObject.begin(); iter != m_vecAnimObject.end(); iter++) (*iter)->Render(m_pd3dCommandList);
 	m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["PackGBuffer"]);
 	for (auto iter = m_vecObject.begin(); iter != m_vecObject.end(); iter++) (*iter)->Render(m_pd3dCommandList);
 
@@ -471,16 +424,16 @@ void Scene::Render(D3D12_CPU_DESCRIPTOR_HANDLE hBckBufRtv, D3D12_CPU_DESCRIPTOR_
 				m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["SpotLightShadow"]);
 				for (int i = 0; i < m_vecObject.size(); i++) m_vecObject[i]->Render(m_pd3dCommandList);
 
-				//m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["SpotLightShadowAnim"]);
-				//for (auto iter = m_vecAnimObject.begin(); iter != m_vecAnimObject.end(); iter++) (*iter)->Render(m_pd3dCommandList);
+				m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["SpotLightShadowAnim"]);
+				for (auto iter = m_vecAnimObject.begin(); iter != m_vecAnimObject.end(); iter++) (*iter)->Render(m_pd3dCommandList);
 				break;
 			case LightType::LIGHT_POINT:
 
 				m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["PointLightShadow"]);
 				for (int i = 0; i < m_vecObject.size(); i++) m_vecObject[i]->Render(m_pd3dCommandList);
 
-				//m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["PointLightShadowAnim"]);
-				//for (auto iter = m_vecAnimObject.begin(); iter != m_vecAnimObject.end(); iter++) (*iter)->Render(m_pd3dCommandList);
+				m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["PointLightShadowAnim"]);
+				for (auto iter = m_vecAnimObject.begin(); iter != m_vecAnimObject.end(); iter++) (*iter)->Render(m_pd3dCommandList);
 				break;
 			case LightType::LIGHT_DIRECTIONAL:
 
@@ -488,8 +441,8 @@ void Scene::Render(D3D12_CPU_DESCRIPTOR_HANDLE hBckBufRtv, D3D12_CPU_DESCRIPTOR_
 				m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["DirectionalLightShadow"]);
 				for (int i = 0; i < m_vecObject.size(); i++) m_vecObject[i]->Render(m_pd3dCommandList);
 
-				//m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["DirectionalLightShadowAnim"]);
-				//for (auto iter = m_vecAnimObject.begin(); iter != m_vecAnimObject.end(); iter++) (*iter)->Render(m_pd3dCommandList);
+				m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["DirectionalLightShadowAnim"]);
+				for (auto iter = m_vecAnimObject.begin(); iter != m_vecAnimObject.end(); iter++) (*iter)->Render(m_pd3dCommandList);
 				break;
 			case LightType::LIGHT_NONE:
 			default:
@@ -537,7 +490,6 @@ void Scene::Render(D3D12_CPU_DESCRIPTOR_HANDLE hBckBufRtv, D3D12_CPU_DESCRIPTOR_
 	g_TextureMng.UseForShaderResource("GBuffer_Depth", m_pd3dCommandList, ROOTSIGNATURE_DEPTH_TEXTURE);
 	g_TextureMng.UseForShaderResource("GBuffer_Color", m_pd3dCommandList, ROOTSIGNATURE_COLOR_TEXTURE);
 	//g_TextureMng.UseForShaderResource("PostProcessTexture", m_pd3dCommandList, ROOTSIGNATURE_COLOR_TEXTURE);
-	//m_vecDebugWindow[0]->Render(m_pd3dCommandList);
 	m_vecScreenObject[0]->Render(m_pd3dCommandList);
 
 
@@ -561,7 +513,6 @@ void Scene::Render(D3D12_CPU_DESCRIPTOR_HANDLE hBckBufRtv, D3D12_CPU_DESCRIPTOR_
 			}
 		}
 
-		//m_vecDebugWindow[0]->Render(m_pd3dCommandList);
 		m_vecScreenObject[0]->Render(m_pd3dCommandList);
 	}
 
@@ -802,7 +753,6 @@ void Scene::Render(D3D12_CPU_DESCRIPTOR_HANDLE hBckBufRtv, D3D12_CPU_DESCRIPTOR_
 		m_pd3dCommandList->ClearDepthStencilView(hBckBufDsv, 
 			D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
 		m_pd3dCommandList->OMSetRenderTargets(1, &hBckBufRtv, TRUE, &hBckBufDsv);
-		//m_vecDebugWindow[0]->Render(m_pd3dCommandList);
 		m_vecScreenObject[0]->Render(m_pd3dCommandList);
 
 		d3dResourceBarrier[0].Transition.pResource = g_TextureMng.GetTextureResource("Screen");
@@ -818,23 +768,8 @@ void Scene::Render(D3D12_CPU_DESCRIPTOR_HANDLE hBckBufRtv, D3D12_CPU_DESCRIPTOR_
 
 		m_pd3dCommandList->ClearDepthStencilView(hBckBufDsv, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
 		m_pd3dCommandList->OMSetRenderTargets(1, &hBckBufRtv, TRUE, &hBckBufDsv);
-		//m_vecDebugWindow[0]->Render(m_pd3dCommandList);
 		m_vecScreenObject[0]->Render(m_pd3dCommandList);
 	}
-
-	/*========================================================================
-	* Pass 2. Debug Window 렌더
-	*=======================================================================*/
-	//if (test) {
-	//	m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["DebugColor"]);
-	//	g_TextureMng.UseForShaderResource("GBuffer_Color", m_pd3dCommandList, ROOTSIGNATURE_COLOR_TEXTURE);
-	//	m_vecDebugWindow[0]->Render(m_pd3dCommandList);
-	//	g_TextureMng.UseForShaderResource("GBuffer_Normal", m_pd3dCommandList, ROOTSIGNATURE_COLOR_TEXTURE);
-	//	m_vecDebugWindow[1]->Render(m_pd3dCommandList);
-	//	g_TextureMng.UseForShaderResource("GBuffer_Depth", m_pd3dCommandList, ROOTSIGNATURE_DEPTH_TEXTURE);
-	//	m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["DebugDepth"]);
-	//	m_vecDebugWindow[2]->Render(m_pd3dCommandList);
-	//}
 
 }
 
@@ -1081,11 +1016,11 @@ void Scene::CreatePSO()
 	AddLightPSO AddLightPso = AddLightPSO(m_pd3dDevice, m_pd3dRootSignature);
 	m_uomPipelineStates["AddLight"] = AddLightPso.GetPipelineState();
 
-	DebugColorPSO DebugColorPso = DebugColorPSO(m_pd3dDevice, m_pd3dRootSignature);
-	m_uomPipelineStates["DebugColor"] = DebugColorPso.GetPipelineState();
+	//DebugColorPSO DebugColorPso = DebugColorPSO(m_pd3dDevice, m_pd3dRootSignature);
+	//m_uomPipelineStates["DebugColor"] = DebugColorPso.GetPipelineState();
 
-	DebugDepthPSO DebugDepthPso = DebugDepthPSO(m_pd3dDevice, m_pd3dRootSignature);
-	m_uomPipelineStates["DebugDepth"] = DebugDepthPso.GetPipelineState();
+	//DebugDepthPSO DebugDepthPso = DebugDepthPSO(m_pd3dDevice, m_pd3dRootSignature);
+	//m_uomPipelineStates["DebugDepth"] = DebugDepthPso.GetPipelineState();
 
 
 	/*============================================================================

@@ -57,9 +57,6 @@
     <Filter Include="소스 파일\Component">
       <UniqueIdentifier>{b93c48ed-ad7a-4734-ba59-d143b8a4af95}</UniqueIdentifier>
     </Filter>
-    <Filter Include="소스 파일\Component\Controller">
-      <UniqueIdentifier>{539cb7db-c497-48dd-b4a2-ffb05cdeb69d}</UniqueIdentifier>
-    </Filter>
     <Filter Include="소스 파일\Component\Collider">
       <UniqueIdentifier>{ece6963c-f33c-4cc9-81a5-a5ec416c6c4c}</UniqueIdentifier>
     </Filter>
@@ -77,6 +74,18 @@
     </Filter>
     <Filter Include="소스 파일\Component\Animations\Animator">
       <UniqueIdentifier>{caf9c0f8-1c0c-4ffc-9ed1-064eb01ef669}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Component\InputManager">
+      <UniqueIdentifier>{539cb7db-c497-48dd-b4a2-ffb05cdeb69d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Data">
+      <UniqueIdentifier>{1f78400f-9ce6-4bb8-8cfa-b1089a6e74ea}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Component\HumanoidController">
+      <UniqueIdentifier>{ab2c094a-5b9d-4ad8-8004-0503a8e91cf1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Component\WeaponController">
+      <UniqueIdentifier>{5a859353-c6c8-426f-8333-a18e34597489}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -144,9 +153,6 @@
     <ClInclude Include="Animation.h">
       <Filter>소스 파일\Object\Animation</Filter>
     </ClInclude>
-    <ClInclude Include="State.h">
-      <Filter>소스 파일\Object\Animation</Filter>
-    </ClInclude>
     <ClInclude Include="Mask.h">
       <Filter>소스 파일\Object\Animation\Mask</Filter>
     </ClInclude>
@@ -162,8 +168,8 @@
     <ClInclude Include="Components.h">
       <Filter>소스 파일\Component</Filter>
     </ClInclude>
-    <ClInclude Include="ControllerComponent.h">
-      <Filter>소스 파일\Component\Controller</Filter>
+    <ClInclude Include="InputManagerComponent.h">
+      <Filter>소스 파일\Component\InputManager</Filter>
     </ClInclude>
     <ClInclude Include="ColliderComponent.h">
       <Filter>소스 파일\Component\Collider</Filter>
@@ -173,6 +179,12 @@
     </ClInclude>
     <ClInclude Include="AnimatorComponent.h">
       <Filter>소스 파일\Component\Animations\Animator</Filter>
+    </ClInclude>
+    <ClInclude Include="HumanoidControllerComponent.h">
+      <Filter>소스 파일\Component\HumanoidController</Filter>
+    </ClInclude>
+    <ClInclude Include="WeaponControllerComponent.h">
+      <Filter>소스 파일\Component\WeaponController</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -228,9 +240,6 @@
     <ClCompile Include="Animation.cpp">
       <Filter>소스 파일\Object\Animation</Filter>
     </ClCompile>
-    <ClCompile Include="State.cpp">
-      <Filter>소스 파일\Object\Animation</Filter>
-    </ClCompile>
     <ClCompile Include="Mask.cpp">
       <Filter>소스 파일\Object\Animation\Mask</Filter>
     </ClCompile>
@@ -243,8 +252,8 @@
     <ClCompile Include="MeshRendererComponent.cpp">
       <Filter>소스 파일\Component\MeshRenderer</Filter>
     </ClCompile>
-    <ClCompile Include="ControllerComponent.cpp">
-      <Filter>소스 파일\Component\Controller</Filter>
+    <ClCompile Include="InputManagerComponent.cpp">
+      <Filter>소스 파일\Component\InputManager</Filter>
     </ClCompile>
     <ClCompile Include="ColliderComponent.cpp">
       <Filter>소스 파일\Component\Collider</Filter>
@@ -254,6 +263,12 @@
     </ClCompile>
     <ClCompile Include="AnimatorComponent.cpp">
       <Filter>소스 파일\Component\Animations\Animator</Filter>
+    </ClCompile>
+    <ClCompile Include="HumanoidControllerComponent.cpp">
+      <Filter>소스 파일\Component\HumanoidController</Filter>
+    </ClCompile>
+    <ClCompile Include="WeaponControllerComponent.cpp">
+      <Filter>소스 파일\Component\WeaponController</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -292,9 +307,17 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="Data\ObjectData.txt" />
-    <Text Include="Data\LightData.txt" />
-    <Text Include="Data\AssetsData.txt" />
-    <Text Include="Data\MaterialData.txt" />
+    <Text Include="Data\AssetsData.txt">
+      <Filter>Data</Filter>
+    </Text>
+    <Text Include="Data\LightData.txt">
+      <Filter>Data</Filter>
+    </Text>
+    <Text Include="Data\MaterialData.txt">
+      <Filter>Data</Filter>
+    </Text>
+    <Text Include="Data\ObjectData.txt">
+      <Filter>Data</Filter>
+    </Text>
   </ItemGroup>
 </Project>
