@@ -87,6 +87,9 @@
     <Filter Include="소스 파일\Component\WeaponController">
       <UniqueIdentifier>{5a859353-c6c8-426f-8333-a18e34597489}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\Component\Rigidbody">
+      <UniqueIdentifier>{6e81d655-313f-47a8-9862-06c0238da165}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Resource.h">
@@ -186,6 +189,9 @@
     <ClInclude Include="WeaponControllerComponent.h">
       <Filter>소스 파일\Component\WeaponController</Filter>
     </ClInclude>
+    <ClInclude Include="RigidbodyComponent.h">
+      <Filter>소스 파일\Component\Rigidbody</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WindowsProject1.cpp">
@@ -269,6 +275,9 @@
     </ClCompile>
     <ClCompile Include="WeaponControllerComponent.cpp">
       <Filter>소스 파일\Component\WeaponController</Filter>
+    </ClCompile>
+    <ClCompile Include="RigidbodyComponent.cpp">
+      <Filter>소스 파일\Component\Rigidbody</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

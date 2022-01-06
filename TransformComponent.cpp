@@ -125,6 +125,6 @@ XMFLOAT3 const TransformComponent::GetPosition()
 XMFLOAT4 const TransformComponent::GetRotationQuaternion()
 {
 	XMFLOAT4 result;
-	XMStoreFloat4(&result, XMQuaternionRotationMatrix(GetWorldTransform()));
+	XMStoreFloat4(&result, XMQuaternionRotationMatrix(GetLocalTransform()));
 	return result;
 }

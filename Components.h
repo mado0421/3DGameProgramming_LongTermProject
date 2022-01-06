@@ -9,3 +9,5 @@
 #include "HumanoidControllerComponent.h"
 
 #include "WeaponControllerComponent.h"
+
+#include "RigidbodyComponent.h"

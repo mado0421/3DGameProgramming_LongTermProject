@@ -18,13 +18,17 @@ public:
 	virtual void Update(float fTimeElapsed);
 
 public:
-	vector<ColliderComponent*> m_vecpCollided;
+	vector<ColliderComponent*>	m_vecpCollided;
+	XMFLOAT4X4					m_xmf4x4Local;
 };
 
 class BoxColliderComponent : public ColliderComponent
 {
 public:
 	BoxColliderComponent() = delete;
+	BoxColliderComponent(
+		Object* pObject,
+		const XMFLOAT3& xmf3Extents);
 	BoxColliderComponent(
 		Object* pObject,
 		const XMFLOAT3& xmf3Center,
@@ -35,7 +39,6 @@ public:
 	virtual void Update(float fTimeElapsed);
 
 	virtual void CheckCollision(Object* other);
-	BoundingOrientedBox& GetBoundingBox();
 
 public:
 	BoundingOrientedBox m_box;
@@ -47,14 +50,16 @@ public:
 	SphereColliderComponent() = delete;
 	SphereColliderComponent(
 		Object* pObject,
+		const float& fRadius);
+	SphereColliderComponent(
+		Object* pObject,
 		const XMFLOAT3& xmf3Center,
-		const float fRadius);
+		const float& fRadius);
 	~SphereColliderComponent();
 
 	virtual void Update(float fTimeElapsed);
 
 	virtual void CheckCollision(Object* other);
-	BoundingSphere& GetBoundingSphere();
 
 public:
 	BoundingSphere m_sphere;

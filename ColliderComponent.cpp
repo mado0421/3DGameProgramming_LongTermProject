@@ -4,6 +4,7 @@
 
 ColliderComponent::ColliderComponent(Object* pObject)
 	:Component(pObject)
+	, m_xmf4x4Local(Matrix4x4::Identity())
 {
 }
 
@@ -18,12 +19,24 @@ void ColliderComponent::Update(float fTimeElapsed)
 
 BoxColliderComponent::BoxColliderComponent(
 	Object* pObject, 
-	const XMFLOAT3& xmf3Center,
-	const XMFLOAT3& xmf3Extents, 
-	const XMFLOAT4& xmf4Orientation)
+	const XMFLOAT3& xmf3Extents)
 	:ColliderComponent(pObject)
 {
+	m_box = BoundingOrientedBox(XMFLOAT3(0,0,0), xmf3Extents, XMFLOAT4(0,0,0,1));
+}
+
+BoxColliderComponent::BoxColliderComponent(
+	Object* pObject,
+	const XMFLOAT3& xmf3Center, 
+	const XMFLOAT3& xmf3Extents,
+	const XMFLOAT4& xmf4Orientation)
+	: ColliderComponent(pObject)
+{
 	m_box = BoundingOrientedBox(xmf3Center, xmf3Extents, xmf4Orientation);
+	XMStoreFloat4x4(&m_xmf4x4Local,	XMMatrixRotationQuaternion(XMLoadFloat4(&xmf4Orientation)));
+	m_xmf4x4Local._41 = xmf3Center.x;
+	m_xmf4x4Local._42 = xmf3Center.y;
+	m_xmf4x4Local._43 = xmf3Center.z;
 }
 
 BoxColliderComponent::~BoxColliderComponent()
@@ -36,9 +49,26 @@ void BoxColliderComponent::Update(float fTimeElapsed)
 
 	m_vecpCollided.clear();
 
-	TransformComponent* transform = m_pObject->FindComponent<TransformComponent>();
-	m_box.Center		= transform->GetPosition();
-	m_box.Orientation	= transform->GetRotationQuaternion();
+	XMMATRIX world, local;
+	XMFLOAT4X4 xmf4x4Result;
+	XMFLOAT4 xmf4Orientation;
+
+	local = XMLoadFloat4x4(&m_xmf4x4Local);
+	world = m_pObject->FindComponent<TransformComponent>()->GetWorldTransform();
+
+	local = XMMatrixMultiply(world, local);
+
+	XMStoreFloat4x4(&xmf4x4Result, local);
+	XMStoreFloat4(&xmf4Orientation, XMQuaternionRotationMatrix(local));
+
+	m_box.Center.x = xmf4x4Result._41;
+	m_box.Center.y = xmf4x4Result._42;
+	m_box.Center.z = xmf4x4Result._43;
+
+	m_box.Orientation.x = xmf4Orientation.x;
+	m_box.Orientation.y = xmf4Orientation.y;
+	m_box.Orientation.z = xmf4Orientation.z;
+	m_box.Orientation.w	= xmf4Orientation.w;
 }
 
 void BoxColliderComponent::CheckCollision(Object* other)
@@ -49,24 +79,30 @@ void BoxColliderComponent::CheckCollision(Object* other)
 	SphereColliders spheres	= other->FindComponents<SphereColliderComponent>();
 
 	for_each(boxes.begin(), boxes.end(), [&](BoxColliderComponent* b) { 
-		if (b->m_bEnabled && m_box.Intersects(b->GetBoundingBox())) m_vecpCollided.push_back(b); });
+		if (b->m_bEnabled && m_box.Intersects(b->m_box)) m_vecpCollided.push_back(b); });
 
 	for_each(spheres.begin(), spheres.end(), [&](SphereColliderComponent* s) {
-		if (s->m_bEnabled && m_box.Intersects(s->GetBoundingSphere())) m_vecpCollided.push_back(s); });
+		if (s->m_bEnabled && m_box.Intersects(s->m_sphere)) m_vecpCollided.push_back(s); });
 }
 
-BoundingOrientedBox& BoxColliderComponent::GetBoundingBox()
+SphereColliderComponent::SphereColliderComponent(
+	Object* pObject, 
+	const float& fRadius)
+	:ColliderComponent(pObject)
 {
-	return m_box;
+	m_sphere = BoundingSphere(XMFLOAT3(0,0,0), fRadius);
 }
 
 SphereColliderComponent::SphereColliderComponent(
 	Object* pObject,
 	const XMFLOAT3& xmf3Center, 
-	const float fRadius)
-	:ColliderComponent(pObject)
+	const float& fRadius)
+	: ColliderComponent(pObject)
 {
 	m_sphere = BoundingSphere(xmf3Center, fRadius);
+	m_xmf4x4Local._41 = xmf3Center.x;
+	m_xmf4x4Local._42 = xmf3Center.y;
+	m_xmf4x4Local._43 = xmf3Center.z;
 }
 
 SphereColliderComponent::~SphereColliderComponent()
@@ -79,8 +115,19 @@ void SphereColliderComponent::Update(float fTimeElapsed)
 
 	m_vecpCollided.clear();
 
-	TransformComponent* transform = m_pObject->FindComponent<TransformComponent>();
-	m_sphere.Center = transform->GetPosition();
+	XMMATRIX world, local;
+	XMFLOAT4X4 xmf4x4Result;
+
+	local = XMLoadFloat4x4(&m_xmf4x4Local);
+	world = m_pObject->FindComponent<TransformComponent>()->GetWorldTransform();
+
+	local = XMMatrixMultiply(world, local);
+
+	XMStoreFloat4x4(&xmf4x4Result, local);
+
+	m_sphere.Center.x = xmf4x4Result._41;
+	m_sphere.Center.y = xmf4x4Result._42;
+	m_sphere.Center.z = xmf4x4Result._43;
 }
 
 void SphereColliderComponent::CheckCollision(Object* other)
@@ -91,13 +138,8 @@ void SphereColliderComponent::CheckCollision(Object* other)
 	SphereColliders spheres = other->FindComponents<SphereColliderComponent>();
 
 	for_each(boxes.begin(), boxes.end(), [&](BoxColliderComponent* b) {
-		if (b->m_bEnabled && m_sphere.Intersects(b->GetBoundingBox())) m_vecpCollided.push_back(b); });
+		if (b->m_bEnabled && m_sphere.Intersects(b->m_box)) m_vecpCollided.push_back(b); });
 
 	for_each(spheres.begin(), spheres.end(), [&](SphereColliderComponent* s) {
-		if (s->m_bEnabled && m_sphere.Intersects(s->GetBoundingSphere())) m_vecpCollided.push_back(s); });
-}
-
-BoundingSphere& SphereColliderComponent::GetBoundingSphere()
-{
-	return m_sphere;
+		if (s->m_bEnabled && m_sphere.Intersects(s->m_sphere)) m_vecpCollided.push_back(s); });
 }

@@ -25,7 +25,7 @@ void Scene::Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12Graphics
 	* 카메라 설정
 	*=======================================================================*/
 	m_pCamera = new FollowCamera();
-	m_pCamera->SetPosition(XMFLOAT3(0, 2, -7));
+	m_pCamera->SetPosition(XMFLOAT3(0, 2, -3));
 	m_pCamera->SetLookAt(XMFLOAT3(0, 1, 1));
 
 	/*========================================================================
@@ -1039,22 +1039,25 @@ void Scene::BuildObject()
 		Object* player = new Object();
 
 		TransformComponent* transform = new TransformComponent(player);
+		RigidbodyComponent* rigidbody = new RigidbodyComponent(player);
 		SkinnedMeshRendererComponent* skinnedMeshRenderer = new SkinnedMeshRendererComponent(player, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
 		HumanoidControllerComponent* humanoidController = new HumanoidControllerComponent(player, m_vecNonAnimObjectRenderGroup[0]);
 		HumanoidAnimatorComponent* humanoidAnimator = new HumanoidAnimatorComponent(player, "Humanoid_Idle");
 		InputManagerComponent* controller = new InputManagerComponent(player);
-		BoxColliderComponent* boxCollider = new BoxColliderComponent(player, XMFLOAT3(0, 0, 0), XMFLOAT3(0.5f, 0.5f, 0.5f), XMFLOAT4(0, 0, 0, 1));
+		//BoxColliderComponent* boxCollider = new BoxColliderComponent(player, XMFLOAT3(0, 0, 0), XMFLOAT3(0.5f, 0.5f, 0.5f), XMFLOAT4(0, 0, 0, 1));
+		SphereColliderComponent* sphereCollider = new SphereColliderComponent(player, XMFLOAT3(0, 0.5f, 0), 0.5f);
 
 		skinnedMeshRenderer->SetModelByName("human");
 		skinnedMeshRenderer->SetMaterialByName("DefaultMaterial");
 		transform->Translate(0, 0, -3);
 
 		player->AddComponent(transform);
+		player->AddComponent(rigidbody);
 		player->AddComponent(skinnedMeshRenderer);
 		player->AddComponent(humanoidController);
 		player->AddComponent(humanoidAnimator);
 		player->AddComponent(controller);
-		player->AddComponent(boxCollider);
+		player->AddComponent(sphereCollider);
 
 		m_vecObject.push_back(player);
 		m_vecAnimObjectRenderGroup.push_back(player);
@@ -1065,11 +1068,47 @@ void Scene::BuildObject()
 
 		TransformComponent* transform = new TransformComponent(box);
 		MeshRendererComponent* mrc = new MeshRendererComponent(box, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
-		BoxColliderComponent* boxCollider = new BoxColliderComponent(box, XMFLOAT3(0, 0, 0), XMFLOAT3(0.5f, 0.5f, 0.5f), XMFLOAT4(0, 0, 0, 1));
+		BoxColliderComponent* boxCollider = new BoxColliderComponent(box, XMFLOAT3(0, 0.5f, 0), XMFLOAT3(0.5f, 0.5f, 0.5f), XMFLOAT4(0, 0, 0, 1));
 
 		mrc->SetModelByName("1x1Box_20220104");
 		mrc->SetMaterialByName("BoxMat");
 		transform->Translate(0, 0, 3);
+
+		box->AddComponent(transform);
+		box->AddComponent(boxCollider);
+		box->AddComponent(mrc);
+
+		m_vecObject.push_back(box);
+		m_vecNonAnimObjectRenderGroup.push_back(box);
+	}
+	{
+		Object* box = new Object();
+
+		TransformComponent* transform = new TransformComponent(box);
+		MeshRendererComponent* mrc = new MeshRendererComponent(box, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
+		BoxColliderComponent* boxCollider = new BoxColliderComponent(box, XMFLOAT3(0, 0.5f, 0), XMFLOAT3(0.5f, 0.5f, 0.5f), XMFLOAT4(0, 0, 0, 1));
+
+		mrc->SetModelByName("1x1Box_20220104");
+		mrc->SetMaterialByName("BoxMat");
+		transform->Translate(-2, 0, 2);
+
+		box->AddComponent(transform);
+		box->AddComponent(boxCollider);
+		box->AddComponent(mrc);
+
+		m_vecObject.push_back(box);
+		m_vecNonAnimObjectRenderGroup.push_back(box);
+	}
+	{
+		Object* box = new Object();
+
+		TransformComponent* transform = new TransformComponent(box);
+		MeshRendererComponent* mrc = new MeshRendererComponent(box, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
+		BoxColliderComponent* boxCollider = new BoxColliderComponent(box, XMFLOAT3(0, 0.5f, 0), XMFLOAT3(0.5f, 0.5f, 0.5f), XMFLOAT4(0, 0, 0, 1));
+
+		mrc->SetModelByName("1x1Box_20220104");
+		mrc->SetMaterialByName("BoxMat");
+		transform->Translate(1, 0, 2);
 
 		box->AddComponent(transform);
 		box->AddComponent(boxCollider);
@@ -1084,6 +1123,11 @@ void Scene::BuildObject()
 		TransformComponent* transform = new TransformComponent(room);
 		MeshRendererComponent* mrc0 = new MeshRendererComponent(room, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
 		MeshRendererComponent* mrc1 = new MeshRendererComponent(room, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
+		// 0: front, 1: left, 2: back, 3: right
+		BoxColliderComponent* boxCollider0 = new BoxColliderComponent(room, XMFLOAT3(0, 0.5f, 5.0f),	XMFLOAT3(5.0f, 0.5f, 0.5f), XMFLOAT4(0, 0, 0, 1));
+		BoxColliderComponent* boxCollider1 = new BoxColliderComponent(room, XMFLOAT3(5.0f, 0.5f, 0),	XMFLOAT3(0.5f, 0.5f, 5.0f), XMFLOAT4(0, 0, 0, 1));
+		BoxColliderComponent* boxCollider2 = new BoxColliderComponent(room, XMFLOAT3(0, 0.5f, -5.0f),	XMFLOAT3(5.0f, 0.5f, 0.5f), XMFLOAT4(0, 0, 0, 1));
+		BoxColliderComponent* boxCollider3 = new BoxColliderComponent(room, XMFLOAT3(-5.0f, 0.5f, 0),	XMFLOAT3(0.5f, 0.5f, 5.0f), XMFLOAT4(0, 0, 0, 1));
 
 		mrc0->SetModelByName("10x10Floor_20220104");
 		mrc0->SetMaterialByName("CobblestoneMat");
@@ -1093,6 +1137,10 @@ void Scene::BuildObject()
 		room->AddComponent(transform);
 		room->AddComponent(mrc0);
 		room->AddComponent(mrc1);
+		room->AddComponent(boxCollider0);
+		room->AddComponent(boxCollider1);
+		room->AddComponent(boxCollider2);
+		room->AddComponent(boxCollider3);
 
 		m_vecObject.push_back(room);
 		m_vecNonAnimObjectRenderGroup.push_back(room);

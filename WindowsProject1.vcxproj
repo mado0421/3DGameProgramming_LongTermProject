@@ -170,6 +170,7 @@
     <ClInclude Include="Object.h" />
     <ClInclude Include="PipelineStateObject.h" />
     <ClInclude Include="Resource.h" />
+    <ClInclude Include="RigidbodyComponent.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="SkinnedMeshRendererComponent.h" />
     <ClInclude Include="stdafx.h" />
@@ -205,6 +206,7 @@
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="Object.cpp" />
     <ClCompile Include="PipelineStateObject.cpp" />
+    <ClCompile Include="RigidbodyComponent.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="SkinnedMeshRendererComponent.cpp" />
     <ClCompile Include="stdafx.cpp" />

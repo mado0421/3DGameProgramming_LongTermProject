@@ -15,16 +15,16 @@ HumanoidControllerComponent::~HumanoidControllerComponent()
 
 void HumanoidControllerComponent::SolveConstraint()
 {
-	vector<ColliderComponent*> c = m_pObject->FindComponents<ColliderComponent>();
+	//vector<ColliderComponent*> c = m_pObject->FindComponents<ColliderComponent>();
 
-	static int n = 0;
+	//static int n = 0;
 
-	if (!c.empty()) 
-		if(c[0]->m_vecpCollided.size())
-		{
-			cout << n << " collided!!!\n";
-			n++;
-		}
+	//if (!c.empty()) 
+	//	if(c[0]->m_vecpCollided.size())
+	//	{
+	//		cout << n << " collided!!!\n";
+	//		n++;
+	//	}
 }
 
 void HumanoidControllerComponent::Update(float fTimeElapsed)
@@ -35,15 +35,6 @@ void HumanoidControllerComponent::Update(float fTimeElapsed)
 	
 	m_fTime += fTimeElapsed;
 
-	/*
-	
-		하려고 한 것:
-		- 무브먼트 파트 먼저 로컬라이징하기
-		- 애니메이터에서 받아와서 렌더링하기(StateHumanoidIdle::GetRotation() 여기 내용을 애니메이터에 넣으면 될 듯)
-
-	*/
-
-
 	// Movement Part
 	{
 		XMFLOAT3 l_xmf3Direction = XMFLOAT3(0, 0, 0);
@@ -52,8 +43,6 @@ void HumanoidControllerComponent::Update(float fTimeElapsed)
 		if (l_pInput->IsKeyDown(KeyCode::_A)) { l_xmf3Direction.x -= m_fSpeed; }
 		if (l_pInput->IsKeyDown(KeyCode::_S)) { l_xmf3Direction.z -= m_fSpeed; }
 		if (l_pInput->IsKeyDown(KeyCode::_D)) { l_xmf3Direction.x += m_fSpeed; }
-		//if (l_pInput->IsKeyDown(KeyCode::_R)) { l_xmf3Direction.y += m_fSpeed; }
-		//if (l_pInput->IsKeyDown(KeyCode::_F)) { l_xmf3Direction.y -= m_fSpeed; }
 
 		float fPrevSpd = Vector3::Length(m_xmf3Velocity);
 		float fSpdLimit = 1.5f;

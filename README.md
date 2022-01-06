@@ -1000,27 +1000,41 @@ Happy New Year~
 충돌체 구현을 위해 컴포넌트 구조로 변경하였다.
 
 작업한 내용:
+
 	- DebugWindowMesh와 DebugWindowObject, AnimatedObject 같은 class들을 삭제하였다. 급하게 개발하면서 만들어둔 내용을 쳐냈다.
-
 	- Object 내에서 이동, 가속도, 부모의 월드변환행렬 받아오기 등의 일을 하던 함수들 전부 삭제하였다.
-
 	- **Transform, MeshRenderer, SkinnedMeshRenderer, HumanoidController, WeaponController, HumanoidAnimator, InputManager 등의 Component를 작성하고 이를 Object에 추가하여 사용하게 하였다.**
-
 	- 다만, batch 처리를 위해 Object들의 관리는 Non-Animated / Animated로 나눠서 관리한다. (그렇지 않으면 Object 하나 그릴 때마다 Animation 여부에 따라 SetPSO 해줘야 한다)
-
 	- 코드를 일부 정리하였다. (예를 들어, Importer.h에서 불필요한 include header들을 삭제하였다)
-
 	- AnimationUploader class를 삭제하고 SkinnedMeshRenderer Component에 넣어서 Object 별로 다른 애니메이션 클립을 재생할 수 있게됨
-
 	- **State class를 삭제하였다.** 혼자서 개발하다보니 State를 만들고 작성하고 하는건 코스트에 맞지 않다고 생각했다. 앞으로 ~Controller Component와 ~Animator Component에서 해당 class의 역할을 하게 될 것.
-
 	- ObjectData.data 파일을 읽어서 Import를 하는건 중단하였다. 어떤 Object가 어떤 Component를 갖고, 어떤 값을 가지게 되는지 등을 전부 자동화 한다고 해서 작업시간이 크게 단축되거나 할 것 같지 않다. (어쨌든 내가 손으로 작성해야 하므로) 
-
 	- template 방식을 사용하여 FindComponent() 함수를 작성하였다. 이제 m_pObject->FindComponent< TransformComponent >()->GetLookVector() 와 같이 사용할 수 있다.
-
 	- Collider Component를 일부 작성해뒀다. 
 
 
 <img src="https://user-images.githubusercontent.com/21697638/148066942-3b821378-ec73-4f38-ba3f-aa7d6d9bb3c6.png" width="70%" height="70%"></img>
 
 충돌 검사를 위해 BoxCollider와 SphereCollider Component들을 작성하고 Object에 추가하여 작동까지 확인하였다.
+
+### 2022.01.06
+
+<img src="https://user-images.githubusercontent.com/21697638/148333823-cb4ee025-5563-4acd-9a1d-04c1f4eef50a.jpg" width="70%" height="70%"></img>
+
+작업한 내용:
+
+	- BoxColliderComponent와 SphereColliderComponent, RigidbodyComponent를 작성하였다.
+	- Collider들은 localTransform을 가진다. 비교를 위한 BoundingOrientedBox와 BoundingSphere는 Object의 WorldTransform과 ColliderComponent의 LocalTransform 값을 곱해서 만든 최종변환행렬에 의해 Center와 Orientation이 정해진다.
+	- 현재 프로그램의 함수 호출 순서는 CheckCollsion(), SolveConstraints(), Update() 순이다.
+	- CheckCollision()에서는 Object들마다 서로 충돌하는지 여부를 검사한다. 충돌할 경우, Collider Component 내에 충돌한 Collider의 주소를 저장한다.
+	- SolveConstraints()에서는 충돌했을 때, Component별로 추가적인 처리를 한다. 예를 들어, 지금MeshRenderer Component는 충돌한다고 해서 추가적인 처리를 필요로 하지 않는다. Rigidbody Component는 충돌한 Collider에 따라 처리해야 할 내용이 있다.
+	- Rigidbody Component는 Update()에서 Transform의 currPosition을 저장하고, 이를 다음 프레임의 SolveConstraints()에서 prevPosition으로 사용한다. 이를 위해 Rigidbody Component는 현재 위치를 변경하는 그 어떤 Component들보다 우선적으로 호출되어야 한다. (예를 들어, HumanoidControllerComponent)
+	- Player가 다른 Collider에 충돌하였을 경우, 뚫고 지나가지 않는 동시에 미끄러지는 듯한 효과를 주기 위해 다음과 같은 전략을 사용하였다.
+	- Ray 3개를 나란히 쏴서 Collider에 충돌하는 지점을 찾고, CollsionPoint의 개수에 따라 위치를 보정하였다.
+	- CollisionPoint가 하나일 경우, CollisionPoint에서 이동방향의 수직으로 일정값만큼 이동하여 보정하였다.
+	- CollisionPoint가 둘일 경우, 임의의 CollisionPoint를 복사하여 y값만 달리하여 충돌면을 만들고 노멀벡터를 계산하였다. 이렇게 구한 노멀벡터로 위치를 보정.
+	- CollisionPoint가 셋일 경우, CollisionPoint들로 충돌면을 구하고 노멀벡터를 계산하였다. 단, 모서리와 같이 충돌면 두 개에 Ray가 나뉘어 맞는 경우가 있는데 이럴 땐 중앙 Ray가 충돌한 CollisionPoint를 복사하여 CollisionPoint가 두 개일 때와 같이 보정하였다.
+
+Player의 SphereCollider의 크기를 줄여 좀 더 디테일하게 충돌처리를 하고 싶은데, Collider의 크기를 줄이면 충돌체의 모서리나 겹치는 부분에서 충돌체를 뚫는 문제가 발생한다.
+
+<img src="https://user-images.githubusercontent.com/21697638/148335055-a33e41d1-8569-4033-a5c9-21a4402785a6.png" width="70%" height="70%"></img>
