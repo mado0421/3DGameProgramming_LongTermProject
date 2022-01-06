@@ -117,7 +117,7 @@ void RigidbodyComponent::SolveConstraint()
 							normal = XMVector3Normalize(normal);
 
 							XMStoreFloat3(&test, normal);
-							transform->SetPosition(Vector3::Add(xmf3CurrPosition, Vector3::Multiply(0.03f, test)));
+							transform->SetPosition(Vector3::Add(xmf3CurrPosition, Vector3::Multiply(0.04f, test)));
 							continue;
 						}
 					}
