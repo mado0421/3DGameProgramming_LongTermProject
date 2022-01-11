@@ -10,20 +10,17 @@ public:
 
 public:
 
-	// for Test!!
-	virtual void SolveConstraint();
-
 	virtual void Update(float fTimeElapsed);
 
-	float		m_fTime = 0;
+	float		m_fTime;
 
 	// For Movement Part
-	XMFLOAT3	m_xmf3Velocity = XMFLOAT3(0, 0, 0);
-	float		m_fSpeed = 1.0f;
-	float		m_fDragFactor = 1.0f;
+	XMFLOAT3	m_xmf3Velocity;
+	float		m_fSpeed;
+	float		m_fDragFactor;
 
-	float		m_fAimProgress = 0;
-	float		m_fTimeForAim = 1.0f;
-	Object*		m_pWeaponObject = nullptr;
+	float		m_fAimProgress;
+	float		m_fTimeForAim;
+	Object*		m_pWeaponObject;
 };
 

@@ -14,6 +14,8 @@ public:
 	void SetScissorRect(LONG xLeft, LONG yTop, LONG xRight, LONG yBottom);
 	void SetLookAtWorldPos(const XMFLOAT3& xmf3LookAtWorld);
 	void SetLookAtWorldPos(const float& x, const float& y, const float& z);
+	void SetFocusObject(Object* pObject);
+	void SetFocusDisable();
 
 	const XMFLOAT4X4 GetViewMatrix();
 	const XMFLOAT4X4 GetProjectionMatrix();
@@ -34,5 +36,7 @@ protected:
 
 	D3D12_VIEWPORT		m_d3dViewport;
 	D3D12_RECT			m_d3dScissorRect;
+
+	Object*		m_pFocusObject;
 };
 

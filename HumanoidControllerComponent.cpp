@@ -6,6 +6,12 @@
 HumanoidControllerComponent::HumanoidControllerComponent(Object* pObject, Object* pWeapon)
 	:Component(pObject)
 	, m_pWeaponObject(pWeapon)
+	, m_fTime(0)
+	, m_xmf3Velocity(0,0,0)
+	, m_fSpeed(1.0f)
+	, m_fDragFactor(1.0f)
+	, m_fAimProgress(0)
+	, m_fTimeForAim(0.2f)
 {
 }
 
@@ -13,29 +19,25 @@ HumanoidControllerComponent::~HumanoidControllerComponent()
 {
 }
 
-void HumanoidControllerComponent::SolveConstraint()
-{
-	//vector<ColliderComponent*> c = m_pObject->FindComponents<ColliderComponent>();
-
-	//static int n = 0;
-
-	//if (!c.empty()) 
-	//	if(c[0]->m_vecpCollided.size())
-	//	{
-	//		cout << n << " collided!!!\n";
-	//		n++;
-	//	}
-}
-
 void HumanoidControllerComponent::Update(float fTimeElapsed)
 {
 	if (!m_bEnabled) return;
 
 	InputManagerComponent* l_pInput = m_pObject->FindComponent<InputManagerComponent>();
+	TransformComponent* l_transform = m_pObject->FindComponent<TransformComponent>();
 	
 	m_fTime += fTimeElapsed;
 
 	// Movement Part
+	{
+		XMFLOAT2 xmf2MouseMovement = l_pInput->GetMouseMovement();
+		
+		// for test
+		if (0 != xmf2MouseMovement.x) {
+
+			l_transform->RotateXYZDegree(0, xmf2MouseMovement.x * -0.05f, 0);
+		}
+	}
 	{
 		XMFLOAT3 l_xmf3Direction = XMFLOAT3(0, 0, 0);
 		
@@ -62,7 +64,17 @@ void HumanoidControllerComponent::Update(float fTimeElapsed)
 			else						m_xmf3Velocity.z += m_fDragFactor * fTimeElapsed;
 			if (m_fDragFactor * fTimeElapsed >= fabs(m_xmf3Velocity.z)) m_xmf3Velocity.z = 0;
 		}
-		m_pObject->FindComponent<TransformComponent>()->Translate(Vector3::Multiply(fTimeElapsed, m_xmf3Velocity));
+
+		XMFLOAT3 xmf3Velocity;
+		XMFLOAT4 xmf4RotationQuaternion;
+		XMVECTOR velocity, rotationQuaternion;
+		velocity				= XMLoadFloat3(&m_xmf3Velocity);
+		xmf4RotationQuaternion	= l_transform->GetRotationQuaternion(Space::world);
+		rotationQuaternion		= XMLoadFloat4(&xmf4RotationQuaternion);
+		velocity = XMVector3Rotate(velocity, rotationQuaternion);
+		XMStoreFloat3(&xmf3Velocity, velocity);
+
+		l_transform->Translate(Vector3::Multiply(fTimeElapsed, xmf3Velocity));
 	}
 
 	// Action Part

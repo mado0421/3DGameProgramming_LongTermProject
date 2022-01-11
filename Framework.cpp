@@ -207,6 +207,8 @@ void Framework::CreateSwapChain()
 
 	//현재 후면버퍼 인덱스를 받아와서 가지고 있음
 	m_nSwapChainBufferIndex = m_pdxgiSwapChain->GetCurrentBackBufferIndex();
+
+	//m_pdxgiSwapChain->SetFullscreenState(true, NULL);
 }
 void Framework::CreateRenderTargetViews()
 {

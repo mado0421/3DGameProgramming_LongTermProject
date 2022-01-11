@@ -22,6 +22,12 @@ void Scene::Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12Graphics
 	m_pd3dRootSignature = CreateRootSignature();
 
 	/*========================================================================
+	* 커서 설정
+	*=======================================================================*/
+	SetCursorPos(FRAME_BUFFER_WIDTH / 2.0f, FRAME_BUFFER_HEIGHT / 2.0f);
+
+
+	/*========================================================================
 	* 카메라 설정
 	*=======================================================================*/
 	//m_pCamera = new FollowCamera();
@@ -198,6 +204,12 @@ void Scene::CheckCollsion()
 			for_each(mySpheres.begin(), mySpheres.end(), [&](SphereColliderComponent* s) { s->CheckCollision(m_vecObject[j]); });
 		}
 	}
+
+	//for (int i = 0; i < m_vecObject.size(); i++) {
+	//	for (int j = i + 1; j < m_vecObject.size(); j++) {
+	//		m_vecObject[i]->CheckCollision(m_vecObject[j]);
+	//	}
+	//}
 }
 
 void Scene::SolveConstraint()
@@ -207,12 +219,17 @@ void Scene::SolveConstraint()
 
 void Scene::Input(UCHAR* pKeyBuffer)
 {
-	for_each(m_vecObject.begin(), m_vecObject.end(), [pKeyBuffer](Object* o) {o->Input(pKeyBuffer); });
+	POINT ptCursorPos;
+	GetCursorPos(&ptCursorPos);
+	XMFLOAT2 xmf2MouseMovement;
+	xmf2MouseMovement.x = (float)(ptCursorPos.x - FRAME_BUFFER_WIDTH / 2.0f);
+	xmf2MouseMovement.y = (float)(ptCursorPos.y - FRAME_BUFFER_HEIGHT / 2.0f);
+	SetCursorPos(FRAME_BUFFER_WIDTH / 2.0f, FRAME_BUFFER_HEIGHT / 2.0f);
+
+	for_each(m_vecObject.begin(), m_vecObject.end(), [&](Object* o) {o->Input(pKeyBuffer, xmf2MouseMovement); });
 }
 void Scene::Update(float fTimeElapsed)
 {
-	//m_pCamera->Update(fTimeElapsed);
-
 	m_fCurrentTime += fTimeElapsed;
 	::memcpy(&m_pcbMappedPassInfo->m_xmfCurrentTime, &m_fCurrentTime, sizeof(float));
 
@@ -220,7 +237,6 @@ void Scene::Update(float fTimeElapsed)
 	SolveConstraint();
 
 	for_each(m_vecObject.begin(), m_vecObject.end(), [fTimeElapsed](Object* o) {o->Update(fTimeElapsed); });
-
 }
 void Scene::Render(D3D12_CPU_DESCRIPTOR_HANDLE hBckBufRtv, D3D12_CPU_DESCRIPTOR_HANDLE hBckBufDsv)
 {	
@@ -1076,6 +1092,16 @@ void Scene::BuildObject()
 		m_vecNonAnimObjectRenderGroup[0]->m_pParent = m_vecAnimObjectRenderGroup[0];
 	}
 	{
+		Object* head = new Object();
+
+		TransformComponent* transform = new TransformComponent(head);
+		transform->Translate(0, 1.7f, 0);
+		head->AddComponent(transform);
+		m_vecObject.push_back(head);
+
+		head->m_pParent = m_vecAnimObjectRenderGroup[0];
+	}
+	{
 		Object* box = new Object();
 
 		TransformComponent* transform = new TransformComponent(box);
@@ -1187,8 +1213,8 @@ void Scene::BuildObject()
 		m_pCameraObject = camera;
 		m_pCameraObject->m_pParent = m_vecAnimObjectRenderGroup[0];
 
-		transform->Translate(0, 2, -2);
-		cam->SetLookAtWorldPos(0, 1, 0);
+		transform->Translate(0, 2, -2.8f);
+		cam->SetFocusObject(m_vecObject[3]);
 	}
 }
 

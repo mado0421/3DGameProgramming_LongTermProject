@@ -12,6 +12,7 @@ CameraComponent::CameraComponent(Object* pObject)
 	, m_xmf3Right(1, 0, 0)
 	, m_xmf3Up(0, 1, 0)
 	, m_xmf3Look(0, 0, 1)
+	, m_pFocusObject(nullptr)
 {
 	CalculateProjectionMatrix(0.1f, 1000.0f, ASPECT_RATIO, 60.0f);
 
@@ -52,7 +53,8 @@ void CameraComponent::SetLookAtWorldPos(const XMFLOAT3& xmf3LookAt)
 	TransformComponent* t = m_pObject->FindComponent<TransformComponent>();
 	XMFLOAT3 xmf3Pos = t->GetPosition(Space::world);
 
-	XMFLOAT4X4 xmf4x4New = Matrix4x4::LookAtLH(xmf3Pos, xmf3LookAt, m_xmf3Up);
+	XMFLOAT4X4 xmf4x4New = Matrix4x4::LookAtLH(xmf3Pos, xmf3LookAt, XMFLOAT3(0, 1, 0));
+	//XMFLOAT4X4 xmf4x4New = Matrix4x4::LookAtLH(xmf3Pos, xmf3LookAt, m_xmf3Up);
 
 	m_xmf3Right = XMFLOAT3(xmf4x4New._11, xmf4x4New._21, xmf4x4New._31);
 	m_xmf3Up	= XMFLOAT3(xmf4x4New._12, xmf4x4New._22, xmf4x4New._32);
@@ -62,6 +64,16 @@ void CameraComponent::SetLookAtWorldPos(const XMFLOAT3& xmf3LookAt)
 void CameraComponent::SetLookAtWorldPos(const float& x, const float& y, const float& z)
 {
 	SetLookAtWorldPos(XMFLOAT3(x, y, z));
+}
+
+void CameraComponent::SetFocusObject(Object* pObject)
+{
+	m_pFocusObject = pObject;
+}
+
+void CameraComponent::SetFocusDisable()
+{
+	m_pFocusObject = nullptr;
 }
 
 const XMFLOAT4X4 CameraComponent::GetViewMatrix()
@@ -76,6 +88,10 @@ const XMFLOAT4X4 CameraComponent::GetProjectionMatrix()
 
 void CameraComponent::Update(float fTimeElapsed)
 {
+	if (!m_bEnabled) return;
+	if (m_pFocusObject) {
+		SetLookAtWorldPos(m_pFocusObject->FindComponent<TransformComponent>()->GetPosition(Space::world));
+	}
 	CalculateViewMatrix();
 }
 
@@ -83,14 +99,6 @@ void CameraComponent::CalculateViewMatrix()
 {
 	TransformComponent* transform = m_pObject->FindComponent<TransformComponent>();
 	XMFLOAT3 xmf3Position;
-	// 로컬 변환 말고 월드 변환을 받아와야하는데??
-	//xmf3Look		= transform->GetLookVector(Space::world);
-	//xmf3Right		= transform->GetRightVector(Space::world);
-	//xmf3Up			= transform->GetUpVector(Space::world);
-	//xmf3Position	= transform->GetPosition(Space::world);
-	//xmf3Look		= transform->GetLookVector();
-	//xmf3Right		= transform->GetRightVector();
-	//xmf3Up			= transform->GetUpVector();
 	xmf3Position	= transform->GetPosition(Space::world);
 
 	m_xmf3Look	= Vector3::Normalize(m_xmf3Look);

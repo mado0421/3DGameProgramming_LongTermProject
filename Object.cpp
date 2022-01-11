@@ -16,16 +16,25 @@ Object::~Object()
 	for_each(m_vecComponents.begin(), m_vecComponents.end(), [](Component* c) { delete c; });
 }
 
+//void Object::CheckCollision(Object* other)
+//{
+//	for_each(m_vecComponents.begin(), m_vecComponents.end(), [&](Component* c) {
+//		vector<ColliderComponent*> colliders = other->FindComponents<ColliderComponent>();
+//		for_each(colliders.begin(), colliders.end(), [&](ColliderComponent* collider) { c->CheckCollision(collider); });
+//		}
+//	);
+//}
+
 void Object::SolveConstraint()
 {
 	for_each(m_vecComponents.begin(), m_vecComponents.end(), [](Component* c) { c->SolveConstraint(); });
 }
 
-void Object::Input(UCHAR* pKeyBuffer)
+void Object::Input(UCHAR* pKeyBuffer, XMFLOAT2& xmf2MouseMovement)
 {
 	// Input 받을 애만 처리하겠다.
 	InputManagerComponent* l_pInputMng = FindComponent<InputManagerComponent>();
-	if (nullptr != l_pInputMng) l_pInputMng->InputEvent(pKeyBuffer);
+	if (nullptr != l_pInputMng) l_pInputMng->InputEvent(pKeyBuffer, xmf2MouseMovement);
 }
 
 void Object::Update(float fTimeElapsed)

@@ -9,9 +9,6 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="소스 파일\framework">
-      <UniqueIdentifier>{a0def10a-32da-49e2-93e8-558936b33286}</UniqueIdentifier>
-    </Filter>
     <Filter Include="소스 파일\etc">
       <UniqueIdentifier>{98dfff54-befe-43a6-9491-ef30ff0f4d86}</UniqueIdentifier>
     </Filter>
@@ -93,6 +90,9 @@
     <Filter Include="소스 파일\Component\Camera">
       <UniqueIdentifier>{2b7aa1c5-e0be-46d1-8eb7-fc5cb658d0df}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\Framework">
+      <UniqueIdentifier>{a0def10a-32da-49e2-93e8-558936b33286}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Resource.h">
@@ -105,7 +105,7 @@
       <Filter>소스 파일</Filter>
     </ClInclude>
     <ClInclude Include="Framework.h">
-      <Filter>소스 파일\framework</Filter>
+      <Filter>소스 파일\Framework</Filter>
     </ClInclude>
     <ClInclude Include="Define.h">
       <Filter>소스 파일</Filter>
@@ -204,7 +204,7 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="Framework.cpp">
-      <Filter>소스 파일\framework</Filter>
+      <Filter>소스 파일\Framework</Filter>
     </ClCompile>
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="Scene.cpp">
