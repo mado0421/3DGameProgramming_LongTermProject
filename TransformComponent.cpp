@@ -17,6 +17,11 @@ void TransformComponent::SetLocalTransform(const XMMATRIX& xmmtxTransform)
 	XMStoreFloat4x4(&m_xmf4x4Local, xmmtxTransform);
 }
 
+void TransformComponent::SetLocalTransform(const XMFLOAT4X4& xmf4x4Transform)
+{
+	m_xmf4x4Local = xmf4x4Transform;
+}
+
 void TransformComponent::SetPosition(const XMFLOAT3& xmf3Position)
 {
 	m_xmf4x4Local._41 = xmf3Position.x;
@@ -105,26 +110,68 @@ XMMATRIX TransformComponent::GetWorldTransform()
 	}
 	else return XMLoadFloat4x4(&m_xmf4x4Local);
 }
-XMFLOAT3 const TransformComponent::GetLookVector()
+XMFLOAT3 const TransformComponent::GetLookVector(Space space)
 {
-	return Vector3::Normalize(XMFLOAT3(m_xmf4x4Local._31, m_xmf4x4Local._32, m_xmf4x4Local._33));
+	switch (space)
+	{
+	case Space::local:
+		return Vector3::Normalize(XMFLOAT3(m_xmf4x4Local._31, m_xmf4x4Local._32, m_xmf4x4Local._33));
+	case Space::world:
+		XMFLOAT4X4 worldTransform;
+		XMStoreFloat4x4(&worldTransform, GetWorldTransform());
+		return Vector3::Normalize(XMFLOAT3(worldTransform._31, worldTransform._32, worldTransform._33));
+	}
+	
 }
-XMFLOAT3 const TransformComponent::GetUpVector()
+XMFLOAT3 const TransformComponent::GetUpVector(Space space)
 {
-	return Vector3::Normalize(XMFLOAT3(m_xmf4x4Local._21, m_xmf4x4Local._22, m_xmf4x4Local._23));
+	switch (space)
+	{
+	case Space::local:
+		return Vector3::Normalize(XMFLOAT3(m_xmf4x4Local._21, m_xmf4x4Local._22, m_xmf4x4Local._23));
+	case Space::world:
+		XMFLOAT4X4 worldTransform;
+		XMStoreFloat4x4(&worldTransform, GetWorldTransform());
+		return Vector3::Normalize(XMFLOAT3(worldTransform._21, worldTransform._22, worldTransform._23));
+	}
 }
-XMFLOAT3 const TransformComponent::GetRightVector()
+XMFLOAT3 const TransformComponent::GetRightVector(Space space)
 {
-	return Vector3::Normalize(XMFLOAT3(m_xmf4x4Local._11, m_xmf4x4Local._12, m_xmf4x4Local._13));
+	switch (space)
+	{
+	case Space::local:
+		return Vector3::Normalize(XMFLOAT3(m_xmf4x4Local._11, m_xmf4x4Local._12, m_xmf4x4Local._13));
+	case Space::world:
+		XMFLOAT4X4 worldTransform;
+		XMStoreFloat4x4(&worldTransform, GetWorldTransform());
+		return Vector3::Normalize(XMFLOAT3(worldTransform._11, worldTransform._12, worldTransform._13));
+	}
 }
-XMFLOAT3 const TransformComponent::GetPosition()
+XMFLOAT3 const TransformComponent::GetPosition(Space space)
 {
-	return XMFLOAT3(m_xmf4x4Local._41, m_xmf4x4Local._42, m_xmf4x4Local._43);
+	switch (space)
+	{
+	case Space::local:
+		return XMFLOAT3(m_xmf4x4Local._41, m_xmf4x4Local._42, m_xmf4x4Local._43);
+	case Space::world:
+		XMFLOAT4X4 worldTransform;
+		XMStoreFloat4x4(&worldTransform, GetWorldTransform());
+		return XMFLOAT3(worldTransform._41, worldTransform._42, worldTransform._43);
+	}
 }
 
-XMFLOAT4 const TransformComponent::GetRotationQuaternion()
+XMFLOAT4 const TransformComponent::GetRotationQuaternion(Space space)
 {
 	XMFLOAT4 result;
-	XMStoreFloat4(&result, XMQuaternionRotationMatrix(GetLocalTransform()));
-	return result;
+
+	switch (space)
+	{
+	case Space::local:
+		XMStoreFloat4(&result, XMQuaternionRotationMatrix(GetLocalTransform()));
+		return result;
+	case Space::world:
+		XMStoreFloat4(&result, XMQuaternionRotationMatrix(GetWorldTransform()));
+		return result;
+	}
+
 }

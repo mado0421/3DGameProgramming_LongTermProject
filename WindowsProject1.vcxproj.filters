@@ -90,6 +90,9 @@
     <Filter Include="소스 파일\Component\Rigidbody">
       <UniqueIdentifier>{6e81d655-313f-47a8-9862-06c0238da165}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\Component\Camera">
+      <UniqueIdentifier>{2b7aa1c5-e0be-46d1-8eb7-fc5cb658d0df}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Resource.h">
@@ -192,6 +195,9 @@
     <ClInclude Include="RigidbodyComponent.h">
       <Filter>소스 파일\Component\Rigidbody</Filter>
     </ClInclude>
+    <ClInclude Include="CameraComponent.h">
+      <Filter>소스 파일\Component\Camera</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WindowsProject1.cpp">
@@ -278,6 +284,9 @@
     </ClCompile>
     <ClCompile Include="RigidbodyComponent.cpp">
       <Filter>소스 파일\Component\Rigidbody</Filter>
+    </ClCompile>
+    <ClCompile Include="CameraComponent.cpp">
+      <Filter>소스 파일\Component\Camera</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -24,9 +24,9 @@ void Scene::Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12Graphics
 	/*========================================================================
 	* 카메라 설정
 	*=======================================================================*/
-	m_pCamera = new FollowCamera();
-	m_pCamera->SetPosition(XMFLOAT3(0, 2, -3));
-	m_pCamera->SetLookAt(XMFLOAT3(0, 1, 1));
+	//m_pCamera = new FollowCamera();
+	//m_pCamera->SetPosition(XMFLOAT3(0, 2, -3));
+	//m_pCamera->SetLookAt(XMFLOAT3(0, 1, 1));
 
 	/*========================================================================
 	* 디스크립터 힙 생성
@@ -211,7 +211,7 @@ void Scene::Input(UCHAR* pKeyBuffer)
 }
 void Scene::Update(float fTimeElapsed)
 {
-	m_pCamera->Update(fTimeElapsed);
+	//m_pCamera->Update(fTimeElapsed);
 
 	m_fCurrentTime += fTimeElapsed;
 	::memcpy(&m_pcbMappedPassInfo->m_xmfCurrentTime, &m_fCurrentTime, sizeof(float));
@@ -235,9 +235,13 @@ void Scene::Render(D3D12_CPU_DESCRIPTOR_HANDLE hBckBufRtv, D3D12_CPU_DESCRIPTOR_
 	/*========================================================================
 	* PassInfo 설정
 	*=======================================================================*/
-	m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
-	m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
-	m_pCamera->SetViewportsAndScissorRects(m_pd3dCommandList);
+	CameraComponent* cam = m_pCameraObject->FindComponent<CameraComponent>();
+	//m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
+	//m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
+	//m_pCamera->SetViewportsAndScissorRects(m_pd3dCommandList);
+	cam->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
+	cam->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
+	cam->SetViewportsAndScissorRects(m_pd3dCommandList);
 	UpdatePassInfoAboutCamera();
 
 	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbPassInfo->GetGPUVirtualAddress();
@@ -314,10 +318,12 @@ void Scene::Render(D3D12_CPU_DESCRIPTOR_HANDLE hBckBufRtv, D3D12_CPU_DESCRIPTOR_
 	/*========================================================================
 	* Pass 1. 광원별 그림자맵 렌더
 	*=======================================================================*/
-	m_pCamera->SetViewport(0, 0, SHADOWMAPSIZE, SHADOWMAPSIZE, 0.0f, 1.0f);
-	m_pCamera->SetScissorRect(0, 0, SHADOWMAPSIZE, SHADOWMAPSIZE);
-
-	m_pCamera->SetViewportsAndScissorRects(m_pd3dCommandList);
+	//m_pCamera->SetViewport(0, 0, SHADOWMAPSIZE, SHADOWMAPSIZE, 0.0f, 1.0f);
+	//m_pCamera->SetScissorRect(0, 0, SHADOWMAPSIZE, SHADOWMAPSIZE);
+	//m_pCamera->SetViewportsAndScissorRects(m_pd3dCommandList);
+	cam->SetViewport(0, 0, SHADOWMAPSIZE, SHADOWMAPSIZE, 0.0f, 1.0f);
+	cam->SetScissorRect(0, 0, SHADOWMAPSIZE, SHADOWMAPSIZE);
+	cam->SetViewportsAndScissorRects(m_pd3dCommandList);
 
 	for (UINT i = 0; i < m_LightMng->GetNumLight(); i++) {
 		if (m_LightMng->GetIsShadow(i)) {
@@ -349,7 +355,8 @@ void Scene::Render(D3D12_CPU_DESCRIPTOR_HANDLE hBckBufRtv, D3D12_CPU_DESCRIPTOR_
 
 			case LightType::LIGHT_DIRECTIONAL:
 
-				m_LightMng->UpdateDirectionalLightOrthographicLH(m_pCamera->GetViewMatrix(), i);
+				m_LightMng->UpdateDirectionalLightOrthographicLH(cam->GetViewMatrix(), i);
+				//m_LightMng->UpdateDirectionalLightOrthographicLH(m_pCamera->GetViewMatrix(), i);
 
 				m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["DirectionalLightShadow"]);
 				for (int i = 0; i < m_vecNonAnimObjectRenderGroup.size(); i++) m_vecNonAnimObjectRenderGroup[i]->Render(m_pd3dCommandList);
@@ -387,10 +394,12 @@ void Scene::Render(D3D12_CPU_DESCRIPTOR_HANDLE hBckBufRtv, D3D12_CPU_DESCRIPTOR_
 	/*========================================================================
 	* PassInfo 설정
 	*=======================================================================*/
-	m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
-	m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
-
-	m_pCamera->SetViewportsAndScissorRects(m_pd3dCommandList);
+	//m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
+	//m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
+	//m_pCamera->SetViewportsAndScissorRects(m_pd3dCommandList);
+	cam->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
+	cam->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
+	cam->SetViewportsAndScissorRects(m_pd3dCommandList);
 
 
 
@@ -991,21 +1000,24 @@ void Scene::CreatePassInfoShaderResource()
 }
 void Scene::UpdatePassInfoAboutCamera()
 {
+	CameraComponent* cam = m_pCameraObject->FindComponent<CameraComponent>();
 	XMFLOAT4X4 xmf4x4Temp;
 
-	xmf4x4Temp = m_pCamera->GetViewMatrix();
+	//xmf4x4Temp = m_pCamera->GetViewMatrix();
+	xmf4x4Temp = cam->GetViewMatrix();
 	XMStoreFloat4x4(&m_pcbMappedPassInfo->m_xmf4x4CameraView,			XMMatrixTranspose(XMLoadFloat4x4(&xmf4x4Temp)));
 	xmf4x4Temp = Matrix4x4::Inverse(xmf4x4Temp);
 	XMStoreFloat4x4(&m_pcbMappedPassInfo->m_xmf4x4CameraViewInv,		XMMatrixTranspose(XMLoadFloat4x4(&xmf4x4Temp)));
 
-	xmf4x4Temp = m_pCamera->GetProjectionMatrix();
+	//xmf4x4Temp = m_pCamera->GetProjectionMatrix();
+	xmf4x4Temp = cam->GetProjectionMatrix();
 	XMStoreFloat4x4(&m_pcbMappedPassInfo->m_xmf4x4CameraProjection,		XMMatrixTranspose(XMLoadFloat4x4(&xmf4x4Temp)));
 	xmf4x4Temp = Matrix4x4::Inverse(xmf4x4Temp);
 	XMStoreFloat4x4(&m_pcbMappedPassInfo->m_xmf4x4CameraProjectionInv,	XMMatrixTranspose(XMLoadFloat4x4(&xmf4x4Temp)));
 
-	::memcpy(&m_pcbMappedPassInfo->m_xmf3CameraPosition, &m_pCamera->GetPosition(), sizeof(XMFLOAT3));
-
-
+	//::memcpy(&m_pcbMappedPassInfo->m_xmf3CameraPosition, &m_pCamera->GetPosition(), sizeof(XMFLOAT3));
+	XMFLOAT3 xmf3WorldPos = m_pCameraObject->FindComponent<TransformComponent>()->GetPosition(Space::world);
+	::memcpy(&m_pcbMappedPassInfo->m_xmf3CameraPosition, &xmf3WorldPos, sizeof(XMFLOAT3));
 }
 
 void Scene::BuildObject()
@@ -1160,6 +1172,23 @@ void Scene::BuildObject()
 
 		m_vecObject.push_back(room);
 		m_vecNonAnimObjectRenderGroup.push_back(room);
+	}
+	{
+		Object* camera = new Object();
+
+		TransformComponent* transform = new TransformComponent(camera);
+		CameraComponent* cam = new CameraComponent(camera);
+
+		camera->AddComponent(transform);
+		camera->AddComponent(cam);
+
+
+		m_vecObject.push_back(camera);
+		m_pCameraObject = camera;
+		m_pCameraObject->m_pParent = m_vecAnimObjectRenderGroup[0];
+
+		transform->Translate(0, 2, -2);
+		cam->SetLookAtWorldPos(0, 1, 0);
 	}
 }
 

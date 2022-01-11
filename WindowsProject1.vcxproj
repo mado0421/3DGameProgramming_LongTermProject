@@ -148,6 +148,7 @@
     </ClInclude>
     <ClInclude Include="AnimatorComponent.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="CameraComponent.h" />
     <ClInclude Include="ColliderComponent.h" />
     <ClInclude Include="Component.h" />
     <ClInclude Include="Components.h" />
@@ -188,6 +189,7 @@
     </ClCompile>
     <ClCompile Include="AnimatorComponent.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="CameraComponent.cpp" />
     <ClCompile Include="ColliderComponent.cpp" />
     <ClCompile Include="Component.cpp" />
     <ClCompile Include="InputManagerComponent.cpp" />

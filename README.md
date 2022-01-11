@@ -1038,3 +1038,12 @@ Happy New Year~
 Player의 SphereCollider의 크기를 줄여 좀 더 디테일하게 충돌처리를 하고 싶은데, Collider의 크기를 줄이면 충돌체의 모서리나 겹치는 부분에서 충돌체를 뚫는 문제가 발생한다.
 
 <img src="https://user-images.githubusercontent.com/21697638/148335055-a33e41d1-8569-4033-a5c9-21a4402785a6.png" width="70%" height="70%"></img>
+
+### 2022.01.11
+
+기존 카메라의 역할을 CameraComponent로 옮기고, Camera 전용 Object를 생성하여 Player Object의 Child로 넣었다.
+
+작업한 내용:
+
+	- TransformComponent에서 Get~() 함수에 Space::local, Space::world 옵션을 받게 변경하였다.
+	- CameraComponent를 작성하고 기존 Camera를 대체하였다.

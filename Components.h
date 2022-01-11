@@ -11,3 +11,4 @@
 #include "WeaponControllerComponent.h"
 
 #include "RigidbodyComponent.h"
+#include "CameraComponent.h"

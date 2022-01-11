@@ -40,6 +40,9 @@ protected:
 	vector<Object*>								m_vecNonAnimObjectRenderGroup;
 	vector<Object*>								m_vecAnimObjectRenderGroup;
 
+	// for Camera
+	Object*										m_pCameraObject = nullptr;
+
 	vector<Screen*>								m_vecScreenObject;
 	unordered_map<string, ID3D12PipelineState*> m_uomPipelineStates;
 
