@@ -38,8 +38,7 @@ public:
 
 	virtual void Update(float fTimeElapsed);
 
-	virtual void CheckCollision(Object* other);
-	//virtual void CheckCollision(Component* other);
+	virtual void CheckCollision(Component* other);
 
 public:
 	BoundingOrientedBox m_box;
@@ -60,8 +59,7 @@ public:
 
 	virtual void Update(float fTimeElapsed);
 
-	virtual void CheckCollision(Object* other);
-	//virtual void CheckCollision(Component* other);
+	virtual void CheckCollision(Component* other);
 
 public:
 	BoundingSphere m_sphere;

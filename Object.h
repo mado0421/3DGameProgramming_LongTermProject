@@ -14,7 +14,7 @@ public:
 	virtual ~Object();
 
 public:
-	//virtual void CheckCollision(Object* other);
+	virtual void CheckCollision(Object* other);
 	virtual void SolveConstraint();
 	virtual void Input(UCHAR* pKeyBuffer, XMFLOAT2& xmf2MouseMovement);
 	virtual void Update(float fTimeElapsed);

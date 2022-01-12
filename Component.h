@@ -11,7 +11,7 @@ public:
 
 	virtual Component* GetInstance();
 
-	//virtual void CheckCollision(Component* c) {}
+	virtual void CheckCollision(Component* c) {}
 	virtual void SolveConstraint() {}
 	virtual void Update(float fTimeElapsed) {}
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList) {}

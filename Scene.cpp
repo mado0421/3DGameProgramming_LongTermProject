@@ -12,6 +12,8 @@
 
 #include "Components.h"
 
+bool TEST_MOUSE_USABLE = false;
+
 void Scene::Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	/*========================================================================
@@ -24,7 +26,8 @@ void Scene::Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12Graphics
 	/*========================================================================
 	* 커서 설정
 	*=======================================================================*/
-	SetCursorPos(FRAME_BUFFER_WIDTH / 2.0f, FRAME_BUFFER_HEIGHT / 2.0f);
+	if(TEST_MOUSE_USABLE)
+		SetCursorPos(FRAME_BUFFER_WIDTH / 2, FRAME_BUFFER_HEIGHT / 2);	
 
 
 	/*========================================================================
@@ -196,20 +199,10 @@ void Scene::Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12Graphics
 void Scene::CheckCollsion()
 {
 	for (int i = 0; i < m_vecObject.size(); i++) {
-		BoxColliders	myBoxes		= m_vecObject[i]->FindComponents<BoxColliderComponent>();
-		SphereColliders mySpheres	= m_vecObject[i]->FindComponents<SphereColliderComponent>();
-
 		for (int j = i + 1; j < m_vecObject.size(); j++) {
-			for_each(myBoxes.begin(), myBoxes.end(), [&](BoxColliderComponent* b) { b->CheckCollision(m_vecObject[j]); });
-			for_each(mySpheres.begin(), mySpheres.end(), [&](SphereColliderComponent* s) { s->CheckCollision(m_vecObject[j]); });
+			m_vecObject[i]->CheckCollision(m_vecObject[j]);
 		}
 	}
-
-	//for (int i = 0; i < m_vecObject.size(); i++) {
-	//	for (int j = i + 1; j < m_vecObject.size(); j++) {
-	//		m_vecObject[i]->CheckCollision(m_vecObject[j]);
-	//	}
-	//}
 }
 
 void Scene::SolveConstraint()
@@ -222,9 +215,15 @@ void Scene::Input(UCHAR* pKeyBuffer)
 	POINT ptCursorPos;
 	GetCursorPos(&ptCursorPos);
 	XMFLOAT2 xmf2MouseMovement;
-	xmf2MouseMovement.x = (float)(ptCursorPos.x - FRAME_BUFFER_WIDTH / 2.0f);
-	xmf2MouseMovement.y = (float)(ptCursorPos.y - FRAME_BUFFER_HEIGHT / 2.0f);
-	SetCursorPos(FRAME_BUFFER_WIDTH / 2.0f, FRAME_BUFFER_HEIGHT / 2.0f);
+	if (TEST_MOUSE_USABLE) {
+		xmf2MouseMovement.x = (float)(ptCursorPos.x - FRAME_BUFFER_WIDTH / 2);
+		xmf2MouseMovement.y = (float)(ptCursorPos.y - FRAME_BUFFER_HEIGHT / 2);
+		SetCursorPos(FRAME_BUFFER_WIDTH / 2, FRAME_BUFFER_HEIGHT / 2);
+	}
+	else {
+		xmf2MouseMovement.x = 0;
+		xmf2MouseMovement.y = 0;
+	}
 
 	for_each(m_vecObject.begin(), m_vecObject.end(), [&](Object* o) {o->Input(pKeyBuffer, xmf2MouseMovement); });
 }
@@ -1072,7 +1071,6 @@ void Scene::BuildObject()
 		HumanoidControllerComponent* humanoidController = new HumanoidControllerComponent(player, m_vecNonAnimObjectRenderGroup[0]);
 		HumanoidAnimatorComponent* humanoidAnimator = new HumanoidAnimatorComponent(player, "Humanoid_Idle");
 		InputManagerComponent* controller = new InputManagerComponent(player);
-		//BoxColliderComponent* boxCollider = new BoxColliderComponent(player, XMFLOAT3(0, 0, 0), XMFLOAT3(0.5f, 0.5f, 0.5f), XMFLOAT4(0, 0, 0, 1));
 		SphereColliderComponent* sphereCollider = new SphereColliderComponent(player, XMFLOAT3(0, 0.5f, 0), 0.5f);
 
 		skinnedMeshRenderer->SetModelByName("human");

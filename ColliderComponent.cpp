@@ -71,33 +71,19 @@ void BoxColliderComponent::Update(float fTimeElapsed)
 	m_box.Orientation.w	= xmf4Orientation.w;
 }
 
-void BoxColliderComponent::CheckCollision(Object* other)
+void BoxColliderComponent::CheckCollision(Component* other)
 {
 	if (!m_bEnabled) return;
 
-	BoxColliders	boxes	= other->FindComponents<BoxColliderComponent>();
-	SphereColliders spheres	= other->FindComponents<SphereColliderComponent>();
-
-	for_each(boxes.begin(), boxes.end(), [&](BoxColliderComponent* b) { 
-		if (b->m_bEnabled && m_box.Intersects(b->m_box)) m_vecpCollided.push_back(b); });
-
-	for_each(spheres.begin(), spheres.end(), [&](SphereColliderComponent* s) {
-		if (s->m_bEnabled && m_box.Intersects(s->m_sphere)) m_vecpCollided.push_back(s); });
+	BoxColliderComponent* otherBox = dynamic_cast<BoxColliderComponent*>(other);
+	if (otherBox) {
+		if (otherBox->m_bEnabled && m_box.Intersects(otherBox->m_box)) m_vecpCollided.push_back(otherBox);
+	}
+	SphereColliderComponent* otherSphere = dynamic_cast<SphereColliderComponent*>(other);
+	if (otherSphere) {
+		if (otherSphere->m_bEnabled && m_box.Intersects(otherSphere->m_sphere)) m_vecpCollided.push_back(otherSphere);
+	}
 }
-
-//void BoxColliderComponent::CheckCollision(Component* other)
-//{
-//	if (!m_bEnabled) return;
-//
-//	BoxColliderComponent* otherBox = dynamic_cast<BoxColliderComponent*>(other);
-//	if (otherBox) {
-//		if (otherBox->m_bEnabled && m_box.Intersects(otherBox->m_box)) m_vecpCollided.push_back(otherBox);
-//	}
-//	SphereColliderComponent* otherSphere = dynamic_cast<SphereColliderComponent*>(other);
-//	if (otherSphere) {
-//		if (otherSphere->m_bEnabled && m_box.Intersects(otherSphere->m_sphere)) m_vecpCollided.push_back(otherSphere);
-//	}
-//}
 
 SphereColliderComponent::SphereColliderComponent(
 	Object* pObject, 
@@ -144,30 +130,16 @@ void SphereColliderComponent::Update(float fTimeElapsed)
 	m_sphere.Center.z = xmf4x4Result._43;
 }
 
-void SphereColliderComponent::CheckCollision(Object* other)
+void SphereColliderComponent::CheckCollision(Component* other)
 {
 	if (!m_bEnabled) return;
 
-	BoxColliders	boxes = other->FindComponents<BoxColliderComponent>();
-	SphereColliders spheres = other->FindComponents<SphereColliderComponent>();
-
-	for_each(boxes.begin(), boxes.end(), [&](BoxColliderComponent* b) {
-		if (b->m_bEnabled && m_sphere.Intersects(b->m_box)) m_vecpCollided.push_back(b); });
-
-	for_each(spheres.begin(), spheres.end(), [&](SphereColliderComponent* s) {
-		if (s->m_bEnabled && m_sphere.Intersects(s->m_sphere)) m_vecpCollided.push_back(s); });
+	BoxColliderComponent* otherBox = dynamic_cast<BoxColliderComponent*>(other);
+	if (otherBox) {
+		if (otherBox->m_bEnabled && m_sphere.Intersects(otherBox->m_box)) m_vecpCollided.push_back(otherBox);
+	}
+	SphereColliderComponent* otherSphere = dynamic_cast<SphereColliderComponent*>(other);
+	if (otherSphere) {
+		if (otherSphere->m_bEnabled && m_sphere.Intersects(otherSphere->m_sphere)) m_vecpCollided.push_back(otherSphere);
+	}
 }
-
-//void SphereColliderComponent::CheckCollision(Component* other)
-//{
-//	if (!m_bEnabled) return;
-//
-//	BoxColliderComponent* otherBox = dynamic_cast<BoxColliderComponent*>(other);
-//	if (otherBox) {
-//		if (otherBox->m_bEnabled && m_sphere.Intersects(otherBox->m_box)) m_vecpCollided.push_back(otherBox);
-//	}
-//	SphereColliderComponent* otherSphere = dynamic_cast<SphereColliderComponent*>(other);
-//	if (otherSphere) {
-//		if (otherSphere->m_bEnabled && m_sphere.Intersects(otherSphere->m_sphere)) m_vecpCollided.push_back(otherSphere);
-//	}
-//}
