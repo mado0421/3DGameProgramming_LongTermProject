@@ -1060,6 +1060,7 @@ void Scene::BuildObject()
 		weapon->AddComponent(mrc);
 		m_vecObject.push_back(weapon);
 		m_vecNonAnimObjectRenderGroup.push_back(weapon);
+		muzzle->m_pParent = weapon;
 	}
 	{
 		// player
@@ -1160,10 +1161,10 @@ void Scene::BuildObject()
 		MeshRendererComponent* mrc0 = new MeshRendererComponent(room, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
 		MeshRendererComponent* mrc1 = new MeshRendererComponent(room, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
 		// 0: front, 1: left, 2: back, 3: right
-		BoxColliderComponent* boxCollider0 = new BoxColliderComponent(room, XMFLOAT3(0, 0.5f, 5.0f),	XMFLOAT3(5.0f, 0.5f, 0.5f), XMFLOAT4(0, 0, 0, 1));
-		BoxColliderComponent* boxCollider1 = new BoxColliderComponent(room, XMFLOAT3(5.0f, 0.5f, 0),	XMFLOAT3(0.5f, 0.5f, 5.0f), XMFLOAT4(0, 0, 0, 1));
-		BoxColliderComponent* boxCollider2 = new BoxColliderComponent(room, XMFLOAT3(0, 0.5f, -5.0f),	XMFLOAT3(5.0f, 0.5f, 0.5f), XMFLOAT4(0, 0, 0, 1));
-		BoxColliderComponent* boxCollider3 = new BoxColliderComponent(room, XMFLOAT3(-5.0f, 0.5f, 0),	XMFLOAT3(0.5f, 0.5f, 5.0f), XMFLOAT4(0, 0, 0, 1));
+		BoxColliderComponent* boxCollider0 = new BoxColliderComponent(room, XMFLOAT3(0, 0.5f, 5.0f),	XMFLOAT3(5.0f, 1.0f, 0.5f), XMFLOAT4(0, 0, 0, 1));
+		BoxColliderComponent* boxCollider1 = new BoxColliderComponent(room, XMFLOAT3(5.0f, 0.5f, 0),	XMFLOAT3(0.5f, 1.0f, 5.0f), XMFLOAT4(0, 0, 0, 1));
+		BoxColliderComponent* boxCollider2 = new BoxColliderComponent(room, XMFLOAT3(0, 0.5f, -5.0f),	XMFLOAT3(5.0f, 1.0f, 0.5f), XMFLOAT4(0, 0, 0, 1));
+		BoxColliderComponent* boxCollider3 = new BoxColliderComponent(room, XMFLOAT3(-5.0f, 0.5f, 0),	XMFLOAT3(0.5f, 1.0f, 5.0f), XMFLOAT4(0, 0, 0, 1));
 
 		mrc0->SetModelByName("10x10Floor_20220104");
 		mrc0->SetMaterialByName("CobblestoneMat");

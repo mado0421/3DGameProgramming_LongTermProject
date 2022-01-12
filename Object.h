@@ -22,6 +22,7 @@ public:
 
 public:
 	virtual void SetParent(Object* pObject) { m_pParent = pObject; }
+	void SetActive(bool state);
 
 public:
 	template<typename t>
@@ -40,6 +41,7 @@ protected:
 	void FindComponentsReq(vector<t*>& result);
 
 public:
+	bool			m_bEnable		= true;
 	float			m_fTime			= 0;
 	Object*			m_pParent		= nullptr;
 	vector<Object*> m_vecpChild;

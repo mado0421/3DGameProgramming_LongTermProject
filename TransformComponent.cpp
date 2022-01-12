@@ -102,6 +102,7 @@ XMMATRIX TransformComponent::GetLocalTransform()
 {
 	return XMLoadFloat4x4(&m_xmf4x4Local);
 }
+
 XMMATRIX TransformComponent::GetWorldTransform()
 {
 	if (nullptr != m_pObject->m_pParent) {
@@ -110,6 +111,7 @@ XMMATRIX TransformComponent::GetWorldTransform()
 	}
 	else return XMLoadFloat4x4(&m_xmf4x4Local);
 }
+
 XMFLOAT3 const TransformComponent::GetLookVector(Space space)
 {
 	switch (space)

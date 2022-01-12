@@ -48,6 +48,13 @@ void Object::Render(ID3D12GraphicsCommandList* pd3dCommandList)
 	for_each(m_vecComponents.begin(), m_vecComponents.end(), [&](Component* c) { c->Render(pd3dCommandList); });
 }
 
+void Object::SetActive(bool state)
+{
+	m_bEnable = state;
+	for_each(m_vecComponents.begin(), m_vecComponents.end(), 
+		[&](Component* c) {c->SetActive(state); });
+}
+
 
 void Object::AddComponent(Component* component)
 {

@@ -170,7 +170,7 @@ void HumanoidAnimatorComponent::Update(float fTimeElapsed)
 		}
 	}
 
-	float l_fAimingWeight = l_HCC->m_fAimProgress;
+	float l_fAimingWeight =  l_HCC->m_fAimProgress / l_HCC->m_fTimeForAim;
 	for (int i = 0; i < MAX_BONE_NUM; i++) {
 		l_arrMovementLocalRotation[i] *= (1 - (m_pAimingMask->weight[i] * l_fAimingWeight));
 		l_arrMovementLocalRotation[i] += l_arrAimingLocalRotation[i] * m_pAimingMask->weight[i] * l_fAimingWeight;
