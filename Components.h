@@ -3,12 +3,13 @@
 #include "TransformComponent.h"
 #include "InputManagerComponent.h"
 #include "ColliderComponent.h"
-
 #include "SkinnedMeshRendererComponent.h"
 #include "AnimatorComponent.h"
 #include "HumanoidControllerComponent.h"
-
 #include "WeaponControllerComponent.h"
-
 #include "RigidbodyComponent.h"
 #include "CameraComponent.h"
+#include "EffectComponent.h"
+#include "ParticleEmitterComponent.h"
+#include "ParticleComponent.h"
+#include "Object.h"

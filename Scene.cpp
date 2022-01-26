@@ -251,9 +251,6 @@ void Scene::Render(D3D12_CPU_DESCRIPTOR_HANDLE hBckBufRtv, D3D12_CPU_DESCRIPTOR_
 	* PassInfo ¼³Á¤
 	*=======================================================================*/
 	CameraComponent* cam = m_pCameraObject->FindComponent<CameraComponent>();
-	//m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
-	//m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
-	//m_pCamera->SetViewportsAndScissorRects(m_pd3dCommandList);
 	cam->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
 	cam->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
 	cam->SetViewportsAndScissorRects(m_pd3dCommandList);
@@ -317,6 +314,8 @@ void Scene::Render(D3D12_CPU_DESCRIPTOR_HANDLE hBckBufRtv, D3D12_CPU_DESCRIPTOR_
 	m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["PackGBuffer"]);
 	for (auto iter = m_vecNonAnimObjectRenderGroup.begin(); iter != m_vecNonAnimObjectRenderGroup.end(); iter++) (*iter)->Render(m_pd3dCommandList);
 
+
+
 	d3dResourceBarrier[0].Transition.pResource = g_TextureMng.GetTextureResource("GBuffer_Depth");
 	d3dResourceBarrier[0].Transition.StateBefore = D3D12_RESOURCE_STATE_DEPTH_WRITE;
 	d3dResourceBarrier[0].Transition.StateAfter = D3D12_RESOURCE_STATE_GENERIC_READ;
@@ -333,9 +332,6 @@ void Scene::Render(D3D12_CPU_DESCRIPTOR_HANDLE hBckBufRtv, D3D12_CPU_DESCRIPTOR_
 	/*========================================================================
 	* Pass 1. ±¤¿øº° ±×¸²ÀÚ¸Ê ·»´õ
 	*=======================================================================*/
-	//m_pCamera->SetViewport(0, 0, SHADOWMAPSIZE, SHADOWMAPSIZE, 0.0f, 1.0f);
-	//m_pCamera->SetScissorRect(0, 0, SHADOWMAPSIZE, SHADOWMAPSIZE);
-	//m_pCamera->SetViewportsAndScissorRects(m_pd3dCommandList);
 	cam->SetViewport(0, 0, SHADOWMAPSIZE, SHADOWMAPSIZE, 0.0f, 1.0f);
 	cam->SetScissorRect(0, 0, SHADOWMAPSIZE, SHADOWMAPSIZE);
 	cam->SetViewportsAndScissorRects(m_pd3dCommandList);
@@ -371,7 +367,6 @@ void Scene::Render(D3D12_CPU_DESCRIPTOR_HANDLE hBckBufRtv, D3D12_CPU_DESCRIPTOR_
 			case LightType::LIGHT_DIRECTIONAL:
 
 				m_LightMng->UpdateDirectionalLightOrthographicLH(cam->GetViewMatrix(), i);
-				//m_LightMng->UpdateDirectionalLightOrthographicLH(m_pCamera->GetViewMatrix(), i);
 
 				m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["DirectionalLightShadow"]);
 				for (int i = 0; i < m_vecNonAnimObjectRenderGroup.size(); i++) m_vecNonAnimObjectRenderGroup[i]->Render(m_pd3dCommandList);
@@ -392,7 +387,7 @@ void Scene::Render(D3D12_CPU_DESCRIPTOR_HANDLE hBckBufRtv, D3D12_CPU_DESCRIPTOR_
 	*/
 	D3D12_CPU_DESCRIPTOR_HANDLE screenRtv = g_TextureMng.GetRtvCPUHandle("Screen");
 	m_pd3dCommandList->ClearRenderTargetView(screenRtv, pfClearColor, 0, NULL);
-	m_pd3dCommandList->OMSetRenderTargets(1, &screenRtv, TRUE, NULL);
+	m_pd3dCommandList->OMSetRenderTargets(1, &screenRtv, TRUE, &dsvHandle);
 
 	//m_pd3dCommandList->ClearDepthStencilView(hBckBufDsv, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
 	//m_pd3dCommandList->OMSetRenderTargets(1, &hBckBufRtv, TRUE, &hBckBufDsv);
@@ -409,9 +404,6 @@ void Scene::Render(D3D12_CPU_DESCRIPTOR_HANDLE hBckBufRtv, D3D12_CPU_DESCRIPTOR_
 	/*========================================================================
 	* PassInfo ¼³Á¤
 	*=======================================================================*/
-	//m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
-	//m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
-	//m_pCamera->SetViewportsAndScissorRects(m_pd3dCommandList);
 	cam->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
 	cam->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
 	cam->SetViewportsAndScissorRects(m_pd3dCommandList);
@@ -427,13 +419,25 @@ void Scene::Render(D3D12_CPU_DESCRIPTOR_HANDLE hBckBufRtv, D3D12_CPU_DESCRIPTOR_
 	g_TextureMng.UseForShaderResource("GBuffer_Normal", m_pd3dCommandList, ROOTSIGNATURE_NORMAL_TEXTURE);
 	g_TextureMng.UseForShaderResource("GBuffer_Depth", m_pd3dCommandList, ROOTSIGNATURE_DEPTH_TEXTURE);
 	g_TextureMng.UseForShaderResource("GBuffer_Color", m_pd3dCommandList, ROOTSIGNATURE_COLOR_TEXTURE);
-	//g_TextureMng.UseForShaderResource("PostProcessTexture", m_pd3dCommandList, ROOTSIGNATURE_COLOR_TEXTURE);
 	m_vecScreenObject[0]->Render(m_pd3dCommandList);
 
 
 	/*========================================================================
+	* Pass 2. ÆÄÆ¼Å¬ & ÀÌÆåÆ® ·»´õ?
+	*=======================================================================*/
+	m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["Effect"]);
+	for (auto iter = m_vecEffectRenderGroup.begin(); iter != m_vecEffectRenderGroup.end(); iter++) (*iter)->Render(m_pd3dCommandList);
+	m_pd3dCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_POINTLIST);
+	m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["Particle"]);
+	for (auto iter = m_vecParticleEmitter.begin(); iter != m_vecParticleEmitter.end(); iter++) (*iter)->Render(m_pd3dCommandList);
+	m_pd3dCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	/*========================================================================
 	* Pass 2. ±¤¿øº° ·»´õ
 	*=======================================================================*/
+	g_TextureMng.UseForShaderResource("GBuffer_Normal", m_pd3dCommandList, ROOTSIGNATURE_NORMAL_TEXTURE);
+	g_TextureMng.UseForShaderResource("GBuffer_Depth", m_pd3dCommandList, ROOTSIGNATURE_DEPTH_TEXTURE);
+	g_TextureMng.UseForShaderResource("GBuffer_Color", m_pd3dCommandList, ROOTSIGNATURE_COLOR_TEXTURE);
 	m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["AddLight"]);
 
 	for (UINT i = 0; i < m_LightMng->GetNumLight(); i++) {
@@ -954,6 +958,12 @@ void Scene::CreatePSO()
 	AddLightPSO AddLightPso = AddLightPSO(m_pd3dDevice, m_pd3dRootSignature);
 	m_uomPipelineStates["AddLight"] = AddLightPso.GetPipelineState();
 
+	EffectPSO EffectPso = EffectPSO(m_pd3dDevice, m_pd3dRootSignature);
+	m_uomPipelineStates["Effect"] = EffectPso.GetPipelineState();
+
+	ParticlePSO ParticlePso = ParticlePSO(m_pd3dDevice, m_pd3dRootSignature);
+	m_uomPipelineStates["Particle"] = ParticlePso.GetPipelineState();
+
 	//DebugColorPSO DebugColorPso = DebugColorPSO(m_pd3dDevice, m_pd3dRootSignature);
 	//m_uomPipelineStates["DebugColor"] = DebugColorPso.GetPipelineState();
 
@@ -1035,15 +1045,58 @@ void Scene::UpdatePassInfoAboutCamera()
 	::memcpy(&m_pcbMappedPassInfo->m_xmf3CameraPosition, &xmf3WorldPos, sizeof(XMFLOAT3));
 }
 
+#define MAX_PARTICLE_NUM 1000
+
 void Scene::BuildObject()
 {
+	// Particle Pool Initialize
+	for (int i = 0; i < MAX_PARTICLE_NUM; i++) {
+		Object* ptc = new Object();
+
+		TransformComponent* t = new TransformComponent(ptc);
+		ParticleComponent* pc = new ParticleComponent(ptc, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
+
+		ptc->AddComponent(t);
+		ptc->AddComponent(pc);
+
+		ptc->SetActive(false);
+
+		m_vecParticlePool.push_back(ptc);
+	}
+	{
+		Object* pe = new Object();
+		
+		TransformComponent* t = new TransformComponent(pe);
+		ParticleEmitterComponent* pec = new ParticleEmitterComponent(pe, &m_vecParticlePool);
+
+		t->Translate(0, 3, 0);
+		pe->AddComponent(t);
+		pe->AddComponent(pec);
+
+		pec->SetMaterialByName("ParticleTestMat");
+
+		m_vecObject.push_back(pe);
+		m_vecParticleEmitter.push_back(pe);
+	}
 	{
 		// muzzle, empty object for weapon
 		Object* muzzle = new Object();
 		TransformComponent* mTransform = new TransformComponent(muzzle);
-		mTransform->Translate(0, 0, 0.3f);
+		EffectComponent* effect = new EffectComponent(muzzle);
+		MeshRendererComponent* mrcm = new MeshRendererComponent(muzzle, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
+
+		mrcm->SetActive(false);
+		mrcm->SetModelByName("muzzleFlash");
+		mrcm->SetMaterialByName("MuzzleFlashMat");
+
+		effect->SetDuration(1.5f);
+
+		mTransform->Translate(0, 0.07f, 0.15f);
 		muzzle->AddComponent(mTransform);
+		muzzle->AddComponent(effect);
+		muzzle->AddComponent(mrcm);
 		m_vecObject.push_back(muzzle);
+		m_vecEffectRenderGroup.push_back(muzzle);
 
 		// weapon
 		Object* weapon = new Object();
@@ -1145,7 +1198,7 @@ void Scene::BuildObject()
 
 		mrc->SetModelByName("1x1Box_20220104");
 		mrc->SetMaterialByName("BoxMat");
-		transform->Translate(1, 0, 2);
+		transform->Translate(1, 1, 2);
 
 		box->AddComponent(transform);
 		box->AddComponent(boxCollider);
@@ -1213,7 +1266,7 @@ void Scene::BuildObject()
 		m_pCameraObject->m_pParent = m_vecAnimObjectRenderGroup[0];
 
 		transform->Translate(0, 2, -2.8f);
-		cam->SetFocusObject(m_vecObject[3]);
+		cam->SetFocusObject(m_vecObject[4]);
 	}
 }
 

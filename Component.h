@@ -7,7 +7,7 @@ class Component
 public:
 	Component() = delete;
 	Component(Object* pObject);
-	~Component();
+	virtual ~Component();
 
 	virtual Component* GetInstance();
 

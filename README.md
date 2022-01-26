@@ -1047,3 +1047,34 @@ Player의 SphereCollider의 크기를 줄여 좀 더 디테일하게 충돌처�
 
 	- TransformComponent에서 Get~() 함수에 Space::local, Space::world 옵션을 받게 변경하였다.
 	- CameraComponent를 작성하고 기존 Camera를 대체하였다.
+
+### 2022.01.26
+
+<img src="https://user-images.githubusercontent.com/21697638/151126640-3eeb7ffb-5df3-4d3c-8435-3237923671ed.gif" width="70%" height="70%"></img>
+
+좌클릭을 하여 권총을 쏘고, 맞은 오브젝트에게 피격 처리를 할 수 있게 추가하였다.
+권총 사격 시에 총구 화염 이펙트를 추가하였다.
+파티클과 이펙트를 사용할 수 있게 작성하였다.
+
+작업한 내용:
+
+	- Collider 외의 Component에서도 RayCast 같은 기능이 필요하다 판단되어, 다른 Component도 CheckCollision() 함수를 갖게 하였다.
+	- WeaponControllerComponent는 이제 CheckCollision()에서 RayCast가 필요한 상황이면 RayCast를 하고, 충돌한 가장 가까운 Object의 CollisionComponent를 갖게 하였다.
+	- 또한, WCC의 SolveConstraint()에서 충돌한 ColliderComponent가 있을 경우, 해당 Object를 SetActive(false)하게 하였다. (가장 기초적인 처리만 추가하였음)
+	- 앞으로 사격 시에 충돌점을 구할 수 있다.
+	- Component 기본 클래스는 이제 가상 소멸자를 가진다.
+	- ParticleComponent와 ParticleEmitterComponent 클래스를 작성하였다.
+	- ParticleComponent는 MeshRendererComponent나 SkinnedMeshRendererComponent와는 별개로 Render를 해야하기 때문에 Mesh를 사용하지 않고 Point Vertex 하나만 GPU로 전달할 수 있게 별도 작성하였다.
+	- ParticleComponent는 Render() 함수를 가진다.
+	- ParticlePSO를 작성하였다.
+	- ParticlePSO는 DepthTest는 하되, Depth를 덮어쓰지는 않는다.
+	- DeferrdRendering을 하고 있기 때문에, Screen에 1차적으로 Render를 하고 그 위에 Particle을 Render하였다.
+	- ParticlePSO는 가산 혼합 방식으로 작성하였다.
+	- Particle Render를 위한 VS, GS, PS를 작성하였다.
+	- GS_Particle()은 Point 기본도형을 받아 TriangleStrip형태로 정점 4개, 삼각형 두 개를 반환한다.
+	- Particle Pool은 Scene에서 갖고 있는다.
+	- ParticleEmitter는 ParticlePool에서 m_bEnabled가 false인 Object를 찾아 자신의 m_vecParticle에 추가하고 자신이 Update()와 Render() 등을 관리한다.
+	- MuzzleFlash와 ParticleTest 이미지를 만들고, 알파채널을 추가하여 dds 포맷으로 추가하였다.
+	- Mesh.h와 Mesh.cpp의 쓰지 않고 있던 DebugWindowMesh 클래스를 삭제하였다.
+	- ModelManager::Render()의 람다 함수 캡쳐모드를 =에서 &로 변경하였다.
+	- WCC::Fire() 시에 MuzzleEffect를 Render한다.

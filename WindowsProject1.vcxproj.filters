@@ -93,6 +93,15 @@
     <Filter Include="소스 파일\Framework">
       <UniqueIdentifier>{a0def10a-32da-49e2-93e8-558936b33286}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\Component\ParticleEmitter">
+      <UniqueIdentifier>{9fda0d7a-805d-4e31-8de0-d080ea8f4842}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Component\Effect">
+      <UniqueIdentifier>{fa4c2279-a7d1-4226-9248-c12e48114dd6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Component\Particle">
+      <UniqueIdentifier>{a2d141c7-88b6-4595-988a-538544ce667d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Resource.h">
@@ -198,6 +207,15 @@
     <ClInclude Include="CameraComponent.h">
       <Filter>소스 파일\Component\Camera</Filter>
     </ClInclude>
+    <ClInclude Include="ParticleEmitterComponent.h">
+      <Filter>소스 파일\Component\ParticleEmitter</Filter>
+    </ClInclude>
+    <ClInclude Include="EffectComponent.h">
+      <Filter>소스 파일\Component\Effect</Filter>
+    </ClInclude>
+    <ClInclude Include="ParticleComponent.h">
+      <Filter>소스 파일\Component\Particle</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WindowsProject1.cpp">
@@ -287,6 +305,15 @@
     </ClCompile>
     <ClCompile Include="CameraComponent.cpp">
       <Filter>소스 파일\Component\Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="ParticleEmitterComponent.cpp">
+      <Filter>소스 파일\Component\ParticleEmitter</Filter>
+    </ClCompile>
+    <ClCompile Include="EffectComponent.cpp">
+      <Filter>소스 파일\Component\Effect</Filter>
+    </ClCompile>
+    <ClCompile Include="ParticleComponent.cpp">
+      <Filter>소스 파일\Component\Particle</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

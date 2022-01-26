@@ -33,6 +33,9 @@ void WeaponControllerComponent::CheckCollision(Component* other)
 		origin		= XMLoadFloat3(&xmf3Origin);
 		direction	= XMLoadFloat3(&xmf3Direction);
 
+		cout << "Direction: " << xmf3Direction.x << ", " << xmf3Direction.y << ", " << xmf3Direction.z << "\n";
+
+
 		BoxColliderComponent* otherBoxCollider = dynamic_cast<BoxColliderComponent*>(other);
 		if (otherBoxCollider) {
 			otherBoxCollider->m_box.Intersects(origin, direction, length);
@@ -103,6 +106,9 @@ void WeaponControllerComponent::Fire()
 
 	if (0 >= m_fCurrCooltime) {
 		//Create(m_pBullet);
+		m_pMuzzle->FindComponent<EffectComponent>()->TurnOn();
+
+
 		cout << "WeaponControllerComponent::Fire()\n";
 
 		m_fCurrCooltime = m_fCooltime;

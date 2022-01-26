@@ -24,8 +24,6 @@ float3 NormalSampleToWorldSpace(float3 normalMapSample, float3 unitNormalW, floa
 	return bumpedNormalW;
 }
 
-
-
 GBuffer PS_PackGBuffer(VS_OUTPUT input)
 {
 	GBuffer output;
@@ -37,6 +35,31 @@ GBuffer PS_PackGBuffer(VS_OUTPUT input)
 
 	//output.cNormal.rgb = (gtxtNormalMap.Sample(gSamplerState, input.uv).rgb * 0.5 + 0.5).rgb;
 	//output.cNormal = float4((input.normalW * 0.5 + 0.5), 1.0f);
+
+	return output;
+}
+
+// 이펙트랑 파티클을 GBuffer로 빼는게 맞는지
+// float4로 빼서 기존 스크린에 더하는게 좋지 않을지
+float4 PS_EffectAlpha(VS_OUTPUT input) : SV_TARGET0
+{
+	//if (0.05f > gtxtColorMap.Sample(gSamplerState, input.uv).a) discard;
+
+	//GBuffer output;
+	//output.cColor.rgb = gtxtColorMap.Sample(gSamplerState, input.uv).rgb;
+	////output.cColor.rgb = gtxtColorMap.Sample(gSamplerState, input.uv).a;
+	////output.cColor.a = gtxtColorMap.Sample(gSamplerState, input.uv).a;
+	//output.cColor.a = (1 - gtxtDepthMap.Sample(gSamplerState, input.uv).r);
+
+
+	//return output;
+	return float4(1, 1, 1, 1);
+}
+
+float4 PS_Particle(GS_PARTICLEOUT input) : SV_TARGET0
+{
+	float4 output;
+	output = gtxtColorMap.Sample(gSamplerState, input.uv);
 
 	return output;
 }

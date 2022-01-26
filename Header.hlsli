@@ -56,10 +56,21 @@ struct VS_OUTPUT {
 	float3 normalW	: NORMAL;
 	float3 tangentW	: TANGENT;
 };
+
+struct VS_PARTICLEOUTPUT {
+	//float4 position : SV_POSITION;
+	float3 positionW: POSITION;
+	float  size		: PSIZE;
+};
 struct GS_OUTPUT
 {
 	float4 pos		: SV_POSITION;
 	uint RTIndex	: SV_RenderTargetArrayIndex;
+};
+struct GS_PARTICLEOUT
+{
+	float4 position	: SV_POSITION;
+	float2 uv		: TEXCOORD0;
 };
 struct GBuffer {
 	float4 cColor	: SV_TARGET0;

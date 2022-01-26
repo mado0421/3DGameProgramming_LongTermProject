@@ -279,7 +279,55 @@ protected:
 	virtual D3D12_SHADER_BYTECODE		CreatePixelShader(ID3DBlob** ppd3dShaderBlob);
 };
 
+/*========================================================================
+* EffectPSO
+*
+* - 2 RTV
+* - 1 DSV
+* - DepthTest True
+* - FrontCounterClockwise False
+* 양면을 그리고, 알파값에 따라 처리한다는 것 외엔 다 똑같이 처리
+*=======================================================================*/
+class EffectPSO : public PipelineStateObject
+{
+public:
+	EffectPSO(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dRootSignature) { CreatePipelineState(pd3dDevice, pd3dRootSignature); }
+protected:
+	virtual void CreatePipelineState(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dRootSignature);
 
+	virtual D3D12_BLEND_DESC			CreateBlendState();
+	//virtual D3D12_DEPTH_STENCIL_DESC	CreateDepthStencilState();
+	virtual D3D12_SHADER_BYTECODE		CreateVertexShader(ID3DBlob** ppd3dShaderBlob);
+	virtual D3D12_SHADER_BYTECODE		CreatePixelShader(ID3DBlob** ppd3dShaderBlob);
+	virtual D3D12_RASTERIZER_DESC		CreateRasterizerState();
+};
+
+
+/*========================================================================
+* ParticlePSO
+*
+* - 1 RTV
+* - 1 DSV
+* - DepthTest True
+* - FrontCounterClockwise False
+* - VS_Particle
+* - GS_Partile
+* - PS_Particle
+*=======================================================================*/
+class ParticlePSO : public PipelineStateObject
+{
+public:
+	ParticlePSO(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dRootSignature) { CreatePipelineState(pd3dDevice, pd3dRootSignature); }
+protected:
+	virtual void CreatePipelineState(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dRootSignature);
+
+	virtual D3D12_BLEND_DESC			CreateBlendState();
+	virtual D3D12_DEPTH_STENCIL_DESC	CreateDepthStencilState();
+	virtual D3D12_SHADER_BYTECODE		CreateVertexShader(ID3DBlob** ppd3dShaderBlob);
+	virtual D3D12_SHADER_BYTECODE		CreateGeometryShader(ID3DBlob** ppd3dShaderBlob);
+	virtual D3D12_SHADER_BYTECODE		CreatePixelShader(ID3DBlob** ppd3dShaderBlob);
+	virtual D3D12_RASTERIZER_DESC		CreateRasterizerState();
+};
 
 
 /*========================================================================
@@ -379,4 +427,3 @@ protected:
 
 	virtual D3D12_SHADER_BYTECODE		CreateComputeShader(ID3DBlob** ppd3dShaderBlob);
 };
-

@@ -25,24 +25,3 @@ protected:
 	string	m_strDiffMapName;
 	string	m_strNormMapName;
 };
-
-class DebugWindowMesh
-{
-public:
-	DebugWindowMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, bool bIsPass2Screen = false);
-	DebugWindowMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float width, float height);
-	~DebugWindowMesh() {
-		if (m_pd3dVertexBuffer) m_pd3dVertexBuffer->Release();
-		if (m_pd3dVertexUploadBuffer) m_pd3dVertexUploadBuffer->Release();
-	}
-
-	void Render(ID3D12GraphicsCommandList* pd3dCommandList);
-protected:
-	ID3D12Resource*				m_pd3dVertexBuffer;
-	ID3D12Resource*				m_pd3dVertexUploadBuffer;
-	D3D12_VERTEX_BUFFER_VIEW	m_d3dVertexBufferView;
-
-	UINT m_nStride;
-	UINT m_nVertices;
-
-};

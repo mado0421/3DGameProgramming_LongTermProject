@@ -39,6 +39,11 @@ protected:
 	// for Render
 	vector<Object*>								m_vecNonAnimObjectRenderGroup;
 	vector<Object*>								m_vecAnimObjectRenderGroup;
+	vector<Object*>								m_vecEffectRenderGroup;
+
+	// for Particle
+	vector<Object*>								m_vecParticleEmitter;
+	vector<Object*>								m_vecParticlePool;
 
 	// for Camera
 	Object*										m_pCameraObject = nullptr;

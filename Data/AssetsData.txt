@@ -14,6 +14,8 @@ ArcadedWoodPanels_normal.dds
 Leather_Tufted_albedo.dds
 Leather_Tufted_normal.dds
 Mech_albedo.dds
+MuzzleFlash_1_albedo.dds
+ParticleTest_albedo.dds
 human.mm
 10x10Floor.mm
 pistol.mm
@@ -22,6 +24,7 @@ Mech.mm
 1x1Box_20220104.mm
 10x1wall_around_20220104.mm
 10x10Floor_20220104.mm
+muzzleFlash.mm
 Humanoid_Aiming.mac
 Humanoid_Idle.mac
 Humanoid_Idle2.mac

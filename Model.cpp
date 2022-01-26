@@ -39,5 +39,5 @@ void ModelManager::AddFBXModel(const char* fileName, ID3D12Device* pd3dDevice, I
 void ModelManager::Render(const char* modelName, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	assert(m_uomModel.count(modelName) && "modelName이 틀렸거나, 없는 model입니다\n");
-	for_each(m_uomModel[modelName].begin(), m_uomModel[modelName].end(), [=](Mesh* mesh) {mesh->Render(pd3dCommandList); });
+	for_each(m_uomModel[modelName].begin(), m_uomModel[modelName].end(), [&](Mesh* mesh) {mesh->Render(pd3dCommandList); });
 }
