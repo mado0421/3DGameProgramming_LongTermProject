@@ -12,7 +12,7 @@
 
 #include "Components.h"
 
-bool TEST_MOUSE_USABLE = false;
+bool TEST_MOUSE_USABLE = true;
 
 void Scene::Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {

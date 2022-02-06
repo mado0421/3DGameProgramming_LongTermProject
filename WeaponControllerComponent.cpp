@@ -33,7 +33,7 @@ void WeaponControllerComponent::CheckCollision(Component* other)
 		origin		= XMLoadFloat3(&xmf3Origin);
 		direction	= XMLoadFloat3(&xmf3Direction);
 
-		cout << "Direction: " << xmf3Direction.x << ", " << xmf3Direction.y << ", " << xmf3Direction.z << "\n";
+		//cout << "Direction: " << xmf3Direction.x << ", " << xmf3Direction.y << ", " << xmf3Direction.z << "\n";
 
 
 		BoxColliderComponent* otherBoxCollider = dynamic_cast<BoxColliderComponent*>(other);
@@ -67,7 +67,7 @@ void WeaponControllerComponent::SolveConstraint()
 		m_fTryRaycast = false;
 		m_fMinLength = FLT_MAX;
 		if (m_pCollided) {
-			cout << "Shoot at " << m_xmf3CollisionPoint.x << ", " << m_xmf3CollisionPoint.y << ", " << m_xmf3CollisionPoint.z << "\n";
+			//cout << "Shoot at " << m_xmf3CollisionPoint.x << ", " << m_xmf3CollisionPoint.y << ", " << m_xmf3CollisionPoint.z << "\n";
 			m_pCollided->m_pObject->SetActive(false);
 		}
 		m_pCollided = nullptr;
@@ -109,7 +109,7 @@ void WeaponControllerComponent::Fire()
 		m_pMuzzle->FindComponent<EffectComponent>()->TurnOn();
 
 
-		cout << "WeaponControllerComponent::Fire()\n";
+		//cout << "WeaponControllerComponent::Fire()\n";
 
 		m_fCurrCooltime = m_fCooltime;
 		m_fTryRaycast = true;
