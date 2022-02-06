@@ -282,9 +282,9 @@ protected:
 /*========================================================================
 * EffectPSO
 *
-* - 2 RTV
+* - 1 RTV
 * - 1 DSV
-* - DepthTest True
+* - DepthTest True(MASK ZERO, 테스트만 하고 쓰지 않음)
 * - FrontCounterClockwise False
 * 양면을 그리고, 알파값에 따라 처리한다는 것 외엔 다 똑같이 처리
 *=======================================================================*/
@@ -296,7 +296,7 @@ protected:
 	virtual void CreatePipelineState(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dRootSignature);
 
 	virtual D3D12_BLEND_DESC			CreateBlendState();
-	//virtual D3D12_DEPTH_STENCIL_DESC	CreateDepthStencilState();
+	virtual D3D12_DEPTH_STENCIL_DESC	CreateDepthStencilState();
 	virtual D3D12_SHADER_BYTECODE		CreateVertexShader(ID3DBlob** ppd3dShaderBlob);
 	virtual D3D12_SHADER_BYTECODE		CreatePixelShader(ID3DBlob** ppd3dShaderBlob);
 	virtual D3D12_RASTERIZER_DESC		CreateRasterizerState();
@@ -308,8 +308,8 @@ protected:
 *
 * - 1 RTV
 * - 1 DSV
-* - DepthTest True
-* - FrontCounterClockwise False
+* - DepthTest True(MASK ZERO, 테스트만 하고 쓰지 않음)
+* - FrontCounterClockwise TRUE
 * - VS_Particle
 * - GS_Partile
 * - PS_Particle

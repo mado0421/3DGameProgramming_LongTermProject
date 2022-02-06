@@ -57,8 +57,12 @@ struct VS_OUTPUT {
 	float3 tangentW	: TANGENT;
 };
 
+struct VS_EFFECTOUTPUT {
+	float4 position : SV_POSITION;
+	float2 uv		: TEXCOORD0;
+};
+
 struct VS_PARTICLEOUTPUT {
-	//float4 position : SV_POSITION;
 	float3 positionW: POSITION;
 	float  size		: PSIZE;
 };

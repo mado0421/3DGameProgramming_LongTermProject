@@ -1069,7 +1069,7 @@ void Scene::BuildObject()
 		TransformComponent* t = new TransformComponent(pe);
 		ParticleEmitterComponent* pec = new ParticleEmitterComponent(pe, &m_vecParticlePool);
 
-		t->Translate(0, 3, 0);
+		t->Translate(0, 2, -1);
 		pe->AddComponent(t);
 		pe->AddComponent(pec);
 
@@ -1089,7 +1089,7 @@ void Scene::BuildObject()
 		mrcm->SetModelByName("muzzleFlash");
 		mrcm->SetMaterialByName("MuzzleFlashMat");
 
-		effect->SetDuration(1.5f);
+		effect->SetDuration(0.05f);
 
 		mTransform->Translate(0, 0.07f, 0.15f);
 		muzzle->AddComponent(mTransform);

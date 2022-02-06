@@ -33,33 +33,31 @@ GBuffer PS_PackGBuffer(VS_OUTPUT input)
 
 	output.cNormal.rgb = NormalSampleToWorldSpace(gtxtNormalMap.Sample(gSamplerState, input.uv).rgb, input.normalW, input.tangentW) * 0.5 + 0.5;
 
-	//output.cNormal.rgb = (gtxtNormalMap.Sample(gSamplerState, input.uv).rgb * 0.5 + 0.5).rgb;
-	//output.cNormal = float4((input.normalW * 0.5 + 0.5), 1.0f);
-
 	return output;
 }
 
 // 이펙트랑 파티클을 GBuffer로 빼는게 맞는지
 // float4로 빼서 기존 스크린에 더하는게 좋지 않을지
-float4 PS_EffectAlpha(VS_OUTPUT input) : SV_TARGET0
+float4 PS_EffectAlpha(VS_EFFECTOUTPUT input) : SV_TARGET0
 {
-	//if (0.05f > gtxtColorMap.Sample(gSamplerState, input.uv).a) discard;
+	float4 output;
+	output = gtxtColorMap.Sample(gSamplerState, input.uv);
 
-	//GBuffer output;
-	//output.cColor.rgb = gtxtColorMap.Sample(gSamplerState, input.uv).rgb;
-	////output.cColor.rgb = gtxtColorMap.Sample(gSamplerState, input.uv).a;
-	////output.cColor.a = gtxtColorMap.Sample(gSamplerState, input.uv).a;
-	//output.cColor.a = (1 - gtxtDepthMap.Sample(gSamplerState, input.uv).r);
-
-
-	//return output;
-	return float4(1, 1, 1, 1);
+	return output;
 }
 
 float4 PS_Particle(GS_PARTICLEOUT input) : SV_TARGET0
 {
 	float4 output;
 	output = gtxtColorMap.Sample(gSamplerState, input.uv);
+
+	clip(output.a - 0.01f);
+
+	//float depth = gtxtDepthMap.Sample(gSamplerState, input.uv).r;
+	//float distance = length(gvCameraPosition - input.position.xyz);
+
+	//output.r = distance;
+	//output.gba = float3(0, 0, 1);
 
 	return output;
 }
@@ -95,13 +93,6 @@ float4 PS_ColorFromGBufferAmbient(VS_OUTPUT input) : SV_TARGET {
 	float3 color = gtxtColorMap.Sample(gSamplerState, input.uv).xyz;
 	float3 vAmbientLight = float3(0.1f, 0.1f, 0.1f);
 	return float4(color * vAmbientLight, 1.0f);
-	 
-	//float d = distance(gvCameraPosition ,vWorldPosition);
-	//if (1000.0f <= d < 1020.0f) return float4(0.0f, 1.0f, 0.0f, 1.0f);
-	//else if (0.006 <= d < 0.02) return float4(0.0f, 1.0f, 0.0f, 1.0f);
-	//else if (0.02 <= d < 0.06) return float4(0.0f, 0.0f, 1.0f, 1.0f);
-	//return float4(floor(d).xxx * 0.1f, 1.0f);
-
 }
 
 /*========================================================================
@@ -128,9 +119,8 @@ float4 PS_AddLight(VS_OUTPUT input) : SV_TARGET{
 	float3 vToEye			= normalize(gvCameraPosition - vWorldPosition);
 	float fRoughness		= gtxtColorMap.Sample(gSamplerState, input.uv).a;
 
-
 	float3 result = float3(0.0f, 0.0f, 0.0f);
-	// 내용...
+
 	switch (gLightType) {
 	case 1: result += CalcPointLight(vWorldPosition, vNormal, vToEye, vColor, fRoughness); break;
 	case 2: result += CalcSpotLight(vWorldPosition, vNormal, vToEye, vColor, fRoughness); break;

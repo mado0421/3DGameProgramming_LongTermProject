@@ -163,3 +163,17 @@ VS_PARTICLEOUTPUT VS_Particle(VS_INPUT input) {
 
 	return output;
 }
+
+
+/*========================================================================
+* VS_Effect
+*=======================================================================*/
+VS_EFFECTOUTPUT VS_Effect(VS_INPUT input) {
+	VS_EFFECTOUTPUT output;
+
+	float3 positionW = (float3)mul(float4(input.position, 1.0f), gmtxGameObject);
+	output.position = mul(mul(float4(positionW, 1.0f), gmtxView), gmtxProjection);
+	output.uv = input.uv;
+
+	return output;
+}
