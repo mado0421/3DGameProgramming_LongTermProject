@@ -95,5 +95,8 @@ protected:
 	*
 	==============================================================================*/
 	void ReloadLight();
+
+protected:
+	Object* FindObjectByName(const char*);
 };
 

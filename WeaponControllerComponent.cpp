@@ -33,9 +33,6 @@ void WeaponControllerComponent::CheckCollision(Component* other)
 		origin		= XMLoadFloat3(&xmf3Origin);
 		direction	= XMLoadFloat3(&xmf3Direction);
 
-		//cout << "Direction: " << xmf3Direction.x << ", " << xmf3Direction.y << ", " << xmf3Direction.z << "\n";
-
-
 		BoxColliderComponent* otherBoxCollider = dynamic_cast<BoxColliderComponent*>(other);
 		if (otherBoxCollider) {
 			otherBoxCollider->m_box.Intersects(origin, direction, length);
@@ -67,8 +64,9 @@ void WeaponControllerComponent::SolveConstraint()
 		m_fTryRaycast = false;
 		m_fMinLength = FLT_MAX;
 		if (m_pCollided) {
-			//cout << "Shoot at " << m_xmf3CollisionPoint.x << ", " << m_xmf3CollisionPoint.y << ", " << m_xmf3CollisionPoint.z << "\n";
-			m_pCollided->m_pObject->SetActive(false);
+			Character* enemy = m_pCollided->m_pObject->FindComponent<Character>();
+
+			if (enemy) enemy->Damage(100);
 		}
 		m_pCollided = nullptr;
 	}
@@ -80,7 +78,6 @@ void WeaponControllerComponent::Update(float fTimeElapsed)
 
 	m_fCurrCooltime -= fTimeElapsed;
 
-
 	// Move to position of Parent's RHand
 	if (m_pObject->m_pParent) {
 		XMMATRIX l_xmmtxTransform = m_pObject->m_pParent->FindComponent<HumanoidAnimatorComponent>()->GetToWorldTransform(28);
@@ -91,12 +88,8 @@ void WeaponControllerComponent::Update(float fTimeElapsed)
 
 		XMFLOAT3 xmf3Adjust(0, 0, 0);
 		xmf3Adjust = Vector3::Add(xmf3Adjust, Vector3::Multiply(-0.028f, transform->GetRightVector()));
-		//xmf3Adjust = Vector3::Add(xmf3Adjust, Vector3::Multiply(0.0f, transform->GetUpVector()));
 		xmf3Adjust = Vector3::Add(xmf3Adjust, Vector3::Multiply(0.08f, transform->GetLookVector()));
 		transform->Translate(xmf3Adjust);
-
-
-		//-0.028f, 0.0f, 0.08f
 	}
 }
 

@@ -28,7 +28,7 @@ void TransformComponent::SetPosition(const XMFLOAT3& xmf3Position)
 	m_xmf4x4Local._42 = xmf3Position.y;
 	m_xmf4x4Local._43 = xmf3Position.z;
 }
-void TransformComponent::SetPosition(const float& fX, const float& fY, const float& fZ)
+void TransformComponent::SetPosition(float fX, float fY, float fZ)
 {
 	m_xmf4x4Local._41 = fX;
 	m_xmf4x4Local._42 = fY;
@@ -40,7 +40,7 @@ void TransformComponent::Translate(const XMFLOAT3& xmf3Val)
 	m_xmf4x4Local._42 += xmf3Val.y;
 	m_xmf4x4Local._43 += xmf3Val.z;
 }
-void TransformComponent::Translate(const float& fX, const float& fY, const float& fZ)
+void TransformComponent::Translate(float fX, float fY, float fZ)
 {
 	m_xmf4x4Local._41 += fX;
 	m_xmf4x4Local._42 += fY;
@@ -71,7 +71,7 @@ void TransformComponent::RotateXYZDegree(const XMFLOAT3& xmf3Val)
 	m_xmf4x4Local._21 = xmf3Up.x;		m_xmf4x4Local._22 = xmf3Up.y;		m_xmf4x4Local._23 = xmf3Up.z;
 	m_xmf4x4Local._31 = xmf3Look.x;		m_xmf4x4Local._32 = xmf3Look.y;		m_xmf4x4Local._33 = xmf3Look.z;
 }
-void TransformComponent::RotateXYZDegree(const float& fX, const float& fY, const float& fZ)
+void TransformComponent::RotateXYZDegree(float fX, float fY, float fZ)
 {
 	XMMATRIX xmmtxRotate
 		= XMMatrixRotationQuaternion(

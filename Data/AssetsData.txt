@@ -16,6 +16,8 @@ Leather_Tufted_normal.dds
 Mech_albedo.dds
 MuzzleFlash_1_albedo.dds
 ParticleTest_albedo.dds
+WoodOldRough3_albedo.dds
+WoodOldRough3_normal.dds
 human.mm
 10x10Floor.mm
 pistol.mm
@@ -25,9 +27,11 @@ Mech.mm
 10x1wall_around_20220104.mm
 10x10Floor_20220104.mm
 muzzleFlash.mm
+targetBoardStand.mm
 Humanoid_Aiming.mac
 Humanoid_Idle.mac
 Humanoid_Idle2.mac
+Humanoid_Idle_NoneMovement.mac
 Humanoid_RunningForward.mac
 Humanoid_RunningLeftStrafe.mac
 Humanoid_RunningRightStrafe.mac
@@ -40,3 +44,5 @@ Humanoid_WalkingRightStrafe.mac
 Humanoid_WalkingRightStrafeForward.mac
 Humanoid_WalkingRightStrafeBack.mac
 Humanoid_WalkingBackward.mac
+targetBoardDown.mac
+targetBoardStand.mac

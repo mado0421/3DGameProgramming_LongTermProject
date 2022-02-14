@@ -78,12 +78,6 @@
     <Filter Include="Data">
       <UniqueIdentifier>{1f78400f-9ce6-4bb8-8cfa-b1089a6e74ea}</UniqueIdentifier>
     </Filter>
-    <Filter Include="소스 파일\Component\HumanoidController">
-      <UniqueIdentifier>{ab2c094a-5b9d-4ad8-8004-0503a8e91cf1}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="소스 파일\Component\WeaponController">
-      <UniqueIdentifier>{5a859353-c6c8-426f-8333-a18e34597489}</UniqueIdentifier>
-    </Filter>
     <Filter Include="소스 파일\Component\Rigidbody">
       <UniqueIdentifier>{6e81d655-313f-47a8-9862-06c0238da165}</UniqueIdentifier>
     </Filter>
@@ -101,6 +95,21 @@
     </Filter>
     <Filter Include="소스 파일\Component\Particle">
       <UniqueIdentifier>{a2d141c7-88b6-4595-988a-538544ce667d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Character">
+      <UniqueIdentifier>{7f5f145b-814e-4188-96cd-9804c6a9066d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Component\Controllers">
+      <UniqueIdentifier>{16485320-095f-441b-870d-173e1ec113e5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Component\Controllers\HumanoidController">
+      <UniqueIdentifier>{ab2c094a-5b9d-4ad8-8004-0503a8e91cf1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Component\Controllers\TargetBoardController">
+      <UniqueIdentifier>{3d84c707-6f2c-4b18-a53b-7d10f3022f23}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Component\Controllers\WeaponController">
+      <UniqueIdentifier>{5a859353-c6c8-426f-8333-a18e34597489}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -196,10 +205,10 @@
       <Filter>소스 파일\Component\Animations\Animator</Filter>
     </ClInclude>
     <ClInclude Include="HumanoidControllerComponent.h">
-      <Filter>소스 파일\Component\HumanoidController</Filter>
+      <Filter>소스 파일\Component\Controllers\HumanoidController</Filter>
     </ClInclude>
     <ClInclude Include="WeaponControllerComponent.h">
-      <Filter>소스 파일\Component\WeaponController</Filter>
+      <Filter>소스 파일\Component\Controllers\WeaponController</Filter>
     </ClInclude>
     <ClInclude Include="RigidbodyComponent.h">
       <Filter>소스 파일\Component\Rigidbody</Filter>
@@ -215,6 +224,12 @@
     </ClInclude>
     <ClInclude Include="ParticleComponent.h">
       <Filter>소스 파일\Component\Particle</Filter>
+    </ClInclude>
+    <ClInclude Include="TargetBoardControllerComponent.h">
+      <Filter>소스 파일\Component\Controllers\TargetBoardController</Filter>
+    </ClInclude>
+    <ClInclude Include="Character.h">
+      <Filter>소스 파일\Character</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -295,10 +310,10 @@
       <Filter>소스 파일\Component\Animations\Animator</Filter>
     </ClCompile>
     <ClCompile Include="HumanoidControllerComponent.cpp">
-      <Filter>소스 파일\Component\HumanoidController</Filter>
+      <Filter>소스 파일\Component\Controllers\HumanoidController</Filter>
     </ClCompile>
     <ClCompile Include="WeaponControllerComponent.cpp">
-      <Filter>소스 파일\Component\WeaponController</Filter>
+      <Filter>소스 파일\Component\Controllers\WeaponController</Filter>
     </ClCompile>
     <ClCompile Include="RigidbodyComponent.cpp">
       <Filter>소스 파일\Component\Rigidbody</Filter>
@@ -314,6 +329,12 @@
     </ClCompile>
     <ClCompile Include="ParticleComponent.cpp">
       <Filter>소스 파일\Component\Particle</Filter>
+    </ClCompile>
+    <ClCompile Include="TargetBoardControllerComponent.cpp">
+      <Filter>소스 파일\Component\Controllers\TargetBoardController</Filter>
+    </ClCompile>
+    <ClCompile Include="Character.cpp">
+      <Filter>소스 파일\Character</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

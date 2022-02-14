@@ -11,6 +11,7 @@ class Object
 {
 public:
 	Object();
+	Object(const char*);
 	virtual ~Object();
 
 public:
@@ -41,9 +42,10 @@ protected:
 	void FindComponentsReq(vector<t*>& result);
 
 public:
-	bool			m_bEnable		= true;
-	float			m_fTime			= 0;
-	Object*			m_pParent		= nullptr;
+	string			m_strName;
+	bool			m_bEnable;
+	float			m_fTime;
+	Object*			m_pParent;
 	vector<Object*> m_vecpChild;
 
 	vector<Component*> m_vecComponents;

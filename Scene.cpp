@@ -12,7 +12,7 @@
 
 #include "Components.h"
 
-bool TEST_MOUSE_USABLE = true;
+bool TEST_MOUSE_USABLE = false;
 
 void Scene::Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
@@ -1056,31 +1056,27 @@ void Scene::BuildObject()
 		TransformComponent* t = new TransformComponent(ptc);
 		ParticleComponent* pc = new ParticleComponent(ptc, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
 
-		ptc->AddComponent(t);
-		ptc->AddComponent(pc);
-
 		ptc->SetActive(false);
 
 		m_vecParticlePool.push_back(ptc);
 	}
 	{
-		Object* pe = new Object();
+		Object* pe = new Object("particleEmitter");
 		
 		TransformComponent* t = new TransformComponent(pe);
 		ParticleEmitterComponent* pec = new ParticleEmitterComponent(pe, &m_vecParticlePool);
 
-		t->Translate(0, 2, -1);
-		pe->AddComponent(t);
-		pe->AddComponent(pec);
+		t->Translate(3, 2, -1);
 
 		pec->SetMaterialByName("ParticleTestMat");
 
 		m_vecObject.push_back(pe);
 		m_vecParticleEmitter.push_back(pe);
 	}
+
 	{
 		// muzzle, empty object for weapon
-		Object* muzzle = new Object();
+		Object* muzzle = new Object("muzzle");
 		TransformComponent* mTransform = new TransformComponent(muzzle);
 		EffectComponent* effect = new EffectComponent(muzzle);
 		MeshRendererComponent* mrcm = new MeshRendererComponent(muzzle, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
@@ -1092,14 +1088,11 @@ void Scene::BuildObject()
 		effect->SetDuration(0.05f);
 
 		mTransform->Translate(0, 0.07f, 0.15f);
-		muzzle->AddComponent(mTransform);
-		muzzle->AddComponent(effect);
-		muzzle->AddComponent(mrcm);
 		m_vecObject.push_back(muzzle);
 		m_vecEffectRenderGroup.push_back(muzzle);
 
 		// weapon
-		Object* weapon = new Object();
+		Object* weapon = new Object("pistol");
 
 		TransformComponent* wTransform = new TransformComponent(weapon);
 		WeaponControllerComponent* wcc = new WeaponControllerComponent(weapon, muzzle, nullptr);
@@ -1108,16 +1101,13 @@ void Scene::BuildObject()
 		mrc->SetModelByName("pistol");
 		mrc->SetMaterialByName("PistolMat");
 
-		weapon->AddComponent(wTransform);
-		weapon->AddComponent(wcc);
-		weapon->AddComponent(mrc);
 		m_vecObject.push_back(weapon);
 		m_vecNonAnimObjectRenderGroup.push_back(weapon);
 		muzzle->m_pParent = weapon;
 	}
 	{
 		// player
-		Object* player = new Object();
+		Object* player = new Object("player");
 
 		TransformComponent* transform = new TransformComponent(player);
 		RigidbodyComponent* rigidbody = new RigidbodyComponent(player);
@@ -1131,28 +1121,21 @@ void Scene::BuildObject()
 		skinnedMeshRenderer->SetMaterialByName("DefaultMaterial");
 		transform->Translate(0, 0, -3);
 
-		player->AddComponent(transform);
-		player->AddComponent(rigidbody);
-		player->AddComponent(skinnedMeshRenderer);
-		player->AddComponent(humanoidController);
-		player->AddComponent(humanoidAnimator);
-		player->AddComponent(controller);
-		player->AddComponent(sphereCollider);
 
 		m_vecObject.push_back(player);
 		m_vecAnimObjectRenderGroup.push_back(player);
-		m_vecNonAnimObjectRenderGroup[0]->m_pParent = m_vecAnimObjectRenderGroup[0];
+		FindObjectByName("pistol")->m_pParent = player;
 	}
 	{
-		Object* head = new Object();
+		Object* head = new Object("head");
 
 		TransformComponent* transform = new TransformComponent(head);
 		transform->Translate(0, 1.7f, 0);
-		head->AddComponent(transform);
 		m_vecObject.push_back(head);
 
-		head->m_pParent = m_vecAnimObjectRenderGroup[0];
+		head->m_pParent = FindObjectByName("player");
 	}
+	
 	{
 		Object* box = new Object();
 
@@ -1163,10 +1146,6 @@ void Scene::BuildObject()
 		mrc->SetModelByName("1x1Box_20220104");
 		mrc->SetMaterialByName("BoxMat");
 		transform->Translate(0, 0, 3);
-
-		box->AddComponent(transform);
-		box->AddComponent(boxCollider);
-		box->AddComponent(mrc);
 
 		m_vecObject.push_back(box);
 		m_vecNonAnimObjectRenderGroup.push_back(box);
@@ -1182,10 +1161,6 @@ void Scene::BuildObject()
 		mrc->SetMaterialByName("BoxMat");
 		transform->Translate(-2, 0, 2);
 
-		box->AddComponent(transform);
-		box->AddComponent(boxCollider);
-		box->AddComponent(mrc);
-
 		m_vecObject.push_back(box);
 		m_vecNonAnimObjectRenderGroup.push_back(box);
 	}
@@ -1199,10 +1174,6 @@ void Scene::BuildObject()
 		mrc->SetModelByName("1x1Box_20220104");
 		mrc->SetMaterialByName("BoxMat");
 		transform->Translate(1, 1, 2);
-
-		box->AddComponent(transform);
-		box->AddComponent(boxCollider);
-		box->AddComponent(mrc);
 
 		m_vecObject.push_back(box);
 		m_vecNonAnimObjectRenderGroup.push_back(box);
@@ -1224,14 +1195,6 @@ void Scene::BuildObject()
 		mrc1->SetModelByName("10x1wall_around_20220104");
 		mrc1->SetMaterialByName("WallBottomMat");
 
-		room->AddComponent(transform);
-		room->AddComponent(mrc0);
-		room->AddComponent(mrc1);
-		room->AddComponent(boxCollider0);
-		room->AddComponent(boxCollider1);
-		room->AddComponent(boxCollider2);
-		room->AddComponent(boxCollider3);
-
 		m_vecObject.push_back(room);
 		m_vecNonAnimObjectRenderGroup.push_back(room);
 	}
@@ -1245,28 +1208,48 @@ void Scene::BuildObject()
 		mrc->SetMaterialByName("WallTopMat");
 		transform->Translate(0, 1, 0);
 
-		room->AddComponent(transform);
-		room->AddComponent(mrc);
-
 		m_vecObject.push_back(room);
 		m_vecNonAnimObjectRenderGroup.push_back(room);
 	}
+	
 	{
-		Object* camera = new Object();
+		Object* camera = new Object("camera");
 
 		TransformComponent* transform = new TransformComponent(camera);
 		CameraComponent* cam = new CameraComponent(camera);
 
-		camera->AddComponent(transform);
-		camera->AddComponent(cam);
-
-
-		m_vecObject.push_back(camera);
-		m_pCameraObject = camera;
-		m_pCameraObject->m_pParent = m_vecAnimObjectRenderGroup[0];
-
 		transform->Translate(0, 2, -2.8f);
-		cam->SetFocusObject(m_vecObject[4]);
+		cam->SetFocusObject(FindObjectByName("head"));
+
+		camera->m_pParent = FindObjectByName("player");
+
+		m_pCameraObject = camera;
+		m_vecObject.push_back(camera);
+	}
+	{
+		Object* targetBoard = new Object();
+
+		TransformComponent* transform = new TransformComponent(targetBoard);
+		SkinnedMeshRendererComponent* skinnedMeshRenderer = new SkinnedMeshRendererComponent(
+			targetBoard, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
+		// SkinnedMeshRenderer가 작동하려면 Animator가 있어야 함!
+		// TBAC가 작동하려면 TargetBoardController가 있어야 함!
+		TargetBoardControllerComponent* TCC = new TargetBoardControllerComponent(targetBoard);
+		TargetBoardAnimatorComponent* TAC = new TargetBoardAnimatorComponent(targetBoard, "targetBoardStand");
+		BoxColliderComponent* bodyCollider = new BoxColliderComponent(
+			targetBoard, XMFLOAT3(0, 0.5f, 0), XMFLOAT3(0.3f, 0.5f, 0.1f), XMFLOAT4(0, 0, 0, 1), TAC, 1);
+		BoxColliderComponent* headCollider = new BoxColliderComponent(
+			targetBoard, XMFLOAT3(0, 1.2f, 0), XMFLOAT3(0.15f, 0.2f, 0.1f), XMFLOAT4(0, 0, 0, 1), TAC, 1);
+
+		skinnedMeshRenderer->SetModelByName("targetBoardStand");
+		skinnedMeshRenderer->SetMaterialByName("TargetBoardMat");
+		transform->Translate(0, 0.4f, 1);
+		transform->RotateXYZDegree(0, 180, 0);
+
+		//TCC->Damage(100);
+
+		m_vecObject.push_back(targetBoard);
+		m_vecAnimObjectRenderGroup.push_back(targetBoard);
 	}
 }
 
@@ -1299,4 +1282,11 @@ void Scene::ReloadLight()
 			m_LightMng->SetShadowMapName(temp.c_str(), i);
 		}
 	}
+}
+
+Object* Scene::FindObjectByName(const char* strName)
+{
+	for (auto iter = m_vecObject.begin(); iter != m_vecObject.end(); iter++) 
+		if (strName == (*iter)->m_strName) return *iter;
+	return nullptr;
 }

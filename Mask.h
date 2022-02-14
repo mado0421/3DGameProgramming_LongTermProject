@@ -12,9 +12,10 @@ public:
 		switch (option)
 		{
 		case BoneMask::PreDefined::eUpperBody:
+			//weight[1]  = 0.9f;	// Pelvis
 			weight[2]  = 0.1f ;	// Spine
-			weight[3]  = 0.4f ;	// Spine1
-			weight[4]  = 0.9f ;	// Spine2
+			weight[3]  = 0.5f ;	// Spine1
+			weight[4]  = 1.0f ;	// Spine2
 			weight[5]  = 1.0f ;	// Neck
 			weight[6]  = 1.0f ;	// L Clavicle
 			weight[7]  = 1.0f ;	// L UpperArm

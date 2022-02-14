@@ -149,6 +149,7 @@
     <ClInclude Include="AnimatorComponent.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="CameraComponent.h" />
+    <ClInclude Include="Character.h" />
     <ClInclude Include="ColliderComponent.h" />
     <ClInclude Include="Component.h" />
     <ClInclude Include="Components.h" />
@@ -178,6 +179,7 @@
     <ClInclude Include="Scene.h" />
     <ClInclude Include="SkinnedMeshRendererComponent.h" />
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="TargetBoardControllerComponent.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="Timer.h" />
@@ -193,6 +195,7 @@
     <ClCompile Include="AnimatorComponent.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="CameraComponent.cpp" />
+    <ClCompile Include="Character.cpp" />
     <ClCompile Include="ColliderComponent.cpp" />
     <ClCompile Include="Component.cpp" />
     <ClCompile Include="EffectComponent.cpp" />
@@ -218,6 +221,7 @@
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="SkinnedMeshRendererComponent.cpp" />
     <ClCompile Include="stdafx.cpp" />
+    <ClCompile Include="TargetBoardControllerComponent.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="TransformComponent.cpp" />

@@ -11,10 +11,9 @@ public:
 	~AnimatorComponent();
 
 public:
-	virtual void Update(float fTimeElapsed) {}
-
 	XMFLOAT4X4* GetFinalResultAnimationTransform();
 	XMMATRIX GetToWorldTransform(int boneIdx);
+	XMMATRIX GetFinalResultTransform(int boneIdx);
 
 protected:
 	void CalcToWorld();
@@ -41,4 +40,18 @@ public:
 
 protected:
 	BoneMask* m_pAimingMask = nullptr;
+};
+
+class TargetBoardAnimatorComponent : public AnimatorComponent
+{
+public:
+	TargetBoardAnimatorComponent() = delete;
+	TargetBoardAnimatorComponent(Object*, const char*);
+	~TargetBoardAnimatorComponent();
+
+public:
+	virtual void Update(float fTimeElapsed);
+
+private:
+	float m_fStandInterpolationValue;	// 1: Stand, 0: Down, [0~1]
 };

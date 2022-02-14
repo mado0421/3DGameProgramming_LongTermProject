@@ -8,6 +8,18 @@
 #include "Components.h"
 
 Object::Object()
+	:m_strName("")
+	,m_bEnable(true)
+	,m_fTime(0.0f)
+	,m_pParent(nullptr)
+{
+}
+
+Object::Object(const char* strName)
+	:m_strName(strName)
+	, m_bEnable(true)
+	, m_fTime(0.0f)
+	, m_pParent(nullptr)
 {
 }
 

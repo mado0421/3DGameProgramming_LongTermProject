@@ -6,6 +6,7 @@
 Component::Component(Object* pObject)
     : m_pObject(pObject)
 {
+    pObject->AddComponent(this);
 }
 
 Component::~Component()

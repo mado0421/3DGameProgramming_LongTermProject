@@ -12,4 +12,7 @@
 #include "EffectComponent.h"
 #include "ParticleEmitterComponent.h"
 #include "ParticleComponent.h"
+#include "TargetBoardControllerComponent.h"
+
+#include "Character.h"
 #include "Object.h"

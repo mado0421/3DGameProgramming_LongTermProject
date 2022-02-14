@@ -2,8 +2,10 @@
 #include "Components.h"
 #include "Object.h"
 
-ColliderComponent::ColliderComponent(Object* pObject)
-	:Component(pObject)
+ColliderComponent::ColliderComponent(Object* pObject, AnimatorComponent* pAnimator, int boneIdx)
+	: Component(pObject)
+	, m_pAnimator(pAnimator)
+	, m_boneIdx(boneIdx)
 	, m_xmf4x4Local(Matrix4x4::Identity())
 {
 }
@@ -19,8 +21,10 @@ void ColliderComponent::Update(float fTimeElapsed)
 
 BoxColliderComponent::BoxColliderComponent(
 	Object* pObject, 
-	const XMFLOAT3& xmf3Extents)
-	:ColliderComponent(pObject)
+	const XMFLOAT3& xmf3Extents,
+	AnimatorComponent* pAnimator,
+	int boneIdx)
+	:ColliderComponent(pObject, pAnimator, boneIdx)
 {
 	m_box = BoundingOrientedBox(XMFLOAT3(0,0,0), xmf3Extents, XMFLOAT4(0,0,0,1));
 }
@@ -29,8 +33,10 @@ BoxColliderComponent::BoxColliderComponent(
 	Object* pObject,
 	const XMFLOAT3& xmf3Center, 
 	const XMFLOAT3& xmf3Extents,
-	const XMFLOAT4& xmf4Orientation)
-	: ColliderComponent(pObject)
+	const XMFLOAT4& xmf4Orientation,
+	AnimatorComponent* pAnimator,
+	int boneIdx)
+	: ColliderComponent(pObject, pAnimator, boneIdx)
 {
 	m_box = BoundingOrientedBox(xmf3Center, xmf3Extents, xmf4Orientation);
 	XMStoreFloat4x4(&m_xmf4x4Local,	XMMatrixRotationQuaternion(XMLoadFloat4(&xmf4Orientation)));
@@ -53,10 +59,16 @@ void BoxColliderComponent::Update(float fTimeElapsed)
 	XMFLOAT4X4 xmf4x4Result;
 	XMFLOAT4 xmf4Orientation;
 
-	local = XMLoadFloat4x4(&m_xmf4x4Local);
+	// Move to position of m_pAnimator's Bone
+	if (m_pAnimator) {
+		XMMATRIX l_xmmtxTransform = m_pAnimator->GetFinalResultTransform(m_boneIdx);
+		l_xmmtxTransform = XMMatrixMultiply(XMLoadFloat4x4(&m_xmf4x4Local), l_xmmtxTransform );
+		local = l_xmmtxTransform;
+	}
+	else local = XMLoadFloat4x4(&m_xmf4x4Local);
 	world = m_pObject->FindComponent<TransformComponent>()->GetWorldTransform();
 
-	local = XMMatrixMultiply(world, local);
+	local = XMMatrixMultiply(local, world);
 
 	XMStoreFloat4x4(&xmf4x4Result, local);
 	XMStoreFloat4(&xmf4Orientation, XMQuaternionRotationMatrix(local));
@@ -87,8 +99,10 @@ void BoxColliderComponent::CheckCollision(Component* other)
 
 SphereColliderComponent::SphereColliderComponent(
 	Object* pObject, 
-	const float& fRadius)
-	:ColliderComponent(pObject)
+	const float& fRadius,
+	AnimatorComponent* pAnimator,
+	int boneIdx)
+	:ColliderComponent(pObject, pAnimator, boneIdx)
 {
 	m_sphere = BoundingSphere(XMFLOAT3(0,0,0), fRadius);
 }
@@ -96,8 +110,10 @@ SphereColliderComponent::SphereColliderComponent(
 SphereColliderComponent::SphereColliderComponent(
 	Object* pObject,
 	const XMFLOAT3& xmf3Center, 
-	const float& fRadius)
-	: ColliderComponent(pObject)
+	const float& fRadius,
+	AnimatorComponent* pAnimator,
+	int boneIdx)
+	: ColliderComponent(pObject, pAnimator, boneIdx)
 {
 	m_sphere = BoundingSphere(xmf3Center, fRadius);
 	m_xmf4x4Local._41 = xmf3Center.x;
@@ -118,7 +134,14 @@ void SphereColliderComponent::Update(float fTimeElapsed)
 	XMMATRIX world, local;
 	XMFLOAT4X4 xmf4x4Result;
 
-	local = XMLoadFloat4x4(&m_xmf4x4Local);
+	// Move to position of m_pAnimator's Bone
+	if (m_pAnimator) {
+		XMMATRIX l_xmmtxTransform = m_pAnimator->GetToWorldTransform(m_boneIdx);
+		l_xmmtxTransform = XMMatrixMultiply(XMMatrixRotationRollPitchYaw(0, XMConvertToRadians(0), XMConvertToRadians(90)), l_xmmtxTransform);
+
+		local = l_xmmtxTransform;
+	}
+	else local = XMLoadFloat4x4(&m_xmf4x4Local);
 	world = m_pObject->FindComponent<TransformComponent>()->GetWorldTransform();
 
 	local = XMMatrixMultiply(world, local);

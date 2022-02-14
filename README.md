@@ -16,7 +16,7 @@
 * **Deferred Shading Rendering Path**(RenderToTexture, GBuffer 등)
 * **Spot Light & Shadow Map**
 * **Point Light &** (GS를 이용한)**Cube Shadow Map**
-* **Directional Light &** (GS를 이용한)**Cascaded Shadow Map**
+* **Directional Light &** (GS를 이용한)**Cascade Shadow Map**
 * **FBX Mesh & Animation Info Parser**
 * **Animation Blend** (+**보행이동 기반 블렌딩**)
 * (CS를 이용한)**Blur, HDR, Bloom PostProcess**
@@ -33,7 +33,7 @@
 * Cubemap과 GS를 이용한 PointLight Shadow 구현
   - Cubemap Texture 사용법 숙지
   - GeometryShader 사용법 숙지
-* Cascaded ShadowMap 을 이용한 Directional Light Shadow 구현
+* Cascade ShadowMap 을 이용한 Directional Light Shadow 구현
   - Texture Array 사용법 숙지
 
 #### 2주 목표
@@ -58,7 +58,7 @@
 * Cubemap과 GS를 이용한 PointLight 그림자 구현
   - Cubemap Texture 사용법 숙지
   - GeometryShader 사용법 숙지
-* Cascaded ShadowMap 을 이용한 Directional Light 그림자 구현
+* Cascade ShadowMap 을 이용한 Directional Light 그림자 구현
   - Texture Array 사용법 숙지
 
 #### 2주 목표
@@ -96,7 +96,7 @@ Point Light Shadow를 위해 TextureManager와 Texture에 CubeMap Type으로 Tex
 -----------
 ### 21.03.29 - 21.04.04
 #### 이번주 일정
-* Cascaded ShadowMap 을 이용한 Directional Light Shadow 구현
+* Cascade ShadowMap 을 이용한 Directional Light Shadow 구현
 * Render Object를 할 때, Texture 등을 어떻게 저장할 것인지 정리(자료구조 면에서)
 * Material 구조체 업로드 준비
 * FBX SDK로 파일 읽기(애니메이션 구현 준비)
@@ -110,7 +110,7 @@ Point Light Shadow를 위해 TextureManager와 Texture에 CubeMap Type으로 Tex
 - DeferredShading
 - 다중 SpotLight Shadow
 - 다중 PointLight Shadow
-- CascadeShadowMap을 TextureArray를 사용하여 DepthBuffer에 그리는 것까지 진행
+- Cascade Shadow Map을 TextureArray를 사용하여 DepthBuffer에 그리는 것까지 진행
 
 ### 2021.03.29
 26일에 DepthBuffer에 그려지는 것까지 확인
@@ -441,14 +441,14 @@ Mixamo 사용법은 다음과 같다.
 4. 애니메이션이 적용된 Max파일을 그대로 Export하여 AnimParser에서 처리하면 그대로 사용할 수 있다.
 
 해상도를 1920*1080으로 변경하였다.
-Cascaded Shadow Map 구현에 있어서 버그를 찾았으므로 이를 수정하는 것을 최우선 목표로 한다.
+Cascade Shadow Map 구현에 있어서 버그를 찾았으므로 이를 수정하는 것을 최우선 목표로 한다.
 
 ### 2021.05.14
 
 <img src="https://user-images.githubusercontent.com/21697638/118232331-573e6600-b4cb-11eb-9733-548b1a0b22e7.png" width="70%" height="70%"></img>
 
 창의 크기를 1920*1080으로 늘렸다.
-Cascaded Shadow Map 기능에 버그가 있어 수정하였다. 이제 가끔씩 보였던 자잘한 그림자들이 보이지 않게 됐다.
+Cascade Shadow Map 기능에 버그가 있어 수정하였다. 이제 가끔씩 보였던 자잘한 그림자들이 보이지 않게 됐다.
 
 -----------
 ### 21.05.17 - 21.05.23
@@ -1132,3 +1132,35 @@ WeaponControllerComponent에서는 Fire()가 호출되면  다음 CheckCollision
 -----------
 ### 22.02.07 - 22.02.13
 #### 이번주 일정
+* TargetBoard Object 만들기
+
+TargetBoard가 Stand, Down 상태일 때, 각각 현재 Bone의 방향에 따라서 Collider를 변환해주어야 한다.
+그동안 Collider의 위치와 방향 결정에 있어서 의도와 다르게 작동하던 것을 확인하였다(지금까지는 Collider가 포함된 Object가 회전하는 일이 없어서 발견되지 않음).
+
+### 2022.02.11
+추가된 내용:
+
+	- Humanoid Animator Component에서 Aiming Layer의 자세를 보정하기 위해, AdjustRotationQuaternion() 함수를 만들고 Humanoid Bone 중에서 Spine0, 1, 2, 그리고 좌우 Clavicle을 보정했다.
+	-  TargetBoard 진행중
+
+-----------
+### 22.02.14 - 22.02.20
+#### 이번주 일정
+* TargetBoard Object 만들기
+* 피격 시 파티클 이펙트 생성하기
+
+### 2022.02.14
+
+	- Component class의 생성자에 pObject->AddComponent(this)를 추가하였다. 현재, Component의 추가 순서에 영향을 받는 Component가 몇몇 존재한다.
+	- 모든 Object는 이름을 나타낼 string 비정적 데이터 변수를 가지고, Scene 내에서 FindObjectByName(strName)으로 찾을 수 있다. 
+	- TargetBoard는 체력을 가지고, 피해를 받아야 하고, 체력이 0 이하가 되면 죽어야 한다. 일정 시간 후에 다시 살아나는 것도 해야함.
+	- 그래서 Object의 Enable/Disable과 별개로, HP가 있는 Object들의 HP 관련 수치를 관리할 Character 클래스를 작성. Character는 Component가 아니다.
+	- TargetBoard Controller Component는 Component와 Character를 다중상속한다. (이름을 TargetBoard Controller Character Component 같이 지어도 괜찮을 듯)
+	- 3ds Max에서 간단한 판자 모델을 만들고, 애니메이션을 적용하여 Export하였다.
+	- Humanoid Animation Clip은 제대로 Parse되고, Import 되는데, Bone으로 직접 만든 Hierarchy는 값이 오염되는 일이 있어 bipad를 사용하여 애니메이션을 만들었다.
+	- Skinned Mesh와 별개로, Collider 또한, Animator에 영향을 받을 수 있게 변경하였다. 이제 Collider를 Child Object로 두고 Parent의 Bone Transform Matrix를 받지 않고도 한 Object 내에서 Animator가 계산해둔 finalResultAnimationTransform[boneIdx]를 통해 Collider의 위치와 방향을 결정할 수 있다.
+
+
+<img src="https://user-images.githubusercontent.com/21697638/153813631-40f8710b-efba-4f7e-b631-56fcdcf17d42.gif" width="70%" height="70%"></img>
+
+TargetBoard의 체력은 50, 피격 시에 Damage(100), 다시 살아나는 시간은 3.0s로 설정.
