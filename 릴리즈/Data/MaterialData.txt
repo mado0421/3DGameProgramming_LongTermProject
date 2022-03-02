@@ -1,0 +1,16 @@
+#Material
+
+#{ name CobblestoneMat d CobblestoneOld_albedo n CobblestoneOld_normal s CobblestoneOld_roughness f 0.1 0.1 0.1 }
+#{ name WallBottomMat d ArcadedWoodPanels_albedo n ArcadedWoodPanels_normal f 0.1 0.1 0.1 }
+#{ name WallTopMat d Leather_Tufted_albedo n Leather_Tufted_normal f 0.1 0.1 0.1 }
+{ name PistolMat d pistol_albedo n pistol_normal f 0.1 0.1 0.1 }
+{ name MechMat d Mech_albedo f 0.1 0.1 0.1 }
+{ name BoxMat d Wood_Decking1_albedo n Wood_Decking1_normal s Wood_Decking1_roughness f 0.1 0.1 0.1 }
+{ name CobblestoneMat d CobblestoneOld_albedo n CobblestoneOld_normal s CobblestoneOld_roughness f 0.1 0.1 0.1 }
+{ name WallTopMat d Leather_Tufted_albedo n Leather_Tufted_normal f 0.1 0.1 0.1 }
+{ name WallBottomMat d ArcadedWoodPanels_albedo n ArcadedWoodPanels_normal f 0.1 0.1 0.1 }
+{ name MuzzleFlashMat d MuzzleFlash_1_albedo f 0.1 0.1 0.1 }
+{ name ParticleTestMat d ParticleTest_albedo f 0.1 0.1 0.1 }
+{ name TargetBoardMat d WoodOldRough3_albedo n WoodOldRough3_normal f 0.1 0.1 0.1 }
+
+#End

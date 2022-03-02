@@ -3,7 +3,7 @@
 
 TargetBoardControllerComponent::TargetBoardControllerComponent(Object* pObject)
 	: Component(pObject)
-	, Character(50)
+	, Character(10)
 {
 }
 

@@ -187,6 +187,7 @@ void HumanoidAnimatorComponent::Update(float fTimeElapsed)
 	AdjustRotationQuaternion(l_arrAimingLocalRotation[4], -10, 0, 0);
 	AdjustRotationQuaternion(l_arrAimingLocalRotation[6], 0, 0, 20);
 	AdjustRotationQuaternion(l_arrAimingLocalRotation[25], 0, 0, -10);
+	AdjustRotationQuaternion(l_arrAimingLocalRotation[28], 20, 0, 0);
 
 	float l_fAimingWeight =  l_HCC->m_fAimProgress / l_HCC->m_fTimeForAim;
 	for (int i = 0; i < MAX_BONE_NUM; i++) {

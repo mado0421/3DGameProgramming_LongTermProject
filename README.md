@@ -10,6 +10,7 @@
 - **마우스 좌우 이동**으로 보는 방향을 조절합니다.
 - **마우스 좌클릭**으로 사격합니다.
 - **ESC**로 프로그램을 종료합니다.
+- **M**으로 마우스 고정을 켜고, **N**키로 마우스 고정을 끕니다.
 
 ## 구현 내용
 * **FBX Mesh Rendering**(Diffuse, Normal, Roughness)
@@ -1144,7 +1145,7 @@ TargetBoard가 Stand, Down 상태일 때, 각각 현재 Bone의 방향에 따라
 	-  TargetBoard 진행중
 
 -----------
-### 22.02.14 - 22.02.20
+### 22.02.14 - 22.02.27
 #### 이번주 일정
 * TargetBoard Object 만들기
 * 피격 시 파티클 이펙트 생성하기
@@ -1164,3 +1165,21 @@ TargetBoard가 Stand, Down 상태일 때, 각각 현재 Bone의 방향에 따라
 <img src="https://user-images.githubusercontent.com/21697638/153813631-40f8710b-efba-4f7e-b631-56fcdcf17d42.gif" width="70%" height="70%"></img>
 
 TargetBoard의 체력은 50, 피격 시에 Damage(100), 다시 살아나는 시간은 3.0s로 설정.
+
+### 2022.02.15
+마우스 위아래 조종으로 캐릭터의 팔과 목, 머리 부분을 수정해야 함. (스파인까지)
+카메라가 플레이어가 조준하는 방향을 보게 해야 함.
+카메라는 지금 Player의 Child로 있고, Head를 Focus 중.
+TargetPos랑 Camera를 Head의 Child로 두고, Head의 각도를 조절하는 것도 괜찮을 것 같음.
+
+Object를 Scene의 vector<Object*>에 넣으려면, 밖에서 접근할 방법이 있어야 함.
+유니티는 GameObject에 Scene 주소? 를 가지고 있음.
+GameObject.Instantiate() 함수로 Scene에 Object 추가 가능.
+
+-----------
+### 22.02.28 - 22.03.06
+
+### 2022.03.02
+AnimationControllerComponent에서 R Hand의 방향을 조금 꺾어서 조준 방향을 조절.
+마우스 고정을 켜고 끌 수 있는 단축키를 추가. (M/N)
+배치를 변경함.
