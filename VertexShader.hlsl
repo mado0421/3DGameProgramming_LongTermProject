@@ -177,3 +177,15 @@ VS_EFFECTOUTPUT VS_Effect(VS_INPUT input) {
 
 	return output;
 }
+
+
+/*========================================================================
+* VS_Text
+*=======================================================================*/
+VS_TEXTOUTPUT VS_Text(VS_INPUT input) {
+	VS_TEXTOUTPUT output;
+
+	output.positionW = float3(gmtxGameObject._32, gmtxGameObject._33, gmtxGameObject._34);
+
+	return output;
+}

@@ -331,6 +331,32 @@ protected:
 
 
 /*========================================================================
+* TextPSO
+*
+* - 1 RTV
+* - DepthTest False(무조건 위에 그림)
+* - FrontCounterClockwise TRUE
+* - VS_Text
+* - GS_Text
+* - PS_Text
+*=======================================================================*/
+class TextPSO : public PipelineStateObject
+{
+public:
+	TextPSO(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dRootSignature) { CreatePipelineState(pd3dDevice, pd3dRootSignature); }
+protected:
+	virtual void CreatePipelineState(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dRootSignature);
+
+	virtual D3D12_BLEND_DESC			CreateBlendState();
+	virtual D3D12_DEPTH_STENCIL_DESC	CreateDepthStencilState();
+	virtual D3D12_SHADER_BYTECODE		CreateVertexShader(ID3DBlob** ppd3dShaderBlob);
+	virtual D3D12_SHADER_BYTECODE		CreateGeometryShader(ID3DBlob** ppd3dShaderBlob);
+	virtual D3D12_SHADER_BYTECODE		CreatePixelShader(ID3DBlob** ppd3dShaderBlob);
+	virtual D3D12_RASTERIZER_DESC		CreateRasterizerState();
+};
+
+
+/*========================================================================
 * PostProcess PSOs
 *=======================================================================*/
 class ComputePipelineStateObject {

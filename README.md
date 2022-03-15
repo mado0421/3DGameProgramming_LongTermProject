@@ -1183,3 +1183,27 @@ GameObject.Instantiate() 함수로 Scene에 Object 추가 가능.
 AnimationControllerComponent에서 R Hand의 방향을 조금 꺾어서 조준 방향을 조절.
 마우스 고정을 켜고 끌 수 있는 단축키를 추가. (M/N)
 배치를 변경함.
+
+-----------
+### 22.03.07 - 22.03.13
+#### 이번주 일정
+* Render Text
+
+### 2022.03.12
+[11. Drawing text in DirectX 12 - Braynzar Soft](https://www.braynzarsoft.net/viewtutorial/q16390-11-drawing-text-in-directx-12)를 참고하여 렌더 텍스트를 구현하자.
+
+구현한 내용:
+
+	- TextRendererComponent를 작성하였다.
+	- 영어 대소문자, 숫자, 기본적인 문장부호 몇 가지를 지원한다.
+	- SetText(), SetSize() 등을 지원한다.
+	- Transform Component로 화면에서의 위치를 조절할 수 있다(좌하단(0,0) - 우상단(1920,1080)).
+	- Text 출력을 위한 PSO, VS, GS, PS를 작성하였다.
+	- 출력할 수 있는 문장의 최대 길이는 80자로 정해두었다.
+	- 실시간 Text 수정 및 출력을 활용할 수 있는 script를 작성하였다(EnemyDownCounter).
+	- 대상으로 할 Character class를 상속받는 Component를 지닌 Object를 추가할 수 있다.
+	- 해당 Character가 죽을 경우, 죽는 그 순간에 count를 1 더한다.
+	- 이를 화면 좌상단에 출력한다.
+	- 카메라의 위치를 플레이어 캐릭터의 뒤에서 오른쪽 뒤로 조절하고, 바라보는 조준점의 위치를 변경하였다.
+
+<img src="https://user-images.githubusercontent.com/21697638/158320803-58127e1d-029d-4614-b9bb-312f7ef3294a.gif" width="70%" height="70%"></img>

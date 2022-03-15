@@ -40,6 +40,7 @@ protected:
 	vector<Object*>								m_vecNonAnimObjectRenderGroup;
 	vector<Object*>								m_vecAnimObjectRenderGroup;
 	vector<Object*>								m_vecEffectRenderGroup;
+	vector<Object*>								m_vecUIRenderGroup;
 
 	// for Particle
 	vector<Object*>								m_vecParticleEmitter;

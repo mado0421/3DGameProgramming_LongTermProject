@@ -13,6 +13,9 @@
 #include "ParticleEmitterComponent.h"
 #include "ParticleComponent.h"
 #include "TargetBoardControllerComponent.h"
+#include "TextRendererComponent.h"
+
+#include "EnemyDownCounter.h"
 
 #include "Character.h"
 #include "Object.h"

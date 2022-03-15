@@ -18,6 +18,7 @@ MuzzleFlash_1_albedo.dds
 ParticleTest_albedo.dds
 WoodOldRough3_albedo.dds
 WoodOldRough3_normal.dds
+font_consolas_0.dds
 human.mm
 10x10Floor.mm
 pistol.mm

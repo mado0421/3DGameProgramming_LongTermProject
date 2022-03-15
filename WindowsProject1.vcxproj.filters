@@ -111,6 +111,15 @@
     <Filter Include="소스 파일\Component\Controllers\WeaponController">
       <UniqueIdentifier>{5a859353-c6c8-426f-8333-a18e34597489}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\Component\TextRenderer">
+      <UniqueIdentifier>{a9eba415-4b08-4224-a8b4-3255261f1aae}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Component\Scripts">
+      <UniqueIdentifier>{d2d9e744-1eff-47cd-87cb-c99f15dbd1e4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Component\Scripts\EnemyDownCounter">
+      <UniqueIdentifier>{f1496272-7e6f-4a88-8e27-1727bbe0f5d8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Resource.h">
@@ -231,6 +240,12 @@
     <ClInclude Include="Character.h">
       <Filter>소스 파일\Character</Filter>
     </ClInclude>
+    <ClInclude Include="TextRendererComponent.h">
+      <Filter>소스 파일\Component\TextRenderer</Filter>
+    </ClInclude>
+    <ClInclude Include="EnemyDownCounter.h">
+      <Filter>소스 파일\Component\Scripts\EnemyDownCounter</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WindowsProject1.cpp">
@@ -335,6 +350,12 @@
     </ClCompile>
     <ClCompile Include="Character.cpp">
       <Filter>소스 파일\Character</Filter>
+    </ClCompile>
+    <ClCompile Include="TextRendererComponent.cpp">
+      <Filter>소스 파일\Component\TextRenderer</Filter>
+    </ClCompile>
+    <ClCompile Include="EnemyDownCounter.cpp">
+      <Filter>소스 파일\Component\Scripts\EnemyDownCounter</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -12,5 +12,6 @@
 { name MuzzleFlashMat d MuzzleFlash_1_albedo f 0.1 0.1 0.1 }
 { name ParticleTestMat d ParticleTest_albedo f 0.1 0.1 0.1 }
 { name TargetBoardMat d WoodOldRough3_albedo n WoodOldRough3_normal f 0.1 0.1 0.1 }
+{ name font_consolasMat d font_consolas_0 f 0.1 0.1 0.1 }
 
 #End

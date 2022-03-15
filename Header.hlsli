@@ -81,6 +81,14 @@ struct GBuffer {
 	float4 cNormal	: SV_TARGET1;
 };
 
+struct VS_TEXTOUTPUT {
+	float3 positionW: POSITION;
+};
+struct GS_TEXTOUTPUT {
+	float4 position	: SV_POSITION;
+	float2 uv		: TEXCOORD0;
+};
+
 float CalcWFromDepth(float depth) {
 	float w = gmtxProjection._m32 / (depth - gmtxProjection._m22);
 	return w;

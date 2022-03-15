@@ -62,6 +62,16 @@ float4 PS_Particle(GS_PARTICLEOUT input) : SV_TARGET0
 	return output;
 }
 
+float4 PS_Text(GS_TEXTOUTPUT input) : SV_TARGET0
+{
+	float4 output;
+	output = gtxtColorMap.Sample(gSamplerState, input.uv);
+
+	//clip(output.a - 0.01f);
+
+	return output;
+}
+
 /*========================================================================
 * RenderShadowPSO
 *

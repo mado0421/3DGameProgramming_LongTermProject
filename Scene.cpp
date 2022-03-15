@@ -433,6 +433,9 @@ void Scene::Render(D3D12_CPU_DESCRIPTOR_HANDLE hBckBufRtv, D3D12_CPU_DESCRIPTOR_
 	m_pd3dCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_POINTLIST);
 	m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["Particle"]);
 	for (auto iter = m_vecParticleEmitter.begin(); iter != m_vecParticleEmitter.end(); iter++) (*iter)->Render(m_pd3dCommandList);
+
+	m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["Text"]);
+	for (auto iter = m_vecUIRenderGroup.begin(); iter != m_vecUIRenderGroup.end(); iter++) (*iter)->Render(m_pd3dCommandList);
 	m_pd3dCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	/*========================================================================
@@ -461,95 +464,6 @@ void Scene::Render(D3D12_CPU_DESCRIPTOR_HANDLE hBckBufRtv, D3D12_CPU_DESCRIPTOR_
 		m_vecScreenObject[0]->Render(m_pd3dCommandList);
 	}
 
-	/*========================================================================
-	* Pass 2. Post Process
-	*=======================================================================*/
-	//bool bPostProcessing = true;
-	//if (gTestInt == 1) {
-	//	/*========================================================================
-	//	* DownScaling
-	//	*=======================================================================*/
-	//	m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["SRToRt"]);
-
-	//	d3dResourceBarrier[0].Transition.pResource = g_TextureMng.GetTextureResource("Screen");
-	//	d3dResourceBarrier[0].Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
-	//	d3dResourceBarrier[0].Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
-	//	d3dResourceBarrier[1].Transition.pResource = g_TextureMng.GetTextureResource("SmallScreen");
-	//	d3dResourceBarrier[1].Transition.StateBefore = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
-	//	d3dResourceBarrier[1].Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
-	//	m_pd3dCommandList->ResourceBarrier(2, d3dResourceBarrier);
-	//	g_TextureMng.UseForShaderResource("Screen", m_pd3dCommandList, ROOTSIGNATURE_COLOR_TEXTURE);
-
-	//	screenRtv = g_TextureMng.GetRtvCPUHandle("SmallScreen");
-	//	m_pd3dCommandList->ClearRenderTargetView(screenRtv, pfClearColor, 0, NULL);
-	//	m_pd3dCommandList->OMSetRenderTargets(1, &screenRtv, TRUE, NULL);
-
-	//	m_vecDebugWindow[1]->Render(m_pd3dCommandList);
-
-	//	d3dResourceBarrier[0].Transition.pResource = g_TextureMng.GetTextureResource("Screen");
-	//	d3dResourceBarrier[0].Transition.StateBefore = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
-	//	d3dResourceBarrier[0].Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
-	//	d3dResourceBarrier[1].Transition.pResource = g_TextureMng.GetTextureResource("SmallScreen");
-	//	d3dResourceBarrier[1].Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
-	//	d3dResourceBarrier[1].Transition.StateAfter = D3D12_RESOURCE_STATE_GENERIC_READ;
-	//	m_pd3dCommandList->ResourceBarrier(2, d3dResourceBarrier);
-
-	//	/*========================================================================
-	//	* Vertical Blue
-	//	*=======================================================================*/
-	//	m_pd3dCommandList->SetComputeRootSignature(m_pd3dRootSignature);
-
-	//	m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["Blur_Vertical"]);
-
-	//	g_TextureMng.UseForComputeShaderResourceSRV("SmallScreen", m_pd3dCommandList, ROOTSIGNATURE_COLOR_TEXTURE);
-	//	g_TextureMng.UseForComputeShaderResourceUAV("Blur_Vertical", m_pd3dCommandList, ROOTSIGNATURE_POSTPROCESS_TEXTURE);
-
-	//	UINT numGroups = (UINT)ceilf((FRAME_BUFFER_WIDTH / 2) / 256.0f);
-	//	m_pd3dCommandList->Dispatch(numGroups, FRAME_BUFFER_HEIGHT / 2, 1);
-
-	//	/*========================================================================
-	//	* Horizontal Blur
-	//	*=======================================================================*/
-	//	d3dResourceBarrier[0].Transition.pResource = g_TextureMng.GetTextureResource("Blur_Horizontal");
-	//	d3dResourceBarrier[0].Transition.StateBefore = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
-	//	d3dResourceBarrier[0].Transition.StateAfter = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
-	//	d3dResourceBarrier[1].Transition.pResource = g_TextureMng.GetTextureResource("Blur_Vertical");
-	//	d3dResourceBarrier[1].Transition.StateBefore = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
-	//	d3dResourceBarrier[1].Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
-	//	m_pd3dCommandList->ResourceBarrier(2, d3dResourceBarrier);
-
-	//	m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["Blur_Horizontal"]);
-
-	//	g_TextureMng.UseForComputeShaderResourceSRV("Blur_Vertical", m_pd3dCommandList, ROOTSIGNATURE_COLOR_TEXTURE);
-	//	g_TextureMng.UseForComputeShaderResourceUAV("Blur_Horizontal", m_pd3dCommandList, ROOTSIGNATURE_POSTPROCESS_TEXTURE);
-
-	//	numGroups = (UINT)ceilf((FRAME_BUFFER_HEIGHT / 2) / 256.0f);
-	//	m_pd3dCommandList->Dispatch(FRAME_BUFFER_WIDTH / 2, numGroups, 1);
-
-	//	d3dResourceBarrier[0].Transition.pResource = g_TextureMng.GetTextureResource("Blur_Horizontal");
-	//	d3dResourceBarrier[0].Transition.StateBefore = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
-	//	d3dResourceBarrier[0].Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
-	//	d3dResourceBarrier[1].Transition.pResource = g_TextureMng.GetTextureResource("Blur_Vertical");
-	//	d3dResourceBarrier[1].Transition.StateBefore = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
-	//	d3dResourceBarrier[1].Transition.StateAfter = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
-	//	d3dResourceBarrier[2].Transition.pResource = g_TextureMng.GetTextureResource("SmallScreen");
-	//	d3dResourceBarrier[2].Transition.StateBefore = D3D12_RESOURCE_STATE_GENERIC_READ;
-	//	d3dResourceBarrier[2].Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
-	//	m_pd3dCommandList->ResourceBarrier(3, d3dResourceBarrier);
-
-	//	/*===========================================================================
-	//	* Final Result
-	//	*==========================================================================*/
-	//	m_pd3dCommandList->SetGraphicsRootSignature(m_pd3dRootSignature);
-	//	m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["SRToRt"]);
-
-	//	g_TextureMng.UseForShaderResource("Blur_Horizontal", m_pd3dCommandList, ROOTSIGNATURE_COLOR_TEXTURE);
-
-	//	m_pd3dCommandList->ClearDepthStencilView(hBckBufDsv, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
-	//	m_pd3dCommandList->OMSetRenderTargets(1, &hBckBufRtv, TRUE, &hBckBufDsv);
-	//	m_vecDebugWindow[0]->Render(m_pd3dCommandList);
-	//}
-	//else 
 	if (gTestInt == 2) {
 
 		/*===========================================================================
@@ -704,6 +618,16 @@ void Scene::Render(D3D12_CPU_DESCRIPTOR_HANDLE hBckBufRtv, D3D12_CPU_DESCRIPTOR_
 		d3dResourceBarrier[0].Transition.StateBefore = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE ;
 		d3dResourceBarrier[0].Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
 		m_pd3dCommandList->ResourceBarrier(1, d3dResourceBarrier);
+
+
+
+
+
+
+
+
+
+
 	}
 	else {
 		m_pd3dCommandList->SetGraphicsRootSignature(m_pd3dRootSignature);
@@ -715,6 +639,9 @@ void Scene::Render(D3D12_CPU_DESCRIPTOR_HANDLE hBckBufRtv, D3D12_CPU_DESCRIPTOR_
 		m_pd3dCommandList->OMSetRenderTargets(1, &hBckBufRtv, TRUE, &hBckBufDsv);
 		m_vecScreenObject[0]->Render(m_pd3dCommandList);
 	}
+
+
+
 
 }
 
@@ -973,6 +900,8 @@ void Scene::CreatePSO()
 	//DebugDepthPSO DebugDepthPso = DebugDepthPSO(m_pd3dDevice, m_pd3dRootSignature);
 	//m_uomPipelineStates["DebugDepth"] = DebugDepthPso.GetPipelineState();
 
+	TextPSO TextPso = TextPSO(m_pd3dDevice, m_pd3dRootSignature);
+	m_uomPipelineStates["Text"] = TextPso.GetPipelineState();
 
 	/*============================================================================
 	* Blur
@@ -1133,7 +1062,7 @@ void Scene::BuildObject()
 		Object* head = new Object("head");
 
 		TransformComponent* transform = new TransformComponent(head);
-		transform->Translate(0, 1.2f, 0.7f);
+		transform->Translate(0, 1.2f, 5.0f);
 		m_vecObject.push_back(head);
 
 		head->m_pParent = FindObjectByName("player");
@@ -1276,7 +1205,7 @@ void Scene::BuildObject()
 		TransformComponent* transform = new TransformComponent(camera);
 		CameraComponent* cam = new CameraComponent(camera);
 
-		transform->Translate(0, 2, -2.8f);
+		transform->Translate(0.6f, 1.8f, -2.2f);
 		cam->SetFocusObject(FindObjectByName("head"));
 
 		camera->m_pParent = FindObjectByName("player");
@@ -1285,7 +1214,7 @@ void Scene::BuildObject()
 		m_vecObject.push_back(camera);
 	}
 	{
-		Object* targetBoard = new Object();
+		Object* targetBoard = new Object("TB0");
 
 		TransformComponent* transform = new TransformComponent(targetBoard);
 		SkinnedMeshRendererComponent* skinnedMeshRenderer = new SkinnedMeshRendererComponent(
@@ -1309,7 +1238,7 @@ void Scene::BuildObject()
 	}
 
 	{
-		Object* targetBoard = new Object();
+		Object* targetBoard = new Object("TB1");
 
 		TransformComponent* transform = new TransformComponent(targetBoard);
 		SkinnedMeshRendererComponent* skinnedMeshRenderer = new SkinnedMeshRendererComponent(
@@ -1332,7 +1261,7 @@ void Scene::BuildObject()
 		m_vecAnimObjectRenderGroup.push_back(targetBoard);
 	}
 	{
-		Object* targetBoard = new Object();
+		Object* targetBoard = new Object("TB2");
 
 		TransformComponent* transform = new TransformComponent(targetBoard);
 		SkinnedMeshRendererComponent* skinnedMeshRenderer = new SkinnedMeshRendererComponent(
@@ -1353,6 +1282,42 @@ void Scene::BuildObject()
 
 		m_vecObject.push_back(targetBoard);
 		m_vecAnimObjectRenderGroup.push_back(targetBoard);
+	}
+
+
+	{
+		Object* text = new Object("TextInfo");
+
+		TransformComponent* transform = new TransformComponent(text);
+		TextRendererComponent* TRC = new TextRendererComponent(text, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
+
+		TRC->Initialize("consolas");
+		TRC->SetMaterialByName("font_consolasMat");
+		TRC->SetText("Consolas. Hello, World!");
+		TRC->SetSize(12);
+		transform->Translate(0, 1080, 0);
+
+		m_vecObject.push_back(text);
+		m_vecUIRenderGroup.push_back(text);
+	}
+	{
+		Object* textCounter = new Object("textCounter");
+
+		TransformComponent* transform = new TransformComponent(textCounter);
+		TextRendererComponent* TRC = new TextRendererComponent(textCounter, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
+		EnemyDownCounter* EDC = new EnemyDownCounter(textCounter);
+		TRC->Initialize("consolas");
+		TRC->SetMaterialByName("font_consolasMat");
+		TRC->SetText("");
+		TRC->SetSize(16);
+		transform->Translate(0, 1040, 0);
+
+		EDC->AddTarget(FindObjectByName("TB0"));
+		EDC->AddTarget(FindObjectByName("TB1"));
+		EDC->AddTarget(FindObjectByName("TB2"));
+
+		m_vecObject.push_back(textCounter);
+		m_vecUIRenderGroup.push_back(textCounter);
 	}
 }
 

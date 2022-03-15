@@ -55,10 +55,6 @@ void GS_ParticleBillboard(
 	right = normalize(cross(look, float3(0, 1, 0)));
 	up = normalize(cross(look, right));
 
-	//right	= float3(1, 0, 0);
-	//up		= float3(0, 1, 0);
-	//pos		= float3(0, 2, -4);
-
 	float3 TR, TL, BR, BL;	//Top, Right, Bottom, Left
 	TR = pos + input[0].size * up + input[0].size * right;
 	TL = pos + input[0].size * up - input[0].size * right;
@@ -72,17 +68,47 @@ void GS_ParticleBillboard(
 	output[2].position = mul(mul(float4(BL, 1.0f), gmtxView), gmtxProjection);
 	output[3].position = mul(mul(float4(TL, 1.0f), gmtxView), gmtxProjection);
 
-	//output.position = mul(mul(float4(input[0].position.xyz, 1.0f), gmtxView), gmtxProjection);
-
 	output[0].uv = float2(0, 1);
 	output[1].uv = float2(0, 0);
 	output[2].uv = float2(1, 1);
 	output[3].uv = float2(1, 0);
 
-	//output[0].position = float4( 1.0f, -1.0f, 0.98f, 1.0f);
-	//output[1].position = float4( 1.0f,  1.0f, 0.98f, 1.0f);
-	//output[2].position = float4(-1.0f, -1.0f, 0.98f, 1.0f);
-	//output[3].position = float4(-1.0f,  1.0f, 0.98f, 1.0f);
+	outStream.Append(output[0]);
+	outStream.Append(output[1]);
+	outStream.Append(output[2]);
+	outStream.Append(output[3]);
+}
+
+
+[maxvertexcount(4)]
+void GS_Text(
+	point VS_TEXTOUTPUT input[1],
+	inout TriangleStream< GS_TEXTOUTPUT > outStream
+)
+{
+	float3 pos		= float3(gmtxGameObject._23, gmtxGameObject._33, 0);
+	float3 right	= float3(1, 0, 0) * (gmtxGameObject._43 / 32.0);
+	float3 down		= float3(0, -1.77777, 0) * (gmtxGameObject._43 / 32.0);
+
+	float3 TR, TL, BR, BL;
+	TL = pos;
+	TR = pos + right * gmtxGameObject._31;
+	BL = pos + down * gmtxGameObject._41;
+	BR = pos + right * gmtxGameObject._31 + down * gmtxGameObject._41;
+
+	GS_PARTICLEOUT output[4];
+
+	output[0].position = float4(BL, 1.0f);
+	output[1].position = float4(TL, 1.0f);
+	output[2].position = float4(BR, 1.0f);
+	output[3].position = float4(TR, 1.0f);
+
+	output[0].uv = float2(gmtxGameObject._11, gmtxGameObject._21 + gmtxGameObject._41);
+	output[1].uv = float2(gmtxGameObject._11, gmtxGameObject._21);
+	output[2].uv = float2(gmtxGameObject._11 + gmtxGameObject._31, gmtxGameObject._21 + gmtxGameObject._41);
+	output[3].uv = float2(gmtxGameObject._11 + gmtxGameObject._31, gmtxGameObject._21);
+
+	for (int i = 0; i < 4; i++) output[i].uv / 256.0;
 
 	outStream.Append(output[0]);
 	outStream.Append(output[1]);
