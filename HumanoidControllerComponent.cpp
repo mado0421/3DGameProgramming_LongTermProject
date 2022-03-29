@@ -75,6 +75,13 @@ void HumanoidControllerComponent::Update(float fTimeElapsed)
 		XMStoreFloat3(&xmf3Velocity, velocity);
 
 		l_transform->Translate(Vector3::Multiply(fTimeElapsed, xmf3Velocity));
+
+
+
+		//// for Test
+		//xmf3Velocity = l_transform->GetPosition(Space::world);
+		//cout << xmf3Velocity.x << ", " << xmf3Velocity.y << ", " << xmf3Velocity.z << "\n";
+
 	}
 
 	// Action Part
@@ -84,10 +91,12 @@ void HumanoidControllerComponent::Update(float fTimeElapsed)
 				m_fAimProgress += fTimeElapsed;
 			else 
 				m_pWeaponObject->FindComponent<WeaponControllerComponent>()->Fire();
+			
 		}
 		else {
 			m_fAimProgress -= fTimeElapsed;
 			if (0 > m_fAimProgress) m_fAimProgress = 0;
 		}
 	}
+
 }

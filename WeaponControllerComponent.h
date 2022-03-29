@@ -16,6 +16,14 @@ public:
 public:
 	void Fire();
 
+public:
+
+	// For Ammo
+	int m_maxAmmo;
+	int m_curAmmo;
+	bool m_bReloading = false;
+	float m_fReloadProgress = 0;
+
 protected:
 	Object* m_pBullet;
 	Object* m_pMuzzle;

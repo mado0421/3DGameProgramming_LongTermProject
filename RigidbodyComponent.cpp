@@ -21,6 +21,8 @@ void RigidbodyComponent::SolveConstraint()
 		if (!c->m_vecpCollided.empty()) {
 			for (int idx = 0; idx < c->m_vecpCollided.size(); idx++) {
 
+				if (c->m_vecpCollided[idx]->isTrigger()) continue;
+
 				// ray direction을 구한다.
 				TransformComponent* transform = m_pObject->FindComponent<TransformComponent>();
 				XMFLOAT3 xmf3CurrPosition = transform->GetPosition();

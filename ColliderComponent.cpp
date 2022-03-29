@@ -2,11 +2,12 @@
 #include "Components.h"
 #include "Object.h"
 
-ColliderComponent::ColliderComponent(Object* pObject, AnimatorComponent* pAnimator, int boneIdx)
+ColliderComponent::ColliderComponent(Object* pObject, AnimatorComponent* pAnimator, bool bTrigger, int boneIdx)
 	: Component(pObject)
 	, m_pAnimator(pAnimator)
 	, m_boneIdx(boneIdx)
 	, m_xmf4x4Local(Matrix4x4::Identity())
+	, m_bTrigger(bTrigger)
 {
 }
 
@@ -19,12 +20,18 @@ void ColliderComponent::Update(float fTimeElapsed)
 	m_vecpCollided.clear();
 }
 
+bool ColliderComponent::isTrigger()
+{
+	return m_bTrigger;
+}
+
 BoxColliderComponent::BoxColliderComponent(
 	Object* pObject, 
 	const XMFLOAT3& xmf3Extents,
+	bool bTrigger,
 	AnimatorComponent* pAnimator,
 	int boneIdx)
-	:ColliderComponent(pObject, pAnimator, boneIdx)
+	:ColliderComponent(pObject, pAnimator, bTrigger, boneIdx)
 {
 	m_box = BoundingOrientedBox(XMFLOAT3(0,0,0), xmf3Extents, XMFLOAT4(0,0,0,1));
 }
@@ -34,9 +41,10 @@ BoxColliderComponent::BoxColliderComponent(
 	const XMFLOAT3& xmf3Center, 
 	const XMFLOAT3& xmf3Extents,
 	const XMFLOAT4& xmf4Orientation,
+	bool bTrigger,
 	AnimatorComponent* pAnimator,
 	int boneIdx)
-	: ColliderComponent(pObject, pAnimator, boneIdx)
+	: ColliderComponent(pObject, pAnimator, bTrigger, boneIdx)
 {
 	m_box = BoundingOrientedBox(xmf3Center, xmf3Extents, xmf4Orientation);
 	XMStoreFloat4x4(&m_xmf4x4Local,	XMMatrixRotationQuaternion(XMLoadFloat4(&xmf4Orientation)));
@@ -89,20 +97,27 @@ void BoxColliderComponent::CheckCollision(Component* other)
 
 	BoxColliderComponent* otherBox = dynamic_cast<BoxColliderComponent*>(other);
 	if (otherBox) {
-		if (otherBox->m_bEnabled && m_box.Intersects(otherBox->m_box)) m_vecpCollided.push_back(otherBox);
+		if (otherBox->m_bEnabled && m_box.Intersects(otherBox->m_box)) {
+			m_vecpCollided.push_back(otherBox);
+			otherBox->m_vecpCollided.push_back(this);
+		}
 	}
 	SphereColliderComponent* otherSphere = dynamic_cast<SphereColliderComponent*>(other);
 	if (otherSphere) {
-		if (otherSphere->m_bEnabled && m_box.Intersects(otherSphere->m_sphere)) m_vecpCollided.push_back(otherSphere);
+		if (otherSphere->m_bEnabled && m_box.Intersects(otherSphere->m_sphere)) {
+			m_vecpCollided.push_back(otherSphere);
+			otherSphere->m_vecpCollided.push_back(this);
+		}
 	}
 }
 
 SphereColliderComponent::SphereColliderComponent(
 	Object* pObject, 
 	const float& fRadius,
+	bool bTrigger,
 	AnimatorComponent* pAnimator,
 	int boneIdx)
-	:ColliderComponent(pObject, pAnimator, boneIdx)
+	:ColliderComponent(pObject, pAnimator, bTrigger, boneIdx)
 {
 	m_sphere = BoundingSphere(XMFLOAT3(0,0,0), fRadius);
 }
@@ -111,9 +126,10 @@ SphereColliderComponent::SphereColliderComponent(
 	Object* pObject,
 	const XMFLOAT3& xmf3Center, 
 	const float& fRadius,
+	bool bTrigger,
 	AnimatorComponent* pAnimator,
 	int boneIdx)
-	: ColliderComponent(pObject, pAnimator, boneIdx)
+	: ColliderComponent(pObject, pAnimator, bTrigger, boneIdx)
 {
 	m_sphere = BoundingSphere(xmf3Center, fRadius);
 	m_xmf4x4Local._41 = xmf3Center.x;
@@ -159,10 +175,16 @@ void SphereColliderComponent::CheckCollision(Component* other)
 
 	BoxColliderComponent* otherBox = dynamic_cast<BoxColliderComponent*>(other);
 	if (otherBox) {
-		if (otherBox->m_bEnabled && m_sphere.Intersects(otherBox->m_box)) m_vecpCollided.push_back(otherBox);
+		if (otherBox->m_bEnabled && m_sphere.Intersects(otherBox->m_box)) {
+			m_vecpCollided.push_back(otherBox);
+			otherBox->m_vecpCollided.push_back(this);
+		}
 	}
 	SphereColliderComponent* otherSphere = dynamic_cast<SphereColliderComponent*>(other);
 	if (otherSphere) {
-		if (otherSphere->m_bEnabled && m_sphere.Intersects(otherSphere->m_sphere)) m_vecpCollided.push_back(otherSphere);
+		if (otherSphere->m_bEnabled && m_sphere.Intersects(otherSphere->m_sphere)) {
+			m_vecpCollided.push_back(otherSphere);
+			otherSphere->m_vecpCollided.push_back(this);
+		}
 	}
 }

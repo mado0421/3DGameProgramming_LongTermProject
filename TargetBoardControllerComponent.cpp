@@ -1,9 +1,9 @@
 #include "stdafx.h"
 #include "TargetBoardControllerComponent.h"
 
-TargetBoardControllerComponent::TargetBoardControllerComponent(Object* pObject)
+TargetBoardControllerComponent::TargetBoardControllerComponent(Object* pObject, bool bAutoRevive)
 	: Component(pObject)
-	, Character(10)
+	, Character(10, bAutoRevive)
 {
 }
 

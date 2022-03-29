@@ -9,6 +9,10 @@ WeaponControllerComponent::WeaponControllerComponent(Object* pObject, Object* pM
 	, m_pMuzzle(pMuzzle)
 	, m_fCooltime(0.5f)
 	, m_fCurrCooltime(0.0f)
+	, m_maxAmmo(10)
+	, m_curAmmo(m_maxAmmo)
+	, m_bReloading(false)
+	, m_fReloadProgress(0)
 {
 
 }
@@ -97,14 +101,28 @@ void WeaponControllerComponent::Fire()
 {
 	if (!m_bEnabled) return;
 
+
 	if (0 >= m_fCurrCooltime) {
-		//Create(m_pBullet);
 		m_pMuzzle->FindComponent<EffectComponent>()->TurnOn();
-
-
-		//cout << "WeaponControllerComponent::Fire()\n";
 
 		m_fCurrCooltime = m_fCooltime;
 		m_fTryRaycast = true;
 	}
+
+
+	//if (l_pInput->IsKeyDown(KeyCode::_R) && !m_bReloading) {
+	//	m_bReloading = true;
+	//	m_fReloadProgress = 0;
+	//}
+	//if (m_bReloading) {
+	//	if (m_fReloadProgress > 3) {
+	//		m_fReloadProgress = 0;
+	//		m_bReloading = false;
+	//		m_curAmmo = m_maxAmmo;
+	//	}
+	//	else {
+	//		m_fReloadProgress += fTimeElapsed;
+	//	}
+	//}
+
 }

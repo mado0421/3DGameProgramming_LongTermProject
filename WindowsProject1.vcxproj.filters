@@ -120,6 +120,15 @@
     <Filter Include="소스 파일\Component\Scripts\EnemyDownCounter">
       <UniqueIdentifier>{f1496272-7e6f-4a88-8e27-1727bbe0f5d8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\Component\Scripts\Door">
+      <UniqueIdentifier>{840adcaf-ca63-4fea-aaaf-a47d704469a5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Component\Scripts\Event">
+      <UniqueIdentifier>{98b38732-4c5c-45dc-b1ef-422678a41df4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Component\Scripts\UI">
+      <UniqueIdentifier>{50d86b91-ffd9-4f08-a0ba-54bc3f27dbd6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Resource.h">
@@ -246,6 +255,15 @@
     <ClInclude Include="EnemyDownCounter.h">
       <Filter>소스 파일\Component\Scripts\EnemyDownCounter</Filter>
     </ClInclude>
+    <ClInclude Include="DoorComponent.h">
+      <Filter>소스 파일\Component\Scripts\Door</Filter>
+    </ClInclude>
+    <ClInclude Include="EventComponent.h">
+      <Filter>소스 파일\Component\Scripts\Event</Filter>
+    </ClInclude>
+    <ClInclude Include="TextUI.h">
+      <Filter>소스 파일\Component\Scripts\UI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WindowsProject1.cpp">
@@ -356,6 +374,15 @@
     </ClCompile>
     <ClCompile Include="EnemyDownCounter.cpp">
       <Filter>소스 파일\Component\Scripts\EnemyDownCounter</Filter>
+    </ClCompile>
+    <ClCompile Include="DoorComponent.cpp">
+      <Filter>소스 파일\Component\Scripts\Door</Filter>
+    </ClCompile>
+    <ClCompile Include="EventComponent.cpp">
+      <Filter>소스 파일\Component\Scripts\Event</Filter>
+    </ClCompile>
+    <ClCompile Include="TextUI.cpp">
+      <Filter>소스 파일\Component\Scripts\UI</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -15,7 +15,10 @@
 #include "TargetBoardControllerComponent.h"
 #include "TextRendererComponent.h"
 
+#include "DoorComponent.h"
 #include "EnemyDownCounter.h"
+#include "EventComponent.h"
+#include "TextUI.h"
 
 #include "Character.h"
 #include "Object.h"

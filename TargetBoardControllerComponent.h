@@ -7,7 +7,7 @@ class TargetBoardControllerComponent : public Component, public Character
 {
 public:
 	TargetBoardControllerComponent() = delete;
-	TargetBoardControllerComponent(Object* pObject);
+	TargetBoardControllerComponent(Object* pObject, bool bAutoRevive = false);
 	~TargetBoardControllerComponent();
 
 public:

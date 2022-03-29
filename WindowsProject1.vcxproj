@@ -155,8 +155,10 @@
     <ClInclude Include="ColliderComponent.h" />
     <ClInclude Include="Component.h" />
     <ClInclude Include="Components.h" />
+    <ClInclude Include="DoorComponent.h" />
     <ClInclude Include="EffectComponent.h" />
     <ClInclude Include="EnemyDownCounter.h" />
+    <ClInclude Include="EventComponent.h" />
     <ClInclude Include="InputManagerComponent.h" />
     <ClInclude Include="d3dUtil.h" />
     <ClInclude Include="DDSTextureLoader12.h" />
@@ -185,6 +187,7 @@
     <ClInclude Include="TargetBoardControllerComponent.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="TextRendererComponent.h" />
+    <ClInclude Include="TextUI.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="Timer.h" />
     <ClInclude Include="TransformComponent.h" />
@@ -202,8 +205,10 @@
     <ClCompile Include="Character.cpp" />
     <ClCompile Include="ColliderComponent.cpp" />
     <ClCompile Include="Component.cpp" />
+    <ClCompile Include="DoorComponent.cpp" />
     <ClCompile Include="EffectComponent.cpp" />
     <ClCompile Include="EnemyDownCounter.cpp" />
+    <ClCompile Include="EventComponent.cpp" />
     <ClCompile Include="InputManagerComponent.cpp" />
     <ClCompile Include="d3dUtil.cpp" />
     <ClCompile Include="DDSTextureLoader12.cpp" />
@@ -228,6 +233,7 @@
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="TargetBoardControllerComponent.cpp" />
     <ClCompile Include="TextRendererComponent.cpp" />
+    <ClCompile Include="TextUI.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="TransformComponent.cpp" />

@@ -58,8 +58,8 @@ using Microsoft::WRL::ComPtr;
 #define FRAME_BUFFER_HEIGHT 1080
 #define ASPECT_RATIO				(float(FRAME_BUFFER_WIDTH) / float(FRAME_BUFFER_HEIGHT))
 
-#define MAXNUMCBV (1024 * 2)
-#define MAXNUMSRV 128
+#define MAXNUMCBV (1024 * 3)
+#define MAXNUMSRV (128 * 2)
 #define MAXNUMLIGHT 32
 
 #define MAX_BONE_NUM 64

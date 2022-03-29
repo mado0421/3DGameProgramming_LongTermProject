@@ -22,5 +22,6 @@ public:
 	float		m_fAimProgress;
 	float		m_fTimeForAim;
 	Object*		m_pWeaponObject;
+
 };
 
