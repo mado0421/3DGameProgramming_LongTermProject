@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "Framework.h"
 #include "Scene.h"
+#include"ServerScene.h"
 
 void Framework::Update() 
 {
@@ -264,8 +265,12 @@ void Framework::BuildScenes()
 {
 	m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
 
+	/*m_ppScenes = new Scene * [1];
+	m_ppScenes[0] = new Scene();*/
+
 	m_ppScenes = new Scene * [1];
-	m_ppScenes[0] = new Scene();
+	m_ppScenes[0] = new ServerScene();
+
 	m_pCurrentScene = m_ppScenes[0];
 
 	m_pCurrentScene->Init(this, m_pd3dDevice, m_pd3dCommandList);
@@ -365,6 +370,9 @@ void Framework::OnProcessingWindowMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 	case WM_KEYDOWN:
 	case WM_KEYUP:
 		OnProcessingKeyboardMessage(hWnd, nMessageID, wParam, lParam);
+		break;
+	case WM_SOCKET:
+
 		break;
 	}
 }

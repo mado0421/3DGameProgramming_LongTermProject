@@ -1,0 +1,24 @@
+
+	Window
+	     -
+	framework
+	     -
+	 Scene <- ServerScene
+
+ClientWsaModule : 통신 담당
+move나 enter disconnect등 
+
+Framework에 뒀을 경우 : Object들의 정보는 Scene에 있음
+Scene에 Module 포인터를 넘겨줘서 사용해야함
+
+Scene에 뒀을 경우 : Scene Change가 일어 났을때 Module을 넘겨줘야 하는
+번거로움이 있음
+
+그럼 Framework에 있을 때 Scene Change가 일어난다면?
+그래도 module을 넘겨줘야함
+
+논리상 Framework가 관리하는게 맞는거 같으나
+Scene이 관리하는게 편할지도
+
+일단 Framework가 갖고있게 하고
+ServerScene만 init시에 Module 객체를 받도록 설계하자

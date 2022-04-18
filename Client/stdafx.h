@@ -86,6 +86,11 @@ using Microsoft::WRL::ComPtr;
 #define RESOURCE_TEXTURE_CUBE		0x04
 #define RESOURCE_BUFFER				0x05
 
+// Server Define
+#define _WINSOCK_DEPRECATED_NO_WARNINGS
+#define WM_SOCKET	(WM_USER+1)
+
+
 enum KeyCode {
 	_LMB	= 1,
 	_RMB	= 2,

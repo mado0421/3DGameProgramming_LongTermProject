@@ -147,9 +147,6 @@
       <Filter>소스 파일</Filter>
     </ClInclude>
     <ClInclude Include="stdafx.h" />
-    <ClInclude Include="Scene.h">
-      <Filter>소스 파일\Scene</Filter>
-    </ClInclude>
     <ClInclude Include="PipelineStateObject.h">
       <Filter>소스 파일\PipelineStateObject</Filter>
     </ClInclude>
@@ -264,6 +261,15 @@
     <ClInclude Include="TextUI.h">
       <Filter>소스 파일\Component\Scripts\UI</Filter>
     </ClInclude>
+    <ClInclude Include="ServerScene.h">
+      <Filter>소스 파일\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="GameScene.h">
+      <Filter>소스 파일\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene.h">
+      <Filter>소스 파일\Scene</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WindowsProject1.cpp">
@@ -273,9 +279,6 @@
       <Filter>소스 파일\Framework</Filter>
     </ClCompile>
     <ClCompile Include="stdafx.cpp" />
-    <ClCompile Include="Scene.cpp">
-      <Filter>소스 파일\Scene</Filter>
-    </ClCompile>
     <ClCompile Include="PipelineStateObject.cpp">
       <Filter>소스 파일\PipelineStateObject</Filter>
     </ClCompile>
@@ -383,6 +386,15 @@
     </ClCompile>
     <ClCompile Include="TextUI.cpp">
       <Filter>소스 파일\Component\Scripts\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="ServerScene.cpp">
+      <Filter>소스 파일\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="GameScene.cpp">
+      <Filter>소스 파일\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene.cpp">
+      <Filter>소스 파일\Scene</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

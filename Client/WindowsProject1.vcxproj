@@ -181,7 +181,9 @@
     <ClInclude Include="PipelineStateObject.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="RigidbodyComponent.h" />
+    <ClInclude Include="GameScene.h" />
     <ClInclude Include="Scene.h" />
+    <ClInclude Include="ServerScene.h" />
     <ClInclude Include="SkinnedMeshRendererComponent.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="TargetBoardControllerComponent.h" />
@@ -228,7 +230,9 @@
     <ClCompile Include="ParticleEmitterComponent.cpp" />
     <ClCompile Include="PipelineStateObject.cpp" />
     <ClCompile Include="RigidbodyComponent.cpp" />
+    <ClCompile Include="GameScene.cpp" />
     <ClCompile Include="Scene.cpp" />
+    <ClCompile Include="ServerScene.cpp" />
     <ClCompile Include="SkinnedMeshRendererComponent.cpp" />
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="TargetBoardControllerComponent.cpp" />

@@ -15,7 +15,7 @@
 #pragma comment(linker, "/entry:WinMainCRTStartup /subsystem:console")
 #endif
 #endif
-
+//#define WM_SOCKET	(WM_USER+1)
 
 class ClientWsaModule
 {

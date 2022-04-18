@@ -3,7 +3,7 @@
 void ServerFrame::Init()
 {
 	int ret;
-	cout << "server Init\n";
+	cout << "server Init";
 	ret=WSAStartup(MAKEWORD(2, 2), &WsaData);
 	l_socket = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
 
@@ -33,10 +33,12 @@ void ServerFrame::Init()
 	CreateIoCompletionPort(reinterpret_cast<HANDLE>(l_socket), g_iocp, 999, 0);
 
 	AcceptMy();
+	cout << " - ok\n";
 }
 
 void ServerFrame::Run()
 {
+	cout << "server Run\n";
 	for (int i = 0; i < 4; ++i)
 		worker_threads.emplace_back(&ServerFrame::worker_thread, this, i);
 
