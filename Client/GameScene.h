@@ -10,16 +10,6 @@ class Texture;
 class LightManager;
 class TextureManager;
 
-struct CB_PASS_INFO {
-	XMFLOAT4X4	m_xmf4x4CameraView;
-	XMFLOAT4X4	m_xmf4x4CameraProjection;
-	XMFLOAT4X4	m_xmf4x4CameraViewInv;
-	XMFLOAT4X4	m_xmf4x4CameraProjectionInv;
-	XMFLOAT4X4	m_xmf4x4TextureTransform;
-	XMFLOAT3	m_xmf3CameraPosition;
-	float		m_xmfCurrentTime;
-};
-
 class GameScene : public Scene
 {
 protected:

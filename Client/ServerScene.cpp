@@ -10,8 +10,8 @@
 #include "Importer.h"
 #include "Vertex.h"
 #include "Model.h"
-
 #include "Components.h"
+#include "ClientWsaModule.h"
 
 void ServerScene::Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
@@ -23,6 +23,12 @@ void ServerScene::Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12Gr
 	m_pd3dDevice = pd3dDevice;
 	m_pd3dCommandList = pd3dCommandList;
 	m_pd3dRootSignature = CreateRootSignature();
+
+	/*========================================================================
+	* 네트워크 설정
+	*=======================================================================*/
+	m_pWsaModule = new ClientWsaModule;
+	m_pWsaModule->Init(pFramework->GetHwnd());
 
 	/*========================================================================
 	* 커서 설정
@@ -195,6 +201,9 @@ void ServerScene::Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12Gr
 	* PSO 생성
 	*=======================================================================*/
 	CreatePSO();
+
+	TransformComponent* t = m_pPlayer->FindComponent<TransformComponent>();
+	
 }
 
 void ServerScene::CheckCollsion()
@@ -648,6 +657,15 @@ void ServerScene::Render(D3D12_CPU_DESCRIPTOR_HANDLE hBckBufRtv, D3D12_CPU_DESCR
 
 }
 
+void ServerScene::ProcessSocket(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
+{
+	if (m_pWsaModule)
+	{
+		m_pWsaModule->ProcessSocketMessage(hWnd, nMessageID, wParam, lParam);
+		
+	}
+}
+
 void ServerScene::Release()
 {
 	if (m_pd3dcbPassInfo)
@@ -1037,9 +1055,11 @@ void ServerScene::BuildObject()
 		m_vecNonAnimObjectRenderGroup.push_back(weapon);
 		muzzle->m_pParent = weapon;
 	}
+
+	// player
 	{
-		// player
 		Object* player = new Object("player");
+		m_pPlayer = player;
 
 		TransformComponent* transform = new TransformComponent(player);
 		RigidbodyComponent* rigidbody = new RigidbodyComponent(player);

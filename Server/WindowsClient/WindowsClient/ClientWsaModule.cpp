@@ -1,5 +1,6 @@
 #include "ClientWsaModule.h"
 
+
 ClientWsaModule::ClientWsaModule()
 {
 	hWnd = NULL;

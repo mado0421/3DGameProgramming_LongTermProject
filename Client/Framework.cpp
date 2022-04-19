@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "Framework.h"
 #include "Scene.h"
+#include"GameScene.h"
 #include"ServerScene.h"
 
 void Framework::Update() 
@@ -372,7 +373,8 @@ void Framework::OnProcessingWindowMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 		OnProcessingKeyboardMessage(hWnd, nMessageID, wParam, lParam);
 		break;
 	case WM_SOCKET:
-
+		if (m_pCurrentScene)
+			m_pCurrentScene->ProcessSocket(hWnd, nMessageID, wParam, lParam);
 		break;
 	}
 }

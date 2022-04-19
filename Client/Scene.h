@@ -2,6 +2,16 @@
 #include"stdafx.h"
 class Framework;
 
+struct CB_PASS_INFO {
+	XMFLOAT4X4	m_xmf4x4CameraView;
+	XMFLOAT4X4	m_xmf4x4CameraProjection;
+	XMFLOAT4X4	m_xmf4x4CameraViewInv;
+	XMFLOAT4X4	m_xmf4x4CameraProjectionInv;
+	XMFLOAT4X4	m_xmf4x4TextureTransform;
+	XMFLOAT3	m_xmf3CameraPosition;
+	float		m_xmfCurrentTime;
+};
+
 class Scene
 {
 public:
@@ -9,5 +19,9 @@ public:
 	virtual void Render(D3D12_CPU_DESCRIPTOR_HANDLE hBckBufRtv, D3D12_CPU_DESCRIPTOR_HANDLE hBckBufDsv) = 0;
 	virtual void Update(float fTimeElapsed) = 0;
 	virtual void Input(UCHAR* pKeyBuffer) = 0;
+	virtual void ProcessSocket(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
+	{
+		cout << "Scene OnProcessingWindowMessage\n";
+	};
 };
 

@@ -1,0 +1,17 @@
+HumanoidControllerComponent 에서 Input 처리를 하고 있다
+해당 클래스를 상속받는 NetController Class를 작성하여
+Input이 주어져도 바로 이동하지 않고
+서버에 입력을 전송하게 한다.
+
+완료하고 Controller의 기존 값에 더해 사용하던가
+혹은 TransformComponent를 이용해본다
+
+테스트 환경에서는 입력 받았을때
+따로 관리 하지 않고 TransformComponent를 이용한
+이동만 먼저 테스트 해봐야 할 듯
+다른 플레이어가 들어왔을때
+벡터에 새로운 player Object를 추가해야한다?
+object id를 player-id 로 구성해야 할 것 같음
+전체 업데이트 랜더 진행하는 object vector 와 별개로
+통신에 참여하는 class들의 vector 혹은 unordered_map 으로
+따로 관리하는게 편할 것으로 생각됌

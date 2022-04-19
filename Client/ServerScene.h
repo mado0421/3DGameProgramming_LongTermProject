@@ -9,16 +9,7 @@ class Framework;
 class Texture;
 class LightManager;
 class TextureManager;
-
-struct CB_PASS_INFO {
-	XMFLOAT4X4	m_xmf4x4CameraView;
-	XMFLOAT4X4	m_xmf4x4CameraProjection;
-	XMFLOAT4X4	m_xmf4x4CameraViewInv;
-	XMFLOAT4X4	m_xmf4x4CameraProjectionInv;
-	XMFLOAT4X4	m_xmf4x4TextureTransform;
-	XMFLOAT3	m_xmf3CameraPosition;
-	float		m_xmfCurrentTime;
-};
+class ClientWsaModule;
 
 class ServerScene : public Scene
 {
@@ -65,6 +56,11 @@ protected:
 	float										m_fCurrentTime = 0;
 
 public:
+	// Network
+	ClientWsaModule* m_pWsaModule;
+	Object* m_pPlayer;
+
+public:
 	bool test = false;
 	bool TEST_MOUSE_USABLE = false;
 public:
@@ -75,6 +71,7 @@ public:
 	virtual void Input(UCHAR* pKeyBuffer);
 	virtual void Update(float fTimeElapsed);
 	virtual void Render(D3D12_CPU_DESCRIPTOR_HANDLE hBckBufRtv, D3D12_CPU_DESCRIPTOR_HANDLE hBckBufDsv);
+	virtual void ProcessSocket(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 
 	virtual void Release();
 

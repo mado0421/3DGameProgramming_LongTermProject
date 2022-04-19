@@ -5,6 +5,19 @@
 #pragma comment(lib, "d3d12.lib")
 #pragma comment(lib, "dxgi.lib")
 
+// socket
+#include<WS2tcpip.h>
+#include<MSWSock.h>
+#pragma comment (lib, "WS2_32.lib")
+#pragma comment (lib, "mswsock.lib")
+#include"../Server/serverFrame/serverFrame/Packets/packet.h"
+//#include"packet.h"
+namespace SCV {
+	const int max_user = 1000;
+	const int max_buf_size = 1024;
+	const int max_packet_size = 255;
+}
+
 #define DEBUG
 
 #ifdef DEBUG
@@ -89,6 +102,7 @@ using Microsoft::WRL::ComPtr;
 // Server Define
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
 #define WM_SOCKET	(WM_USER+1)
+#define SERVER_PORT		9000
 
 
 enum KeyCode {
