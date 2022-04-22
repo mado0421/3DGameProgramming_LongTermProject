@@ -1066,7 +1066,8 @@ void ServerScene::BuildObject()
 		SkinnedMeshRendererComponent* skinnedMeshRenderer = new SkinnedMeshRendererComponent(player, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
 		HumanoidControllerComponent* humanoidController = new HumanoidControllerComponent(player, m_vecNonAnimObjectRenderGroup[0]);
 		HumanoidAnimatorComponent* humanoidAnimator = new HumanoidAnimatorComponent(player, "Humanoid_Idle");
-		InputManagerComponent* controller = new InputManagerComponent(player);
+		NetInputManagerComponent* controller = new NetInputManagerComponent(player, m_pWsaModule);
+		//InputManagerComponent* controller = new InputManagerComponent(player);
 		SphereColliderComponent* sphereCollider = new SphereColliderComponent(player, XMFLOAT3(0, 0.5f, 0), 0.5f);
 
 		skinnedMeshRenderer->SetModelByName("human");
@@ -1101,6 +1102,27 @@ void ServerScene::BuildObject()
 		m_pCameraObject = camera;
 		m_vecObject.push_back(camera);
 	}
+
+	// Other Test
+	/*{
+		Object* player = new Object("other");
+
+		TransformComponent* transform = new TransformComponent(player);
+		RigidbodyComponent* rigidbody = new RigidbodyComponent(player);
+		SkinnedMeshRendererComponent* skinnedMeshRenderer = new SkinnedMeshRendererComponent(player, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
+		HumanoidControllerComponent* humanoidController = new HumanoidControllerComponent(player, m_vecNonAnimObjectRenderGroup[0]);
+		HumanoidAnimatorComponent* humanoidAnimator = new HumanoidAnimatorComponent(player, "Humanoid_Idle");
+		InputManagerComponent* controller = new NetInputManagerComponent(player);
+		SphereColliderComponent* sphereCollider = new SphereColliderComponent(player, XMFLOAT3(0, 0.5f, 0), 0.5f);
+
+		skinnedMeshRenderer->SetModelByName("human");
+		skinnedMeshRenderer->SetMaterialByName("DefaultMaterial");
+		transform->Translate(-5, 0, -3);
+		transform->RotateXYZDegree(0, 90, 0);
+
+		m_vecObject.push_back(player);
+		m_vecAnimObjectRenderGroup.push_back(player);
+	}*/
 
 
 	{

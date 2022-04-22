@@ -16,6 +16,7 @@ void InputManagerComponent::InputEvent(UCHAR* pKeyBuffer, XMFLOAT2& xmf2MouseMov
 {
 	memcpy(m_pKeysBuffer, pKeyBuffer, sizeof(UCHAR) * 256);
 	m_xmf2MouseMovement = xmf2MouseMovement;
+	cout << "InputManager\n";
 }
 
 void InputManagerComponent::Update(float fTimeElapsed)

@@ -1,5 +1,8 @@
 #include "stdafx.h"
 #include "ClientWsaModule.h"
+#include "Object.h"
+#include "Components.h"
+#include "NetInputManagerComponent.h"
 
 ClientWsaModule::ClientWsaModule()
 {
@@ -31,7 +34,7 @@ void ClientWsaModule::Init(HWND a_hWnd, string IP)
 	ret = WSAStartup(MAKEWORD(2, 2), &WsaData);
 	if (ret != 0)
 	{
-		cout << "WSAStaryup Error\n";
+		wprintf(L"WSAStaryup Error error: %ld\n", WSAGetLastError());
 		return;
 	}
 
@@ -119,7 +122,8 @@ void ClientWsaModule::Process_Packet()
 		cout << "mv\n";
 		if (p->id == m_id)
 		{
-	
+			NetInputManagerComponent* nimc = m_player->FindComponent<NetInputManagerComponent>();
+			nimc->Move(p->x, p->y, p->z, p->rx, p->ry, p->rz);
 		}
 		else
 		{
@@ -166,18 +170,15 @@ void ClientWsaModule::InitPlayer()
 	sc_packet_login_ok* p = reinterpret_cast<sc_packet_login_ok*>(packet_buf);
 }
 
-void ClientWsaModule::Move(float x, float y, float z, float rx, float ry, float rz)
+void ClientWsaModule::Move(float dirX, float dirZ, float rx)
 {
-	cout << "Move (" << x << "," << y << "," << z << ") " << rx << " " << ry << " " << rz << "\n";
 	cs_packet_move p;
 	p.size = sizeof(p);
 	p.type = C2S_MOVE;
-	p.x = x;
-	p.y = y;
-	p.z = z;
+	p.dirX = dirX;
+	p.dirZ = dirZ;
 	p.rx = rx;
-	p.ry = ry;
-	p.rz = rz;
+
 	send(sock, reinterpret_cast<char*>(&p), p.size, 0);
 }
 
@@ -189,7 +190,7 @@ void ClientWsaModule::ProcessSocketMessage(HWND hWnd, UINT message, WPARAM wPara
 		{
 			case FD_READ:
 			{
-				cout << "FD_READ\n";
+				//cout << "FD_READ\n";
 				recv(sock, packet_buf, SCV::max_buf_size, 0);
 				Process_Packet();
 				break;
@@ -201,19 +202,20 @@ void ClientWsaModule::ProcessSocketMessage(HWND hWnd, UINT message, WPARAM wPara
 
 				}
 				else Connect();
-				cout << "FD_WRITE\n";
+				//cout << "FD_WRITE\n";
 				break;
 			}
 			case FD_CONNECT:
 			{
-				cout << "FD_CONNECT\n";
+				//cout << "FD_CONNECT\n";
 				
 				break;
 			}
 			case FD_CLOSE:
 			{
 				isConnected = false;
-				cout << "FD_CLOSE\n";
+				cout << "Server Closed\n";
+				//cout << "FD_CLOSE\n";
 				break;
 			}
 			default:

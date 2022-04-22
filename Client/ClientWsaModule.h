@@ -1,5 +1,6 @@
 #pragma once
 #include"stdafx.h"
+class Object;
 class ClientWsaModule
 {
 	WSADATA WsaData;
@@ -17,8 +18,8 @@ class ClientWsaModule
 
 // Player data;
 	int m_id;
-	/*Character m_character;
-	unordered_map<int, Character> m_oth;*/
+	Object* m_player;
+	unordered_map<int, Object*> m_oth;
 
 public:
 	ClientWsaModule();
@@ -35,7 +36,7 @@ public:
 	void Login();
 
 	void InitPlayer ();
-	void Move(float x,float y,float z, float rx, float ry, float rz);
+	void Move(float dirX,float dirZ,float rx);
 
 public:
 	void ProcessSocketMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);

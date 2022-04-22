@@ -279,6 +279,9 @@
     <ClInclude Include="ClientWsaModule.h">
       <Filter>소스 파일\Network</Filter>
     </ClInclude>
+    <ClInclude Include="NetInputManagerComponent.h">
+      <Filter>소스 파일\Component\InputManager</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WindowsProject1.cpp">
@@ -407,6 +410,9 @@
     </ClCompile>
     <ClCompile Include="ClientWsaModule.cpp">
       <Filter>소스 파일\Network</Filter>
+    </ClCompile>
+    <ClCompile Include="NetInputManagerComponent.cpp">
+      <Filter>소스 파일\Component\InputManager</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

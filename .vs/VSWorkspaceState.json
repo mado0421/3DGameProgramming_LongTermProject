@@ -1,7 +1,14 @@
 {
   "ExpandedNodes": [
-    ""
+    "",
+    "\\Server",
+    "\\Server\\serverFrame",
+    "\\Server\\serverFrame\\serverFrame",
+    "\\Server\\serverFrame\\serverFrame\\Character",
+    "\\Server\\serverFrame\\serverFrame\\Client",
+    "\\Server\\serverFrame\\serverFrame\\Headers",
+    "\\Server\\serverFrame\\serverFrame\\Packets"
   ],
-  "SelectedNode": "\\TPSLongTermProject.sln",
+  "SelectedNode": "\\Server\\serverFrame\\serverFrame\\ServerFrame.h",
   "PreviewInSolutionExplorer": false
 }

@@ -104,7 +104,7 @@ using Microsoft::WRL::ComPtr;
 #define WM_SOCKET	(WM_USER+1)
 #define SERVER_PORT		9000
 
-
+#define KEYDOWN	0xF0
 enum KeyCode {
 	_LMB	= 1,
 	_RMB	= 2,

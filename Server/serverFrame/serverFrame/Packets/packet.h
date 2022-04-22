@@ -45,8 +45,13 @@ struct cs_packet_login : BasePacket
 };
 struct cs_packet_move : BasePacket
 {
-	float x, y, z;
-	float rx, ry, rz;
+	float dirX, dirZ;
+	float rx;
+};
+
+struct cs_packet_fire : BasePacket
+{
+
 };
 
 #define C2S_ERROR	-1

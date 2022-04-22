@@ -290,23 +290,31 @@ void ServerFrame::ProcessMove(int user_id, char* buf)
 	cs_packet_move* mv = reinterpret_cast<cs_packet_move*>(buf);
 
 	// collide Check
-	character.x += mv->x;
-	character.y += mv->y;
-	character.z += mv->z;
-	character.rx += mv->rx;
-	character.ry += mv->ry;
-	character.rz += mv->rz;
-
 	sc_packet_move m;
 	m.size = sizeof(m);
 	m.type = S2C_MOVE;
 	m.id = user_id;
-	m.x = character.x;
-	m.y = character.y;
-	m.z = character.z;
-	m.rx = character.rx;
-	m.ry = character.ry;
-	m.rz = character.rz;
+
+	if (0 < mv->dirX)
+	{
+		m.x = 1;
+	}
+	if (0 > mv->dirX)
+	{
+		m.x = -1;
+	}
+	if (0 < mv->dirZ)
+	{
+		m.z = 1;
+	}
+	if (0 > mv->dirZ)
+	{
+		m.z = -1;
+	}
+	m.y = 0;
+	m.rx = 0;
+	m.ry = 0;
+	m.rz = 0;
 
 	// check who move
 	for (int i = 0; i < SCV::max_user; ++i)

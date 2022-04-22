@@ -2,6 +2,7 @@
 #include "MeshRendererComponent.h"
 #include "TransformComponent.h"
 #include "InputManagerComponent.h"
+#include "NetInputManagerComponent.h"
 #include "ColliderComponent.h"
 #include "SkinnedMeshRendererComponent.h"
 #include "AnimatorComponent.h"
