@@ -12,6 +12,7 @@ Object::Object()
 	,m_bEnable(true)
 	,m_fTime(0.0f)
 	,m_pParent(nullptr)
+	,m_id(-1)
 {
 }
 
@@ -20,6 +21,7 @@ Object::Object(const char* strName)
 	, m_bEnable(true)
 	, m_fTime(0.0f)
 	, m_pParent(nullptr)
+	, m_id(-1)
 {
 }
 

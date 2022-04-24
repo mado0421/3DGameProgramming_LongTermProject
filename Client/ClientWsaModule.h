@@ -1,6 +1,8 @@
 #pragma once
 #include"stdafx.h"
 class Object;
+class Scene;
+class ServerScene;
 class ClientWsaModule
 {
 	WSADATA WsaData;
@@ -21,13 +23,15 @@ class ClientWsaModule
 	Object* m_player;
 	unordered_map<int, Object*> m_oth;
 
+	ServerScene* scene;
+
 public:
 	ClientWsaModule();
 	virtual ~ClientWsaModule();
 
 public:
-	void Init(HWND hWnd, string IP = "none");
-	void Process_Packet();
+	void Init(HWND hWnd, ServerScene* sp, string IP = "none");
+	void Process_Packet(char* packet);
 	void Connect();
 	void Destroy();
 
@@ -37,6 +41,8 @@ public:
 
 	void InitPlayer ();
 	void Move(float dirX,float dirZ,float rx);
+	void SetPlayer(Object* p);
+	int GetPlayerId() { return m_id; }
 
 public:
 	void ProcessSocketMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);

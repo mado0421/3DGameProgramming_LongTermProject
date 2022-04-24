@@ -49,6 +49,7 @@ public:
 	vector<Object*> m_vecpChild;
 
 	vector<Component*> m_vecComponents;
+	int				m_id;
 };
 
 class Screen {

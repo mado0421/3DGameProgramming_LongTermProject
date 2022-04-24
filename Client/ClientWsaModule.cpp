@@ -2,6 +2,8 @@
 #include "ClientWsaModule.h"
 #include "Object.h"
 #include "Components.h"
+#include "Scene.h"
+#include "ServerScene.h"
 #include "NetInputManagerComponent.h"
 
 ClientWsaModule::ClientWsaModule()
@@ -20,10 +22,11 @@ ClientWsaModule::~ClientWsaModule()
 	Destroy();
 }
 
-void ClientWsaModule::Init(HWND a_hWnd, string IP)
+void ClientWsaModule::Init(HWND a_hWnd, ServerScene* sp, string IP)
 {
 	int ret;
 	hWnd = a_hWnd;
+	scene = sp;
 	if (NULL == hWnd)
 	{
 		cout << "Error hWnd is null\n";
@@ -97,9 +100,9 @@ void ClientWsaModule::Destroy()
 	WSACleanup();
 }
 
-void ClientWsaModule::Process_Packet()
+void ClientWsaModule::Process_Packet(char* packet)
 {
-	switch (packet_buf[1])
+	switch (packet[1])
 	{
 	case S2C_LOGIN:
 	{
@@ -110,31 +113,41 @@ void ClientWsaModule::Process_Packet()
 	}
 	case S2C_ENTER:
 	{
-		cout << "S2C_ENTER\n";
-		sc_packet_enter* p = reinterpret_cast<sc_packet_enter*>(packet_buf);
+		sc_packet_enter* p = reinterpret_cast<sc_packet_enter*>(packet);
+		int id = p->oth_id;
+		cout << "S2C_ENTER ["<<id<<"]\n";
+		m_oth[id] = scene->EnterPlayer(id);
 		
 		cout << "id: " << p->oth_id << " entered\n";
 		break;
 	} 
 	case S2C_MOVE:
 	{
-		sc_packet_move* p = reinterpret_cast<sc_packet_move*>(packet_buf);
-		cout << "mv\n";
-		if (p->id == m_id)
+		sc_packet_move* p = reinterpret_cast<sc_packet_move*>(packet);
+		int id = p->id;
+		cout << "move [" << id << "]\n";
+		if (id == m_id)
 		{
 			NetInputManagerComponent* nimc = m_player->FindComponent<NetInputManagerComponent>();
-			nimc->Move(p->x, p->y, p->z, p->rx, p->ry, p->rz);
+			if (nullptr != nimc)nimc->Move(p->x, p->y, p->z, p->rx, p->ry, p->rz);
+			else { cout << "nimc is nullptr\n"; };
 		}
 		else
 		{
+			if (m_oth[id])
+			{
+				NetInputManagerComponent* nimc = m_oth[id]->FindComponent<NetInputManagerComponent>();
+				if (nullptr != nimc)nimc->Move(p->x, p->y, p->z, p->rx, p->ry, p->rz);
+				else { cout << "nimc is nullptr\n"; };
 
 			//cout << "other move id: " << p->id << "\n";
+			}
 		}
 		break;
 	}
 	case S2C_DISCONNECT:
 	{
-		sc_packet_disconnect* p = reinterpret_cast<sc_packet_disconnect*>(packet_buf);
+		sc_packet_disconnect* p = reinterpret_cast<sc_packet_disconnect*>(packet);
 		cout << "id: " << p->id << " disconnected\n";
 		break;
 	}
@@ -168,6 +181,10 @@ void ClientWsaModule::Login()
 void ClientWsaModule::InitPlayer()
 {
 	sc_packet_login_ok* p = reinterpret_cast<sc_packet_login_ok*>(packet_buf);
+	m_id = p->id;
+
+	m_player->m_id = m_id;
+	cout << "id:" << m_player->m_id;
 }
 
 void ClientWsaModule::Move(float dirX, float dirZ, float rx)
@@ -182,6 +199,11 @@ void ClientWsaModule::Move(float dirX, float dirZ, float rx)
 	send(sock, reinterpret_cast<char*>(&p), p.size, 0);
 }
 
+void ClientWsaModule::SetPlayer(Object* p)
+{
+	m_player = p;
+}
+
 void ClientWsaModule::ProcessSocketMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	if (WM_SOCKET == message)
@@ -190,9 +212,15 @@ void ClientWsaModule::ProcessSocketMessage(HWND hWnd, UINT message, WPARAM wPara
 		{
 			case FD_READ:
 			{
-				//cout << "FD_READ\n";
-				recv(sock, packet_buf, SCV::max_buf_size, 0);
-				Process_Packet();
+				int rest_byte = recv(sock, packet_buf, SCV::max_buf_size, 0);
+				char* p = packet_buf;
+				while (rest_byte > 0)
+				{
+					int packet_size = *p;
+					Process_Packet(p);
+					p += packet_size;
+					rest_byte -= packet_size;
+				}
 				break;
 			}
 			case FD_WRITE:

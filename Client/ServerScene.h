@@ -72,6 +72,8 @@ public:
 	virtual void Update(float fTimeElapsed);
 	virtual void Render(D3D12_CPU_DESCRIPTOR_HANDLE hBckBufRtv, D3D12_CPU_DESCRIPTOR_HANDLE hBckBufDsv);
 	virtual void ProcessSocket(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
+	Object* EnterPlayer(int id);
+	void LeavePlayer(int id);
 
 	virtual void Release();
 
@@ -86,6 +88,7 @@ protected:
 	void UpdatePassInfoAboutCamera();
 
 	void BuildObject();
+	
 
 protected:
 	/*==============================================================================

@@ -1,0 +1,20 @@
+ServerScene에서
+유저의 추가 및 삭제
+
+이름으로 관리한다? 아마도
+m_vecObject 와 m_vecAnimObjectRenderGroup 각각 추가해줘야함
+
+유저가 나갈때는 삭제해줘야함
+해당 멤버변수는 Scene에서 관리
+
+실제 유저가 들어왔을 때 정보를 받아오고 활성화 하는 곳
+WsaClientModule
+Module에서만 통신 관련은 관리 가능하지만
+실제 업데이트는 상위의 Scene에서 가능하다
+
+Module에서 추가하기 앞서
+Scene에서 주가하고 Module에 추가 해야 하는데
+그러려면 Scene에 대한 접근
+혹은 Scene에서 새 유저 추가 및 삭제 함수를 구현해야함
+Module에서 Read가 호출되고 enter와 disconnect 발생 알림시
+Scene에서 해당 정보에 접근할 방법이 없음 => Module에서 Scene에 접근하는게 맞을듯

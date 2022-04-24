@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include"Scene.h"
+#include "Scene.h"
 #include "ServerScene.h"
 #include "Object.h"
 #include "PipelineStateObject.h"
@@ -28,7 +28,7 @@ void ServerScene::Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12Gr
 	* 네트워크 설정
 	*=======================================================================*/
 	m_pWsaModule = new ClientWsaModule;
-	m_pWsaModule->Init(pFramework->GetHwnd());
+	m_pWsaModule->Init(pFramework->GetHwnd(),this);
 
 	/*========================================================================
 	* 커서 설정
@@ -662,8 +662,43 @@ void ServerScene::ProcessSocket(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARA
 	if (m_pWsaModule)
 	{
 		m_pWsaModule->ProcessSocketMessage(hWnd, nMessageID, wParam, lParam);
-		
 	}
+}
+
+Object* ServerScene::EnterPlayer(int id)
+{
+	string name = "player";
+	name += id;
+
+	Object* oth = new Object(name.c_str());
+	oth->m_id = id;
+
+	TransformComponent* transform = new TransformComponent(oth);
+	RigidbodyComponent* rigidbody = new RigidbodyComponent(oth);
+	SkinnedMeshRendererComponent* skinnedMeshRenderer = new SkinnedMeshRendererComponent(oth, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
+	HumanoidControllerComponent* humanoidController = new HumanoidControllerComponent(oth, m_vecNonAnimObjectRenderGroup[0]);
+	HumanoidAnimatorComponent* humanoidAnimator = new HumanoidAnimatorComponent(oth, "Humanoid_Idle");
+	NetInputManagerComponent* controller = new NetInputManagerComponent(oth, m_pWsaModule);
+	SphereColliderComponent* sphereCollider = new SphereColliderComponent(oth, XMFLOAT3(0, 0.5f, 0), 0.5f);
+
+	skinnedMeshRenderer->SetModelByName("human");
+	skinnedMeshRenderer->SetMaterialByName("DefaultMaterial");
+	transform->Translate(-5, 0, -3);
+	transform->RotateXYZDegree(0, 180, 0);
+	
+	m_vecObject.push_back(oth);
+	m_vecAnimObjectRenderGroup.push_back(oth);
+	return oth;
+}
+
+void ServerScene::LeavePlayer(int id)
+{
+	int pid = id;
+	auto p = remove_if(m_vecObject.begin(), m_vecObject.end(), [&](Object* o) {return (pid == o->m_id); });
+	m_vecObject.erase(p, m_vecObject.end());
+
+	auto q = remove_if(m_vecAnimObjectRenderGroup.begin(), m_vecAnimObjectRenderGroup.end(), [&](Object* o) {return (pid == o->m_id); });
+	m_vecAnimObjectRenderGroup.erase(q, m_vecAnimObjectRenderGroup.end());
 }
 
 void ServerScene::Release()
@@ -1060,13 +1095,14 @@ void ServerScene::BuildObject()
 	{
 		Object* player = new Object("player");
 		m_pPlayer = player;
+		m_pWsaModule->SetPlayer(player);
 
 		TransformComponent* transform = new TransformComponent(player);
 		RigidbodyComponent* rigidbody = new RigidbodyComponent(player);
 		SkinnedMeshRendererComponent* skinnedMeshRenderer = new SkinnedMeshRendererComponent(player, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
 		HumanoidControllerComponent* humanoidController = new HumanoidControllerComponent(player, m_vecNonAnimObjectRenderGroup[0]);
 		HumanoidAnimatorComponent* humanoidAnimator = new HumanoidAnimatorComponent(player, "Humanoid_Idle");
-		NetInputManagerComponent* controller = new NetInputManagerComponent(player, m_pWsaModule);
+		NetInputManagerComponent* controller = new NetInputManagerComponent(player, m_pWsaModule, true);
 		//InputManagerComponent* controller = new InputManagerComponent(player);
 		SphereColliderComponent* sphereCollider = new SphereColliderComponent(player, XMFLOAT3(0, 0.5f, 0), 0.5f);
 
@@ -1078,6 +1114,7 @@ void ServerScene::BuildObject()
 		m_vecObject.push_back(player);
 		m_vecAnimObjectRenderGroup.push_back(player);
 		FindObjectByName("pistol")->m_pParent = player;
+
 	}
 	{
 		Object* head = new Object("head");
@@ -2068,6 +2105,6 @@ void ServerScene::ReloadLight()
 Object* ServerScene::FindObjectByName(const char* strName)
 {
 	for (auto iter = m_vecObject.begin(); iter != m_vecObject.end(); iter++)
-		if (strName == (*iter)->m_strName) return *iter;
+		if ((*iter)->m_strName == strName) return *iter;
 	return nullptr;
 }

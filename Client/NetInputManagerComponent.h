@@ -7,11 +7,14 @@ class NetInputManagerComponent :
 {
 	ClientWsaModule* m_netModule;
 
+	UCHAR		m_NotBuffer[256];
 	UCHAR		m_pNetKey[256];
 	XMFLOAT2	m_xmf2NetMouse;
+
+	bool playerControl = false;
 public:
 	NetInputManagerComponent() = delete;
-	NetInputManagerComponent(Object* pObject, ClientWsaModule* cwm);
+	NetInputManagerComponent(Object* pObject, ClientWsaModule* cwm, bool control=false);
 	~NetInputManagerComponent();
 
 	virtual void InputEvent(UCHAR* pKeyBuffer, XMFLOAT2& xmf2MouseMovement);

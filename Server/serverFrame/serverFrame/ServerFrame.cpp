@@ -188,7 +188,7 @@ void ServerFrame::Process_packet(int user_id, char* buf)
 	}
 	case C2S_MOVE:
 	{
-		cout << "C2S_MOVE  ";
+		//cout << "C2S_MOVE  ";
 		ProcessMove(user_id, buf);
 		break;
 	}
@@ -294,6 +294,9 @@ void ServerFrame::ProcessMove(int user_id, char* buf)
 	m.size = sizeof(m);
 	m.type = S2C_MOVE;
 	m.id = user_id;
+	m.x = 0;
+	m.y = 0;
+	m.z = 0;
 
 	if (0 < mv->dirX)
 	{
@@ -311,7 +314,6 @@ void ServerFrame::ProcessMove(int user_id, char* buf)
 	{
 		m.z = -1;
 	}
-	m.y = 0;
 	m.rx = 0;
 	m.ry = 0;
 	m.rz = 0;
