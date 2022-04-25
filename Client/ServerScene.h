@@ -72,7 +72,9 @@ public:
 	virtual void Update(float fTimeElapsed);
 	virtual void Render(D3D12_CPU_DESCRIPTOR_HANDLE hBckBufRtv, D3D12_CPU_DESCRIPTOR_HANDLE hBckBufDsv);
 	virtual void ProcessSocket(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
-	Object* EnterPlayer(int id);
+
+	void LoginPlayer(sc_packet_login_ok* packet);
+	Object* EnterPlayer(int id, sc_packet_enter* packet);
 	void LeavePlayer(int id);
 
 	virtual void Release();

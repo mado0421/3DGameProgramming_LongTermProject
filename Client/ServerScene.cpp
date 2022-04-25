@@ -665,7 +665,14 @@ void ServerScene::ProcessSocket(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARA
 	}
 }
 
-Object* ServerScene::EnterPlayer(int id)
+void ServerScene::LoginPlayer(sc_packet_login_ok* packet)
+{
+	TransformComponent* transform = m_pPlayer->FindComponent<TransformComponent>();
+	transform->SetPosition(packet->x, packet->y, packet->z);
+	transform->RotateXYZDegree(packet->rx, packet->ry, packet->rz);
+}
+
+Object* ServerScene::EnterPlayer(int id, sc_packet_enter* p)
 {
 	string name = "player";
 	name += id;
@@ -683,8 +690,11 @@ Object* ServerScene::EnterPlayer(int id)
 
 	skinnedMeshRenderer->SetModelByName("human");
 	skinnedMeshRenderer->SetMaterialByName("DefaultMaterial");
-	transform->Translate(-5, 0, -3);
-	transform->RotateXYZDegree(0, 180, 0);
+	transform->Translate(p->x, p->y, p->z);
+	transform->RotateXYZDegree(p->rx, p->ry, p->rz);
+
+	/*transform->Translate(-5, 0, -3);
+	transform->RotateXYZDegree(0, 180, 0);*/
 	
 	m_vecObject.push_back(oth);
 	m_vecAnimObjectRenderGroup.push_back(oth);
@@ -1108,8 +1118,8 @@ void ServerScene::BuildObject()
 
 		skinnedMeshRenderer->SetModelByName("human");
 		skinnedMeshRenderer->SetMaterialByName("DefaultMaterial");
-		transform->Translate(-3, 0, -3);
-		transform->RotateXYZDegree(0, 180, 0);
+		/*transform->Translate(-3, 0, -3);
+		transform->RotateXYZDegree(0, 180, 0);*/
 
 		m_vecObject.push_back(player);
 		m_vecAnimObjectRenderGroup.push_back(player);

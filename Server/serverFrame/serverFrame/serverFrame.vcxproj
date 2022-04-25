@@ -140,12 +140,15 @@
   <ItemGroup>
     <ClCompile Include="Character\Character.cpp" />
     <ClCompile Include="Client\Client.cpp" />
+    <ClCompile Include="DirectX\TransformComponent.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="ServerFrame.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Character\Character.h" />
     <ClInclude Include="Client\Client.h" />
+    <ClInclude Include="DirectX\MathHelper.h" />
+    <ClInclude Include="DirectX\TransformComponent.h" />
     <ClInclude Include="Headers\constants.h" />
     <ClInclude Include="Headers\exover.h" />
     <ClInclude Include="Headers\headers.h" />

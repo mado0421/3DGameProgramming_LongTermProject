@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "Object.h"
 #include "NetInputManagerComponent.h"
 #include "ClientWsaModule.h"
 
@@ -9,6 +10,7 @@ NetInputManagerComponent::NetInputManagerComponent(Object* pObject, ClientWsaMod
 	playerControl = control;
 	cout << "NetInputManagerComponent(Object* pObject)\n";
 	for (int i = 0; i < 256; ++i)m_NotBuffer[i] = (!KEYDOWN);
+	player = pObject;
 }
 
 NetInputManagerComponent::~NetInputManagerComponent()
@@ -33,7 +35,8 @@ void NetInputManagerComponent::InputEvent(UCHAR* pKeyBuffer, XMFLOAT2& xmf2Mouse
 		if (l_xmf3Direction.x || l_xmf3Direction.z || xmf2MouseMovement.x)
 		{
 			// Send Move Packet
-			m_netModule->Move(l_xmf3Direction.x, l_xmf3Direction.z, xmf2MouseMovement.x);
+			
+			m_netModule->Move(l_xmf3Direction.x, l_xmf3Direction.z, xmf2MouseMovement.x,player->m_timeElapsed);
 		}
 	}
 }

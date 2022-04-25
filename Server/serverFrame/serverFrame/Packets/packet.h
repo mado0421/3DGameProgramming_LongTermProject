@@ -37,6 +37,7 @@ struct sc_packet_move : BasePacket
 	int id;
 	float x, y, z;
 	float rx, ry, rz;
+	float t;
 };
 
 struct cs_packet_login : BasePacket
@@ -47,6 +48,7 @@ struct cs_packet_move : BasePacket
 {
 	float dirX, dirZ;
 	float rx;
+	float time;
 };
 
 struct cs_packet_fire : BasePacket
@@ -54,14 +56,15 @@ struct cs_packet_fire : BasePacket
 
 };
 
-#define C2S_ERROR	-1
-#define C2S_LOGIN	1
-#define C2S_MOVE	2
+#define C2S_ERROR			-1
+#define C2S_LOGIN			1
+#define C2S_MOVE			2
 
-#define S2C_ERROR	-1
-#define S2C_LOGIN	1
-#define S2C_ENTER	2
-#define S2C_MOVE	3
-#define S2C_DISCONNECT 4
+#define S2C_ERROR			-1
+#define S2C_LOGIN			1
+#define S2C_ENTER			2
+#define S2C_MOVE			3
+#define S2C_LEAVEPLAYER		4
+#define S2C_DISCONNECT		5
 
 #pragma pack(pop)

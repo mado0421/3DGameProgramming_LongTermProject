@@ -18,6 +18,7 @@ public:
 	char packet_buf[SCV::max_buf_size];
 
 	Character m_character;
+	float fTimeElapsed;
 
 	// more data;
 

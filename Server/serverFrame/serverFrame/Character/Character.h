@@ -1,7 +1,6 @@
 #pragma once
-#include"../Headers/constants.h"
-#include"../Headers/headers.h"
 
+class TransformComponent;
 class Character
 {
 public:
@@ -9,8 +8,10 @@ public:
 	float m_currReviveTime;
 	bool m_bDead;
 	bool m_bAutoRevive;
-	float x, y, z;
 	float rx, ry, rz;
+	TransformComponent* transform;
+	XMFLOAT3 m_xmf3Velocity;
+	float m_fDragFactor;
 
 public:
 	Character();

@@ -2,6 +2,7 @@
 #include "InputManagerComponent.h"
 
 class ClientWsaModule;
+class Object;
 class NetInputManagerComponent :
 	public InputManagerComponent
 {
@@ -10,6 +11,7 @@ class NetInputManagerComponent :
 	UCHAR		m_NotBuffer[256];
 	UCHAR		m_pNetKey[256];
 	XMFLOAT2	m_xmf2NetMouse;
+	Object*		player;
 
 	bool playerControl = false;
 public:

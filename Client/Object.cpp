@@ -53,6 +53,7 @@ void Object::Input(UCHAR* pKeyBuffer, XMFLOAT2& xmf2MouseMovement)
 
 void Object::Update(float fTimeElapsed)
 {
+	m_timeElapsed = fTimeElapsed;
 	m_fTime += fTimeElapsed;
 	for_each(m_vecComponents.begin(), m_vecComponents.end(), [&](Component* c) { c->Update(fTimeElapsed); });
 }

@@ -7,6 +7,6 @@ Client::Client()
 	id = NULL;
 	exover = EXOVER();
 	prev_size = 0;
-
+	fTimeElapsed = 0;
 	m_character = Character();
 }

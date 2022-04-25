@@ -22,3 +22,5 @@ enum class ClStatus {
 
 constexpr int maxHp = 10;
 constexpr float reviveTime = 3.0f;
+constexpr float fSpeed = 1.0f;
+constexpr float fSpdLimit = 1.5f;

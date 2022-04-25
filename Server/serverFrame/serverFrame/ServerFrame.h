@@ -4,6 +4,7 @@
 #include"Headers/constants.h"
 #include"Client/Client.h"
 #include"Packets/packet.h"
+#include"DirectX/TransformComponent.h"
 
 class ServerFrame
 {

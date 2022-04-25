@@ -39,10 +39,10 @@ public:
 	void Test();
 	void Login();
 
-	void InitPlayer ();
-	void Move(float dirX,float dirZ,float rx);
+	void Move(float dirX,float dirZ,float rx,float time);
 	void SetPlayer(Object* p);
 	int GetPlayerId() { return m_id; }
+	void LeavePlayer(int id);
 
 public:
 	void ProcessSocketMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);

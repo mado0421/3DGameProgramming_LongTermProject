@@ -69,12 +69,12 @@ void HumanoidControllerComponent::Update(float fTimeElapsed)
 		XMFLOAT4 xmf4RotationQuaternion;
 		XMVECTOR velocity, rotationQuaternion;
 		velocity				= XMLoadFloat3(&m_xmf3Velocity);
-		xmf4RotationQuaternion	= l_transform->GetRotationQuaternion(Space::world);
+		//xmf4RotationQuaternion	= l_transform->GetRotationQuaternion(Space::world);
 		rotationQuaternion		= XMLoadFloat4(&xmf4RotationQuaternion);
 		velocity = XMVector3Rotate(velocity, rotationQuaternion);
 		XMStoreFloat3(&xmf3Velocity, velocity);
 
-		l_transform->Translate(Vector3::Multiply(fTimeElapsed, xmf3Velocity));
+		//l_transform->Translate(Vector3::Multiply(fTimeElapsed, xmf3Velocity));
 
 
 

@@ -5,6 +5,7 @@
 #include "Scene.h"
 #include "ServerScene.h"
 #include "NetInputManagerComponent.h"
+#include "TransformComponent.h"
 
 ClientWsaModule::ClientWsaModule()
 {
@@ -107,7 +108,11 @@ void ClientWsaModule::Process_Packet(char* packet)
 	case S2C_LOGIN:
 	{
 		cout << "S2C_LOGIN\n";
-		InitPlayer();
+		sc_packet_login_ok* p = reinterpret_cast<sc_packet_login_ok*>(packet);
+		m_id = p->id;
+		m_player->m_id = m_id;
+		cout << "id:" << m_player->m_id;
+		scene->LoginPlayer(p);
 		isConnected = true;
 		break;
 	}
@@ -116,7 +121,7 @@ void ClientWsaModule::Process_Packet(char* packet)
 		sc_packet_enter* p = reinterpret_cast<sc_packet_enter*>(packet);
 		int id = p->oth_id;
 		cout << "S2C_ENTER ["<<id<<"]\n";
-		m_oth[id] = scene->EnterPlayer(id);
+		m_oth[id] = scene->EnterPlayer(id, p);
 		
 		cout << "id: " << p->oth_id << " entered\n";
 		break;
@@ -129,7 +134,14 @@ void ClientWsaModule::Process_Packet(char* packet)
 		if (id == m_id)
 		{
 			NetInputManagerComponent* nimc = m_player->FindComponent<NetInputManagerComponent>();
-			if (nullptr != nimc)nimc->Move(p->x, p->y, p->z, p->rx, p->ry, p->rz);
+			if (nullptr != nimc) 
+			{
+				nimc->Move(p->x, p->y, p->z, p->rx, p->ry, p->rz);
+				auto t = m_player->FindComponent<TransformComponent>();
+				t->RotateXYZDegree(0, p->rx, 0);
+				t->Translate(p->x, p->y, p->z);
+
+			}
 			else { cout << "nimc is nullptr\n"; };
 		}
 		else
@@ -137,7 +149,13 @@ void ClientWsaModule::Process_Packet(char* packet)
 			if (m_oth[id])
 			{
 				NetInputManagerComponent* nimc = m_oth[id]->FindComponent<NetInputManagerComponent>();
-				if (nullptr != nimc)nimc->Move(p->x, p->y, p->z, p->rx, p->ry, p->rz);
+				if (nullptr != nimc)
+				{
+					nimc->Move(p->x, p->y, p->z, p->rx, p->ry, p->rz);
+					auto t = m_oth[id]->FindComponent<TransformComponent>();
+					t->RotateXYZDegree(0, p->rx, 0);
+					t->Translate(p->x, p->y, p->z);
+				}
 				else { cout << "nimc is nullptr\n"; };
 
 			//cout << "other move id: " << p->id << "\n";
@@ -145,10 +163,13 @@ void ClientWsaModule::Process_Packet(char* packet)
 		}
 		break;
 	}
+	case S2C_LEAVEPLAYER:
 	case S2C_DISCONNECT:
+		
 	{
 		sc_packet_disconnect* p = reinterpret_cast<sc_packet_disconnect*>(packet);
 		cout << "id: " << p->id << " disconnected\n";
+		LeavePlayer(p->id);
 		break;
 	}
 	}
@@ -178,16 +199,7 @@ void ClientWsaModule::Login()
 	send(sock, reinterpret_cast<char*>(&p), p.size, NULL);
 }
 
-void ClientWsaModule::InitPlayer()
-{
-	sc_packet_login_ok* p = reinterpret_cast<sc_packet_login_ok*>(packet_buf);
-	m_id = p->id;
-
-	m_player->m_id = m_id;
-	cout << "id:" << m_player->m_id;
-}
-
-void ClientWsaModule::Move(float dirX, float dirZ, float rx)
+void ClientWsaModule::Move(float dirX, float dirZ, float rx,float time)
 {
 	cs_packet_move p;
 	p.size = sizeof(p);
@@ -195,6 +207,7 @@ void ClientWsaModule::Move(float dirX, float dirZ, float rx)
 	p.dirX = dirX;
 	p.dirZ = dirZ;
 	p.rx = rx;
+	p.time = time;
 
 	send(sock, reinterpret_cast<char*>(&p), p.size, 0);
 }
@@ -202,6 +215,16 @@ void ClientWsaModule::Move(float dirX, float dirZ, float rx)
 void ClientWsaModule::SetPlayer(Object* p)
 {
 	m_player = p;
+}
+
+void ClientWsaModule::LeavePlayer(int id)
+{
+	if (m_oth[id])
+	{
+		cout << "Leave complete\n";
+		scene->LeavePlayer(id);
+		m_oth.erase(id);
+	}
 }
 
 void ClientWsaModule::ProcessSocketMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)

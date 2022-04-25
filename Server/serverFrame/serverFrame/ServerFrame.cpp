@@ -231,18 +231,20 @@ void ServerFrame::Send_login_ok_packet(int user_id)
 	cout << "Send_login_ok_packet " << user_id << "\n";
 	Client* cl = clients[user_id];
 	Character& ch = cl->m_character;
+	TransformComponent* tc = ch.transform;
 	sc_packet_login_ok p;
 	p.size = sizeof(sc_packet_login_ok);
 	p.type = S2C_LOGIN;
 	p.id = user_id;
 
+	XMFLOAT3 pos = tc->GetPosition();
 	p.m_currHp = ch.m_currHp;
 	p.m_currReviveTime = ch.m_currReviveTime;
 	p.m_bDead = ch.m_bDead;
 	p.m_bAutoRevive = ch.m_bAutoRevive;
-	p.x = ch.x;
-	p.y = ch.y;
-	p.z = ch.z;
+	p.x = pos.x;
+	p.y = pos.y;
+	p.z = pos.z;
 	p.rx = ch.rx;
 	p.ry = ch.ry;
 	p.rz = ch.rz;
@@ -255,15 +257,17 @@ void ServerFrame::Send_enter_packet(int user_id, int oth_id)
 	cout << "Send_enter_packet " << user_id << " " << oth_id << "\n";
 	Client* cl = clients[oth_id];
 	Character& ch = cl->m_character;
+	TransformComponent* tc = ch.transform;
+	XMFLOAT3 pos = tc->GetPosition();
 
 	sc_packet_enter p;
 	p.size = sizeof(sc_packet_enter);
 	p.type = S2C_ENTER;
 	p.oth_id = oth_id;
 	p.m_currHp = ch.m_currHp;
-	p.x = ch.x;
-	p.y = ch.y;
-	p.z = ch.z;
+	p.x = pos.x;
+	p.y = pos.y;
+	p.z = pos.z;
 	p.rx = ch.rx;
 	p.ry = ch.ry;
 	p.rz = ch.rz;
@@ -297,26 +301,75 @@ void ServerFrame::ProcessMove(int user_id, char* buf)
 	m.x = 0;
 	m.y = 0;
 	m.z = 0;
+	XMFLOAT3 l_xmf3Direction = XMFLOAT3(0, 0, 0);
+	XMFLOAT3 m_velocity = character.m_xmf3Velocity;
+	float m_fDragFactor = character.m_fDragFactor;
+	float fTimeElapsed = 0.16666;
+	TransformComponent* l_transform = character.transform;
 
 	if (0 < mv->dirX)
 	{
 		m.x = 1;
+		l_xmf3Direction.x += fSpeed;
 	}
 	if (0 > mv->dirX)
 	{
 		m.x = -1;
+		l_xmf3Direction.x -= fSpeed;
 	}
 	if (0 < mv->dirZ)
 	{
 		m.z = 1;
+		l_xmf3Direction.z += fSpeed;
 	}
 	if (0 > mv->dirZ)
 	{
 		m.z = -1;
+		l_xmf3Direction.z -= fSpeed;
 	}
 	m.rx = 0;
 	m.ry = 0;
 	m.rz = 0;
+	float fPrevSpd = Vector3::Length(m_velocity);
+
+	if (0 != mv->rx) 
+	{
+		l_transform->RotateXYZDegree(0, mv->rx * -0.05f, 0);
+		m.rx = mv->rx * -0.05f;
+		character.rx += m.rx;
+	}
+
+	if (!Vector3::IsZero(l_xmf3Direction)) {
+		m_velocity = Vector3::Add(m_velocity, Vector3::Multiply(fTimeElapsed * 2.8, Vector3::Normalize(l_xmf3Direction)));
+		Clamp(m_velocity.x, -fSpdLimit, fSpdLimit);
+		Clamp(m_velocity.z, -fSpdLimit, fSpdLimit);
+	}
+	if (0 == l_xmf3Direction.x) {
+		if (m_velocity.x > 0)	m_velocity.x -= m_fDragFactor * fTimeElapsed;
+		else						m_velocity.x += m_fDragFactor * fTimeElapsed;
+		if (m_fDragFactor * fTimeElapsed >= fabs(m_velocity.x)) m_velocity.x = 0;
+	}
+	if (0 == l_xmf3Direction.z) {
+		if (m_velocity.z > 0)	m_velocity.z -= m_fDragFactor * fTimeElapsed;
+		else						m_velocity.z += m_fDragFactor * fTimeElapsed;
+		if (m_fDragFactor * fTimeElapsed >= fabs(m_velocity.z)) m_velocity.z = 0;
+	}
+
+	XMFLOAT3 xmf3Velocity;
+	XMFLOAT4 xmf4RotationQuaternion;
+	XMVECTOR velocity, rotationQuaternion;
+	velocity = XMLoadFloat3(&m_velocity);
+	xmf4RotationQuaternion = l_transform->GetRotationQuaternion(Space::local);
+	rotationQuaternion = XMLoadFloat4(&xmf4RotationQuaternion);
+	velocity = XMVector3Rotate(velocity, rotationQuaternion);
+	XMStoreFloat3(&xmf3Velocity, velocity);
+
+	XMFLOAT3 xmf3Move = Vector3::Multiply(fTimeElapsed, xmf3Velocity);
+	l_transform->Translate(xmf3Move);
+	m.x = xmf3Move.x;
+	m.y = xmf3Move.y;
+	m.z = xmf3Move.z;
+
 
 	// check who move
 	for (int i = 0; i < SCV::max_user; ++i)

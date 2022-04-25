@@ -50,6 +50,7 @@ public:
 
 	vector<Component*> m_vecComponents;
 	int				m_id;
+	float m_timeElapsed;
 };
 
 class Screen {
