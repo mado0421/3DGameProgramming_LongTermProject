@@ -1,5 +1,5 @@
 #pragma once
-
+#pragma warning(disable:4996)
 // 라이브러리
 #pragma comment(lib, "d3dcompiler.lib")
 #pragma comment(lib, "d3d12.lib")
