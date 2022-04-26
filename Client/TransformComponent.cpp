@@ -98,6 +98,26 @@ void TransformComponent::RotateXYZDegree(float fX, float fY, float fZ)
 	m_xmf4x4Local._31 = xmf3Look.x;		m_xmf4x4Local._32 = xmf3Look.y;		m_xmf4x4Local._33 = xmf3Look.z;
 }
 
+void TransformComponent::Rotate(const XMFLOAT4& xmf4Quaternion)
+{
+	XMMATRIX xmmtxRotate = XMMatrixRotationQuaternion(XMLoadFloat4(&xmf4Quaternion));
+
+	XMFLOAT3 xmf3Right = XMFLOAT3(m_xmf4x4Local._11, m_xmf4x4Local._12, m_xmf4x4Local._13);
+	XMFLOAT3 xmf3Up = XMFLOAT3(m_xmf4x4Local._21, m_xmf4x4Local._22, m_xmf4x4Local._23);
+	XMFLOAT3 xmf3Look = XMFLOAT3(m_xmf4x4Local._31, m_xmf4x4Local._32, m_xmf4x4Local._33);
+
+	xmf3Look = Vector3::TransformNormal(xmf3Look, xmmtxRotate);
+	xmf3Right = Vector3::TransformNormal(xmf3Right, xmmtxRotate);
+
+	xmf3Look = Vector3::Normalize(xmf3Look);
+	xmf3Right = Vector3::CrossProduct(xmf3Up, xmf3Look, true);
+	xmf3Up = Vector3::CrossProduct(xmf3Look, xmf3Right, true);
+
+	m_xmf4x4Local._11 = xmf3Right.x;	m_xmf4x4Local._12 = xmf3Right.y;	m_xmf4x4Local._13 = xmf3Right.z;
+	m_xmf4x4Local._21 = xmf3Up.x;		m_xmf4x4Local._22 = xmf3Up.y;		m_xmf4x4Local._23 = xmf3Up.z;
+	m_xmf4x4Local._31 = xmf3Look.x;		m_xmf4x4Local._32 = xmf3Look.y;		m_xmf4x4Local._33 = xmf3Look.z;
+}
+
 XMMATRIX TransformComponent::GetLocalTransform()
 {
 	return XMLoadFloat4x4(&m_xmf4x4Local);

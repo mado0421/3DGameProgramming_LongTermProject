@@ -19,6 +19,7 @@
 #include "EnemyDownCounter.h"
 #include "EventComponent.h"
 #include "TextUI.h"
+#include "GameManagerComponent.h"
 
 #include "Character.h"
 #include "Object.h"

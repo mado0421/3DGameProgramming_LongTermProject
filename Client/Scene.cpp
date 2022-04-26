@@ -101,6 +101,8 @@ void Scene::Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12Graphics
 	g_TextureMng.LoadFromFile("defaultDiffuseMap", m_pd3dDevice, m_pd3dCommandList, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
 	g_TextureMng.LoadFromFile("defaultNormalMap", m_pd3dDevice, m_pd3dCommandList, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
 	g_TextureMng.LoadFromFile("defaultSpecularMap", m_pd3dDevice, m_pd3dCommandList, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
+	g_TextureMng.LoadFromFile("titleImage_rescale", m_pd3dDevice, m_pd3dCommandList, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
+	g_TextureMng.LoadFromFile("endImage_rescale", m_pd3dDevice, m_pd3dCommandList, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
 
 	/*========================================================================
 	* 마테리얼
@@ -231,6 +233,10 @@ void Scene::Input(UCHAR* pKeyBuffer)
 
 	if (pKeyBuffer[KeyCode::_M] & 0xF0) { TEST_MOUSE_USABLE = true; ShowCursor(false); }
 	if (pKeyBuffer[KeyCode::_N] & 0xF0) { TEST_MOUSE_USABLE = false; ShowCursor(true); }
+
+	if (1 == startEndState) {
+		if (pKeyBuffer[KeyCode::_Space] & 0xF0) { startEndState = 0; TEST_MOUSE_USABLE = true; ShowCursor(false); }
+	}
 }
 void Scene::Update(float fTimeElapsed)
 {
@@ -428,16 +434,13 @@ void Scene::Render(D3D12_CPU_DESCRIPTOR_HANDLE hBckBufRtv, D3D12_CPU_DESCRIPTOR_
 
 
 	/*========================================================================
-	* Pass 2. 파티클 & 이펙트 렌더?
+	* Pass 2. 파티클 & 이펙트 렌더
 	*=======================================================================*/
 	m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["Effect"]);
 	for (auto iter = m_vecEffectRenderGroup.begin(); iter != m_vecEffectRenderGroup.end(); iter++) (*iter)->Render(m_pd3dCommandList);
 	m_pd3dCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_POINTLIST);
 	m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["Particle"]);
 	for (auto iter = m_vecParticleEmitter.begin(); iter != m_vecParticleEmitter.end(); iter++) (*iter)->Render(m_pd3dCommandList);
-
-	m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["Text"]);
-	for (auto iter = m_vecUIRenderGroup.begin(); iter != m_vecUIRenderGroup.end(); iter++) (*iter)->Render(m_pd3dCommandList);
 	m_pd3dCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	/*========================================================================
@@ -621,15 +624,30 @@ void Scene::Render(D3D12_CPU_DESCRIPTOR_HANDLE hBckBufRtv, D3D12_CPU_DESCRIPTOR_
 		d3dResourceBarrier[0].Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
 		m_pd3dCommandList->ResourceBarrier(1, d3dResourceBarrier);
 
+		///*========================================================================
+		//* Pass 2. Text UI 렌더
+		//*=======================================================================*/
+		m_pd3dCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_POINTLIST);
 
+		m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["Text"]);
+		for (auto iter = m_vecUIRenderGroup.begin(); iter != m_vecUIRenderGroup.end(); iter++) (*iter)->Render(m_pd3dCommandList);
+		m_pd3dCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
+		/*========================================================================
+		* Pass 2. Title Card or End Card Render
+		*=======================================================================*/
+		if (startEndState) {
 
+			m_pd3dCommandList->SetGraphicsRootSignature(m_pd3dRootSignature);
+			m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["SRToRt"]);
 
+			if (1 == startEndState) g_TextureMng.UseForShaderResource("titleImage_rescale", m_pd3dCommandList, ROOTSIGNATURE_COLOR_TEXTURE);
+			else g_TextureMng.UseForShaderResource("endImage_rescale", m_pd3dCommandList, ROOTSIGNATURE_COLOR_TEXTURE);
 
-
-
-
-
+			m_pd3dCommandList->ClearDepthStencilView(hBckBufDsv, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
+			m_pd3dCommandList->OMSetRenderTargets(1, &hBckBufRtv, TRUE, &hBckBufDsv);
+			m_vecScreenObject[0]->Render(m_pd3dCommandList);
+		}
 	}
 	else {
 		m_pd3dCommandList->SetGraphicsRootSignature(m_pd3dRootSignature);
@@ -1005,6 +1023,12 @@ void Scene::BuildObject()
 	//	m_vecParticleEmitter.push_back(pe);
 	//}
 
+
+
+
+
+
+
 	{
 		// muzzle, empty object for weapon
 		Object* muzzle = new Object("muzzle");
@@ -1082,405 +1106,39 @@ void Scene::BuildObject()
 	}
 
 
-	{
-		Object* targetBoard = new Object("TB0");
 
-		TransformComponent* transform = new TransformComponent(targetBoard);
-		SkinnedMeshRendererComponent* skinnedMeshRenderer = new SkinnedMeshRendererComponent(
-			targetBoard, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
-		// SkinnedMeshRenderer가 작동하려면 Animator가 있어야 함!
-		// TBAC가 작동하려면 TargetBoardController가 있어야 함!
-		TargetBoardControllerComponent* TCC = new TargetBoardControllerComponent(targetBoard);
-		TargetBoardAnimatorComponent* TAC = new TargetBoardAnimatorComponent(targetBoard, "targetBoardStand");
-		BoxColliderComponent* bodyCollider = new BoxColliderComponent(
-			targetBoard, XMFLOAT3(0, 0.5f, 0), XMFLOAT3(0.3f, 0.5f, 0.1f), XMFLOAT4(0, 0, 0, 1), false, TAC, 1);
-		BoxColliderComponent* headCollider = new BoxColliderComponent(
-			targetBoard, XMFLOAT3(0, 1.2f, 0), XMFLOAT3(0.15f, 0.2f, 0.1f), XMFLOAT4(0, 0, 0, 1), false, TAC, 1);
+	CreateTargetBoard("TB0", XMFLOAT3(-4, 0.5f, -20), XMFLOAT3(0, 270, 0), true,
+		m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
+	CreateTargetBoard("TB1", XMFLOAT3(-10.5, 0.5f, -24), XMFLOAT3(0, 300, 0), true,
+		m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
+	CreateTargetBoard("TB2", XMFLOAT3(-13, 0.5f, -22), XMFLOAT3(0, 270, 0), true,
+		m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
+	CreateTargetBoard("TB3", XMFLOAT3(-11.8, 0.5f, -19.7), XMFLOAT3(0, 240, 0), true,
+		m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
 
-		skinnedMeshRenderer->SetModelByName("targetBoardStand");
-		skinnedMeshRenderer->SetMaterialByName("TargetBoardMat");
-		transform->Translate(-4, 0.5f, -20);
-		transform->RotateXYZDegree(0, 270, 0);
-		TCC->Die();
+	CreateTargetBoard("TB4", XMFLOAT3(-17.1, 0.5f, -22), XMFLOAT3(0, 0, 0), true,
+		m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
+	CreateTargetBoard("TB5", XMFLOAT3(-19.5, 0.5f, -25.3), XMFLOAT3(0, 0, 0), true,
+		m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
+	CreateTargetBoard("TB6", XMFLOAT3(-23.8, 0.5f, -25.3), XMFLOAT3(0, 0, 0), true,
+		m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
+	CreateTargetBoard("TB7", XMFLOAT3(-26.5, 0.5f, -21.7), XMFLOAT3(0, 0, 0), true,
+		m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
 
-		m_vecObject.push_back(targetBoard);
-		m_vecAnimObjectRenderGroup.push_back(targetBoard);
-	}
+	CreateTargetBoard("TB8", XMFLOAT3(-11.8, 0.5f, -13), XMFLOAT3(0, 70, 0), true,
+		m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
+	CreateTargetBoard("TB9", XMFLOAT3(-10.6, 0.5f, -7.1), XMFLOAT3(0, 70, 0), true,
+		m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
+	CreateTargetBoard("TB10", XMFLOAT3(-14.9, 0.5f, -8.2), XMFLOAT3(0, 90, 0), true,
+		m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
 
-	{
-		Object* targetBoard = new Object("TB1");
+	CreateTargetBoard("TB11", XMFLOAT3(-19.5, 0.5f, -13), XMFLOAT3(0, 80, 0), true,
+		m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
+	CreateTargetBoard("TB12", XMFLOAT3(-22.6, 0.5f, -7.1), XMFLOAT3(0, 90, 0), true,
+		m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
 
-		TransformComponent* transform = new TransformComponent(targetBoard);
-		SkinnedMeshRendererComponent* skinnedMeshRenderer = new SkinnedMeshRendererComponent(
-			targetBoard, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
-		// SkinnedMeshRenderer가 작동하려면 Animator가 있어야 함!
-		// TBAC가 작동하려면 TargetBoardController가 있어야 함!
-		TargetBoardControllerComponent* TCC = new TargetBoardControllerComponent(targetBoard);
-		TargetBoardAnimatorComponent* TAC = new TargetBoardAnimatorComponent(targetBoard, "targetBoardStand");
-		BoxColliderComponent* bodyCollider = new BoxColliderComponent(
-			targetBoard, XMFLOAT3(0, 0.5f, 0), XMFLOAT3(0.3f, 0.5f, 0.1f), XMFLOAT4(0, 0, 0, 1), false, TAC, 1);
-		BoxColliderComponent* headCollider = new BoxColliderComponent(
-			targetBoard, XMFLOAT3(0, 1.2f, 0), XMFLOAT3(0.15f, 0.2f, 0.1f), XMFLOAT4(0, 0, 0, 1), false, TAC, 1);
 
-		skinnedMeshRenderer->SetModelByName("targetBoardStand");
-		skinnedMeshRenderer->SetMaterialByName("TargetBoardMat");
-		transform->Translate(-10.5, 0.5f, -24);
-		transform->RotateXYZDegree(0, 300, 0);
-		TCC->Die();
-
-		m_vecObject.push_back(targetBoard);
-		m_vecAnimObjectRenderGroup.push_back(targetBoard);
-	}
-	{
-		Object* targetBoard = new Object("TB2");
-
-		TransformComponent* transform = new TransformComponent(targetBoard);
-		SkinnedMeshRendererComponent* skinnedMeshRenderer = new SkinnedMeshRendererComponent(
-			targetBoard, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
-		// SkinnedMeshRenderer가 작동하려면 Animator가 있어야 함!
-		// TBAC가 작동하려면 TargetBoardController가 있어야 함!
-		TargetBoardControllerComponent* TCC = new TargetBoardControllerComponent(targetBoard);
-		TargetBoardAnimatorComponent* TAC = new TargetBoardAnimatorComponent(targetBoard, "targetBoardStand");
-		BoxColliderComponent* bodyCollider = new BoxColliderComponent(
-			targetBoard, XMFLOAT3(0, 0.5f, 0), XMFLOAT3(0.3f, 0.5f, 0.1f), XMFLOAT4(0, 0, 0, 1), false, TAC, 1);
-		BoxColliderComponent* headCollider = new BoxColliderComponent(
-			targetBoard, XMFLOAT3(0, 1.2f, 0), XMFLOAT3(0.15f, 0.2f, 0.1f), XMFLOAT4(0, 0, 0, 1), false, TAC, 1);
-
-		skinnedMeshRenderer->SetModelByName("targetBoardStand");
-		skinnedMeshRenderer->SetMaterialByName("TargetBoardMat");
-		transform->Translate(-13, 0.5f, -22);
-		transform->RotateXYZDegree(0, 270, 0);
-		TCC->Die();
-
-		m_vecObject.push_back(targetBoard);
-		m_vecAnimObjectRenderGroup.push_back(targetBoard);
-	}
-	{
-		Object* targetBoard = new Object("TB3");
-
-		TransformComponent* transform = new TransformComponent(targetBoard);
-		SkinnedMeshRendererComponent* skinnedMeshRenderer = new SkinnedMeshRendererComponent(
-			targetBoard, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
-		// SkinnedMeshRenderer가 작동하려면 Animator가 있어야 함!
-		// TBAC가 작동하려면 TargetBoardController가 있어야 함!
-		TargetBoardControllerComponent* TCC = new TargetBoardControllerComponent(targetBoard);
-		TargetBoardAnimatorComponent* TAC = new TargetBoardAnimatorComponent(targetBoard, "targetBoardStand");
-		BoxColliderComponent* bodyCollider = new BoxColliderComponent(
-			targetBoard, XMFLOAT3(0, 0.5f, 0), XMFLOAT3(0.3f, 0.5f, 0.1f), XMFLOAT4(0, 0, 0, 1), false, TAC, 1);
-		BoxColliderComponent* headCollider = new BoxColliderComponent(
-			targetBoard, XMFLOAT3(0, 1.2f, 0), XMFLOAT3(0.15f, 0.2f, 0.1f), XMFLOAT4(0, 0, 0, 1), false, TAC, 1);
-
-		skinnedMeshRenderer->SetModelByName("targetBoardStand");
-		skinnedMeshRenderer->SetMaterialByName("TargetBoardMat");
-		transform->Translate(-11.8, 0.5f, -19.7);
-		transform->RotateXYZDegree(0, 240, 0);
-		TCC->Die();
-
-		m_vecObject.push_back(targetBoard);
-		m_vecAnimObjectRenderGroup.push_back(targetBoard);
-	}
-
-	//room 3
-	{
-		Object* targetBoard = new Object("TB4");
-
-		TransformComponent* transform = new TransformComponent(targetBoard);
-		SkinnedMeshRendererComponent* skinnedMeshRenderer = new SkinnedMeshRendererComponent(
-			targetBoard, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
-		// SkinnedMeshRenderer가 작동하려면 Animator가 있어야 함!
-		// TBAC가 작동하려면 TargetBoardController가 있어야 함!
-		TargetBoardControllerComponent* TCC = new TargetBoardControllerComponent(targetBoard);
-		TargetBoardAnimatorComponent* TAC = new TargetBoardAnimatorComponent(targetBoard, "targetBoardStand");
-		BoxColliderComponent* bodyCollider = new BoxColliderComponent(
-			targetBoard, XMFLOAT3(0, 0.5f, 0), XMFLOAT3(0.3f, 0.5f, 0.1f), XMFLOAT4(0, 0, 0, 1), false, TAC, 1);
-		BoxColliderComponent* headCollider = new BoxColliderComponent(
-			targetBoard, XMFLOAT3(0, 1.2f, 0), XMFLOAT3(0.15f, 0.2f, 0.1f), XMFLOAT4(0, 0, 0, 1), false, TAC, 1);
-
-		skinnedMeshRenderer->SetModelByName("targetBoardStand");
-		skinnedMeshRenderer->SetMaterialByName("TargetBoardMat");
-		transform->Translate(-17.1, 0.5f, -22);
-		TCC->Die();
-
-		m_vecObject.push_back(targetBoard);
-		m_vecAnimObjectRenderGroup.push_back(targetBoard);
-	}
-	{
-		Object* targetBoard = new Object("TB5");
-
-		TransformComponent* transform = new TransformComponent(targetBoard);
-		SkinnedMeshRendererComponent* skinnedMeshRenderer = new SkinnedMeshRendererComponent(
-			targetBoard, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
-		// SkinnedMeshRenderer가 작동하려면 Animator가 있어야 함!
-		// TBAC가 작동하려면 TargetBoardController가 있어야 함!
-		TargetBoardControllerComponent* TCC = new TargetBoardControllerComponent(targetBoard);
-		TargetBoardAnimatorComponent* TAC = new TargetBoardAnimatorComponent(targetBoard, "targetBoardStand");
-		BoxColliderComponent* bodyCollider = new BoxColliderComponent(
-			targetBoard, XMFLOAT3(0, 0.5f, 0), XMFLOAT3(0.3f, 0.5f, 0.1f), XMFLOAT4(0, 0, 0, 1), false, TAC, 1);
-		BoxColliderComponent* headCollider = new BoxColliderComponent(
-			targetBoard, XMFLOAT3(0, 1.2f, 0), XMFLOAT3(0.15f, 0.2f, 0.1f), XMFLOAT4(0, 0, 0, 1), false, TAC, 1);
-
-		skinnedMeshRenderer->SetModelByName("targetBoardStand");
-		skinnedMeshRenderer->SetMaterialByName("TargetBoardMat");
-		transform->Translate(-19.5, 0.5f, -25.3);
-		TCC->Die();
-
-		m_vecObject.push_back(targetBoard);
-		m_vecAnimObjectRenderGroup.push_back(targetBoard);
-	}
-	{
-		Object* targetBoard = new Object("TB6");
-
-		TransformComponent* transform = new TransformComponent(targetBoard);
-		SkinnedMeshRendererComponent* skinnedMeshRenderer = new SkinnedMeshRendererComponent(
-			targetBoard, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
-		// SkinnedMeshRenderer가 작동하려면 Animator가 있어야 함!
-		// TBAC가 작동하려면 TargetBoardController가 있어야 함!
-		TargetBoardControllerComponent* TCC = new TargetBoardControllerComponent(targetBoard);
-		TargetBoardAnimatorComponent* TAC = new TargetBoardAnimatorComponent(targetBoard, "targetBoardStand");
-		BoxColliderComponent* bodyCollider = new BoxColliderComponent(
-			targetBoard, XMFLOAT3(0, 0.5f, 0), XMFLOAT3(0.3f, 0.5f, 0.1f), XMFLOAT4(0, 0, 0, 1), false, TAC, 1);
-		BoxColliderComponent* headCollider = new BoxColliderComponent(
-			targetBoard, XMFLOAT3(0, 1.2f, 0), XMFLOAT3(0.15f, 0.2f, 0.1f), XMFLOAT4(0, 0, 0, 1), false, TAC, 1);
-
-		skinnedMeshRenderer->SetModelByName("targetBoardStand");
-		skinnedMeshRenderer->SetMaterialByName("TargetBoardMat");
-		transform->Translate(-23.8, 0.5f, -25.3);
-		TCC->Die();
-
-		m_vecObject.push_back(targetBoard);
-		m_vecAnimObjectRenderGroup.push_back(targetBoard);
-	}
-	{
-		Object* targetBoard = new Object("TB7");
-
-		TransformComponent* transform = new TransformComponent(targetBoard);
-		SkinnedMeshRendererComponent* skinnedMeshRenderer = new SkinnedMeshRendererComponent(
-			targetBoard, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
-		// SkinnedMeshRenderer가 작동하려면 Animator가 있어야 함!
-		// TBAC가 작동하려면 TargetBoardController가 있어야 함!
-		TargetBoardControllerComponent* TCC = new TargetBoardControllerComponent(targetBoard);
-		TargetBoardAnimatorComponent* TAC = new TargetBoardAnimatorComponent(targetBoard, "targetBoardStand");
-		BoxColliderComponent* bodyCollider = new BoxColliderComponent(
-			targetBoard, XMFLOAT3(0, 0.5f, 0), XMFLOAT3(0.3f, 0.5f, 0.1f), XMFLOAT4(0, 0, 0, 1), false, TAC, 1);
-		BoxColliderComponent* headCollider = new BoxColliderComponent(
-			targetBoard, XMFLOAT3(0, 1.2f, 0), XMFLOAT3(0.15f, 0.2f, 0.1f), XMFLOAT4(0, 0, 0, 1), false, TAC, 1);
-
-		skinnedMeshRenderer->SetModelByName("targetBoardStand");
-		skinnedMeshRenderer->SetMaterialByName("TargetBoardMat");
-		transform->Translate(-26.5, 0.5f, -21.7);
-		TCC->Die();
-
-		m_vecObject.push_back(targetBoard);
-		m_vecAnimObjectRenderGroup.push_back(targetBoard);
-	}
-
-	//room 4
-	{
-		Object* targetBoard = new Object("TB8");
-
-		TransformComponent* transform = new TransformComponent(targetBoard);
-		SkinnedMeshRendererComponent* skinnedMeshRenderer = new SkinnedMeshRendererComponent(
-			targetBoard, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
-		// SkinnedMeshRenderer가 작동하려면 Animator가 있어야 함!
-		// TBAC가 작동하려면 TargetBoardController가 있어야 함!
-		TargetBoardControllerComponent* TCC = new TargetBoardControllerComponent(targetBoard);
-		TargetBoardAnimatorComponent* TAC = new TargetBoardAnimatorComponent(targetBoard, "targetBoardStand");
-		BoxColliderComponent* bodyCollider = new BoxColliderComponent(
-			targetBoard, XMFLOAT3(0, 0.5f, 0), XMFLOAT3(0.3f, 0.5f, 0.1f), XMFLOAT4(0, 0, 0, 1), false, TAC, 1);
-		BoxColliderComponent* headCollider = new BoxColliderComponent(
-			targetBoard, XMFLOAT3(0, 1.2f, 0), XMFLOAT3(0.15f, 0.2f, 0.1f), XMFLOAT4(0, 0, 0, 1), false, TAC, 1);
-
-		skinnedMeshRenderer->SetModelByName("targetBoardStand");
-		skinnedMeshRenderer->SetMaterialByName("TargetBoardMat");
-		transform->Translate(-11.8, 0.5f, -13);
-		transform->RotateXYZDegree(0, 70, 0);
-		TCC->Die();
-
-		m_vecObject.push_back(targetBoard);
-		m_vecAnimObjectRenderGroup.push_back(targetBoard);
-	}
-	{
-		Object* targetBoard = new Object("TB9");
-
-		TransformComponent* transform = new TransformComponent(targetBoard);
-		SkinnedMeshRendererComponent* skinnedMeshRenderer = new SkinnedMeshRendererComponent(
-			targetBoard, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
-		// SkinnedMeshRenderer가 작동하려면 Animator가 있어야 함!
-		// TBAC가 작동하려면 TargetBoardController가 있어야 함!
-		TargetBoardControllerComponent* TCC = new TargetBoardControllerComponent(targetBoard);
-		TargetBoardAnimatorComponent* TAC = new TargetBoardAnimatorComponent(targetBoard, "targetBoardStand");
-		BoxColliderComponent* bodyCollider = new BoxColliderComponent(
-			targetBoard, XMFLOAT3(0, 0.5f, 0), XMFLOAT3(0.3f, 0.5f, 0.1f), XMFLOAT4(0, 0, 0, 1), false, TAC, 1);
-		BoxColliderComponent* headCollider = new BoxColliderComponent(
-			targetBoard, XMFLOAT3(0, 1.2f, 0), XMFLOAT3(0.15f, 0.2f, 0.1f), XMFLOAT4(0, 0, 0, 1), false, TAC, 1);
-
-		skinnedMeshRenderer->SetModelByName("targetBoardStand");
-		skinnedMeshRenderer->SetMaterialByName("TargetBoardMat");
-		transform->Translate(-10.6, 0.5f, -7.1);
-		transform->RotateXYZDegree(0, 70, 0);
-		TCC->Die();
-
-		m_vecObject.push_back(targetBoard);
-		m_vecAnimObjectRenderGroup.push_back(targetBoard);
-	}
-	{
-		Object* targetBoard = new Object("TB10");
-
-		TransformComponent* transform = new TransformComponent(targetBoard);
-		SkinnedMeshRendererComponent* skinnedMeshRenderer = new SkinnedMeshRendererComponent(
-			targetBoard, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
-		// SkinnedMeshRenderer가 작동하려면 Animator가 있어야 함!
-		// TBAC가 작동하려면 TargetBoardController가 있어야 함!
-		TargetBoardControllerComponent* TCC = new TargetBoardControllerComponent(targetBoard);
-		TargetBoardAnimatorComponent* TAC = new TargetBoardAnimatorComponent(targetBoard, "targetBoardStand");
-		BoxColliderComponent* bodyCollider = new BoxColliderComponent(
-			targetBoard, XMFLOAT3(0, 0.5f, 0), XMFLOAT3(0.3f, 0.5f, 0.1f), XMFLOAT4(0, 0, 0, 1), false, TAC, 1);
-		BoxColliderComponent* headCollider = new BoxColliderComponent(
-			targetBoard, XMFLOAT3(0, 1.2f, 0), XMFLOAT3(0.15f, 0.2f, 0.1f), XMFLOAT4(0, 0, 0, 1), false, TAC, 1);
-
-		skinnedMeshRenderer->SetModelByName("targetBoardStand");
-		skinnedMeshRenderer->SetMaterialByName("TargetBoardMat");
-		transform->Translate(-14.9, 0.5f, -8.2);
-		transform->RotateXYZDegree(0, 90, 0);
-		TCC->Die();
-
-		m_vecObject.push_back(targetBoard);
-		m_vecAnimObjectRenderGroup.push_back(targetBoard);
-	}
-	{
-		Object* targetBoard = new Object("TB11");
-
-		TransformComponent* transform = new TransformComponent(targetBoard);
-		SkinnedMeshRendererComponent* skinnedMeshRenderer = new SkinnedMeshRendererComponent(
-			targetBoard, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
-		// SkinnedMeshRenderer가 작동하려면 Animator가 있어야 함!
-		// TBAC가 작동하려면 TargetBoardController가 있어야 함!
-		TargetBoardControllerComponent* TCC = new TargetBoardControllerComponent(targetBoard);
-		TargetBoardAnimatorComponent* TAC = new TargetBoardAnimatorComponent(targetBoard, "targetBoardStand");
-		BoxColliderComponent* bodyCollider = new BoxColliderComponent(
-			targetBoard, XMFLOAT3(0, 0.5f, 0), XMFLOAT3(0.3f, 0.5f, 0.1f), XMFLOAT4(0, 0, 0, 1), false, TAC, 1);
-		BoxColliderComponent* headCollider = new BoxColliderComponent(
-			targetBoard, XMFLOAT3(0, 1.2f, 0), XMFLOAT3(0.15f, 0.2f, 0.1f), XMFLOAT4(0, 0, 0, 1), false, TAC, 1);
-
-		skinnedMeshRenderer->SetModelByName("targetBoardStand");
-		skinnedMeshRenderer->SetMaterialByName("TargetBoardMat");
-		transform->Translate(-19.5, 0.5f, -13);
-		transform->RotateXYZDegree(0, 80, 0);
-		TCC->Die();
-
-		m_vecObject.push_back(targetBoard);
-		m_vecAnimObjectRenderGroup.push_back(targetBoard);
-	}
-	{
-		Object* targetBoard = new Object("TB12");
-
-		TransformComponent* transform = new TransformComponent(targetBoard);
-		SkinnedMeshRendererComponent* skinnedMeshRenderer = new SkinnedMeshRendererComponent(
-			targetBoard, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
-		// SkinnedMeshRenderer가 작동하려면 Animator가 있어야 함!
-		// TBAC가 작동하려면 TargetBoardController가 있어야 함!
-		TargetBoardControllerComponent* TCC = new TargetBoardControllerComponent(targetBoard);
-		TargetBoardAnimatorComponent* TAC = new TargetBoardAnimatorComponent(targetBoard, "targetBoardStand");
-		BoxColliderComponent* bodyCollider = new BoxColliderComponent(
-			targetBoard, XMFLOAT3(0, 0.5f, 0), XMFLOAT3(0.3f, 0.5f, 0.1f), XMFLOAT4(0, 0, 0, 1), false, TAC, 1);
-		BoxColliderComponent* headCollider = new BoxColliderComponent(
-			targetBoard, XMFLOAT3(0, 1.2f, 0), XMFLOAT3(0.15f, 0.2f, 0.1f), XMFLOAT4(0, 0, 0, 1), false, TAC, 1);
-
-		skinnedMeshRenderer->SetModelByName("targetBoardStand");
-		skinnedMeshRenderer->SetMaterialByName("TargetBoardMat");
-		transform->Translate(-22.6, 0.5f, -7.1);
-		transform->RotateXYZDegree(0, 90, 0);
-		TCC->Die();
-
-		m_vecObject.push_back(targetBoard);
-		m_vecAnimObjectRenderGroup.push_back(targetBoard);
-	}
-
-	// Env
-	{
-		Object* env = new Object();
-
-		TransformComponent* transform = new TransformComponent(env);
-		MeshRendererComponent* mrc = new MeshRendererComponent(env, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
-
-		mrc->SetModelByName("tutorialHouse_floor");
-		mrc->SetMaterialByName("floorMat");
-
-		m_vecObject.push_back(env);
-		m_vecNonAnimObjectRenderGroup.push_back(env);
-	}
-	{
-		Object* env = new Object();
-
-		TransformComponent* transform = new TransformComponent(env);
-		MeshRendererComponent* mrc = new MeshRendererComponent(env, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
-
-		mrc->SetModelByName("tutorialHouse_wall");
-		mrc->SetMaterialByName("wallMat");
-
-		m_vecObject.push_back(env);
-		m_vecNonAnimObjectRenderGroup.push_back(env);
-	}
-	{
-		Object* env = new Object();
-
-		TransformComponent* transform = new TransformComponent(env);
-		MeshRendererComponent* mrc = new MeshRendererComponent(env, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
-
-		mrc->SetModelByName("tutorialHouse_ceiling");
-		mrc->SetMaterialByName("ceilingMat");
-
-		m_vecObject.push_back(env);
-		m_vecNonAnimObjectRenderGroup.push_back(env);
-	}
-	{
-		Object* env = new Object();
-
-		TransformComponent* transform = new TransformComponent(env);
-		MeshRendererComponent* mrc = new MeshRendererComponent(env, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
-
-		mrc->SetModelByName("tutorialHouse_doorFrame");
-		mrc->SetMaterialByName("Concrete_Door");
-
-		m_vecObject.push_back(env);
-		m_vecNonAnimObjectRenderGroup.push_back(env);
-	}
-	{
-		Object* env = new Object();
-
-		TransformComponent* transform = new TransformComponent(env);
-		MeshRendererComponent* mrc = new MeshRendererComponent(env, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
-
-		mrc->SetModelByName("tutorialHouse_fence");
-		mrc->SetMaterialByName("Wooden_fence");
-		transform->Translate(0, -0.3f, 0);
-
-		m_vecObject.push_back(env);
-		m_vecNonAnimObjectRenderGroup.push_back(env);
-	}
-	{
-		Object* env = new Object();
-
-		TransformComponent* transform = new TransformComponent(env);
-		MeshRendererComponent* mrc = new MeshRendererComponent(env, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
-
-		mrc->SetModelByName("tutorialHouse_outerFloor");
-		mrc->SetMaterialByName("outerFloorMat");
-
-		m_vecObject.push_back(env);
-		m_vecNonAnimObjectRenderGroup.push_back(env);
-	}
-	{
-		Object* env = new Object();
-
-		TransformComponent* transform = new TransformComponent(env);
-		MeshRendererComponent* mrc = new MeshRendererComponent(env, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
-		mrc->SetModelByName("tutorialHouse_outerWall");
-		mrc->SetMaterialByName("outerWallMat");
-
-		m_vecObject.push_back(env);
-		m_vecNonAnimObjectRenderGroup.push_back(env);
-	}
+	LoadLevelEnvironment();
 
 	// Door
 	{
@@ -1663,332 +1321,50 @@ void Scene::BuildObject()
 	}
 
 
-	//{
-	//	Object* box = new Object();
-
-	//	TransformComponent* transform = new TransformComponent(box);
-	//	transform->Translate(XMFLOAT3(-5.55, 0, -12));
-	//	BoxColliderComponent* boxCollider00 = new BoxColliderComponent(box, XMFLOAT3(0, 1.5f, 0), XMFLOAT3(6.5 * 0.5, 1.5f, 5 * 0.5), XMFLOAT4(0, 0, 0, 1));
-
-	//	m_vecObject.push_back(box);
-	//	m_vecNonAnimObjectRenderGroup.push_back(box);
-	//}
-	//{
-	//	Object* box = new Object();
-
-	//	TransformComponent* transform = new TransformComponent(box);
-	//	transform->Translate(XMFLOAT3(-4.7, 0, -16));
-	//	BoxColliderComponent* boxCollider00 = new BoxColliderComponent(box, XMFLOAT3(0, 1.5f, 0), XMFLOAT3(2.0 * 0.5, 1.5f, 3.3 * 0.5), XMFLOAT4(0, 0, 0, 1));
-
-	//	m_vecObject.push_back(box);
-	//	m_vecNonAnimObjectRenderGroup.push_back(box);
-	//}
-	//{
-	//	Object* box = new Object();
-
-	//	TransformComponent* transform = new TransformComponent(box);
-	//	transform->Translate(XMFLOAT3(-5.9, 0, -19.5));
-	//	BoxColliderComponent* boxCollider00 = new BoxColliderComponent(box, XMFLOAT3(0, 1.5f, 0), XMFLOAT3(5.0 * 0.5, 1.5f, 0.7 * 0.5), XMFLOAT4(0, 0, 0, 1));
-
-	//	m_vecObject.push_back(box);
-	//	m_vecNonAnimObjectRenderGroup.push_back(box);
-	//}
-
-
-	//{
-	//	Object* box = new Object();
-
-	//	TransformComponent* transform = new TransformComponent(box);
-	//	transform->Translate(XMFLOAT3(-0.319, 0, 12.337));
-	//	BoxColliderComponent* boxCollider00 = new BoxColliderComponent(box, XMFLOAT3(0, 1.5f, 0), XMFLOAT3(25.954 * 0.5, 1.5f, 0.53 * 0.5), XMFLOAT4(0, 0, 0, 1));
-
-	//	m_vecObject.push_back(box);
-	//	m_vecNonAnimObjectRenderGroup.push_back(box);
-	//} 
-	//{
-	//	Object* box = new Object();
-
-	//	TransformComponent* transform = new TransformComponent(box);
-	//	transform->Translate(XMFLOAT3(14.959, 0, -0.293));
-	//	BoxColliderComponent* boxCollider01 = new BoxColliderComponent(box, XMFLOAT3(0, 1.5f, 0), XMFLOAT3(0.563 * 0.5, 1.5f, 30.026 * 0.5), XMFLOAT4(0, 0, 0, 1));
-
-	//	m_vecObject.push_back(box);
-	//	m_vecNonAnimObjectRenderGroup.push_back(box);
-	//}
-	//{
-	//	Object* box = new Object();
-
-	//	TransformComponent* transform = new TransformComponent(box);
-	//	transform->Translate(XMFLOAT3(7.907, 0, 9.01));
-	//	BoxColliderComponent* boxCollider02 = new BoxColliderComponent(box, XMFLOAT3(0, 1.5f, 0), XMFLOAT3(11.752 * 0.5, 1.5f, 0.497 * 0.5), XMFLOAT4(0, 0, 0, 1));
-
-	//	m_vecObject.push_back(box);
-	//	m_vecNonAnimObjectRenderGroup.push_back(box);
-	//}
-	//{
-	//	Object* box = new Object();
-
-	//	TransformComponent* transform = new TransformComponent(box);
-	//	transform->Translate(XMFLOAT3(6.865, 0, 9.374));
-	//	BoxColliderComponent* boxCollider03 = new BoxColliderComponent(box, XMFLOAT3(0, 1.5f, 0), XMFLOAT3(0.695 * 0.5, 1.5f, 1.655 * 0.5), XMFLOAT4(0, 0, 0, 1));
-
-	//	m_vecObject.push_back(box);
-	//	m_vecNonAnimObjectRenderGroup.push_back(box);
-	//}
-	//{
-	//	Object* box = new Object();
-
-	//	TransformComponent* transform = new TransformComponent(box);
-	//	transform->Translate(XMFLOAT3(-4.531, 0, -12.999));
-	//	BoxColliderComponent* boxCollider04 = new BoxColliderComponent(box, XMFLOAT3(0, 0, 0), XMFLOAT3(7.945 * 0.5, 1.5f, 3.012 * 0.5), XMFLOAT4(0, 0, 0, 1));
-
-	//	m_vecObject.push_back(box);
-	//	m_vecNonAnimObjectRenderGroup.push_back(box);
-	//}
-	//{
-	//	Object* box = new Object();
-
-	//	TransformComponent* transform = new TransformComponent(box);
-	//	transform->Translate(XMFLOAT3(4.531, 0, 12.999));
-	//	BoxColliderComponent* boxCollider04 = new BoxColliderComponent(box, XMFLOAT3(0, 1.5f, 0), XMFLOAT3(7.945 * 0.5, 1.5f, 3.012 * 0.5), XMFLOAT4(0, 0, 0, 1));
-
-	//	m_vecObject.push_back(box);
-	//	m_vecNonAnimObjectRenderGroup.push_back(box);
-	//}
-	//{
-	//	Object* box = new Object();
-
-	//	TransformComponent* transform = new TransformComponent(box);
-	//	transform->Translate(XMFLOAT3(5.855, 0, 19.471));
-	//	BoxColliderComponent* boxCollider05 = new BoxColliderComponent(box, XMFLOAT3(0, 1.5f, 0), XMFLOAT3(5.065 * 0.5, 1.5f, 0.563 * 0.5), XMFLOAT4(0, 0, 0, 1));
-
-	//	m_vecObject.push_back(box);
-	//	m_vecNonAnimObjectRenderGroup.push_back(box);
-	//}
-	//{
-	//	Object* box = new Object();
-
-	//	TransformComponent* transform = new TransformComponent(box);
-	//	transform->Translate(XMFLOAT3(7.494, 0, 25.396));
-	//	BoxColliderComponent* boxCollider06 = new BoxColliderComponent(box, XMFLOAT3(0, 1.5f, 0), XMFLOAT3(0.761 * 0.5, 1.5f, 14.963 * 0.5), XMFLOAT4(0, 0, 0, 1));
-
-	//	m_vecObject.push_back(box);
-	//	m_vecNonAnimObjectRenderGroup.push_back(box);
-	//}
-	//{
-	//	Object* box = new Object();
-
-	//	TransformComponent* transform = new TransformComponent(box);
-	//	transform->Translate(XMFLOAT3(14.826, 0, 21.573));
-	//	BoxColliderComponent* boxCollider07 = new BoxColliderComponent(box, XMFLOAT3(0, 1.5f, 0), XMFLOAT3(6.952 * 0.5, 1.5f, 0.563 * 0.5), XMFLOAT4(0, 0, 0, 1));
-
-	//	m_vecObject.push_back(box);
-	//	m_vecNonAnimObjectRenderGroup.push_back(box);
-	//}
-	//{
-	//	Object* box = new Object();
-
-	//	TransformComponent* transform = new TransformComponent(box);
-	//	transform->Translate(XMFLOAT3(16.018, 0, 14.836));
-	//	BoxColliderComponent* boxCollider08 = new BoxColliderComponent(box, XMFLOAT3(0, 1.5f, 0), XMFLOAT3(0.364 * 0.5, 1.5f, 19.829 * 0.5), XMFLOAT4(0, 0, 0, 1));
-
-	//	m_vecObject.push_back(box);
-	//	m_vecNonAnimObjectRenderGroup.push_back(box);
-	//}
-	//{
-	//	Object* box = new Object();
-
-	//	TransformComponent* transform = new TransformComponent(box);
-	//	transform->Translate(XMFLOAT3(29.342, 0, 14.919));
-	//	BoxColliderComponent* boxCollider09 = new BoxColliderComponent(box, XMFLOAT3(0, 1.5f,0), XMFLOAT3(29.794 * 0.5, 1.5f, 0.662 * 0.5), XMFLOAT4(0, 0, 0, 1));
-
-	//	m_vecObject.push_back(box);
-	//	m_vecNonAnimObjectRenderGroup.push_back(box);
-	//}
-
-
-
-	/*
 	{
-		Object* box = new Object();
-
-		TransformComponent* transform = new TransformComponent(box);
-		MeshRendererComponent* mrc = new MeshRendererComponent(box, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
-		BoxColliderComponent* boxCollider = new BoxColliderComponent(box, XMFLOAT3(0, 0.5f, 0), XMFLOAT3(0.5f, 0.5f, 0.5f), XMFLOAT4(0, 0, 0, 1));
-
-		mrc->SetModelByName("1x1Box_20220104");
-		mrc->SetMaterialByName("BoxMat");
-		transform->Translate(0, 0, 3);
-
-		m_vecObject.push_back(box);
-		m_vecNonAnimObjectRenderGroup.push_back(box);
-	}
-	{
-		Object* box = new Object();
-
-		TransformComponent* transform = new TransformComponent(box);
-		MeshRendererComponent* mrc = new MeshRendererComponent(box, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
-		BoxColliderComponent* boxCollider = new BoxColliderComponent(box, XMFLOAT3(0, 0.5f, 0), XMFLOAT3(0.5f, 0.5f, 0.5f), XMFLOAT4(0, 0, 0, 1));
-
-		mrc->SetModelByName("1x1Box_20220104");
-		mrc->SetMaterialByName("BoxMat");
-		transform->Translate(-2, 0, 2);
-
-		m_vecObject.push_back(box);
-		m_vecNonAnimObjectRenderGroup.push_back(box);
-	}
-	{
-		Object* box = new Object();
-
-		TransformComponent* transform = new TransformComponent(box);
-		MeshRendererComponent* mrc = new MeshRendererComponent(box, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
-		BoxColliderComponent* boxCollider = new BoxColliderComponent(box, XMFLOAT3(0, 0.5f, 0), XMFLOAT3(0.5f, 0.5f, 0.5f), XMFLOAT4(0, 0, 0, 1));
-
-		mrc->SetModelByName("1x1Box_20220104");
-		mrc->SetMaterialByName("BoxMat");
-		transform->Translate(1, 0, 2);
-
-		m_vecObject.push_back(box);
-		m_vecNonAnimObjectRenderGroup.push_back(box);
-	}
-	{
-		Object* box = new Object();
-
-		TransformComponent* transform = new TransformComponent(box);
-		MeshRendererComponent* mrc = new MeshRendererComponent(box, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
-
-		mrc->SetModelByName("1x1Box_20220104");
-		mrc->SetMaterialByName("BoxMat");
-		transform->Translate(1, 1.8f, 2);
-
-		m_vecObject.push_back(box);
-		m_vecNonAnimObjectRenderGroup.push_back(box);
-	}
-
-	{
-		Object* box = new Object();
-
-		TransformComponent* transform = new TransformComponent(box);
-		MeshRendererComponent* mrc = new MeshRendererComponent(box, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
-
-		mrc->SetModelByName("1x1Box_20220104");
-		mrc->SetMaterialByName("BoxMat");
-		transform->Translate(2.7f, 1.8f, -3.0f);
-
-		m_vecObject.push_back(box);
-		m_vecNonAnimObjectRenderGroup.push_back(box);
-	}
-	{
-		Object* room = new Object();
-
-		TransformComponent* transform = new TransformComponent(room);
-		MeshRendererComponent* mrc0 = new MeshRendererComponent(room, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
-		MeshRendererComponent* mrc1 = new MeshRendererComponent(room, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
-		// 0: front, 1: left, 2: back, 3: right
-		BoxColliderComponent* boxCollider0 = new BoxColliderComponent(room, XMFLOAT3(0, 0.5f, 5.0f),	XMFLOAT3(5.0f, 1.0f, 0.5f), XMFLOAT4(0, 0, 0, 1));
-		BoxColliderComponent* boxCollider1 = new BoxColliderComponent(room, XMFLOAT3(5.0f, 0.5f, 0),	XMFLOAT3(0.5f, 1.0f, 5.0f), XMFLOAT4(0, 0, 0, 1));
-		BoxColliderComponent* boxCollider2 = new BoxColliderComponent(room, XMFLOAT3(0, 0.5f, -5.0f),	XMFLOAT3(5.0f, 1.0f, 0.5f), XMFLOAT4(0, 0, 0, 1));
-		BoxColliderComponent* boxCollider3 = new BoxColliderComponent(room, XMFLOAT3(-5.0f, 0.5f, 0),	XMFLOAT3(0.5f, 1.0f, 5.0f), XMFLOAT4(0, 0, 0, 1));
-
-		mrc0->SetModelByName("10x10Floor_20220104");
-		mrc0->SetMaterialByName("CobblestoneMat");
-		mrc1->SetModelByName("10x1wall_around_20220104");
-		mrc1->SetMaterialByName("WallBottomMat");
-
-		m_vecObject.push_back(room);
-		m_vecNonAnimObjectRenderGroup.push_back(room);
-	}
-	{
-		Object* room = new Object();
-
-		TransformComponent* transform = new TransformComponent(room);
-		MeshRendererComponent* mrc = new MeshRendererComponent(room, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
-
-		mrc->SetModelByName("10x1wall_around_20220104");
-		mrc->SetMaterialByName("WallTopMat");
-		transform->Translate(0, 1, 0);
-
-		m_vecObject.push_back(room);
-		m_vecNonAnimObjectRenderGroup.push_back(room);
-	}
-
-	{
-		Object* room = new Object();
-
-		TransformComponent* transform = new TransformComponent(room);
-		MeshRendererComponent* mrc = new MeshRendererComponent(room, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
-
-		mrc->SetModelByName("10x1wall_around_20220104");
-		mrc->SetMaterialByName("WallTopMat");
-		transform->Translate(0, 2, 0);
-
-		m_vecObject.push_back(room);
-		m_vecNonAnimObjectRenderGroup.push_back(room);
-	}
-
-	{
-		Object* room = new Object();
-
-		TransformComponent* transform = new TransformComponent(room);
-		MeshRendererComponent* mrc = new MeshRendererComponent(room, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
-
-		mrc->SetModelByName("10x1wall_around_20220104");
-		mrc->SetMaterialByName("WallTopMat");
-		transform->Translate(0, 3, 0);
-
-		m_vecObject.push_back(room);
-		m_vecNonAnimObjectRenderGroup.push_back(room);
-	}
-	*/
-
-
-
-	{
-		Object* text = new Object("TextInfo");
+		Object* text = new Object("TextHpInfo");
 
 		TransformComponent* transform = new TransformComponent(text);
 		TextRendererComponent* TRC = new TextRendererComponent(text, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
 
 		TRC->Initialize("consolas");
 		TRC->SetMaterialByName("font_consolasMat");
-		TRC->SetText("Consolas. Hello, World!");
-		TRC->SetSize(12);
-		transform->Translate(0, 1080, 0);
+		TRC->SetText("+");
+		TRC->SetSize(16);
+		transform->Translate(990-8, 570-8, 0);
 
 		m_vecObject.push_back(text);
 		m_vecUIRenderGroup.push_back(text);
 	}
+	{
+		Object* text = new Object("TextHpInfo");
 
-	//{
-	//	Object* text = new Object("TextAmmoInfo");
+		TransformComponent* transform = new TransformComponent(text);
+		TextRendererComponent* TRC = new TextRendererComponent(text, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
 
-	//	TransformComponent* transform = new TransformComponent(text);
-	//	TextRendererComponent* TRC = new TextRendererComponent(text, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
-	//	TRC->Initialize("consolas");
-	//	TRC->SetMaterialByName("font_consolasMat");
-	//	TRC->SetSize(12);
-	//	TextUIAmmoComponent* tuiAmmo = new TextUIAmmoComponent(text, FindObjectByName("player"));
-	//	transform->Translate(800, 300, 0);
+		TRC->Initialize("consolas");
+		TRC->SetMaterialByName("font_consolasMat");
+		TRC->SetSize(10);
+		TextUIPlayerHPComponent* tuiHP = new TextUIPlayerHPComponent(text, FindObjectByName("player"));
+		transform->Translate(1200, 300, 0);
 
-	//	m_vecObject.push_back(text);
-	//	m_vecUIRenderGroup.push_back(text);
-	//}
-	//{
-	//	Object* textCounter = new Object("textCounter");
-	//	TransformComponent* transform = new TransformComponent(textCounter);
-	//	TextRendererComponent* TRC = new TextRendererComponent(textCounter, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
-	//	EnemyDownCounter* EDC = new EnemyDownCounter(textCounter);
-	//	TRC->Initialize("consolas");
-	//	TRC->SetMaterialByName("font_consolasMat");
-	//	TRC->SetText("");
-	//	TRC->SetSize(16);
-	//	transform->Translate(0, 1040, 0);
-	//	EDC->AddTarget(FindObjectByName("TB0"));
-	//	EDC->AddTarget(FindObjectByName("TB1"));
-	//	EDC->AddTarget(FindObjectByName("TB2"));
-	//	m_vecObject.push_back(textCounter);
-	//	m_vecUIRenderGroup.push_back(textCounter);
-	//}
+		m_vecObject.push_back(text);
+		m_vecUIRenderGroup.push_back(text);
+	}
+	{
+		Object* text = new Object("TextAmmoInfo");
+
+		TransformComponent* transform = new TransformComponent(text);
+		TextRendererComponent* TRC = new TextRendererComponent(text, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
+		TRC->Initialize("consolas");
+		TRC->SetMaterialByName("font_consolasMat");
+		TRC->SetSize(8);
+		TextUIAmmoComponent* tuiAmmo = new TextUIAmmoComponent(text, FindObjectByName("pistol"));
+		transform->Translate(1200, 270, 0);
+
+		m_vecObject.push_back(text);
+		m_vecUIRenderGroup.push_back(text);
+	}
 }
 
 void Scene::ReloadLight()
@@ -2027,4 +1403,222 @@ Object* Scene::FindObjectByName(const char* strName)
 	for (auto iter = m_vecObject.begin(); iter != m_vecObject.end(); iter++) 
 		if (strName == (*iter)->m_strName) return *iter;
 	return nullptr;
+}
+
+void Scene::LoadLevelEnvironment()
+{
+	vector<MY_ENV_OBJECT_DATA> envData = LoadMy::LoadEnvMeshList("Data");
+	for (int i = 0; i < envData.size(); i++) {
+		CreateEnvObject(envData[i]);
+	}
+
+	vector<MY_COLLIDER_OBJECT_DATA> colliderData = LoadMy::LoadColliderList("Data");
+	for (int i = 0; i < colliderData.size(); i++) {
+		CreateCollider(colliderData[i]);
+	}
+}
+
+void Scene::CreateEnvObject(const char* strModelName, const char* strMaterialName, XMFLOAT3 pos, XMFLOAT4 rot)
+{
+	Object* env = new Object();
+
+	TransformComponent* transform = new TransformComponent(env);
+	MeshRendererComponent* mrc = new MeshRendererComponent(env, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
+
+	mrc->SetModelByName(strModelName);
+	mrc->SetMaterialByName(strMaterialName);
+
+	transform->SetPosition(pos);
+	transform->Rotate(rot);
+
+	m_vecObject.push_back(env);
+	m_vecNonAnimObjectRenderGroup.push_back(env);
+}
+
+void Scene::CreateEnvObject(MY_ENV_OBJECT_DATA objData)
+{
+	CreateEnvObject(objData.strMeshName.c_str(), objData.strMatName.c_str(), objData.xmf3Position, objData.xmf4Rotation);
+}
+
+void Scene::CreateCollider(MY_COLLIDER_OBJECT_DATA colData)
+{
+	Object* box = new Object();
+
+	XMFLOAT3 extents(colData.xmf3Extents.x * 0.5f, colData.xmf3Extents.y * 0.5f, colData.xmf3Extents.z * 0.5f);
+
+	TransformComponent* transform = new TransformComponent(box);
+	BoxColliderComponent* boxCollider = new BoxColliderComponent(box, colData.xmf3Position, extents, colData.xmf4Rotation);
+
+	m_vecObject.push_back(box);
+}
+
+void Scene::CreateTargetBoard(const char* strName,
+	XMFLOAT3 position, XMFLOAT3 rotationAngle, bool initialState,
+	ID3D12Device* device, ID3D12GraphicsCommandList* commandlist,
+	D3D12_CPU_DESCRIPTOR_HANDLE& cpuHandle, D3D12_GPU_DESCRIPTOR_HANDLE& gpuHandle)
+{
+	Object* targetBoard = new Object(strName);
+
+	TransformComponent* transform = new TransformComponent(targetBoard);
+	SkinnedMeshRendererComponent* skinnedMeshRenderer = new SkinnedMeshRendererComponent(
+		targetBoard, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
+	// SkinnedMeshRenderer가 작동하려면 Animator가 있어야 함!
+	// TBAC가 작동하려면 TargetBoardController가 있어야 함!
+	TargetBoardControllerComponent* TCC = new TargetBoardControllerComponent(targetBoard);
+	TargetBoardAnimatorComponent* TAC = new TargetBoardAnimatorComponent(targetBoard, "targetBoardStand");
+	BoxColliderComponent* bodyCollider = new BoxColliderComponent(
+		targetBoard, XMFLOAT3(0, 0.5f, 0), XMFLOAT3(0.3f, 0.5f, 0.1f), XMFLOAT4(0, 0, 0, 1), false, TAC, 1);
+	BoxColliderComponent* headCollider = new BoxColliderComponent(
+		targetBoard, XMFLOAT3(0, 1.2f, 0), XMFLOAT3(0.15f, 0.2f, 0.1f), XMFLOAT4(0, 0, 0, 1), false, TAC, 1);
+
+	skinnedMeshRenderer->SetModelByName("targetBoardStand");
+	skinnedMeshRenderer->SetMaterialByName("TargetBoardMat");
+	transform->Translate(position);
+	transform->RotateXYZDegree(rotationAngle);
+	if(initialState) TCC->Die();
+
+	m_vecObject.push_back(targetBoard);
+	m_vecAnimObjectRenderGroup.push_back(targetBoard);
+}
+
+vector<string> LoadMy::Split(istringstream& ss, const char delim)
+{
+	vector<string> result;
+	string str;
+
+	while (getline(ss, str, delim))
+		result.push_back(str);
+
+	return result;
+}
+
+vector<MY_ENV_OBJECT_DATA> LoadMy::LoadEnvMeshList(const char* path)
+{
+
+	vector<MY_ENV_OBJECT_DATA> result;
+
+	string fullPath = path;
+	fullPath += "/EnvMeshList.txt";
+	std::ifstream ifs(fullPath);
+	if (ifs.fail()) cout << "Error\n";
+	else {
+		//cout << "===========================\n";
+		//cout << "EnvMeshList.txt\n";
+		//cout << "===========================\n";
+
+		string s;
+		ifs >> s; 
+		//cout << s;
+		ifs >> s; 
+		//cout << s << "\n";
+		int n = stoi(s);
+		//cout << "===========================\n";
+
+
+
+		for (int i = 0; i < n; i++) {
+			MY_ENV_OBJECT_DATA temp = {};
+			ifs >> s; 
+			//cout << s << "\n";	// mesh name
+			temp.strMeshName = s;
+
+			ifs >> s; 
+			//cout << s << "\n";	// position
+			{
+				istringstream ss(s);
+				vector<string> pos = Split(ss, ',');
+				temp.xmf3Position.x = stof(pos[0]);
+				temp.xmf3Position.y = stof(pos[1]);
+				temp.xmf3Position.z = stof(pos[2]);
+			}
+
+			ifs >> s; 
+			//cout << s << "\n";	// rotation
+			{
+				istringstream ss(s);
+				vector<string> pos = Split(ss, ',');
+				temp.xmf4Rotation.x = stof(pos[0]);
+				temp.xmf4Rotation.y = stof(pos[1]);
+				temp.xmf4Rotation.z = stof(pos[2]);
+				temp.xmf4Rotation.w = stof(pos[3]);
+			}
+
+			ifs >> s; 
+			//cout << s << "\n\n";	// mat name
+			temp.strMatName = s;
+
+			result.push_back(temp);
+		}
+
+		//cout << "===========================\n\n";
+		ifs.close();
+	}
+
+	return result;
+}
+
+vector<MY_COLLIDER_OBJECT_DATA> LoadMy::LoadColliderList(const char* path)
+{
+	vector<MY_COLLIDER_OBJECT_DATA> result;
+
+	string fullPath = path;
+	fullPath += "/ColliderList.txt";
+	std::ifstream ifs(fullPath);
+	if (ifs.fail()) cout << "Error\n";
+	else {
+		//cout << "===========================\n";
+		//cout << "ColliderList.txt\n";
+		//cout << "===========================\n";
+
+		string s;
+		ifs >> s;
+		//cout << s;
+		ifs >> s;
+		//cout << s << "\n";
+		int n = stoi(s);
+		//cout << "===========================\n";
+
+
+
+		for (int i = 0; i < n; i++) {
+			MY_COLLIDER_OBJECT_DATA temp = {};
+			ifs >> s;
+			//cout << s << "\n";
+			{
+				istringstream ss(s);
+				vector<string> pos = Split(ss, ',');
+				temp.xmf3Position.x = stof(pos[0]);
+				temp.xmf3Position.y = stof(pos[1]);
+				temp.xmf3Position.z = stof(pos[2]);
+			}
+
+			ifs >> s;
+			//cout << s << "\n";
+			{
+				istringstream ss(s);
+				vector<string> pos = Split(ss, ',');
+				temp.xmf3Extents.x = stof(pos[0]);
+				temp.xmf3Extents.y = stof(pos[1]);
+				temp.xmf3Extents.z = stof(pos[2]);
+			}
+
+			ifs >> s; 
+			//cout << s << "\n";
+			{
+				istringstream ss(s);
+				vector<string> pos = Split(ss, ',');
+				temp.xmf4Rotation.x = stof(pos[0]);
+				temp.xmf4Rotation.y = stof(pos[1]);
+				temp.xmf4Rotation.z = stof(pos[2]);
+				temp.xmf4Rotation.w = stof(pos[3]);
+			}
+
+			result.push_back(temp);
+		}
+
+		//cout << "===========================\n\n";
+		ifs.close();
+	}
+
+	return result;
 }

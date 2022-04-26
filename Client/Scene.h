@@ -20,6 +20,26 @@ struct CB_PASS_INFO {
 	float		m_xmfCurrentTime;
 };
 
+struct MY_ENV_OBJECT_DATA {
+	string strMeshName;
+	string strMatName;
+	XMFLOAT3 xmf3Position;
+	XMFLOAT4 xmf4Rotation;
+};
+
+struct MY_COLLIDER_OBJECT_DATA {
+	XMFLOAT3 xmf3Position;
+	XMFLOAT3 xmf3Extents;
+	XMFLOAT4 xmf4Rotation;
+};
+
+namespace LoadMy {
+	vector<string> Split(istringstream& ss, const char delim);
+	vector<MY_ENV_OBJECT_DATA> LoadEnvMeshList(const char* path);
+	vector<MY_COLLIDER_OBJECT_DATA> LoadColliderList(const char* path);
+}
+
+
 class Scene
 {
 protected:
@@ -64,9 +84,11 @@ protected:
 	Camera*										m_pCamera;
 	float										m_fCurrentTime = 0;
 
+
+
 public:
 	bool test = false;
-
+	int startEndState = 1;	// 0: main, 1: start, 2: end
 public:
 	virtual void Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 
@@ -99,5 +121,23 @@ protected:
 
 protected:
 	Object* FindObjectByName(const char*);
+
+
+	void LoadLevelEnvironment();
+
+	void CreateEnvObject(const char* strModelName, const char* strMaterialName, XMFLOAT3 pos, XMFLOAT4 rot);
+	void CreateEnvObject(MY_ENV_OBJECT_DATA objData);
+
+	void CreateCollider(MY_COLLIDER_OBJECT_DATA colData);
+
+	void CreateTargetBoard(const char* strName, XMFLOAT3 position, XMFLOAT3 rotationAngle, bool initialStateDied,
+		ID3D12Device* device, ID3D12GraphicsCommandList* commandlist,
+		D3D12_CPU_DESCRIPTOR_HANDLE& cpuHandle, D3D12_GPU_DESCRIPTOR_HANDLE& gpuHandle);
+
+
+
+
+
+
 };
 

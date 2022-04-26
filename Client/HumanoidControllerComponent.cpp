@@ -4,7 +4,8 @@
 #include "Object.h"
 
 HumanoidControllerComponent::HumanoidControllerComponent(Object* pObject, Object* pWeapon)
-	:Component(pObject)
+	: Component(pObject)
+	, Character(100, true, true)
 	, m_pWeaponObject(pWeapon)
 	, m_fTime(0)
 	, m_xmf3Velocity(0,0,0)
@@ -97,6 +98,9 @@ void HumanoidControllerComponent::Update(float fTimeElapsed)
 			m_fAimProgress -= fTimeElapsed;
 			if (0 > m_fAimProgress) m_fAimProgress = 0;
 		}
-	}
 
+		if (l_pInput->IsKeyDown(KeyCode::_R)) 
+			m_pWeaponObject->FindComponent<WeaponControllerComponent>()->Reload();
+		
+	}
 }

@@ -129,6 +129,9 @@
     <Filter Include="소스 파일\Component\Scripts\UI">
       <UniqueIdentifier>{50d86b91-ffd9-4f08-a0ba-54bc3f27dbd6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\Component\Scripts\GameManager">
+      <UniqueIdentifier>{a8349357-e989-40c1-b6d6-9e4441a2d968}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Resource.h">
@@ -264,6 +267,9 @@
     <ClInclude Include="TextUI.h">
       <Filter>소스 파일\Component\Scripts\UI</Filter>
     </ClInclude>
+    <ClInclude Include="GameManagerComponent.h">
+      <Filter>소스 파일\Component\Scripts\GameManager</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WindowsProject1.cpp">
@@ -383,6 +389,9 @@
     </ClCompile>
     <ClCompile Include="TextUI.cpp">
       <Filter>소스 파일\Component\Scripts\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="GameManagerComponent.cpp">
+      <Filter>소스 파일\Component\Scripts\GameManager</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
