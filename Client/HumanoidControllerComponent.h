@@ -1,7 +1,8 @@
 #pragma once
 #include "Component.h"
+#include "Character.h"
 
-class HumanoidControllerComponent : public Component
+class HumanoidControllerComponent : public Component, public Character
 {
 public:
 	HumanoidControllerComponent() = delete;

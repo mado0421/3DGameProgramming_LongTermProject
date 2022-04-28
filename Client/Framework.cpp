@@ -2,6 +2,7 @@
 #include "Framework.h"
 #include "Scene.h"
 #include"GameScene.h"
+#include"MainScene.h"
 #include"ServerScene.h"
 
 void Framework::Update() 
@@ -270,7 +271,7 @@ void Framework::BuildScenes()
 	m_ppScenes[0] = new Scene();*/
 
 	m_ppScenes = new Scene * [1];
-	m_ppScenes[0] = new ServerScene();
+	m_ppScenes[0] = new MainScene();
 
 	m_pCurrentScene = m_ppScenes[0];
 

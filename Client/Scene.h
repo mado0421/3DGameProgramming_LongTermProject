@@ -12,6 +12,19 @@ struct CB_PASS_INFO {
 	float		m_xmfCurrentTime;
 };
 
+struct MY_ENV_OBJECT_DATA {
+	string strMeshName;
+	string strMatName;
+	XMFLOAT3 xmf3Position;
+	XMFLOAT4 xmf4Rotation;
+};
+
+struct MY_COLLIDER_OBJECT_DATA {
+	XMFLOAT3 xmf3Position;
+	XMFLOAT3 xmf3Extents;
+	XMFLOAT4 xmf4Rotation;
+};
+
 class Scene
 {
 public:

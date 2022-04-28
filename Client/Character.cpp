@@ -1,12 +1,12 @@
 #include "stdafx.h"
 #include "Character.h"
 
-Character::Character(int maxHp, bool bAutoRevive)
+Character::Character(int maxHp, bool bAutoRevive, bool bDead)
 	: m_maxHp(maxHp)
 	, m_currHp(maxHp)
 	, m_fReviveTime(3.0f)
 	, m_fCurrReviveTime(0.0f)
-	, m_bDead(false)
+	, m_bDead(bDead)
 	, m_bAutoRevive(bAutoRevive)
 {
 }
@@ -40,4 +40,19 @@ void Character::Revive()
 	m_currHp = m_maxHp;
 	m_fCurrReviveTime = 0.0f;
 	m_bDead = false;
+}
+
+int Character::GetCurrHp()
+{
+	return m_currHp;
+}
+
+int Character::GetMaxHp()
+{
+	return m_maxHp;
+}
+
+float Character::GetCurrHpPerMaxHp()
+{
+	return (m_currHp / m_maxHp) * 100;
 }

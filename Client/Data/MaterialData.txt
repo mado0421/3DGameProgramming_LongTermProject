@@ -21,5 +21,7 @@
 { name wallMat d TexturesCom_Fabric_Cotton_1K_albedo n TexturesCom_Fabric_Cotton_1K_normal f 0.1 0.1 0.1 }
 { name ceilingMat d TexturesCom_Plaster_Rough_1K_albedo n TexturesCom_Plaster_Rough_1K_normal f 0.1 0.1 0.1 }
 { name floorMat d TexturesCom_Concrete_Plates3_1K_albedo n TexturesCom_Concrete_Plates3_1K_normal f 0.1 0.1 0.1 }
+{ name titleCard d titleImage_rescale f 0.1 0.1 0.1 }
+{ name endCard d endImage_rescale f 0.1 0.1 0.1 }
 
 #End

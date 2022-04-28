@@ -3,7 +3,7 @@
 class Character
 {
 public:
-	Character(int maxHp, bool bAutoRevive = false);
+	Character(int maxHp, bool bAutoRevive = false, bool bDead = true);
 	virtual ~Character();
 
 public:
@@ -14,6 +14,9 @@ public:
 	bool isAlive() const { return !m_bDead; }
 	virtual void Die();
 	virtual void Revive();
+	int GetCurrHp();
+	int GetMaxHp();
+	float GetCurrHpPerMaxHp();
 
 private:
 	virtual bool isDead() const { return 0 >= m_currHp; }

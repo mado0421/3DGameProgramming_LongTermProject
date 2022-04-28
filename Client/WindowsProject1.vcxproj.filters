@@ -132,6 +132,9 @@
     <Filter Include="소스 파일\Network">
       <UniqueIdentifier>{ef667107-2721-462c-af62-2cb101b0acef}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\Component\Scripts\GameManager">
+      <UniqueIdentifier>{a8349357-e989-40c1-b6d6-9e4441a2d968}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Resource.h">
@@ -282,6 +285,12 @@
     <ClInclude Include="NetInputManagerComponent.h">
       <Filter>소스 파일\Component\InputManager</Filter>
     </ClInclude>
+    <ClInclude Include="GameManagerComponent.h">
+      <Filter>소스 파일\Component\Scripts\GameManager</Filter>
+    </ClInclude>
+    <ClInclude Include="MainScene.h">
+      <Filter>소스 파일\Scene</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WindowsProject1.cpp">
@@ -413,6 +422,12 @@
     </ClCompile>
     <ClCompile Include="NetInputManagerComponent.cpp">
       <Filter>소스 파일\Component\InputManager</Filter>
+    </ClCompile>
+    <ClCompile Include="GameManagerComponent.cpp">
+      <Filter>소스 파일\Component\Scripts\GameManager</Filter>
+    </ClCompile>
+    <ClCompile Include="MainScene.cpp">
+      <Filter>소스 파일\Scene</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

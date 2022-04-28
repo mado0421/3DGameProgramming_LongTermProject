@@ -25,6 +25,7 @@ public:
 	void Translate(float fX, float fY, float fZ);
 	void RotateXYZDegree(const XMFLOAT3& xmf3Val);
 	void RotateXYZDegree(float fX, float fY, float fZ);
+	void Rotate(const XMFLOAT4& xmf4Quaternion);
 
 	XMMATRIX GetLocalTransform();
 	XMMATRIX GetWorldTransform();

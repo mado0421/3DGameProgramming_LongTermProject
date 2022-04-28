@@ -15,6 +15,7 @@ public:
 
 public:
 	void Fire();
+	void Reload();
 
 public:
 
@@ -23,6 +24,8 @@ public:
 	int m_curAmmo;
 	bool m_bReloading = false;
 	float m_fReloadProgress = 0;
+
+	float m_fReloadTime = 3.0f;
 
 protected:
 	Object* m_pBullet;

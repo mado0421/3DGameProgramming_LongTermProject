@@ -53,8 +53,8 @@ protected:
 	Framework*									m_pFramework;
 	Camera*										m_pCamera;
 	float										m_fCurrentTime = 0;
-
 public:
+	bool TEST_MOUSE_USABLE = false;
 	bool test = false;
 
 public:

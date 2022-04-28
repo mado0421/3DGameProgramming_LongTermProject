@@ -1207,3 +1207,160 @@ AnimationControllerComponent에서 R Hand의 방향을 조금 꺾어서 조준 �
 	- 카메라의 위치를 플레이어 캐릭터의 뒤에서 오른쪽 뒤로 조절하고, 바라보는 조준점의 위치를 변경하였다.
 
 <img src="https://user-images.githubusercontent.com/21697638/158320803-58127e1d-029d-4614-b9bb-312f7ef3294a.gif" width="70%" height="70%"></img>
+
+-----------
+### 22.03.29 - 22.04.04
+#### 이번주 일정
+* Unity로 Level Editor 만들기
+* 다른 DX12 프로젝트 Shadow 그리기
+
+Unity로 만들 Level Editor가 가져야 할 기능을 정해두고 만들자.
+
+	- FBX 모델을 배치하고, 텍스처를 씌우고
+
+현재 에셋 컨버팅 과정은 다음과 같다.
+
+ 1. 3ds Max에서 모델을 만들고 FBX 포맷으로 Export한다(필요하다면 리깅까지 한다).
+ 2. 사용할 이미지 파일을 textures.com에서 tif 포맷으로 다운로드 한다.
+ 3. 위의 이미지 파일을 Photoshop CC 2021에서 DDS 포맷으로 변환한다.
+ 4. 프로젝트의 AssetsList.txt에 사용할 에셋들의 이름을 전부 추가한다(model.mm, anim.mac, texture.dds).
+ 5. 프로젝트의 MaterialList.txt에 사용할 마테리얼들을 추가한다(WallMat, wall_diffuse.dds, wall_normal.dds).
+ 6. Importer로 위의 ~List.txt를 읽어서 해당 에셋들을 프로젝트의 리소스로 불러온다.
+ 7. 손으로 직접 타이핑하여 Object를 추가하고, TransformComponent를 추가하고, 위치와 회전 등을 직접 적어 넣는다.
+ 8. 사용할 에셋(모델이나 마테리얼 등)을 직접 손으로 적어 넣는다.
+
+이상적인 컨버팅 과정은 다음과 같다.
+
+1. 3ds Max에서 모델을 만들고 텍스처를 적용한 뒤에 Export한다.
+2. 유니티에서 불러와서 배치한다.
+3. 유니티에서 ObjectList로 Export 한다.
+4. 프로젝트에서 로드를 하면 한 번에 읽을 수 있어야 한다.
+
+FBX Parser의 기능을 Editor에 넣으면 Export 할 때 바로 바로 뺄 수 있지 않을까?
+
+[3d max - Unity 호환이 잘 되는 유닛(Unit) 설정 하기 :: sunghye (tistory.com)](https://sunghye.tistory.com/6)
+
+3ds Max에서 Export 할 때, Embed Media 옵션을 켜줘야 Material을 포함해서 Export 할 수 있다.
+
+<img src="https://user-images.githubusercontent.com/21697638/162359296-6fb071b7-6957-44d6-afc0-cc5c90dcf1e9.png" width="70%" height="70%"></img>
+
+-----------
+### 22.04.12 - 22.04.25
+#### 이번주 일정
+* Unity로 Level Editor 만들기
+
+
+### 2022.04.13
+
+		//GetComponentsInChildren<>()는 자기 자신을 포함한 배열을 반환한다.
+        Transform[] transforms = env.GetComponentsInChildren<Transform>();
+        foreach(Transform child in transforms)
+        {
+	        if (child.name == "Env") continue;  // exclude self
+			// ...
+        }
+        
+        // 아래와 같이 사용해야 문제가 없다.
+        Texture normal = mr.material.GetTexture("_BumpMap");
+        if (normal) Debug.Log(normal.name);
+
+### 2022.04.14
+
+albedo Texture만 가진 instance material은 해당 albedo Texture의 이름으로 material이 생성되는데,
+albedo와 normal texture를 둘 다 가지고 있는 경우엔 Material #25 같이 의미 없는 이름으로 생성됨
+
+일단 이런 방식을 쓰려면 3ds max에서 모든 material에 diffuse, normal, specular를 다 넣어줘야 함
+근데 뭐 텍스트로 적나 이렇게 하나 귀찮은건 똑같아보임
+fresnel 값은 따로 지정하는 법을 모르겠음 아마 3ds max에서 하는거 같은데 거기서 정한 값이 unity에서 저장이 될 지도 미지수
+
+unity에서 빈 오브젝트를 하나 만들고, BoxCollider Component를 넣어준 뒤에, collider의 center를 옮긴게 아니라 Object의 위치를 옮겨줬더니 box.center를 했더니 원점이 나온다. 
+
+FBX는 못 빼나? FBX를 .mm 확장자로 parse해서 뺄 수는 없나??
+[유니티(c#)에서 c++ dll 사용하기 (1) : 네이버 블로그 (naver.com)](https://m.blog.naver.com/PostView.naver?isHttpsRedirect=true&blogId=seilgogo&logNo=220839071223)
+를 쓰면 C++ 코드를 쓸 수 있는 모양
+기존의 FBX parser를 유니티에 붙이고 다른거 export 할 때 같이 뺄 수 있으면 정말 편할 것 같다.
+
+근데 일단 환경 메쉬랑 충돌체랑 마테리얼 빼는거 먼저 해보고 할 것.
+[[유니티] 스크립트로 텍스트 파일 생성 및 쓰기, 저장 / 파일 입출력 (tistory.com)](https://88-it.tistory.com/181)
+요 방법을 쓰면 텍스트 파일을 쓸 수 있을 것 같다.
+
+material에 (instance) 붙어서 나오는게 넘 거슬린다. 심지어 앞에 공백도 한 칸 들어가있음.
+
+<img src="https://user-images.githubusercontent.com/21697638/163302974-af077983-e3c0-4915-932b-b9992f60668e.png" width="70%" height="70%"></img>
+
+<img src="https://user-images.githubusercontent.com/21697638/163303007-52edaf7f-ce3c-40c7-910f-540c82c2df5f.png" width="70%" height="70%"></img>
+Material #25 라고 나오는건 중간의 공백을 없애서 Material#25로 변경했다.
+
+조명 값도 빼야 함.
+
+### 2022.04.15
+
+조명값 뺐음
+
+### 2022.04.16
+
+<img src="https://user-images.githubusercontent.com/21697638/163656982-efcdc270-46f4-48b6-9cc4-05a4a627b832.png" width="70%" height="70%"></img>
+
+해야 하는 것: 
+- 본 프로젝트에서 import 하기
+- Door와 TargetBoard 같은 상호작용하는 특수 오브젝트도 배치하고 Export
+- UI 렌더를 지금 후처리 들어가기 전에 해서 폰트에도 후처리 적용되는 문제가 있음, 이후로 옮겨야 함
+- 체력, 장탄수, 뭐 그런거 보여주기
+
+### 2022.04.18
+18일부터 19일까지 다른 프로젝트 작업함
+
+### 2022.04.22
+
+다른 플레이어 입장
+각 플레이어가 서로의 위치를 보고, 회전 정보 등을 얻음
+
+좀 더 보완하면 좋은 점:
+- 오브젝트 생성할 때, 스크립트 등으로 하면 좋겠다.
+- 솔루션 내에서 소스코드랑 헤더를 필터로 관리중인데 이러면 한 폴더에 다 추가가 됨. 폴더 뷰? 로 관리를 하는 방법도 있음.
+- 오브젝트 생성할 때, 중복되는 부분을 Initialize 함수 같은걸로 관리하면 좋겠다.
+- UI 렌더를 후처리 전 단계에서 하고 있는것.
+
+마음에 안드는 점:
+- 루트시그니처가 너무 지저분함.
+- 씬을 추가할 것을 고려하지 않고 만들어서 헤더 등이 지저분함.
+- 멀티샘플링을 고려하지 않고 만들어서 텍스처 등의 자원 관리에 제한이 있음.
+- 전체화면 전환?
+
+실제로 해야 하는 점:
+- export한 텍스트 파일을 읽어서 데이터화(아마 이걸 역직렬화라고 불렀던거 같음)
+- 장전 추가
+
+우선순위 리스트?
+일단 하기로 한 것부터 다 쳐내기
+	- 장전
+	- 에디터 읽어오기
+
+유니티에서 FBX파일을 씬에 넣고 FBX파일 안에 포함된 마테리얼로 즉석 생성을 하면
+Standard 속성의 마테리얼이 instance로 생성되는데
+이 마테리얼은 러프니스값을 디퓨즈 텍스처나 메탈릭 텍스처의 알파값에서 가져오고
+러프니스값을 러프니스 텍스쳐에서 가져오려면 마테리얼의 속성을 Standard(specular setup)으로 바꿔야 함
+근데 잘 생각해보면 나는 이미 dds 파일을 만들때 디퓨즈 텍스처의 알파채널에 러프니스 텍스처를 올려서 하나로 합쳐 쓰고 있었음
+
+유니티에서 자동으로 마테리얼 잡는 것:
+	- 맥스에서 마테리얼 생성하고 디퓨즈 텍스처(러프니스 합침), 노멀 텍스처를 정해줌
+	- 그걸 익스포트함
+
+### 2022.04.25
+	
+	- 플레이어의 권총에 들어가는 WeaponControllerComponent에 현재 총알 수, 최대 총알 수, 현재 장전중 여부 등의 값을 추가하였다.
+	- 장전이란 기능이 가지는 의미를 그대로 수행한다(탄이 바닥나면 장전하고, R키를 누르면 몇 발이 남아있든 장전하고, 장전 중에는 사격할 수 없는).
+	- Text 등의 UI가 후처리 전 단계에 그려져서 번지는 문제가 있었고 해결했다.
+	- Player의 HP값을 받아올 수 있게 하였다. 이를 위해, HumanoidControllerComponent는 이제 Character class까지 다중상속한다.
+	- Character는 maxHp, currHp, currHpPerMaxHp 등의 값을 Get()으로 가져올 수 있다.
+	- 위의 모든 public으로 접근가능한 값은 TextUI로 출력할 수 있다.
+	- Player의 HP와 Ammo를 Text로 출력한다.
+	- 간단한 조준점을 추가하였다(애니메이션에 의해 총구가 향하는 방향이 매순간 바뀌므로 크게 의미는 없다).
+	- 타이틀과 엔드 이미지를 추가하였다.
+	- 에디터에서 환경 오브젝트와 마테리얼, 충돌체의 위치 등을 가져올 수 있게 하였다.
+	- 그래서 이제 벽에 충돌이 된다!! 솔직히 충돌체 추가가 너무 필요했다.
+
+<img src="https://user-images.githubusercontent.com/21697638/165242265-bce252db-23dd-43dd-8cdb-0d27a9652ea8.png" width="70%" height="70%"></img>
+
+
+

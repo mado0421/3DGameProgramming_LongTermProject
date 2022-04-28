@@ -82,6 +82,16 @@ void WeaponControllerComponent::Update(float fTimeElapsed)
 
 	m_fCurrCooltime -= fTimeElapsed;
 
+	if (m_bReloading) {
+		m_fReloadProgress -= fTimeElapsed;
+		if (0 >= m_fReloadProgress) {
+			m_bReloading = false;
+			m_fCurrCooltime = 0;
+			m_curAmmo = m_maxAmmo;
+		}
+	}
+
+
 	// Move to position of Parent's RHand
 	if (m_pObject->m_pParent) {
 		XMMATRIX l_xmmtxTransform = m_pObject->m_pParent->FindComponent<HumanoidAnimatorComponent>()->GetToWorldTransform(28);
@@ -100,29 +110,24 @@ void WeaponControllerComponent::Update(float fTimeElapsed)
 void WeaponControllerComponent::Fire()
 {
 	if (!m_bEnabled) return;
+	if (m_bReloading) return;
 
+	if (0 >= m_curAmmo) {
+		Reload();
+		return;
+	}
 
 	if (0 >= m_fCurrCooltime) {
 		m_pMuzzle->FindComponent<EffectComponent>()->TurnOn();
 
 		m_fCurrCooltime = m_fCooltime;
 		m_fTryRaycast = true;
+		m_curAmmo--;
 	}
+}
 
-
-	//if (l_pInput->IsKeyDown(KeyCode::_R) && !m_bReloading) {
-	//	m_bReloading = true;
-	//	m_fReloadProgress = 0;
-	//}
-	//if (m_bReloading) {
-	//	if (m_fReloadProgress > 3) {
-	//		m_fReloadProgress = 0;
-	//		m_bReloading = false;
-	//		m_curAmmo = m_maxAmmo;
-	//	}
-	//	else {
-	//		m_fReloadProgress += fTimeElapsed;
-	//	}
-	//}
-
+void WeaponControllerComponent::Reload()
+{
+	m_bReloading = true;
+	m_fReloadProgress = m_fReloadTime;
 }

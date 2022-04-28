@@ -13,10 +13,9 @@
 
 #include "Components.h"
 
-bool TEST_MOUSE_USABLE = false;
-
 void GameScene::Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
+	
 	/*========================================================================
 	* 주요 변수 초기화
 	*=======================================================================*/

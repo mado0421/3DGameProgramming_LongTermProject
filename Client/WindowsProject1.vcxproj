@@ -168,6 +168,7 @@
     <ClInclude Include="EffectComponent.h" />
     <ClInclude Include="EnemyDownCounter.h" />
     <ClInclude Include="EventComponent.h" />
+    <ClInclude Include="GameManagerComponent.h" />
     <ClInclude Include="InputManagerComponent.h" />
     <ClInclude Include="d3dUtil.h" />
     <ClInclude Include="DDSTextureLoader12.h" />
@@ -176,6 +177,7 @@
     <ClInclude Include="HumanoidControllerComponent.h" />
     <ClInclude Include="Importer.h" />
     <ClInclude Include="Light.h" />
+    <ClInclude Include="MainScene.h" />
     <ClInclude Include="Mask.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClInclude>
@@ -223,6 +225,7 @@
     <ClCompile Include="EffectComponent.cpp" />
     <ClCompile Include="EnemyDownCounter.cpp" />
     <ClCompile Include="EventComponent.cpp" />
+    <ClCompile Include="GameManagerComponent.cpp" />
     <ClCompile Include="InputManagerComponent.cpp" />
     <ClCompile Include="d3dUtil.cpp" />
     <ClCompile Include="DDSTextureLoader12.cpp" />
@@ -230,6 +233,7 @@
     <ClCompile Include="HumanoidControllerComponent.cpp" />
     <ClCompile Include="Importer.cpp" />
     <ClCompile Include="Light.cpp" />
+    <ClCompile Include="MainScene.cpp" />
     <ClCompile Include="Mask.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClCompile>
