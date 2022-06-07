@@ -46,6 +46,7 @@ private:
 	float m_fGravityModifier;
 	float m_fGravity;
 	float m_fSize;
+	bool m_bIsBilboard;
 
 	TransformComponent* transform;
 };

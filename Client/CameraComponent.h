@@ -1,6 +1,7 @@
 #pragma once
 #include "Component.h"
 
+class TransformComponent;
 class CameraComponent : public Component
 {
 public:
@@ -19,6 +20,9 @@ public:
 
 	const XMFLOAT4X4 GetViewMatrix();
 	const XMFLOAT4X4 GetProjectionMatrix();
+	const XMFLOAT3 GetLookVector() {
+		return Vector3::Normalize( m_xmf3Look );
+	}
 
 	virtual void Update(float fTimeElapsed);
 
@@ -38,5 +42,6 @@ protected:
 	D3D12_RECT			m_d3dScissorRect;
 
 	Object*		m_pFocusObject;
+	TransformComponent* t;
 };
 

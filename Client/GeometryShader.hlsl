@@ -52,8 +52,15 @@ void GS_ParticleBillboard(
 	float3 up, right;
 	float3 look = input[0].positionW - gvCameraPosition;
 	float3 pos = input[0].positionW;
-	right = normalize(cross(look, float3(0, 1, 0)));
-	up = normalize(cross(look, right));
+
+	if (input[0].direction.w) {	// bilboard X
+		up = normalize(cross(look, input[0].direction));
+		right = normalize(input[0].direction);
+	}
+	else {						// bilboard O
+		right = normalize(cross(look, float3(0, 1, 0)));
+		up = normalize(cross(look, right));
+	}
 
 	float3 TR, TL, BR, BL;	//Top, Right, Bottom, Left
 	TR = pos + input[0].size * up + input[0].size * right;

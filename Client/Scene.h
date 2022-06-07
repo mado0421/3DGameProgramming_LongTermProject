@@ -39,6 +39,12 @@ namespace LoadMy {
 	vector<MY_COLLIDER_OBJECT_DATA> LoadColliderList(const char* path);
 }
 
+enum class RENDERGROUP {
+	OBJECT,
+	ANIMATED,
+	PARTICLE,
+	EFFECT
+};
 
 class Scene
 {
@@ -64,7 +70,6 @@ protected:
 
 	// for Particle
 	vector<Object*>								m_vecParticleEmitter;
-	vector<Object*>								m_vecParticlePool;
 
 	// for Camera
 	Object*										m_pCameraObject = nullptr;
@@ -84,7 +89,8 @@ protected:
 	Camera*										m_pCamera;
 	float										m_fCurrentTime = 0;
 
-
+public:
+	vector<Object*>								m_vecParticlePool;
 
 public:
 	bool test = false;
@@ -99,6 +105,12 @@ public:
 	virtual void Render(D3D12_CPU_DESCRIPTOR_HANDLE hBckBufRtv, D3D12_CPU_DESCRIPTOR_HANDLE hBckBufDsv);
 
 	virtual void Release();
+
+
+
+	void AddObject(Object* pObject, RENDERGROUP renderGroup);
+	void DeleteObject(Object* pObject);
+	Object* FindObjectByName(const char*);
 
 protected:
 	virtual ID3D12RootSignature* CreateRootSignature();
@@ -120,9 +132,6 @@ protected:
 	void ReloadLight();
 
 protected:
-	Object* FindObjectByName(const char*);
-
-
 	void LoadLevelEnvironment();
 
 	void CreateEnvObject(const char* strModelName, const char* strMaterialName, XMFLOAT3 pos, XMFLOAT4 rot);
@@ -133,11 +142,5 @@ protected:
 	void CreateTargetBoard(const char* strName, XMFLOAT3 position, XMFLOAT3 rotationAngle, bool initialStateDied,
 		ID3D12Device* device, ID3D12GraphicsCommandList* commandlist,
 		D3D12_CPU_DESCRIPTOR_HANDLE& cpuHandle, D3D12_GPU_DESCRIPTOR_HANDLE& gpuHandle);
-
-
-
-
-
-
 };
 

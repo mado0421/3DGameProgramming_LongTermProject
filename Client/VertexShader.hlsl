@@ -156,10 +156,9 @@ VS_OUTPUT VS_FlatScreen(VS_INPUT input)
 VS_PARTICLEOUTPUT VS_Particle(VS_INPUT input) {
 	VS_PARTICLEOUTPUT output;
 
-	//output.positionW	= float3(0.5f, 2, 0);
 	output.positionW	= float3(gmtxGameObject._41, gmtxGameObject._42, gmtxGameObject._43);
-	//output.position		= float4(output.positionW, 1);
 	output.size			= gmtxGameObject._44;
+	output.direction    = float4(gmtxGameObject._11, gmtxGameObject._12, gmtxGameObject._13, gmtxGameObject._14);
 
 	return output;
 }

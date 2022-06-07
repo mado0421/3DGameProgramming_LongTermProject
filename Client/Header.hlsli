@@ -65,6 +65,7 @@ struct VS_EFFECTOUTPUT {
 struct VS_PARTICLEOUTPUT {
 	float3 positionW: POSITION;
 	float  size		: PSIZE;
+	float4 direction: NORMAL;
 };
 struct GS_OUTPUT
 {
@@ -105,3 +106,4 @@ float3 WorldPosFromLinearDepth(float2 uv) {
 }
 
 static const float4 LUM_FACTOR = float4(0.299, 0.587, 0.114, 0);
+

@@ -268,6 +268,8 @@ void Framework::BuildScenes()
 	m_ppScenes[0] = new Scene();
 	m_pCurrentScene = m_ppScenes[0];
 
+	g_pCurrScene = m_pCurrentScene;
+
 	m_pCurrentScene->Init(this, m_pd3dDevice, m_pd3dCommandList);
 
 	m_pd3dCommandList->Close();
@@ -411,4 +413,25 @@ void Framework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM w
 	default: break;
 	}
 	//if (m_pCurrentScene) m_pCurrentScene->OnProcessingKeyboardMessage(hWnd, nMessageID, wParam, lParam);
+}
+
+void Framework::RefreshScene()
+{
+	m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
+
+	delete[] m_ppScenes;
+
+	m_ppScenes = new Scene * [1];
+	m_ppScenes[0] = new Scene();
+	m_pCurrentScene = m_ppScenes[0];
+
+	g_pCurrScene = m_pCurrentScene;
+
+	m_pCurrentScene->Init(this, m_pd3dDevice, m_pd3dCommandList);
+
+	m_pd3dCommandList->Close();
+	ID3D12CommandList* ppd3dCommandLists[] = { m_pd3dCommandList };
+	m_pd3dCommandQueue->ExecuteCommandLists(1, ppd3dCommandLists);
+
+	m_Timer.Reset();
 }

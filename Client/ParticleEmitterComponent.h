@@ -12,11 +12,12 @@ enum class ParticleStopAction {
 };
 
 struct ParticleBurstInfo {
-	float time;
-	int count;
-	int cycles;	//0:infinit
-	float interval;
-	float probability; //0~1
+	float time = 0.0f;
+	int count = 0;
+	int cycles = 0;	//0:infinit
+	float interval = 5.0f;
+	float probability = 1.0f; //0~1
+	bool isEnable = false;
 };
 
 struct ParticlePropertiesPack {
@@ -26,21 +27,23 @@ struct ParticlePropertiesPack {
 	float speed;
 	float size;
 	float gravity;
+	bool isBilboard;
 };
 
 class ParticleEmitterComponent : public Component
 {
 public:
 	ParticleEmitterComponent() = delete;
-	ParticleEmitterComponent(Object* pObject, vector<Object*>* particlePool);
+	ParticleEmitterComponent(Object* pObject);
 	~ParticleEmitterComponent();
 
 public:
 	virtual void Update(float fTimeElapsed);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList);
-
+	
 public:
 	void SetMaterialByName(const char* strMaterialName);
+	void SetBurst(ParticleBurstInfo& burstInfo);
 
 private:
 	void AddParticle();
@@ -48,7 +51,7 @@ private:
 	Object* GetUsableParticle();
 	void InitializeParticle(Object* pObject);
 
-private:
+public:
 	float		m_fDuration;
 	bool		m_bLooping;
 	bool		m_bPrewarm;
@@ -62,11 +65,14 @@ private:
 	float		m_fGravityModifier;
 	int			m_RateOverTime;
 	ParticleStopAction			m_StopAction;
-	vector<ParticleBurstInfo>	m_vecEmissionBurst;
+	ParticleBurstInfo	m_emissionBurst;
+	bool		m_bIsBilboard;
+	int			m_nMaxParticles;
 
 	float		m_fCreateCooltime;
 	float		m_fCurrCooltime;
-
+	float		m_fCurrBurstTime;
+	float		m_fTime;
 protected:
 	vector<Object*> m_vecParticle;
 	string			m_strMaterialName;

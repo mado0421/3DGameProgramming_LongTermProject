@@ -28,6 +28,9 @@ protected:
 	XMFLOAT4		m_arrLocalRotation[MAX_BONE_NUM];
 };
 
+
+class HumanoidControllerComponent;
+
 class HumanoidAnimatorComponent : public AnimatorComponent 
 {
 public:
@@ -40,8 +43,12 @@ public:
 
 protected:
 	BoneMask* m_pAimingMask = nullptr;
+
+private:
+	HumanoidControllerComponent* l_HCC = nullptr;
 };
 
+class TargetBoardControllerComponent;
 class TargetBoardAnimatorComponent : public AnimatorComponent
 {
 public:
@@ -54,4 +61,5 @@ public:
 
 private:
 	float m_fStandInterpolationValue;	// 1: Stand, 0: Down, [0~1]
+	TargetBoardControllerComponent* l_TCC = nullptr;
 };

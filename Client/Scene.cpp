@@ -203,6 +203,9 @@ void Scene::CheckCollsion()
 	static bool first = true;
 	if (first) { first = false; return; }
 	for (int i = 0; i < m_vecObject.size(); i++) {
+
+		if (!m_vecObject[i]->m_bEnable) continue;
+
 		for (int j = i + 1; j < m_vecObject.size(); j++) {
 			m_vecObject[i]->CheckCollision(m_vecObject[j]);
 		}
@@ -211,7 +214,10 @@ void Scene::CheckCollsion()
 
 void Scene::SolveConstraint()
 {
-	for_each(m_vecObject.begin(), m_vecObject.end(), [](Object* o) {o->SolveConstraint(); });
+	//for_each(m_vecObject.begin(), m_vecObject.end(), [](Object* o) {o->SolveConstraint(); });
+	for (int i = 0; i < m_vecObject.size(); i++) {
+		if(m_vecObject[i]->m_bEnable) m_vecObject[i]->SolveConstraint();
+	}
 }
 
 void Scene::Input(UCHAR* pKeyBuffer)
@@ -237,6 +243,21 @@ void Scene::Input(UCHAR* pKeyBuffer)
 	if (1 == startEndState) {
 		if (pKeyBuffer[KeyCode::_Space] & 0xF0) { startEndState = 0; TEST_MOUSE_USABLE = true; ShowCursor(false); }
 	}
+	else if (2 == startEndState) {
+		if (pKeyBuffer[KeyCode::_Space] & 0xF0) { 
+			//m_pFramework->RefreshScene();
+			m_vecObject.clear();
+			m_vecNonAnimObjectRenderGroup.clear();
+			m_vecAnimObjectRenderGroup.clear();
+			m_vecEffectRenderGroup.clear();
+			m_vecUIRenderGroup.clear();
+			m_vecParticleEmitter.clear();
+
+			BuildObject();
+
+			startEndState = 1; TEST_MOUSE_USABLE = true; ShowCursor(false); 
+		}
+	}
 }
 void Scene::Update(float fTimeElapsed)
 {
@@ -246,7 +267,7 @@ void Scene::Update(float fTimeElapsed)
 	CheckCollsion();
 	SolveConstraint();
 
-	for_each(m_vecObject.begin(), m_vecObject.end(), [fTimeElapsed](Object* o) {o->Update(fTimeElapsed); });
+	for_each(m_vecObject.begin(), m_vecObject.end(), [fTimeElapsed](Object* o) { if(o->m_bEnable) o->Update(fTimeElapsed); });
 }
 void Scene::Render(D3D12_CPU_DESCRIPTOR_HANDLE hBckBufRtv, D3D12_CPU_DESCRIPTOR_HANDLE hBckBufDsv)
 {	
@@ -674,6 +695,32 @@ void Scene::Release()
 	}
 }
 
+void Scene::AddObject(Object* pObject, RENDERGROUP renderGroup)
+{
+	m_vecObject.push_back(pObject);
+
+	switch (renderGroup)
+	{
+	case RENDERGROUP::OBJECT:	
+		m_vecNonAnimObjectRenderGroup.push_back(pObject);
+		break;
+	case RENDERGROUP::ANIMATED:	
+		m_vecAnimObjectRenderGroup.push_back(pObject);
+		break;
+	case RENDERGROUP::PARTICLE:	
+		m_vecParticleEmitter.push_back(pObject);
+		break;
+	case RENDERGROUP::EFFECT:	
+		m_vecEffectRenderGroup.push_back(pObject);
+		break;
+	}
+}
+
+void Scene::DeleteObject(Object* pObject)
+{
+	
+}
+
 ID3D12RootSignature* Scene::CreateRootSignature()
 {
 	ID3D12RootSignature* pd3dGraphicsRootSignature = NULL;
@@ -1016,18 +1063,22 @@ void Scene::BuildObject()
 	//	Object* pe = new Object("particleEmitter");
 	//	
 	//	TransformComponent* t = new TransformComponent(pe);
-	//	ParticleEmitterComponent* pec = new ParticleEmitterComponent(pe, &m_vecParticlePool);
-	//	t->Translate(3, 2, -1);
-	//	pec->SetMaterialByName("ParticleTestMat");
+	//	ParticleEmitterComponent* pec = new ParticleEmitterComponent(pe);
+
+	//	pec->m_bIsBilboard = true;
+	//	pec->m_fGravityModifier = 0.0f;
+
+	//	t->Translate(-1, 2, -4);
+	//	//pec->SetMaterialByName("ParticleTestMat");
+	//	pec->SetMaterialByName("ParticleSparkMat");
+	//	pec->m_fStartSpeed = fRange(30.0f, 40.0f);
+	//	pec->m_RateOverTime = 10;
+	//	pec->m_fCreateCooltime = 1.0f / 10;
+	//	pec->m_nMaxParticles = 100;
+
 	//	m_vecObject.push_back(pe);
 	//	m_vecParticleEmitter.push_back(pe);
 	//}
-
-
-
-
-
-
 
 	{
 		// muzzle, empty object for weapon
@@ -1103,12 +1154,15 @@ void Scene::BuildObject()
 
 		m_pCameraObject = camera;
 		m_vecObject.push_back(camera);
+
+		FindObjectByName("pistol")->FindComponent<WeaponControllerComponent>()->SetCam(camera);
 	}
 
 
 
 	CreateTargetBoard("TB0", XMFLOAT3(-4, 0.5f, -20), XMFLOAT3(0, 270, 0), true,
 		m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
+
 	CreateTargetBoard("TB1", XMFLOAT3(-10.5, 0.5f, -24), XMFLOAT3(0, 300, 0), true,
 		m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
 	CreateTargetBoard("TB2", XMFLOAT3(-13, 0.5f, -22), XMFLOAT3(0, 270, 0), true,
@@ -1132,9 +1186,9 @@ void Scene::BuildObject()
 	CreateTargetBoard("TB10", XMFLOAT3(-14.9, 0.5f, -8.2), XMFLOAT3(0, 90, 0), true,
 		m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
 
-	CreateTargetBoard("TB11", XMFLOAT3(-19.5, 0.5f, -13), XMFLOAT3(0, 80, 0), true,
+	CreateTargetBoard("TB11", XMFLOAT3(-19.5, 0.5f, -8), XMFLOAT3(0, 80, 0), true,
 		m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
-	CreateTargetBoard("TB12", XMFLOAT3(-22.6, 0.5f, -7.1), XMFLOAT3(0, 90, 0), true,
+	CreateTargetBoard("TB12", XMFLOAT3(-22.6, 0.5f, -6.1), XMFLOAT3(0, 90, 0), true,
 		m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
 
 
@@ -1331,7 +1385,7 @@ void Scene::BuildObject()
 		TRC->SetMaterialByName("font_consolasMat");
 		TRC->SetText("+");
 		TRC->SetSize(16);
-		transform->Translate(990-8, 570-8, 0);
+		transform->Translate(960-16, 540+24, 0);
 
 		m_vecObject.push_back(text);
 		m_vecUIRenderGroup.push_back(text);
@@ -1476,6 +1530,8 @@ void Scene::CreateTargetBoard(const char* strName,
 	transform->Translate(position);
 	transform->RotateXYZDegree(rotationAngle);
 	if(initialState) TCC->Die();
+
+	TCC->SetPlayer(FindObjectByName("player"));
 
 	m_vecObject.push_back(targetBoard);
 	m_vecAnimObjectRenderGroup.push_back(targetBoard);

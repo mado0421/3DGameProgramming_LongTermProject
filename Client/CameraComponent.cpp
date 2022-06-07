@@ -18,6 +18,9 @@ CameraComponent::CameraComponent(Object* pObject)
 
 	SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
 	SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
+
+	t = m_pObject->FindComponent<TransformComponent>();
+
 }
 
 CameraComponent::~CameraComponent()
@@ -50,7 +53,6 @@ void CameraComponent::SetScissorRect(LONG xLeft, LONG yTop, LONG xRight, LONG yB
 
 void CameraComponent::SetLookAtWorldPos(const XMFLOAT3& xmf3LookAt)
 {
-	TransformComponent* t = m_pObject->FindComponent<TransformComponent>();
 	XMFLOAT3 xmf3Pos = t->GetPosition(Space::world);
 
 	XMFLOAT4X4 xmf4x4New = Matrix4x4::LookAtLH(xmf3Pos, xmf3LookAt, XMFLOAT3(0, 1, 0));
@@ -97,7 +99,7 @@ void CameraComponent::Update(float fTimeElapsed)
 
 void CameraComponent::CalculateViewMatrix()
 {
-	TransformComponent* transform = m_pObject->FindComponent<TransformComponent>();
+	TransformComponent* transform = t;
 	XMFLOAT3 xmf3Position;
 	xmf3Position	= transform->GetPosition(Space::world);
 
