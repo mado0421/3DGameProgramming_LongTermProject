@@ -12,7 +12,8 @@ CameraComponent::CameraComponent(Object* pObject)
 	, m_xmf3Right(1, 0, 0)
 	, m_xmf3Up(0, 1, 0)
 	, m_xmf3Look(0, 0, 1)
-	, m_pFocusObject(nullptr)
+	, m_pHeadTransform(nullptr)
+	, m_pLookAtTransform(nullptr)
 {
 	CalculateProjectionMatrix(0.1f, 1000.0f, ASPECT_RATIO, 60.0f);
 
@@ -68,14 +69,22 @@ void CameraComponent::SetLookAtWorldPos(const float& x, const float& y, const fl
 	SetLookAtWorldPos(XMFLOAT3(x, y, z));
 }
 
-void CameraComponent::SetFocusObject(Object* pObject)
+//void CameraComponent::SetFocusObject(Object* pObject)
+//{
+//	m_pLookAtTransform = pObject->FindComponent<TransformComponent>();
+//}
+
+void CameraComponent::SetHeadAndLookAt(Object* pHead, Object* pLookAt, XMFLOAT3 distance)
 {
-	m_pFocusObject = pObject;
+	m_pHeadTransform = pHead->FindComponent<TransformComponent>();
+	m_pLookAtTransform = pLookAt->FindComponent<TransformComponent>();
+	m_xmf3Direction = Vector3::Normalize(distance);
+	m_fDistance = Vector3::Length(distance);
 }
 
 void CameraComponent::SetFocusDisable()
 {
-	m_pFocusObject = nullptr;
+	m_pLookAtTransform = nullptr;
 }
 
 const XMFLOAT4X4 CameraComponent::GetViewMatrix()
@@ -88,11 +97,68 @@ const XMFLOAT4X4 CameraComponent::GetProjectionMatrix()
 	return m_xmf4x4Projection;
 }
 
+void CameraComponent::CheckCollision(Component* other)
+{
+	if (m_pHeadTransform) {
+		XMFLOAT3 xmf3Origin, xmf3Direction;
+		XMVECTOR origin, direction;
+		float length = 0;
+
+
+		xmf3Origin = m_pHeadTransform->GetPosition(Space::world);
+		xmf3Direction = m_xmf3Direction;
+
+		origin = XMLoadFloat3(&xmf3Origin);
+		direction = XMLoadFloat3(&xmf3Direction);
+
+		direction = XMVector3Rotate(direction, XMQuaternionRotationMatrix(t->GetWorldTransform()));
+
+		BoxColliderComponent* otherBoxCollider = dynamic_cast<BoxColliderComponent*>(other);
+		if (otherBoxCollider) {
+			otherBoxCollider->m_box.Intersects(origin, direction, length);
+			if (0 < length) {
+				if (m_fDistance > length && m_fMinLength > length) {
+					m_fMinLength = length;
+					m_bIfCollide = true;
+				}
+			}
+		}
+		SphereColliderComponent* otherSphereCollider = dynamic_cast<SphereColliderComponent*>(other);
+		if (otherSphereCollider) {
+			otherSphereCollider->m_sphere.Intersects(origin, direction, length);
+			if (0 < length) {
+				if (m_fDistance > length && m_fMinLength > length) {
+					m_fMinLength = length;
+					m_bIfCollide = true;
+				}
+			}
+		}
+	}
+}
+void CameraComponent::SolveConstraint()
+{
+	XMFLOAT3 position = m_pHeadTransform->GetPosition(Space::local);
+	if (m_bIfCollide) {
+		position = Vector3::Add(position, Vector3::Multiply(m_fMinLength * 0.8f, m_xmf3Direction));
+	}
+	else {
+		position = Vector3::Add(position, Vector3::Multiply(m_fDistance, m_xmf3Direction));
+	}
+	t->SetPosition(position);
+
+	m_fMinLength = FLT_MAX;
+	m_bIfCollide = false;
+}
+
+
 void CameraComponent::Update(float fTimeElapsed)
 {
 	if (!m_bEnabled) return;
-	if (m_pFocusObject) {
-		SetLookAtWorldPos(m_pFocusObject->FindComponent<TransformComponent>()->GetPosition(Space::world));
+
+
+
+	if (m_pLookAtTransform) {
+		SetLookAtWorldPos(m_pLookAtTransform->GetPosition(Space::world));
 	}
 	CalculateViewMatrix();
 }

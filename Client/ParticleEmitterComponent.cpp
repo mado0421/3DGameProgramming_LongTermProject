@@ -48,28 +48,39 @@ void ParticleEmitterComponent::Update(float fTimeElapsed)
 
 	// Update Emitter
 	
-	// for Test!
-	if (m_fCreateCooltime < m_fCurrCooltime && m_nMaxParticles > m_vecParticle.size()) {
-		m_fCurrCooltime = 0;
-		AddParticle();
-	}
-	m_fCurrCooltime += fTimeElapsed;
+		// Stop Particle Emitter
+	if (m_fTime > m_fDuration) {
 
-	if (m_emissionBurst.isEnable && m_emissionBurst.time < m_fCurrBurstTime) {
-		for (int i = 0; i < m_emissionBurst.count; i++) {
-			if(m_nMaxParticles > m_vecParticle.size())	AddParticle();
+		if (m_fTime > m_fDuration + m_fStartLifetime._max) {
+			m_pObject->m_bEnable = false;
+			m_bEnabled = false;
+			m_vecParticle.clear();
 		}
-		m_fCurrBurstTime = 0;
-		m_emissionBurst.isEnable = false;
-	}
-	m_fCurrBurstTime += fTimeElapsed;
 
+	}
+	else {
+		// for Test!
+		if (m_fCreateCooltime < m_fCurrCooltime && m_nMaxParticles > m_vecParticle.size()) {
+			m_fCurrCooltime = 0;
+			AddParticle();
+		}
+		m_fCurrCooltime += fTimeElapsed;
+
+		if (m_emissionBurst.isEnable && m_emissionBurst.time < m_fCurrBurstTime) {
+			for (int i = 0; i < m_emissionBurst.count; i++) {
+				if (m_nMaxParticles > m_vecParticle.size())	AddParticle();
+			}
+			m_fCurrBurstTime = 0;
+			m_emissionBurst.isEnable = false;
+		}
+		m_fCurrBurstTime += fTimeElapsed;
+
+	}
 
 	//AddParticle();
 
-	// Stop Particle Emitter
-	if (m_fTime > m_fDuration) 
-		m_pObject->m_bEnable = false;
+
+
 	m_fTime += fTimeElapsed;
 }
 

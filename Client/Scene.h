@@ -106,7 +106,7 @@ public:
 
 	virtual void Release();
 
-
+	void Clear();
 
 	void AddObject(Object* pObject, RENDERGROUP renderGroup);
 	void DeleteObject(Object* pObject);

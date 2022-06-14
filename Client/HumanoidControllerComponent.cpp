@@ -34,7 +34,7 @@ void HumanoidControllerComponent::Update(float fTimeElapsed)
 
 
 	if (!this->isAlive()) {
-		g_pCurrScene->startEndState = 2;	// End;
+		g_pCurrScene->Clear();
 	}
 	else {
 

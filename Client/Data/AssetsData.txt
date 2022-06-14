@@ -77,3 +77,5 @@ Humanoid_WalkingRightStrafeBack.mac
 Humanoid_WalkingBackward.mac
 targetBoardDown.mac
 targetBoardStand.mac
+newBody.mm
+newBody.dds

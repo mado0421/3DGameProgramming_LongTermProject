@@ -245,17 +245,7 @@ void Scene::Input(UCHAR* pKeyBuffer)
 	}
 	else if (2 == startEndState) {
 		if (pKeyBuffer[KeyCode::_Space] & 0xF0) { 
-			//m_pFramework->RefreshScene();
-			m_vecObject.clear();
-			m_vecNonAnimObjectRenderGroup.clear();
-			m_vecAnimObjectRenderGroup.clear();
-			m_vecEffectRenderGroup.clear();
-			m_vecUIRenderGroup.clear();
-			m_vecParticleEmitter.clear();
-
-			BuildObject();
-
-			startEndState = 1; TEST_MOUSE_USABLE = true; ShowCursor(false); 
+			startEndState = 1; 
 		}
 	}
 }
@@ -695,6 +685,22 @@ void Scene::Release()
 	}
 }
 
+void Scene::Clear()
+{
+	startEndState = 2;	// End;
+
+	m_vecObject.clear();
+	m_vecNonAnimObjectRenderGroup.clear();
+	m_vecAnimObjectRenderGroup.clear();
+	m_vecEffectRenderGroup.clear();
+	m_vecUIRenderGroup.clear();
+	m_vecParticleEmitter.clear();
+
+	BuildObject();
+
+	TEST_MOUSE_USABLE = false; ShowCursor(true);
+}
+
 void Scene::AddObject(Object* pObject, RENDERGROUP renderGroup)
 {
 	m_vecObject.push_back(pObject);
@@ -1125,6 +1131,8 @@ void Scene::BuildObject()
 
 		skinnedMeshRenderer->SetModelByName("human");
 		skinnedMeshRenderer->SetMaterialByName("DefaultMaterial");
+		//skinnedMeshRenderer->SetModelByName("newBody");
+		//skinnedMeshRenderer->SetMaterialByName("newBody");
 		transform->Translate(-3, 0, -3);
 		transform->RotateXYZDegree(0, 180, 0);
 
@@ -1136,10 +1144,19 @@ void Scene::BuildObject()
 		Object* head = new Object("head");
 
 		TransformComponent* transform = new TransformComponent(head);
-		transform->Translate(0, 1.2f, 5.0f);
+		transform->Translate(0, 1.5f, 0.0f);
 		m_vecObject.push_back(head);
 
 		head->m_pParent = FindObjectByName("player");
+	}
+	{
+		Object* look = new Object("lookAt");
+
+		TransformComponent* transform = new TransformComponent(look);
+		transform->Translate(0, 1.5f, 5.0f);
+		m_vecObject.push_back(look);
+
+		look->m_pParent = FindObjectByName("player");
 	}
 	{
 		Object* camera = new Object("camera");
@@ -1147,8 +1164,8 @@ void Scene::BuildObject()
 		TransformComponent* transform = new TransformComponent(camera);
 		CameraComponent* cam = new CameraComponent(camera);
 
-		transform->Translate(0.6f, 1.8f, -2.2f);
-		cam->SetFocusObject(FindObjectByName("head"));
+		//transform->Translate(0.6f, 1.8f, -2.2f);
+		cam->SetHeadAndLookAt(FindObjectByName("head"), FindObjectByName("lookAt"), XMFLOAT3(0.6f, 0.3f, -2.2f));
 
 		camera->m_pParent = FindObjectByName("player");
 
@@ -1157,8 +1174,6 @@ void Scene::BuildObject()
 
 		FindObjectByName("pistol")->FindComponent<WeaponControllerComponent>()->SetCam(camera);
 	}
-
-
 
 	CreateTargetBoard("TB0", XMFLOAT3(-4, 0.5f, -20), XMFLOAT3(0, 270, 0), true,
 		m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);

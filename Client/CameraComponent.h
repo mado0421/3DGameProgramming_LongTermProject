@@ -15,7 +15,8 @@ public:
 	void SetScissorRect(LONG xLeft, LONG yTop, LONG xRight, LONG yBottom);
 	void SetLookAtWorldPos(const XMFLOAT3& xmf3LookAtWorld);
 	void SetLookAtWorldPos(const float& x, const float& y, const float& z);
-	void SetFocusObject(Object* pObject);
+	//void SetFocusObject(Object* pObject);
+	void SetHeadAndLookAt(Object* pHead, Object* pLookAt, XMFLOAT3 distance);
 	void SetFocusDisable();
 
 	const XMFLOAT4X4 GetViewMatrix();
@@ -24,6 +25,8 @@ public:
 		return Vector3::Normalize( m_xmf3Look );
 	}
 
+	virtual void CheckCollision(Component* other);
+	virtual void SolveConstraint();
 	virtual void Update(float fTimeElapsed);
 
 protected:
@@ -41,7 +44,14 @@ protected:
 	D3D12_VIEWPORT		m_d3dViewport;
 	D3D12_RECT			m_d3dScissorRect;
 
-	Object*		m_pFocusObject;
 	TransformComponent* t;
+
+	//=========================For Cam Collide=======
+	TransformComponent* m_pHeadTransform;
+	TransformComponent* m_pLookAtTransform;
+	XMFLOAT3			m_xmf3Direction;
+	float				m_fMinLength = FLT_MAX;
+	float				m_fDistance;
+	bool				m_bIfCollide = false;
 };
 

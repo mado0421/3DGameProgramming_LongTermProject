@@ -19,7 +19,7 @@ void TargetBoardControllerComponent::Update(float fTimeElapsed)
 	if (!this->isAlive()) return;
 
 	if (m_fTime > m_fAttackPeriod) {
-		m_pPlayerCharacter->Damage(30);
+		//m_pPlayerCharacter->Damage(10);
 		m_fTime = 0;
 	}
 	m_fTime += fTimeElapsed;

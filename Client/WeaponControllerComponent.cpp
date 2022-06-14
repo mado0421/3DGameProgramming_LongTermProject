@@ -119,7 +119,7 @@ void WeaponControllerComponent::SolveConstraint()
 			TransformComponent* t = new TransformComponent(pe);
 			ParticleEmitterComponent* pec = new ParticleEmitterComponent(pe);
 
-			pec->m_bIsBilboard = true;
+			pec->m_bIsBilboard = false;
 			pec->m_fGravityModifier = 0.0f;
 
 			XMFLOAT3 muzzlePos = m_pMuzzle->FindComponent<TransformComponent>()->GetPosition(Space::world);
