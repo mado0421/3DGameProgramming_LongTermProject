@@ -81,3 +81,7 @@ x64/Debug/WindowsProject1.exe
 Client/x64/Debug/WindowsProject1.ilk
 Server/serverFrame/.vs/serverFrame/v16/.suo
 x64/Debug/WindowsProject1.exe
+*.vsidx
+.vs/TPSLongTermProject/v17/Browse.VC.db-shm
+.vs/TPSLongTermProject/FileContentIndex/read.lock
+.vs/TPSLongTermProject/v17/Browse.VC.db-wal
