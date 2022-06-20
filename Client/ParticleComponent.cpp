@@ -70,9 +70,26 @@ void ParticleComponent::Render(ID3D12GraphicsCommandList* pd3dCommandList)
 	// 그니까 단위변환행렬에 _44만 size로 바꿔서 보내고
 	// VS에서 input.positionW = float(_41, _42, _43) 하고
 	// GS에서 size를 _44로 하자~ 완벽~
+	// 
+	// 파티클이 빌보드가 아닐 상황도 대비해야 함
+	// input.direction = float(_11, _12, _13)
+	// isBilboard = bool(_14)
+	// 를 하자
+	// 
+	// 
+	// 
+	// 
+	//
+
+
 	XMFLOAT4X4 xmf4x4Temp;
-	XMStoreFloat4x4(&xmf4x4Temp, transform->GetWorldTransform());
+ 	XMStoreFloat4x4(&xmf4x4Temp, transform->GetWorldTransform());
 	xmf4x4Temp._44 = m_fSize;
+	xmf4x4Temp._11 = m_xmf3Direction.x;
+	xmf4x4Temp._12 = m_xmf3Direction.y;
+	xmf4x4Temp._13 = m_xmf3Direction.z;
+	xmf4x4Temp._14 = m_bIsBilboard ? 0.0f : 1.0f;
+
 	XMStoreFloat4x4(m_pCBMappedWorldTransform, XMMatrixTranspose(XMLoadFloat4x4(&xmf4x4Temp)));
 
 	pd3dCommandList->IASetVertexBuffers(0, 1, &m_d3dVertexBufferView);

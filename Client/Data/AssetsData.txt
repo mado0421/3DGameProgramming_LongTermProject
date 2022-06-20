@@ -21,6 +21,7 @@ WoodOldRough3_normal.dds
 Wooden_fence_albedo.dds
 Wooden_fence_normal.dds
 Concrete_Door_1024_albedo.dds
+ParticleSpark.dds
 TexturesCom_Concrete_WallCast_512_albedo.dds
 TexturesCom_Concrete_WallCast_512_normal.dds
 TexturesCom_Fabric_Cotton_1K_albedo.dds
@@ -76,3 +77,5 @@ Humanoid_WalkingRightStrafeBack.mac
 Humanoid_WalkingBackward.mac
 targetBoardDown.mac
 targetBoardStand.mac
+newBody.mm
+newBody.dds

@@ -1,7 +1,7 @@
 Count: 7
 tutorialHouse_ceiling 0,0,0 0,0,0,1 ceilingMat
 tutorialHouse_doorFrame 0,0,0 0,0,0,1 Concrete_Door
-tutorialHouse_fence 0,0,0 0,0,0,1 Wooden_fence
+tutorialHouse_fence 0,0,-0.4 0,0,0,1 Wooden_fence
 tutorialHouse_outerFloor 0,0,0 0,0,0,1 outerFloorMat
 tutorialHouse_outerWall 0,0,0 0,0,0,1 outerWallMat
 tutorialHouse_wall 0,0,0 0,0,0,1 wallMat

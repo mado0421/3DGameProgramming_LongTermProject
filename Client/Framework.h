@@ -61,9 +61,7 @@ public:
 	void OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 	void OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 
-	HWND GetHwnd() { return m_hWnd; };
-
-	//HWND GetHwnd(){ return m_hWnd; };
+	void RefreshScene();
 
 	//===============================================================
 	// 테스트용 임시함수!!!!!!!!!!!!!!!!!!!!!

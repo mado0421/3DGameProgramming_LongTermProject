@@ -12,5 +12,13 @@ public:
 
 public:
 	virtual void Update(float fTimeElapsed);
+
+	void SetPlayer(Object* pO);
+
+private:
+	float m_fTime = 0.0f;
+	float m_fAttackPeriod = 5.0f;
+
+	Character* m_pPlayerCharacter = nullptr;
 };
 

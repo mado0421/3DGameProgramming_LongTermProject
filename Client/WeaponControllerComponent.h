@@ -1,6 +1,9 @@
 #pragma once
 #include "Component.h"
 
+class TransformComponent;
+class CameraComponent;
+
 class WeaponControllerComponent : public Component
 {
 public:
@@ -16,6 +19,8 @@ public:
 public:
 	void Fire();
 	void Reload();
+
+	void SetCam(Object* pCam);
 
 public:
 
@@ -38,5 +43,11 @@ private:
 	float				m_fMinLength	= FLT_MAX;
 	Component*			m_pCollided		= nullptr;
 	XMFLOAT3			m_xmf3CollisionPoint = XMFLOAT3(0, 0, 0);
+
+
+	TransformComponent* muzzleTransform;
+	TransformComponent* myTransform;
+	TransformComponent* camTransform;
+	CameraComponent*	cam;
 };
 
