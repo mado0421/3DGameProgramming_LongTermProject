@@ -1,9 +1,17 @@
 #include "stdafx.h"
 #include "Components.h"
+#include "Scene.h"
+#include "Object.h"
 
-EventComponent::EventComponent(Object* pObject, EventState eventState)
+EventComponent::EventComponent(Object* pObject)
 	:Component(pObject)
-	, m_EventState(eventState)
+	, targetCount(-1)
+{
+}
+
+EventComponent::EventComponent(Object* pObject, int count)
+	:Component(pObject)
+	,targetCount(count)
 {
 }
 
@@ -11,85 +19,85 @@ EventComponent::~EventComponent()
 {
 }
 
-void EventComponent::SetEvent(EventState eventState)
+void EventComponent::AddEvent(EventInfo& info)
 {
-	switch (eventState)
+	vector<Object*>* temp;
+	switch (info.type)
 	{
-	case EventComponent::EventState::Ready:
-		// 모든 적과 문을 초기상태로
-		for_each(m_vecSpawnTarget.begin(),
-			m_vecSpawnTarget.end(),
-			[&](Character* c) {c->Die(); });
-
-		for_each(m_vecDoorForOpen.begin(),
-			m_vecDoorForOpen.end(),
-			[&](DoorComponent* d) {d->Close(); });
-
-		for_each(m_vecDoorForClose.begin(),
-			m_vecDoorForClose.end(),
-			[&](DoorComponent* d) {d->Open(); });
-
+	case EVENT::TRIGGER:	isTriggerReady = true; break;
+	case EVENT::EDIED:		
+		temp = static_cast<vector<Object*>*>(info.data);
+		for (int i = 0; i < temp->size(); i++) {
+			vecEnemyToWatch.push_back(temp->at(i));
+		}
+		isWatchingEnemy = true;
 		break;
-	case EventComponent::EventState::On:
-		// 적을 스폰, 문을 목표 상태로
-		for_each(m_vecSpawnTarget.begin(),
-			m_vecSpawnTarget.end(),
-			[&](Character* c) {c->Revive(); });
 
-		for_each(m_vecDoorForOpen.begin(),
-			m_vecDoorForOpen.end(),
-			[&](DoorComponent* d) {d->Open(); });
-
-		for_each(m_vecDoorForClose.begin(),
-			m_vecDoorForClose.end(),
-			[&](DoorComponent* d) {d->Close(); });
-
+	case EVENT::DOPEN:		
+		temp = static_cast<vector<Object*>*>(info.data);
+		for (int i = 0; i < temp->size(); i++) 
+			vecDoorToOpen.push_back(temp->at(i));
+		
 		break;
-	case EventComponent::EventState::Off:
-		// 적이 다 죽은걸 가정하고 문을 다시 열음
-
-		for_each(m_vecDoorForOpen.begin(),
-			m_vecDoorForOpen.end(),
-			[&](DoorComponent* d) {d->Open(); });
-
-		for_each(m_vecDoorForClose.begin(),
-			m_vecDoorForClose.end(),
-			[&](DoorComponent* d) {d->Open(); });
+	case EVENT::DCLOSE:		
+		temp = static_cast<vector<Object*>*>(info.data);
+		for (int i = 0; i < temp->size(); i++) 
+			vecDoorToClose.push_back(temp->at(i));
+		
 		break;
-	default:
+	case EVENT::EWAKE:		
+		temp = static_cast<vector<Object*>*>(info.data);
+		for (int i = 0; i < temp->size(); i++) 
+			vecEnemyToWake.push_back(temp->at(i));
+		
 		break;
+	case EVENT::VICTORY:	isEventForVictory = true;  break;
+	case EVENT::DEFEAT:		isEventForDefeat = true;	break;
+	default:break;
 	}
-
-	m_EventState = eventState;
 }
 
-void EventComponent::AddSpawn(Character* pCharacter)
+void EventComponent::SetEvent()
 {
-	m_vecSpawnTarget.push_back(pCharacter);
+	for_each(vecDoorToOpen.begin(), vecDoorToOpen.end(), [&](Object* o) {
+		o->FindComponent<DoorComponent>()->Open();
+		});
+
+	for_each(vecDoorToClose.begin(), vecDoorToClose.end(), [&](Object* o) {
+		o->FindComponent<DoorComponent>()->Close();
+		});
+
+	for_each(vecEnemyToWake.begin(), vecEnemyToWake.end(), [&](Object* o) {
+		o->FindComponent<Character>()->Revive();
+		});
+
+	if (isEventForVictory) g_pCurrScene->Victory();
+	if (isEventForDefeat)  g_pCurrScene->Defeat();
+
+	// 실행했으니 전부 끄기
+	m_pObject->SetActive(false);
+	m_bEnabled = false;
 }
 
-void EventComponent::AddDoorOpen(DoorComponent* pDoor)
-{
-	m_vecDoorForOpen.push_back(pDoor);
-}
-
-void EventComponent::AddDoorClose(DoorComponent* pDoor)
-{
-	m_vecDoorForClose.push_back(pDoor);
-}
 
 void EventComponent::SolveConstraint()
 {
-	vector<ColliderComponent*> l_vecCollider = m_pObject->FindComponents<ColliderComponent>();
+	if (!m_bEnabled) return;
 
-	if (m_EventState == EventState::Ready) {
-		for_each(l_vecCollider.begin(), l_vecCollider.end(), [&](ColliderComponent* c) {
-			for (int i = 0; i < c->m_vecpCollided.size(); i++) {
-				HumanoidControllerComponent* hcc = c->m_vecpCollided[i]->m_pObject->FindComponent<HumanoidControllerComponent>();
-				if (hcc)
-					SetEvent(EventState::On);
-			}
-			});
+	if (g_pCurrScene->eventCount >= targetCount) {
+
+
+		if (isTriggerReady) {
+			vector<ColliderComponent*> l_vecCollider = m_pObject->FindComponents<ColliderComponent>();
+
+			for_each(l_vecCollider.begin(), l_vecCollider.end(), [&](ColliderComponent* c) {
+				for (int i = 0; i < c->m_vecpCollided.size(); i++) {
+					HumanoidControllerComponent* hcc = c->m_vecpCollided[i]->m_pObject->FindComponent<HumanoidControllerComponent>();
+					if (hcc)
+						SetEvent();
+				}
+				});
+		}
 	}
 }
 
@@ -100,13 +108,16 @@ void EventComponent::Update(float fTimeElapsed)
 	*/
 
 	if (!m_bEnabled) return;
+	
+	if (g_pCurrScene->eventCount >= targetCount) {
 
-	if (m_EventState == EventState::On) {
-		for (int i = 0; i < m_vecSpawnTarget.size(); i++) {
-			if (m_vecSpawnTarget[i]->isAlive()) return;
+
+		if (isWatchingEnemy) {
+			for_each(vecEnemyToWatch.begin(), vecEnemyToWatch.end(), [&](Object* o) {
+				if (o->FindComponent<Character>()->isAlive()) return;
+				});
+
+			SetEvent();
 		}
-		SetEvent(EventState::Off);
 	}
-
-
 }

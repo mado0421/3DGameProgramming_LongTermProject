@@ -29,6 +29,35 @@ void HumanoidControllerComponent::SetLookAt(Object* pObejct)
 	m_pLookAt = pObejct->FindComponent<TransformComponent>();
 }
 
+void HumanoidControllerComponent::Damage(int dmg)
+{
+	Character::Damage(dmg);
+
+	{
+		Object* pe = new Object("particleEmitter");
+
+		TransformComponent* t = new TransformComponent(pe);
+		ParticleEmitterComponent* pec = new ParticleEmitterComponent(pe);
+
+		t->Translate(m_pObject->FindComponent<TransformComponent>()->GetPosition(Space::world));
+		t->Translate(0, 1.5, 0);
+		pec->m_bIsBilboard = false;
+		pec->m_fGravityModifier = 0.3f;
+		pec->SetMaterialByName("ParticleDam");
+		pec->m_fStartSpeed = fRange(0.1, 1.0);
+		pec->m_nMaxParticles = 1;
+		pec->m_fDuration = 0.2f;
+		pec->m_fStartSize = fRange(0.3, 0.7);
+		pec->m_fCreateCooltime = 0.0f;
+		pec->m_fStartLifetime = fRange(0.1, 0.2);
+
+		ParticleBurstInfo pb = {};
+		pec->SetBurst(pb);
+
+		g_pCurrScene->AddObject(pe, RENDERGROUP::PARTICLE);
+	}
+}
+
 void HumanoidControllerComponent::Update(float fTimeElapsed)
 {
 	if (!m_bEnabled) return;

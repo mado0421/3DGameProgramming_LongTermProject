@@ -9,6 +9,9 @@ DoorComponent::DoorComponent(Object* pObject, bool bOpen)
 {
 	if (m_bOpen) m_fProgress = 1;
 	else m_fProgress = 0;
+
+	l_transform = m_pObject->FindComponent<TransformComponent>();
+
 }
 
 DoorComponent::~DoorComponent()
@@ -38,7 +41,6 @@ void DoorComponent::Update(float fTimeElapsed)
 		else m_fProgress = 0;
 	}
 
-	TransformComponent* l_transform = m_pObject->FindComponent<TransformComponent>();
 	XMFLOAT3 xmf3Temp = l_transform->GetRightVector();
 	xmf3Temp = Vector3::Add(m_xmf3OrigPosition, Vector3::Multiply(m_fProgress * 3/*m*/, xmf3Temp));
 	l_transform->SetPosition(xmf3Temp);

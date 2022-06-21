@@ -40,4 +40,15 @@
 { name level00_11 d level00_11_dr n level00_11_n f 0.1 0.1 0.1 }
 { name level00_12 d level00_12_dr n level00_12_n f 0.1 0.1 0.1 }
 
+{ name ParticleDam d ParticleDamage f 0.1 0.1 0.1 }
+{ name p1 d Particle_1 f 0.1 0.1 0.1 }
+{ name p2 d Particle_2 f 0.1 0.1 0.1 }
+{ name p3 d Particle_3 f 0.1 0.1 0.1 }
+{ name p4 d Particle_4 f 0.1 0.1 0.1 }
+{ name p5 d Particle_5 f 0.1 0.1 0.1 }
+
+{ name victory d victory f 0.1 0.1 0.1 }
+
+
+
 #End

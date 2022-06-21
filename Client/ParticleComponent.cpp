@@ -106,6 +106,7 @@ void ParticleComponent::Initialize(ParticlePropertiesPack& ppp)
 	m_fGravityModifier	= ppp.gravity;
 	m_fSize				= ppp.size;
 	m_fGravity			= 0;
+	m_bIsBilboard		= ppp.isBilboard;
 	m_pObject->SetActive(true);
 	SetActive(true);
 }

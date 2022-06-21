@@ -1,30 +1,50 @@
 #pragma once
 #include "Component.h"
 
+enum class EVENT {
+	TRIGGER,
+	DOPEN,
+	DCLOSE,
+	EWAKE,
+	EDIED,
+	VICTORY,
+	DEFEAT,
+};
+
+struct EventInfo {
+	EVENT type;
+	void* data;
+
+	EventInfo(EVENT t, void* d)
+		:type(t)
+		, data(d) {}
+};
+
 class EventComponent : public Component
 {
 public:
-	enum class EventState {
-		Ready, On, Off
-	};
-
 	EventComponent() = delete;
-	EventComponent(Object* pObject, EventState eventState = EventState::Ready);
+	EventComponent(Object* pObject);
+	EventComponent(Object* pObject, int count);
 	~EventComponent();
 
-	void SetEvent(EventState eventState);
-
-	void AddSpawn(Character* pCharacter);
-	void AddDoorOpen(DoorComponent* pDoor);
-	void AddDoorClose(DoorComponent* pDoor);
+	void AddEvent(EventInfo& info);
+	// trigger가 실행되면, event를 실행한다.
+	void SetEvent();
 
 	virtual void SolveConstraint();
 	virtual void Update(float fTimeElapsed);
 
 private:
-	vector< Character* > m_vecSpawnTarget;
-	vector< DoorComponent* > m_vecDoorForOpen;
-	vector< DoorComponent* > m_vecDoorForClose;
-	EventState m_EventState;
+	bool			isTriggerReady = false;
+	vector<Object*> vecEnemyToWatch;
+	bool isWatchingEnemy = false;
+
+	vector<Object*> vecDoorToOpen;
+	vector<Object*> vecDoorToClose;
+	vector<Object*> vecEnemyToWake;
+	bool isEventForVictory = false;
+	bool isEventForDefeat = false;
+	int targetCount = -1;
 };
 

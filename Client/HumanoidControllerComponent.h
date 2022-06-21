@@ -16,6 +16,7 @@ public:
 
 public:
 
+	virtual void Damage(int);
 	virtual void Update(float fTimeElapsed);
 
 	float		m_fTime;

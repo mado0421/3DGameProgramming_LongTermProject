@@ -132,7 +132,7 @@ float GetRandomFloat(float min, float max) {
 	// rand() % ((max-min) * 1000) -> 0 ~ 5000
 	// rand() % ((max-min) * 1000) * 0.001 -> 0 ~ 5.000
 	// rand() % ((max-min) * 1000) * 0.001 + min -> 5 ~ 10.000
-
+	if (min == max) return min;
 	return (rand() % static_cast<int>(((max - min) * 1000))) * 0.001 + min;
 }
 

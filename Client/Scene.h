@@ -93,8 +93,9 @@ public:
 	vector<Object*>								m_vecParticlePool;
 
 public:
+	int eventCount = 0;	//enemyDown
 	bool test = false;
-	int startEndState = 1;	// 0: main, 1: start, 2: end
+	int startEndState = 0;	// 0: main, 1: start, 2: end
 public:
 	virtual void Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 
@@ -107,6 +108,8 @@ public:
 	virtual void Release();
 
 	void Clear();
+	void Victory();
+	void Defeat();
 
 	void AddObject(Object* pObject, RENDERGROUP renderGroup);
 	void DeleteObject(Object* pObject);
@@ -139,8 +142,7 @@ protected:
 
 	void CreateCollider(MY_COLLIDER_OBJECT_DATA colData);
 
-	void CreateTargetBoard(const char* strName, XMFLOAT3 position, XMFLOAT3 rotationAngle, bool initialStateDied,
-		ID3D12Device* device, ID3D12GraphicsCommandList* commandlist,
-		D3D12_CPU_DESCRIPTOR_HANDLE& cpuHandle, D3D12_GPU_DESCRIPTOR_HANDLE& gpuHandle);
+	void CreateTargetBoard(const char* strName, XMFLOAT3 position, XMFLOAT3 rotationAngle, bool initialStateDied);
+	void CreateDoor(const char* strName, XMFLOAT3 position, XMFLOAT3 rotationAngle, bool isOpen);
 };
 

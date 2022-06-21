@@ -17,5 +17,6 @@ private:
 	bool m_bOpen;
 	float m_fProgress;
 	XMFLOAT3 m_xmf3OrigPosition;
+	TransformComponent* l_transform;
 };
 

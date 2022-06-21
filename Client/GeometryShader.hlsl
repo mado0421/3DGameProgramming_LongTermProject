@@ -75,10 +75,10 @@ void GS_ParticleBillboard(
 	output[2].position = mul(mul(float4(BL, 1.0f), gmtxView), gmtxProjection);
 	output[3].position = mul(mul(float4(TL, 1.0f), gmtxView), gmtxProjection);
 
-	output[0].uv = float2(0, 1);
-	output[1].uv = float2(0, 0);
-	output[2].uv = float2(1, 1);
-	output[3].uv = float2(1, 0);
+	output[0].uv = float2(0, 0);
+	output[1].uv = float2(0, 1);
+	output[2].uv = float2(1, 0);
+	output[3].uv = float2(1, 1);
 
 	outStream.Append(output[0]);
 	outStream.Append(output[1]);

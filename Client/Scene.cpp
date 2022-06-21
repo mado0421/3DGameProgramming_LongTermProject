@@ -103,7 +103,8 @@ void Scene::Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12Graphics
 	g_TextureMng.LoadFromFile("defaultSpecularMap", m_pd3dDevice, m_pd3dCommandList, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
 	g_TextureMng.LoadFromFile("titleImage_rescale", m_pd3dDevice, m_pd3dCommandList, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
 	g_TextureMng.LoadFromFile("endImage_rescale", m_pd3dDevice, m_pd3dCommandList, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
-
+	g_TextureMng.LoadFromFile("victory", m_pd3dDevice, m_pd3dCommandList, m_d3dSrvCPUDescriptorStartHandle, m_d3dSrvGPUDescriptorStartHandle);
+	
 	/*========================================================================
 	* 마테리얼
 	*=======================================================================*/
@@ -257,7 +258,7 @@ void Scene::Update(float fTimeElapsed)
 	CheckCollsion();
 	SolveConstraint();
 
-	for_each(m_vecObject.begin(), m_vecObject.end(), [fTimeElapsed](Object* o) { if(o->m_bEnable) o->Update(fTimeElapsed); });
+	for_each(m_vecObject.begin(), m_vecObject.end(), [&fTimeElapsed](Object* o) { if(o->m_bEnable) o->Update(fTimeElapsed); });
 }
 void Scene::Render(D3D12_CPU_DESCRIPTOR_HANDLE hBckBufRtv, D3D12_CPU_DESCRIPTOR_HANDLE hBckBufDsv)
 {	
@@ -653,6 +654,7 @@ void Scene::Render(D3D12_CPU_DESCRIPTOR_HANDLE hBckBufRtv, D3D12_CPU_DESCRIPTOR_
 			m_pd3dCommandList->SetPipelineState(m_uomPipelineStates["SRToRt"]);
 
 			if (1 == startEndState) g_TextureMng.UseForShaderResource("titleImage_rescale", m_pd3dCommandList, ROOTSIGNATURE_COLOR_TEXTURE);
+			else if (3 == startEndState) g_TextureMng.UseForShaderResource("victory", m_pd3dCommandList, ROOTSIGNATURE_COLOR_TEXTURE);
 			else g_TextureMng.UseForShaderResource("endImage_rescale", m_pd3dCommandList, ROOTSIGNATURE_COLOR_TEXTURE);
 
 			m_pd3dCommandList->ClearDepthStencilView(hBckBufDsv, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
@@ -687,6 +689,7 @@ void Scene::Release()
 
 void Scene::Clear()
 {
+	eventCount = 0;
 	startEndState = 2;	// End;
 
 	m_vecObject.clear();
@@ -699,6 +702,15 @@ void Scene::Clear()
 	BuildObject();
 
 	TEST_MOUSE_USABLE = false; ShowCursor(true);
+}
+
+void Scene::Victory()
+{
+	startEndState = 3;
+}
+
+void Scene::Defeat()
+{
 }
 
 void Scene::AddObject(Object* pObject, RENDERGROUP renderGroup)
@@ -1177,6 +1189,8 @@ void Scene::BuildObject()
 		FindObjectByName("pistol")->FindComponent<WeaponControllerComponent>()->SetCam(camera);
 	}
 
+	{
+
 	//CreateTargetBoard("TB0", XMFLOAT3(-4, 0.5f, -20), XMFLOAT3(0, 270, 0), true,
 	//	m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
 
@@ -1208,90 +1222,96 @@ void Scene::BuildObject()
 	//CreateTargetBoard("TB12", XMFLOAT3(-22.6, 0.5f, -6.1), XMFLOAT3(0, 90, 0), true,
 	//	m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
 
+	}
 
+	/*===========================================================================
+	* Env Object
+	*==========================================================================*/
 	LoadLevelEnvironment();
-
-	//// Door
-	//{
-	//	Object* env = new Object("door00");
-
-	//	TransformComponent* transform = new TransformComponent(env);
-	//	BoxColliderComponent* boxCollider = new BoxColliderComponent(env, XMFLOAT3(0, 1.5f, 0), XMFLOAT3(1.5f, 1.5f, 0.15f), XMFLOAT4(0, 0, 0, 1));
-	//	transform->Translate(-1.5, 0, -9.15);
-	//	MeshRendererComponent* mrc = new MeshRendererComponent(env, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
-	//	mrc->SetModelByName("tutorialHouse_door");
-	//	mrc->SetMaterialByName("doorMat");
-	//	DoorComponent* dc = new DoorComponent(env, false);
+	{
 
 
-	//	m_vecObject.push_back(env);
-	//	m_vecNonAnimObjectRenderGroup.push_back(env);
-	//}
-	//{
-	//	Object* env = new Object("door01");
+		//// Door
+		//{
+		//	Object* env = new Object("door00");
 
-	//	TransformComponent* transform = new TransformComponent(env);
-	//	BoxColliderComponent* boxCollider = new BoxColliderComponent(env, XMFLOAT3(0, 1.5f, 0), XMFLOAT3(1.5f, 1.5f, 0.15f), XMFLOAT4(0, 0, 0, 1));
-	//	transform->Translate(-1.5, 0, -16.85);
-	//	MeshRendererComponent* mrc = new MeshRendererComponent(env, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
-	//	mrc->SetModelByName("tutorialHouse_door");
-	//	mrc->SetMaterialByName("doorMat");
-	//	DoorComponent* dc = new DoorComponent(env);
+		//	TransformComponent* transform = new TransformComponent(env);
+		//	BoxColliderComponent* boxCollider = new BoxColliderComponent(env, XMFLOAT3(0, 1.5f, 0), XMFLOAT3(1.5f, 1.5f, 0.15f), XMFLOAT4(0, 0, 0, 1));
+		//	transform->Translate(-1.5, 0, -9.15);
+		//	MeshRendererComponent* mrc = new MeshRendererComponent(env, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
+		//	mrc->SetModelByName("tutorialHouse_door");
+		//	mrc->SetMaterialByName("doorMat");
+		//	DoorComponent* dc = new DoorComponent(env, false);
 
 
-	//	m_vecObject.push_back(env);
-	//	m_vecNonAnimObjectRenderGroup.push_back(env);
-	//}
-	//{
-	//	Object* env = new Object("door02");
+		//	m_vecObject.push_back(env);
+		//	m_vecNonAnimObjectRenderGroup.push_back(env);
+		//}
+		//{
+		//	Object* env = new Object("door01");
 
-	//	TransformComponent* transform = new TransformComponent(env);
-	//	BoxColliderComponent* boxCollider = new BoxColliderComponent(env, XMFLOAT3(0, 1.5f, 0), XMFLOAT3(1.5f, 1.5f, 0.15f), XMFLOAT4(0, 0, 0, 1));
-	//	transform->Translate(-5.85, 0, -23.5);
-	//	transform->RotateXYZDegree(0, 90, 0);
-	//	MeshRendererComponent* mrc = new MeshRendererComponent(env, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
-	//	mrc->SetModelByName("tutorialHouse_door");
-	//	mrc->SetMaterialByName("doorMat");
-	//	DoorComponent* dc = new DoorComponent(env);
-
-
-	//	m_vecObject.push_back(env);
-	//	m_vecNonAnimObjectRenderGroup.push_back(env);
-	//}
-	//{
-	//	Object* env = new Object("door03");
-
-	//	TransformComponent* transform = new TransformComponent(env);
-	//	BoxColliderComponent* boxCollider = new BoxColliderComponent(env, XMFLOAT3(0, 1.5f, 0), XMFLOAT3(1.5f, 1.5f, 0.15f), XMFLOAT4(0, 0, 0, 1));
-	//	transform->Translate(-14.85, 0, -16.5);
-	//	transform->RotateXYZDegree(0, 270, 0);
-	//	MeshRendererComponent* mrc = new MeshRendererComponent(env, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
-	//	mrc->SetModelByName("tutorialHouse_door");
-	//	mrc->SetMaterialByName("doorMat");
-	//	DoorComponent* dc = new DoorComponent(env);
+		//	TransformComponent* transform = new TransformComponent(env);
+		//	BoxColliderComponent* boxCollider = new BoxColliderComponent(env, XMFLOAT3(0, 1.5f, 0), XMFLOAT3(1.5f, 1.5f, 0.15f), XMFLOAT4(0, 0, 0, 1));
+		//	transform->Translate(-1.5, 0, -16.85);
+		//	MeshRendererComponent* mrc = new MeshRendererComponent(env, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
+		//	mrc->SetModelByName("tutorialHouse_door");
+		//	mrc->SetMaterialByName("doorMat");
+		//	DoorComponent* dc = new DoorComponent(env);
 
 
-	//	m_vecObject.push_back(env);
-	//	m_vecNonAnimObjectRenderGroup.push_back(env);
-	//}
-	//{
-	//	Object* env = new Object("door04");
+		//	m_vecObject.push_back(env);
+		//	m_vecNonAnimObjectRenderGroup.push_back(env);
+		//}
+		//{
+		//	Object* env = new Object("door02");
 
-	//	TransformComponent* transform = new TransformComponent(env);
-	//	BoxColliderComponent* boxCollider = new BoxColliderComponent(env, XMFLOAT3(0, 1.5f, 0), XMFLOAT3(1.5f, 1.5f, 0.15f), XMFLOAT4(0, 0, 0, 1));
-	//	transform->Translate(-27.5, 0, -14.85);
-	//	transform->RotateXYZDegree(0, 180, 0);
-	//	MeshRendererComponent* mrc = new MeshRendererComponent(env, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
-	//	mrc->SetModelByName("tutorialHouse_door");
-	//	mrc->SetMaterialByName("doorMat");
-	//	DoorComponent* dc = new DoorComponent(env);
+		//	TransformComponent* transform = new TransformComponent(env);
+		//	BoxColliderComponent* boxCollider = new BoxColliderComponent(env, XMFLOAT3(0, 1.5f, 0), XMFLOAT3(1.5f, 1.5f, 0.15f), XMFLOAT4(0, 0, 0, 1));
+		//	transform->Translate(-5.85, 0, -23.5);
+		//	transform->RotateXYZDegree(0, 90, 0);
+		//	MeshRendererComponent* mrc = new MeshRendererComponent(env, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
+		//	mrc->SetModelByName("tutorialHouse_door");
+		//	mrc->SetMaterialByName("doorMat");
+		//	DoorComponent* dc = new DoorComponent(env);
 
 
-	//	m_vecObject.push_back(env);
-	//	m_vecNonAnimObjectRenderGroup.push_back(env);
-	//}
-	//{
-	//	Object* env = new Object("door05");
+		//	m_vecObject.push_back(env);
+		//	m_vecNonAnimObjectRenderGroup.push_back(env);
+		//}
+		//{
+		//	Object* env = new Object("door03");
+
+		//	TransformComponent* transform = new TransformComponent(env);
+		//	BoxColliderComponent* boxCollider = new BoxColliderComponent(env, XMFLOAT3(0, 1.5f, 0), XMFLOAT3(1.5f, 1.5f, 0.15f), XMFLOAT4(0, 0, 0, 1));
+		//	transform->Translate(-14.85, 0, -16.5);
+		//	transform->RotateXYZDegree(0, 270, 0);
+		//	MeshRendererComponent* mrc = new MeshRendererComponent(env, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
+		//	mrc->SetModelByName("tutorialHouse_door");
+		//	mrc->SetMaterialByName("doorMat");
+		//	DoorComponent* dc = new DoorComponent(env);
+
+
+		//	m_vecObject.push_back(env);
+		//	m_vecNonAnimObjectRenderGroup.push_back(env);
+		//}
+		//{
+		//	Object* env = new Object("door04");
+
+		//	TransformComponent* transform = new TransformComponent(env);
+		//	BoxColliderComponent* boxCollider = new BoxColliderComponent(env, XMFLOAT3(0, 1.5f, 0), XMFLOAT3(1.5f, 1.5f, 0.15f), XMFLOAT4(0, 0, 0, 1));
+		//	transform->Translate(-27.5, 0, -14.85);
+		//	transform->RotateXYZDegree(0, 180, 0);
+		//	MeshRendererComponent* mrc = new MeshRendererComponent(env, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
+		//	mrc->SetModelByName("tutorialHouse_door");
+		//	mrc->SetMaterialByName("doorMat");
+		//	DoorComponent* dc = new DoorComponent(env);
+
+
+		//	m_vecObject.push_back(env);
+		//	m_vecNonAnimObjectRenderGroup.push_back(env);
+		//}
+		//{
+		//	Object* env = new Object("door05");
 
 	//	TransformComponent* transform = new TransformComponent(env);
 	//	BoxColliderComponent* boxCollider = new BoxColliderComponent(env, XMFLOAT3(0, 1.5f, 0), XMFLOAT3(1.5f, 1.5f, 0.15f), XMFLOAT4(0, 0, 0, 1));
@@ -1391,6 +1411,284 @@ void Scene::BuildObject()
 	//	m_vecObject.push_back(trig);
 	//}
 
+	}
+
+
+
+	/*===========================================================================
+	* Interaction Object
+	*==========================================================================*/
+	CreateDoor("d0", XMFLOAT3(-3, 0.0f, 6.2f), XMFLOAT3(0, 0, 0), true);
+	CreateDoor("d1", XMFLOAT3(-16.7180004, 0, 2.38000011), XMFLOAT3(0, 90, 0), false);
+	CreateDoor("d2", XMFLOAT3(-22.2059994, 0, 6.60099983), XMFLOAT3(0, 0, 0), false);
+	CreateDoor("d3", XMFLOAT3(-22.9099998, 0, 19.2399998), XMFLOAT3(0, 0, 0), false);
+	CreateDoor("d4", XMFLOAT3(-14.4899998, 0, 40.5599976), XMFLOAT3(0, 90, 0), true);
+	CreateDoor("d5", XMFLOAT3(-3.1400001, 0, 40.7099991), XMFLOAT3(0, 90, 0), true);
+	CreateDoor("d6", XMFLOAT3(-8.38860321, 0, 18.455431), XMFLOAT3(0, 20, 0), false);
+
+	//FirstHallway
+	CreateTargetBoard("t0", XMFLOAT3(-15.8400002, 0, 2.50999999), XMFLOAT3(0, 270, 0), true);
+
+	//FirstRoom
+	CreateTargetBoard("t1", XMFLOAT3(-24.0699997, 0, 5.28999996), XMFLOAT3(0, 270, 0), true);
+	//CreateTargetBoard("t2", XMFLOAT3(-24.7700005, 0, 2.24000001), XMFLOAT3(0, 270, 0), true);
+	CreateTargetBoard("t3", XMFLOAT3(-24.2700005, 0, -0.639999986), XMFLOAT3(0, 270, 0), true);
+
+	//SecondHallway
+	CreateTargetBoard("t4", XMFLOAT3(-26.2800007, 0, 10.4700003), XMFLOAT3(0, 270, 0), true);
+	CreateTargetBoard("t5", XMFLOAT3(-24.6700001, 0, 18.3500004), XMFLOAT3(0, 180, 0), true);
+
+	//FinalRoom
+	CreateTargetBoard("t6", XMFLOAT3(-11.4799995,	1.3, 33.0699997), XMFLOAT3(0, 0, 0), true);
+	//CreateTargetBoard("t7", XMFLOAT3(-6.11999989,	1.3, 33.0699997), XMFLOAT3(0, 0, 0), true);
+	CreateTargetBoard("t8", XMFLOAT3(-2.5,			1.3, 35.8800011), XMFLOAT3(0, 90, 0), true);
+	//CreateTargetBoard("t9", XMFLOAT3(-2.5, 1.3, 43.5999985), XMFLOAT3(0, 90, 0), true);
+	CreateTargetBoard("t9", XMFLOAT3(-6.11999989, 1.3, 33.0699997), XMFLOAT3(0, 0, 0), true);
+	//CreateTargetBoard("t10", XMFLOAT3(-5.78000021,	1.3, 46.8300018), XMFLOAT3(0, 180, 0), true);
+	//CreateTargetBoard("t11", XMFLOAT3(-11.46, 1.3, 46.7999992), XMFLOAT3(0, 180, 0), true);
+	//CreateTargetBoard("t11", XMFLOAT3(-11.46, 1.3, 46.7999992), XMFLOAT3(0, 180, 0), true);
+
+	// TEST
+	//CreateTargetBoard("t12", XMFLOAT3(-6.78999996, 0, 13.6700001), XMFLOAT3(0, 90, 0), false);
+
+
+	eventCount = 0;	// 위에서 생성할 때 다 한 번씩 누워서 안 됨
+
+	{	// 처음 문 닫기
+		Object* trig = new Object();
+		TransformComponent* transform = new TransformComponent(trig);
+		BoxColliderComponent* boxCollider = new BoxColliderComponent(trig, XMFLOAT3(0, 0, 0), XMFLOAT3(3, 1.5, 3), XMFLOAT4(0, 0, 0, 1), true);
+		EventComponent* trigEvent = new EventComponent(trig, 0);
+
+		transform->Translate(-4.48, 0, 0.7);//-6.78999996, 0, 15.6700001
+		//transform->Translate(-6.78999996, 0, 15.6700001);//
+
+		vector<Object*>* temp = new vector<Object*>;
+		temp->push_back(FindObjectByName("d0"));
+		EventInfo close = EventInfo(EVENT::DCLOSE, temp);
+		EventInfo triggerOn = EventInfo(EVENT::TRIGGER, nullptr);
+
+		trigEvent->AddEvent(close);
+		trigEvent->AddEvent(triggerOn);
+
+
+		vector<Object*>* temp2 = new vector<Object*>;
+		EventInfo i = EventInfo(EVENT::VICTORY, temp2);
+		trigEvent->AddEvent(i);
+
+		m_vecObject.push_back(trig);
+	}
+	{	// 첫 복도에서 적 스폰
+		Object* trig = new Object();
+		TransformComponent* transform = new TransformComponent(trig);
+		BoxColliderComponent* boxCollider = new BoxColliderComponent(trig, XMFLOAT3(0, 0, 0), XMFLOAT3(3, 1.5, 3), XMFLOAT4(0, 0, 0, 1), true);
+		EventComponent* trigEvent = new EventComponent(trig, 0);
+
+		transform->Translate(-14.5600004, 0, 0.879999995);//-6.78999996, 0, 15.6700001
+		//transform->Translate(-6.78999996, 0, 15.6700001);//
+
+		vector<Object*>* temp = new vector<Object*>;
+		temp->push_back(FindObjectByName("t0"));
+		EventInfo i = EventInfo(EVENT::EWAKE, temp);
+		EventInfo triggerOn = EventInfo(EVENT::TRIGGER, nullptr);
+
+		trigEvent->AddEvent(i);
+		trigEvent->AddEvent(triggerOn);
+
+		m_vecObject.push_back(trig);
+	}
+
+
+	{	// 첫 복도 적 죽으면 첫 방 문 열기
+		Object* trig = new Object();
+		TransformComponent* transform = new TransformComponent(trig);
+		EventComponent* trigEvent = new EventComponent(trig, 1);
+
+		transform->Translate(-8.81999969, 0, 39.6100006);//-6.78999996, 0, 15.6700001
+		//transform->Translate(-6.78999996, 0, 15.6700001);//
+
+		vector<Object*>* temp = new vector<Object*>;
+		temp->push_back(FindObjectByName("d1"));
+		EventInfo i = EventInfo(EVENT::DOPEN, temp);
+		trigEvent->AddEvent(i);
+
+		vector<Object*>* temp2 = new vector<Object*>;
+		temp2->push_back(FindObjectByName("t0"));
+		i = EventInfo(EVENT::EDIED, temp2);
+		trigEvent->AddEvent(i);
+
+		m_vecObject.push_back(trig);
+	}
+
+
+	{	// 첫 방 들어오면 적 셋 스폰
+		Object* trig = new Object();
+		TransformComponent* transform = new TransformComponent(trig);
+		BoxColliderComponent* boxCollider = new BoxColliderComponent(trig, XMFLOAT3(0, 0, 0), XMFLOAT3(3, 1.5, 3), XMFLOAT4(0, 0, 0, 1), true);
+		EventComponent* trigEvent = new EventComponent(trig, 1);
+
+		transform->Translate(-19.2399998, 0.39199999, 0.949999988);//-6.78999996, 0, 15.6700001
+		//transform->Translate(-6.78999996, 0, 15.6700001);//
+
+		vector<Object*>* temp = new vector<Object*>;
+		temp->push_back(FindObjectByName("t1"));
+		//temp->push_back(FindObjectByName("t2"));
+		temp->push_back(FindObjectByName("t3"));
+		EventInfo i = EventInfo(EVENT::EWAKE, temp);
+		trigEvent->AddEvent(i);
+
+		i = EventInfo(EVENT::TRIGGER, nullptr);
+		trigEvent->AddEvent(i);
+
+		m_vecObject.push_back(trig);
+	}
+
+
+	{	// 총 넷 잡으면 첫 방 나가는 문 열림
+		Object* trig = new Object();
+		TransformComponent* transform = new TransformComponent(trig);
+		EventComponent* trigEvent = new EventComponent(trig, 3);
+
+		transform->Translate(-19.2399998, 0.39199999, 0.949999988);//-6.78999996, 0, 15.6700001
+		//transform->Translate(-6.78999996, 0, 15.6700001);//
+
+		vector<Object*>* temp = new vector<Object*>;
+		temp->push_back(FindObjectByName("t1"));
+		//temp->push_back(FindObjectByName("t2"));
+		temp->push_back(FindObjectByName("t3"));
+		EventInfo i = EventInfo(EVENT::EDIED, temp);
+		trigEvent->AddEvent(i);
+
+		vector<Object*>* temp2 = new vector<Object*>;
+		temp2->push_back(FindObjectByName("d2"));
+		i = EventInfo(EVENT::DOPEN, temp2);
+		trigEvent->AddEvent(i);
+
+		m_vecObject.push_back(trig);
+	}
+
+
+	{	// 두번째 복도 도착하면 적 둘 스폰
+		Object* trig = new Object();
+		TransformComponent* transform = new TransformComponent(trig);
+		BoxColliderComponent* boxCollider = new BoxColliderComponent(trig, XMFLOAT3(0, 0, 0), XMFLOAT3(3, 1.5, 3), XMFLOAT4(0, 0, 0, 1), true);
+		EventComponent* trigEvent = new EventComponent(trig, 3);
+
+		transform->Translate(-24.0100002, 0.39199999, 10.3000002);
+
+		vector<Object*>* temp = new vector<Object*>;
+		temp->push_back(FindObjectByName("t4"));
+		temp->push_back(FindObjectByName("t5"));
+		EventInfo i = EventInfo(EVENT::EWAKE, temp);
+		trigEvent->AddEvent(i);
+
+		i = EventInfo(EVENT::TRIGGER, nullptr);
+		trigEvent->AddEvent(i);
+
+		m_vecObject.push_back(trig);
+	}
+
+
+	{	// 총 여섯 잡으면 두번째 복도 나가는 문 열림
+		Object* trig = new Object();
+		TransformComponent* transform = new TransformComponent(trig);
+		EventComponent* trigEvent = new EventComponent(trig, 5);
+
+		transform->Translate(-19.2399998, 0.39199999, 0.949999988);//-6.78999996, 0, 15.6700001
+		//transform->Translate(-6.78999996, 0, 15.6700001);//
+
+		vector<Object*>* temp = new vector<Object*>;
+		temp->push_back(FindObjectByName("t4"));
+		temp->push_back(FindObjectByName("t5"));
+		EventInfo i = EventInfo(EVENT::EDIED, temp);
+		trigEvent->AddEvent(i);
+
+		vector<Object*>* temp2 = new vector<Object*>;
+		temp2->push_back(FindObjectByName("d3"));
+		i = EventInfo(EVENT::DOPEN, temp2);
+		trigEvent->AddEvent(i);
+
+		m_vecObject.push_back(trig);
+	}
+
+
+	{	// 마지막 방 도착하면 문 닫고 적 여섯 스폰
+		Object* trig = new Object();
+		TransformComponent* transform = new TransformComponent(trig);
+		BoxColliderComponent* boxCollider = new BoxColliderComponent(trig, XMFLOAT3(0, 0, 0), XMFLOAT3(3, 1.5, 3), XMFLOAT4(0, 0, 0, 1), true);
+		EventComponent* trigEvent = new EventComponent(trig, 5);
+
+		transform->Translate(-8.18999958, 0.39199999, 39.4799995);
+
+		vector<Object*>* temp = new vector<Object*>;
+		temp->push_back(FindObjectByName("t6"));
+		//temp->push_back(FindObjectByName("t7"));
+		temp->push_back(FindObjectByName("t8"));
+		temp->push_back(FindObjectByName("t9"));
+		//temp->push_back(FindObjectByName("t10"));
+		//temp->push_back(FindObjectByName("t11"));
+		EventInfo i = EventInfo(EVENT::EWAKE, temp);
+		trigEvent->AddEvent(i);
+
+		i = EventInfo(EVENT::TRIGGER, nullptr);
+		trigEvent->AddEvent(i);
+
+		vector<Object*>* temp2 = new vector<Object*>;
+		temp2->push_back(FindObjectByName("d4"));
+		temp2->push_back(FindObjectByName("d5"));
+		EventInfo close = EventInfo(EVENT::DCLOSE, temp2);
+		trigEvent->AddEvent(close);
+
+		m_vecObject.push_back(trig);
+	}
+
+
+	{	// 총 12 잡으면 마지막 방 나가는 문, 시작지점 가는 문 열림
+		Object* trig = new Object();
+		TransformComponent* transform = new TransformComponent(trig);
+		EventComponent* trigEvent = new EventComponent(trig, 8);
+
+		vector<Object*>* temp = new vector<Object*>;
+		temp->push_back(FindObjectByName("t6"));
+		//temp->push_back(FindObjectByName("t7"));
+		temp->push_back(FindObjectByName("t8"));
+		temp->push_back(FindObjectByName("t9"));
+		//temp->push_back(FindObjectByName("t10"));
+		//temp->push_back(FindObjectByName("t11"));
+		EventInfo i = EventInfo(EVENT::EDIED, temp);
+		trigEvent->AddEvent(i);
+
+		vector<Object*>* temp2 = new vector<Object*>;
+		temp2->push_back(FindObjectByName("d5"));
+		temp2->push_back(FindObjectByName("d6"));
+		i = EventInfo(EVENT::DOPEN, temp2);
+		trigEvent->AddEvent(i);
+
+		m_vecObject.push_back(trig);
+	}
+
+
+	{	// 시작지점까지 돌아갈 수 있으면 승리
+		Object* trig = new Object();
+		TransformComponent* transform = new TransformComponent(trig);
+		BoxColliderComponent* boxCollider = new BoxColliderComponent(trig, XMFLOAT3(0, 0, 0), XMFLOAT3(3, 1.5, 3), XMFLOAT4(0, 0, 0, 1), true);
+		EventComponent* trigEvent = new EventComponent(trig, 8);
+
+		transform->Translate(-11.7200003, 0.39199999, 23.3899994);
+
+		EventInfo i = EventInfo(EVENT::TRIGGER, nullptr);
+		trigEvent->AddEvent(i);
+
+		vector<Object*>* temp2 = new vector<Object*>;
+		EventInfo close = EventInfo(EVENT::VICTORY, temp2);
+		trigEvent->AddEvent(close);
+
+		m_vecObject.push_back(trig);
+	}
+
+	/*===========================================================================
+	* UI Object
+	*==========================================================================*/
 
 	{
 		Object* text = new Object("TextHpInfo");
@@ -1524,9 +1822,7 @@ void Scene::CreateCollider(MY_COLLIDER_OBJECT_DATA colData)
 }
 
 void Scene::CreateTargetBoard(const char* strName,
-	XMFLOAT3 position, XMFLOAT3 rotationAngle, bool initialState,
-	ID3D12Device* device, ID3D12GraphicsCommandList* commandlist,
-	D3D12_CPU_DESCRIPTOR_HANDLE& cpuHandle, D3D12_GPU_DESCRIPTOR_HANDLE& gpuHandle)
+	XMFLOAT3 position, XMFLOAT3 rotationAngle, bool initialState)
 {
 	Object* targetBoard = new Object(strName);
 
@@ -1546,12 +1842,31 @@ void Scene::CreateTargetBoard(const char* strName,
 	skinnedMeshRenderer->SetMaterialByName("TargetBoardMat");
 	transform->Translate(position);
 	transform->RotateXYZDegree(rotationAngle);
-	if(initialState) TCC->Die();
+	if (initialState) TCC->Die();
+	else TCC->Revive();
 
 	TCC->SetPlayer(FindObjectByName("player"));
 
 	m_vecObject.push_back(targetBoard);
 	m_vecAnimObjectRenderGroup.push_back(targetBoard);
+}
+
+void Scene::CreateDoor(const char* strName, XMFLOAT3 position, XMFLOAT3 rotationAngle, bool isOpen)
+{
+	Object* d = new Object(strName);
+	TransformComponent* transform = new TransformComponent(d);
+	transform->Translate(position);
+	transform->RotateXYZDegree(rotationAngle);
+
+	BoxColliderComponent* boxCollider = new BoxColliderComponent(d, XMFLOAT3(0, 1.5, 0), XMFLOAT3(2.9, 3.6, 0.2), XMFLOAT4(0, 0, 0, 1));
+	MeshRendererComponent* mrcm = new MeshRendererComponent(d, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
+	mrcm->SetModelByName("level00_door");
+	mrcm->SetMaterialByName("level00_1");
+
+	DoorComponent* dc = new DoorComponent(d, isOpen);
+	m_vecObject.push_back(d);
+	m_vecNonAnimObjectRenderGroup.push_back(d);
+
 }
 
 vector<string> LoadMy::Split(istringstream& ss, const char delim)

@@ -10,7 +10,7 @@ public:
 	virtual void Update(float fTimeElapsed);
 
 public:
-	void Damage(int);
+	virtual void Damage(int);
 	bool isAlive() const { return !m_bDead; }
 	virtual void Die();
 	virtual void Revive();

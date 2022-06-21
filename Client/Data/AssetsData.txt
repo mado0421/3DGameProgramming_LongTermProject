@@ -92,6 +92,7 @@ level00_9.mm
 level00_10.mm
 level00_11.mm
 level00_12.mm
+level00_door.mm
 level00_0_dr.dds
 level00_1_dr.dds
 level00_2_dr.dds
@@ -118,3 +119,10 @@ level00_9_n.dds
 level00_10_n.dds
 level00_11_n.dds
 level00_12_n.dds
+ParticleDamage.dds
+Particle_5.dds
+Particle_4.dds
+Particle_3.dds
+Particle_2.dds
+Particle_1.dds
+victory.dds
