@@ -1,21 +1,15 @@
 #Light
 
-#{ spot color 0.8 0.0 0.0 direction 0 -2 1 position 2 6 -2 falloff 7 9 spotPower 4 shadow true }
-#{ spot color 0.0 0.8 0.0 direction 1 -1 0 position -2 6 0 falloff 8 10 spotPower 4 shadow true }
-#{ spot color 0.4 0.4 0.4 direction 0 -1 2 position 0 3 -3 falloff 9 10 spotPower 4 shadow true }
-#{ spot color 0.4 0.4 0.4 direction 0 -1 0.001 position 0 2 3 falloff 9 10 spotPower 4 shadow true }
-#{ point color 0.1 0.1 0.4 position 0 2.5 4 falloff 4 5 shadow true }
+{ dir color 0.15 0.15 0.35 direction -0.2 -2 -1 shadow true }
+{ spot color 0.35 0.35 0.5 direction 2.9 -2 -10 position -6.13999987 3.67000008 11.9099998 falloff 14 15 spotPower 4 shadow false }
+{ point position -15.8780003 3.32999992 2.4460001 color 0.4 0.4 0.4 falloff 8 16 shadow true }
+{ point position -22.6469994 5.53399992 5.34800005 color 0.4 0.4 0.4 falloff 8 16 shadow true }
+{ point position -22.6469994 5.53399992 8.28999996 color 0.4 0.4 0.4 falloff 8 16 shadow true }
 
-#{ spot color 0.5 0.5 0.4 direction 0 -1 2 position 0 2 -3 falloff 9 10 spotPower 4 shadow true }
-#{ spot color 0.5 0.5 0.4 direction -2 -1 0 position 0 2 -3 falloff 9 10 spotPower 4 shadow true }
-{ dir color 0.65 0.65 0.55 direction -1 -2 1 shadow true }
-#{ point color 0.3 0.3 0.7 position 0 4 3 falloff 1 7 shadow true }
-#{ point color 0.3 0.3 0.7 position 3.5 1 -3.5 falloff 1 5 shadow true }
-
-{ point position -3.5 2.8 -4 color 0.4 0.4 0.4 falloff 8 16 shadow true }
-{ point position -3 2.8 -21 color 0.4 0.4 0.4 falloff 8 16 shadow true }
-{ point position -11 2.8 -20 color 0.4 0.4 0.4 falloff 8 16 shadow true }
-{ point position -18 2.8 -21 color 0.4 0.4 0.4 falloff 8 16 shadow true }
-{ point position -25 2.8 -21 color 0.4 0.4 0.4 falloff 8 16 shadow true }
+{ point position -26.1159992 3.58999991 27.9680004 color 0.4 0.4 0.4 falloff 8 16 shadow true }
+{ point position -19.0230007 5.02400017 39.2270012 color 0.4 0.4 0.4 falloff 8 16 shadow true }
+{ point position -13.7299995 5.59000015 38.9300003 color 0.3 0.3 0.3 falloff 14 20 shadow true }
+{ point position -0.860000014 5.59000015 31.8199997 color 0.3 0.3 0.2 falloff 4 8 shadow false }
+{ point position -12.3400002 5.59000015 27.1499996 color 0.4 0.4 0.4 falloff 8 16 shadow true }
 
 #End

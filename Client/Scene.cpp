@@ -1119,22 +1119,22 @@ void Scene::BuildObject()
 	}
 	{
 		// player
-		Object* player = new Object("player");
+		Object* player = new Object("player");//Vector3(-6.78999996,0,15.6700001)
 
 		TransformComponent* transform = new TransformComponent(player);
+		InputManagerComponent* controller = new InputManagerComponent(player);
 		RigidbodyComponent* rigidbody = new RigidbodyComponent(player);
 		SkinnedMeshRendererComponent* skinnedMeshRenderer = new SkinnedMeshRendererComponent(player, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
 		HumanoidControllerComponent* humanoidController = new HumanoidControllerComponent(player, m_vecNonAnimObjectRenderGroup[0]);
 		HumanoidAnimatorComponent* humanoidAnimator = new HumanoidAnimatorComponent(player, "Humanoid_Idle");
-		InputManagerComponent* controller = new InputManagerComponent(player);
 		SphereColliderComponent* sphereCollider = new SphereColliderComponent(player, XMFLOAT3(0, 0.5f, 0), 0.5f);
 
 		skinnedMeshRenderer->SetModelByName("human");
 		skinnedMeshRenderer->SetMaterialByName("DefaultMaterial");
 		//skinnedMeshRenderer->SetModelByName("newBody");
 		//skinnedMeshRenderer->SetMaterialByName("newBody");
-		transform->Translate(-3, 0, -3);
-		transform->RotateXYZDegree(0, 180, 0);
+		transform->Translate(-6.78999996, 0, 15.6700001);
+		transform->RotateXYZDegree(0, 210, 0);
 
 		m_vecObject.push_back(player);
 		m_vecAnimObjectRenderGroup.push_back(player);
@@ -1157,6 +1157,8 @@ void Scene::BuildObject()
 		m_vecObject.push_back(look);
 
 		look->m_pParent = FindObjectByName("player");
+
+		FindObjectByName("player")->FindComponent<HumanoidControllerComponent>()->SetLookAt(look);
 	}
 	{
 		Object* camera = new Object("camera");
@@ -1175,219 +1177,219 @@ void Scene::BuildObject()
 		FindObjectByName("pistol")->FindComponent<WeaponControllerComponent>()->SetCam(camera);
 	}
 
-	CreateTargetBoard("TB0", XMFLOAT3(-4, 0.5f, -20), XMFLOAT3(0, 270, 0), true,
-		m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
+	//CreateTargetBoard("TB0", XMFLOAT3(-4, 0.5f, -20), XMFLOAT3(0, 270, 0), true,
+	//	m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
 
-	CreateTargetBoard("TB1", XMFLOAT3(-10.5, 0.5f, -24), XMFLOAT3(0, 300, 0), true,
-		m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
-	CreateTargetBoard("TB2", XMFLOAT3(-13, 0.5f, -22), XMFLOAT3(0, 270, 0), true,
-		m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
-	CreateTargetBoard("TB3", XMFLOAT3(-11.8, 0.5f, -19.7), XMFLOAT3(0, 240, 0), true,
-		m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
+	//CreateTargetBoard("TB1", XMFLOAT3(-10.5, 0.5f, -24), XMFLOAT3(0, 300, 0), true,
+	//	m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
+	//CreateTargetBoard("TB2", XMFLOAT3(-13, 0.5f, -22), XMFLOAT3(0, 270, 0), true,
+	//	m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
+	//CreateTargetBoard("TB3", XMFLOAT3(-11.8, 0.5f, -19.7), XMFLOAT3(0, 240, 0), true,
+	//	m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
 
-	CreateTargetBoard("TB4", XMFLOAT3(-17.1, 0.5f, -22), XMFLOAT3(0, 0, 0), true,
-		m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
-	CreateTargetBoard("TB5", XMFLOAT3(-19.5, 0.5f, -25.3), XMFLOAT3(0, 0, 0), true,
-		m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
-	CreateTargetBoard("TB6", XMFLOAT3(-23.8, 0.5f, -25.3), XMFLOAT3(0, 0, 0), true,
-		m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
-	CreateTargetBoard("TB7", XMFLOAT3(-26.5, 0.5f, -21.7), XMFLOAT3(0, 0, 0), true,
-		m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
+	//CreateTargetBoard("TB4", XMFLOAT3(-17.1, 0.5f, -22), XMFLOAT3(0, 0, 0), true,
+	//	m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
+	//CreateTargetBoard("TB5", XMFLOAT3(-19.5, 0.5f, -25.3), XMFLOAT3(0, 0, 0), true,
+	//	m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
+	//CreateTargetBoard("TB6", XMFLOAT3(-23.8, 0.5f, -25.3), XMFLOAT3(0, 0, 0), true,
+	//	m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
+	//CreateTargetBoard("TB7", XMFLOAT3(-26.5, 0.5f, -21.7), XMFLOAT3(0, 0, 0), true,
+	//	m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
 
-	CreateTargetBoard("TB8", XMFLOAT3(-11.8, 0.5f, -13), XMFLOAT3(0, 70, 0), true,
-		m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
-	CreateTargetBoard("TB9", XMFLOAT3(-10.6, 0.5f, -7.1), XMFLOAT3(0, 70, 0), true,
-		m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
-	CreateTargetBoard("TB10", XMFLOAT3(-14.9, 0.5f, -8.2), XMFLOAT3(0, 90, 0), true,
-		m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
+	//CreateTargetBoard("TB8", XMFLOAT3(-11.8, 0.5f, -13), XMFLOAT3(0, 70, 0), true,
+	//	m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
+	//CreateTargetBoard("TB9", XMFLOAT3(-10.6, 0.5f, -7.1), XMFLOAT3(0, 70, 0), true,
+	//	m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
+	//CreateTargetBoard("TB10", XMFLOAT3(-14.9, 0.5f, -8.2), XMFLOAT3(0, 90, 0), true,
+	//	m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
 
-	CreateTargetBoard("TB11", XMFLOAT3(-19.5, 0.5f, -8), XMFLOAT3(0, 80, 0), true,
-		m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
-	CreateTargetBoard("TB12", XMFLOAT3(-22.6, 0.5f, -6.1), XMFLOAT3(0, 90, 0), true,
-		m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
+	//CreateTargetBoard("TB11", XMFLOAT3(-19.5, 0.5f, -8), XMFLOAT3(0, 80, 0), true,
+	//	m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
+	//CreateTargetBoard("TB12", XMFLOAT3(-22.6, 0.5f, -6.1), XMFLOAT3(0, 90, 0), true,
+	//	m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
 
 
 	LoadLevelEnvironment();
 
-	// Door
-	{
-		Object* env = new Object("door00");
+	//// Door
+	//{
+	//	Object* env = new Object("door00");
 
-		TransformComponent* transform = new TransformComponent(env);
-		BoxColliderComponent* boxCollider = new BoxColliderComponent(env, XMFLOAT3(0, 1.5f, 0), XMFLOAT3(1.5f, 1.5f, 0.15f), XMFLOAT4(0, 0, 0, 1));
-		transform->Translate(-1.5, 0, -9.15);
-		MeshRendererComponent* mrc = new MeshRendererComponent(env, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
-		mrc->SetModelByName("tutorialHouse_door");
-		mrc->SetMaterialByName("doorMat");
-		DoorComponent* dc = new DoorComponent(env, false);
-
-
-		m_vecObject.push_back(env);
-		m_vecNonAnimObjectRenderGroup.push_back(env);
-	}
-	{
-		Object* env = new Object("door01");
-
-		TransformComponent* transform = new TransformComponent(env);
-		BoxColliderComponent* boxCollider = new BoxColliderComponent(env, XMFLOAT3(0, 1.5f, 0), XMFLOAT3(1.5f, 1.5f, 0.15f), XMFLOAT4(0, 0, 0, 1));
-		transform->Translate(-1.5, 0, -16.85);
-		MeshRendererComponent* mrc = new MeshRendererComponent(env, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
-		mrc->SetModelByName("tutorialHouse_door");
-		mrc->SetMaterialByName("doorMat");
-		DoorComponent* dc = new DoorComponent(env);
+	//	TransformComponent* transform = new TransformComponent(env);
+	//	BoxColliderComponent* boxCollider = new BoxColliderComponent(env, XMFLOAT3(0, 1.5f, 0), XMFLOAT3(1.5f, 1.5f, 0.15f), XMFLOAT4(0, 0, 0, 1));
+	//	transform->Translate(-1.5, 0, -9.15);
+	//	MeshRendererComponent* mrc = new MeshRendererComponent(env, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
+	//	mrc->SetModelByName("tutorialHouse_door");
+	//	mrc->SetMaterialByName("doorMat");
+	//	DoorComponent* dc = new DoorComponent(env, false);
 
 
-		m_vecObject.push_back(env);
-		m_vecNonAnimObjectRenderGroup.push_back(env);
-	}
-	{
-		Object* env = new Object("door02");
+	//	m_vecObject.push_back(env);
+	//	m_vecNonAnimObjectRenderGroup.push_back(env);
+	//}
+	//{
+	//	Object* env = new Object("door01");
 
-		TransformComponent* transform = new TransformComponent(env);
-		BoxColliderComponent* boxCollider = new BoxColliderComponent(env, XMFLOAT3(0, 1.5f, 0), XMFLOAT3(1.5f, 1.5f, 0.15f), XMFLOAT4(0, 0, 0, 1));
-		transform->Translate(-5.85, 0, -23.5);
-		transform->RotateXYZDegree(0, 90, 0);
-		MeshRendererComponent* mrc = new MeshRendererComponent(env, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
-		mrc->SetModelByName("tutorialHouse_door");
-		mrc->SetMaterialByName("doorMat");
-		DoorComponent* dc = new DoorComponent(env);
-
-
-		m_vecObject.push_back(env);
-		m_vecNonAnimObjectRenderGroup.push_back(env);
-	}
-	{
-		Object* env = new Object("door03");
-
-		TransformComponent* transform = new TransformComponent(env);
-		BoxColliderComponent* boxCollider = new BoxColliderComponent(env, XMFLOAT3(0, 1.5f, 0), XMFLOAT3(1.5f, 1.5f, 0.15f), XMFLOAT4(0, 0, 0, 1));
-		transform->Translate(-14.85, 0, -16.5);
-		transform->RotateXYZDegree(0, 270, 0);
-		MeshRendererComponent* mrc = new MeshRendererComponent(env, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
-		mrc->SetModelByName("tutorialHouse_door");
-		mrc->SetMaterialByName("doorMat");
-		DoorComponent* dc = new DoorComponent(env);
+	//	TransformComponent* transform = new TransformComponent(env);
+	//	BoxColliderComponent* boxCollider = new BoxColliderComponent(env, XMFLOAT3(0, 1.5f, 0), XMFLOAT3(1.5f, 1.5f, 0.15f), XMFLOAT4(0, 0, 0, 1));
+	//	transform->Translate(-1.5, 0, -16.85);
+	//	MeshRendererComponent* mrc = new MeshRendererComponent(env, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
+	//	mrc->SetModelByName("tutorialHouse_door");
+	//	mrc->SetMaterialByName("doorMat");
+	//	DoorComponent* dc = new DoorComponent(env);
 
 
-		m_vecObject.push_back(env);
-		m_vecNonAnimObjectRenderGroup.push_back(env);
-	}
-	{
-		Object* env = new Object("door04");
+	//	m_vecObject.push_back(env);
+	//	m_vecNonAnimObjectRenderGroup.push_back(env);
+	//}
+	//{
+	//	Object* env = new Object("door02");
 
-		TransformComponent* transform = new TransformComponent(env);
-		BoxColliderComponent* boxCollider = new BoxColliderComponent(env, XMFLOAT3(0, 1.5f, 0), XMFLOAT3(1.5f, 1.5f, 0.15f), XMFLOAT4(0, 0, 0, 1));
-		transform->Translate(-27.5, 0, -14.85);
-		transform->RotateXYZDegree(0, 180, 0);
-		MeshRendererComponent* mrc = new MeshRendererComponent(env, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
-		mrc->SetModelByName("tutorialHouse_door");
-		mrc->SetMaterialByName("doorMat");
-		DoorComponent* dc = new DoorComponent(env);
-
-
-		m_vecObject.push_back(env);
-		m_vecNonAnimObjectRenderGroup.push_back(env);
-	}
-	{
-		Object* env = new Object("door05");
-
-		TransformComponent* transform = new TransformComponent(env);
-		BoxColliderComponent* boxCollider = new BoxColliderComponent(env, XMFLOAT3(0, 1.5f, 0), XMFLOAT3(1.5f, 1.5f, 0.15f), XMFLOAT4(0, 0, 0, 1));
-		transform->Translate(-7.85, 0, -1.5);
-		transform->RotateXYZDegree(0, 270, 0);
-		MeshRendererComponent* mrc = new MeshRendererComponent(env, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
-		mrc->SetModelByName("tutorialHouse_door");
-		mrc->SetMaterialByName("doorMat");
-		DoorComponent* dc = new DoorComponent(env);
+	//	TransformComponent* transform = new TransformComponent(env);
+	//	BoxColliderComponent* boxCollider = new BoxColliderComponent(env, XMFLOAT3(0, 1.5f, 0), XMFLOAT3(1.5f, 1.5f, 0.15f), XMFLOAT4(0, 0, 0, 1));
+	//	transform->Translate(-5.85, 0, -23.5);
+	//	transform->RotateXYZDegree(0, 90, 0);
+	//	MeshRendererComponent* mrc = new MeshRendererComponent(env, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
+	//	mrc->SetModelByName("tutorialHouse_door");
+	//	mrc->SetMaterialByName("doorMat");
+	//	DoorComponent* dc = new DoorComponent(env);
 
 
-		m_vecObject.push_back(env);
-		m_vecNonAnimObjectRenderGroup.push_back(env);
-	}
+	//	m_vecObject.push_back(env);
+	//	m_vecNonAnimObjectRenderGroup.push_back(env);
+	//}
+	//{
+	//	Object* env = new Object("door03");
 
-	// Trigger
-	{
-		Object* trig = new Object();
+	//	TransformComponent* transform = new TransformComponent(env);
+	//	BoxColliderComponent* boxCollider = new BoxColliderComponent(env, XMFLOAT3(0, 1.5f, 0), XMFLOAT3(1.5f, 1.5f, 0.15f), XMFLOAT4(0, 0, 0, 1));
+	//	transform->Translate(-14.85, 0, -16.5);
+	//	transform->RotateXYZDegree(0, 270, 0);
+	//	MeshRendererComponent* mrc = new MeshRendererComponent(env, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
+	//	mrc->SetModelByName("tutorialHouse_door");
+	//	mrc->SetMaterialByName("doorMat");
+	//	DoorComponent* dc = new DoorComponent(env);
 
-		TransformComponent* transform = new TransformComponent(trig);
-		transform->Translate(-1.5, 0, -7.5);
-		BoxColliderComponent* boxCollider = new BoxColliderComponent(trig, XMFLOAT3(0, 0, 0), XMFLOAT3(1.5, 1.5, 1.5), XMFLOAT4(0, 0, 0, 1), true);
-		EventComponent* trigEvent = new EventComponent(trig);
-		trigEvent->AddDoorOpen(FindObjectByName("door00")->FindComponent<DoorComponent>());
 
-		m_vecObject.push_back(trig);
-	}
-	{
-		Object* trig = new Object();
+	//	m_vecObject.push_back(env);
+	//	m_vecNonAnimObjectRenderGroup.push_back(env);
+	//}
+	//{
+	//	Object* env = new Object("door04");
 
-		TransformComponent* transform = new TransformComponent(trig);
-		transform->Translate(-1.5, 0, -15);
-		BoxColliderComponent* boxCollider = new BoxColliderComponent(trig, XMFLOAT3(0, 0, 0), XMFLOAT3(1.5, 1.5, 2), XMFLOAT4(0, 0, 0, 1), true);
-		EventComponent* trigEvent = new EventComponent(trig);
-		trigEvent->AddDoorOpen(FindObjectByName("door01")->FindComponent<DoorComponent>());
+	//	TransformComponent* transform = new TransformComponent(env);
+	//	BoxColliderComponent* boxCollider = new BoxColliderComponent(env, XMFLOAT3(0, 1.5f, 0), XMFLOAT3(1.5f, 1.5f, 0.15f), XMFLOAT4(0, 0, 0, 1));
+	//	transform->Translate(-27.5, 0, -14.85);
+	//	transform->RotateXYZDegree(0, 180, 0);
+	//	MeshRendererComponent* mrc = new MeshRendererComponent(env, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
+	//	mrc->SetModelByName("tutorialHouse_door");
+	//	mrc->SetMaterialByName("doorMat");
+	//	DoorComponent* dc = new DoorComponent(env);
 
-		m_vecObject.push_back(trig);
-	}
-	{
-		Object* trig = new Object();
 
-		TransformComponent* transform = new TransformComponent(trig);
-		transform->Translate(-1.5, 0, -20);
-		BoxColliderComponent* boxCollider = new BoxColliderComponent(trig, XMFLOAT3(0, 0, 0), XMFLOAT3(1.5, 1.5, 2), XMFLOAT4(0, 0, 0, 1), true);
-		EventComponent* trigEvent = new EventComponent(trig);
-		trigEvent->AddDoorClose(FindObjectByName("door02")->FindComponent<DoorComponent>());
-		trigEvent->AddSpawn(FindObjectByName("TB0")->FindComponent<Character>());
+	//	m_vecObject.push_back(env);
+	//	m_vecNonAnimObjectRenderGroup.push_back(env);
+	//}
+	//{
+	//	Object* env = new Object("door05");
 
-		m_vecObject.push_back(trig);
-	}
-	{
-		Object* trig = new Object();
+	//	TransformComponent* transform = new TransformComponent(env);
+	//	BoxColliderComponent* boxCollider = new BoxColliderComponent(env, XMFLOAT3(0, 1.5f, 0), XMFLOAT3(1.5f, 1.5f, 0.15f), XMFLOAT4(0, 0, 0, 1));
+	//	transform->Translate(-7.85, 0, -1.5);
+	//	transform->RotateXYZDegree(0, 270, 0);
+	//	MeshRendererComponent* mrc = new MeshRendererComponent(env, m_pd3dDevice, m_pd3dCommandList, m_d3dCbvCPUDescriptorStartHandle, m_d3dCbvGPUDescriptorStartHandle);
+	//	mrc->SetModelByName("tutorialHouse_door");
+	//	mrc->SetMaterialByName("doorMat");
+	//	DoorComponent* dc = new DoorComponent(env);
 
-		TransformComponent* transform = new TransformComponent(trig);
-		transform->Translate(-7.5, 0, -21);
-		BoxColliderComponent* boxCollider = new BoxColliderComponent(trig, XMFLOAT3(0, 0, 0), XMFLOAT3(1.5, 1.5, 2), XMFLOAT4(0, 0, 0, 1), true);
-		EventComponent* trigEvent = new EventComponent(trig);
-		trigEvent->AddDoorClose(FindObjectByName("door03")->FindComponent<DoorComponent>());
-		trigEvent->AddDoorClose(FindObjectByName("door02")->FindComponent<DoorComponent>());
-		trigEvent->AddSpawn(FindObjectByName("TB1")->FindComponent<Character>());
-		trigEvent->AddSpawn(FindObjectByName("TB2")->FindComponent<Character>());
-		trigEvent->AddSpawn(FindObjectByName("TB3")->FindComponent<Character>());
 
-		m_vecObject.push_back(trig);
-	}
-	{
-		Object* trig = new Object();
+	//	m_vecObject.push_back(env);
+	//	m_vecNonAnimObjectRenderGroup.push_back(env);
+	//}
 
-		TransformComponent* transform = new TransformComponent(trig);
-		transform->Translate(-19, 0, -17);
-		BoxColliderComponent* boxCollider = new BoxColliderComponent(trig, XMFLOAT3(0, 0, 0), XMFLOAT3(1.5, 1.5, 2), XMFLOAT4(0, 0, 0, 1), true);
-		EventComponent* trigEvent = new EventComponent(trig);
-		trigEvent->AddDoorClose(FindObjectByName("door03")->FindComponent<DoorComponent>());
-		trigEvent->AddDoorClose(FindObjectByName("door04")->FindComponent<DoorComponent>());
-		trigEvent->AddSpawn(FindObjectByName("TB4")->FindComponent<Character>());
-		trigEvent->AddSpawn(FindObjectByName("TB5")->FindComponent<Character>());
-		trigEvent->AddSpawn(FindObjectByName("TB6")->FindComponent<Character>());
-		trigEvent->AddSpawn(FindObjectByName("TB7")->FindComponent<Character>());
+	//// Trigger
+	//{
+	//	Object* trig = new Object();
 
-		m_vecObject.push_back(trig);
-	}
-	{
-		Object* trig = new Object();
+	//	TransformComponent* transform = new TransformComponent(trig);
+	//	transform->Translate(-1.5, 0, -7.5);
+	//	BoxColliderComponent* boxCollider = new BoxColliderComponent(trig, XMFLOAT3(0, 0, 0), XMFLOAT3(1.5, 1.5, 1.5), XMFLOAT4(0, 0, 0, 1), true);
+	//	EventComponent* trigEvent = new EventComponent(trig);
+	//	trigEvent->AddDoorOpen(FindObjectByName("door00")->FindComponent<DoorComponent>());
 
-		TransformComponent* transform = new TransformComponent(trig);
-		transform->Translate(-27, 0, -11.5);
-		BoxColliderComponent* boxCollider = new BoxColliderComponent(trig, XMFLOAT3(0, 0, 0), XMFLOAT3(1.5, 1.5, 2), XMFLOAT4(0, 0, 0, 1), true);
-		EventComponent* trigEvent = new EventComponent(trig);
-		trigEvent->AddDoorClose(FindObjectByName("door04")->FindComponent<DoorComponent>());
-		trigEvent->AddDoorClose(FindObjectByName("door05")->FindComponent<DoorComponent>());
-		trigEvent->AddSpawn(FindObjectByName("TB8")->FindComponent<Character>());
-		trigEvent->AddSpawn(FindObjectByName("TB9")->FindComponent<Character>());
-		trigEvent->AddSpawn(FindObjectByName("TB10")->FindComponent<Character>());
-		trigEvent->AddSpawn(FindObjectByName("TB11")->FindComponent<Character>());
-		trigEvent->AddSpawn(FindObjectByName("TB12")->FindComponent<Character>());
+	//	m_vecObject.push_back(trig);
+	//}
+	//{
+	//	Object* trig = new Object();
 
-		m_vecObject.push_back(trig);
-	}
+	//	TransformComponent* transform = new TransformComponent(trig);
+	//	transform->Translate(-1.5, 0, -15);
+	//	BoxColliderComponent* boxCollider = new BoxColliderComponent(trig, XMFLOAT3(0, 0, 0), XMFLOAT3(1.5, 1.5, 2), XMFLOAT4(0, 0, 0, 1), true);
+	//	EventComponent* trigEvent = new EventComponent(trig);
+	//	trigEvent->AddDoorOpen(FindObjectByName("door01")->FindComponent<DoorComponent>());
+
+	//	m_vecObject.push_back(trig);
+	//}
+	//{
+	//	Object* trig = new Object();
+
+	//	TransformComponent* transform = new TransformComponent(trig);
+	//	transform->Translate(-1.5, 0, -20);
+	//	BoxColliderComponent* boxCollider = new BoxColliderComponent(trig, XMFLOAT3(0, 0, 0), XMFLOAT3(1.5, 1.5, 2), XMFLOAT4(0, 0, 0, 1), true);
+	//	EventComponent* trigEvent = new EventComponent(trig);
+	//	trigEvent->AddDoorClose(FindObjectByName("door02")->FindComponent<DoorComponent>());
+	//	trigEvent->AddSpawn(FindObjectByName("TB0")->FindComponent<Character>());
+
+	//	m_vecObject.push_back(trig);
+	//}
+	//{
+	//	Object* trig = new Object();
+
+	//	TransformComponent* transform = new TransformComponent(trig);
+	//	transform->Translate(-7.5, 0, -21);
+	//	BoxColliderComponent* boxCollider = new BoxColliderComponent(trig, XMFLOAT3(0, 0, 0), XMFLOAT3(1.5, 1.5, 2), XMFLOAT4(0, 0, 0, 1), true);
+	//	EventComponent* trigEvent = new EventComponent(trig);
+	//	trigEvent->AddDoorClose(FindObjectByName("door03")->FindComponent<DoorComponent>());
+	//	trigEvent->AddDoorClose(FindObjectByName("door02")->FindComponent<DoorComponent>());
+	//	trigEvent->AddSpawn(FindObjectByName("TB1")->FindComponent<Character>());
+	//	trigEvent->AddSpawn(FindObjectByName("TB2")->FindComponent<Character>());
+	//	trigEvent->AddSpawn(FindObjectByName("TB3")->FindComponent<Character>());
+
+	//	m_vecObject.push_back(trig);
+	//}
+	//{
+	//	Object* trig = new Object();
+
+	//	TransformComponent* transform = new TransformComponent(trig);
+	//	transform->Translate(-19, 0, -17);
+	//	BoxColliderComponent* boxCollider = new BoxColliderComponent(trig, XMFLOAT3(0, 0, 0), XMFLOAT3(1.5, 1.5, 2), XMFLOAT4(0, 0, 0, 1), true);
+	//	EventComponent* trigEvent = new EventComponent(trig);
+	//	trigEvent->AddDoorClose(FindObjectByName("door03")->FindComponent<DoorComponent>());
+	//	trigEvent->AddDoorClose(FindObjectByName("door04")->FindComponent<DoorComponent>());
+	//	trigEvent->AddSpawn(FindObjectByName("TB4")->FindComponent<Character>());
+	//	trigEvent->AddSpawn(FindObjectByName("TB5")->FindComponent<Character>());
+	//	trigEvent->AddSpawn(FindObjectByName("TB6")->FindComponent<Character>());
+	//	trigEvent->AddSpawn(FindObjectByName("TB7")->FindComponent<Character>());
+
+	//	m_vecObject.push_back(trig);
+	//}
+	//{
+	//	Object* trig = new Object();
+
+	//	TransformComponent* transform = new TransformComponent(trig);
+	//	transform->Translate(-27, 0, -11.5);
+	//	BoxColliderComponent* boxCollider = new BoxColliderComponent(trig, XMFLOAT3(0, 0, 0), XMFLOAT3(1.5, 1.5, 2), XMFLOAT4(0, 0, 0, 1), true);
+	//	EventComponent* trigEvent = new EventComponent(trig);
+	//	trigEvent->AddDoorClose(FindObjectByName("door04")->FindComponent<DoorComponent>());
+	//	trigEvent->AddDoorClose(FindObjectByName("door05")->FindComponent<DoorComponent>());
+	//	trigEvent->AddSpawn(FindObjectByName("TB8")->FindComponent<Character>());
+	//	trigEvent->AddSpawn(FindObjectByName("TB9")->FindComponent<Character>());
+	//	trigEvent->AddSpawn(FindObjectByName("TB10")->FindComponent<Character>());
+	//	trigEvent->AddSpawn(FindObjectByName("TB11")->FindComponent<Character>());
+	//	trigEvent->AddSpawn(FindObjectByName("TB12")->FindComponent<Character>());
+
+	//	m_vecObject.push_back(trig);
+	//}
 
 
 	{

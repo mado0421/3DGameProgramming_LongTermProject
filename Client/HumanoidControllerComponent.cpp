@@ -15,19 +15,26 @@ HumanoidControllerComponent::HumanoidControllerComponent(Object* pObject, Object
 	, m_fAimProgress(0)
 	, m_fTimeForAim(0.2f)
 {
+
+	l_pInput = m_pObject->FindComponent<InputManagerComponent>();
+	l_transform = m_pObject->FindComponent<TransformComponent>();
 }
 
 HumanoidControllerComponent::~HumanoidControllerComponent()
 {
 }
 
+void HumanoidControllerComponent::SetLookAt(Object* pObejct)
+{
+	m_pLookAt = pObejct->FindComponent<TransformComponent>();
+}
+
 void HumanoidControllerComponent::Update(float fTimeElapsed)
 {
 	if (!m_bEnabled) return;
 
-	InputManagerComponent* l_pInput = m_pObject->FindComponent<InputManagerComponent>();
-	TransformComponent* l_transform = m_pObject->FindComponent<TransformComponent>();
-	
+	float fTemp;
+
 	m_fTime += fTimeElapsed;
 
 	if (l_pInput->IsKeyDown(KeyCode::_P)) { Character::Damage(100); }
@@ -46,6 +53,17 @@ void HumanoidControllerComponent::Update(float fTimeElapsed)
 			if (0 != xmf2MouseMovement.x) {
 
 				l_transform->RotateXYZDegree(0, xmf2MouseMovement.x * -0.05f, 0);
+			}
+
+			// for test
+			if (m_pLookAt && 0 != xmf2MouseMovement.y) {
+				fTemp = lookAtYAngle + xmf2MouseMovement.y * -0.001f;
+				if (-1.5 < fTemp && fTemp < 1.5) {
+					lookAtYAngle = fTemp;
+
+					m_pLookAt->SetPosition(0, 1.5f + lookAtYAngle, 5.0f);
+
+				}
 			}
 		}
 		{

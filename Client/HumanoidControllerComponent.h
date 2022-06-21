@@ -2,12 +2,17 @@
 #include "Component.h"
 #include "Character.h"
 
+class TransformComponent;
+class InputManagerComponent;
+
 class HumanoidControllerComponent : public Component, public Character
 {
 public:
 	HumanoidControllerComponent() = delete;
 	HumanoidControllerComponent(Object* pObject, Object* pWeapon);
 	~HumanoidControllerComponent();
+
+	void SetLookAt(Object* pObejct);
 
 public:
 
@@ -24,6 +29,9 @@ public:
 	float		m_fTimeForAim;
 	Object*		m_pWeaponObject;
 
-
+	TransformComponent* m_pLookAt = nullptr;
+	float lookAtYAngle = 0;
+	InputManagerComponent* l_pInput;
+	TransformComponent* l_transform;
 };
 

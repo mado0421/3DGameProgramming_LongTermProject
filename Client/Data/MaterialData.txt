@@ -26,4 +26,18 @@
 { name endCard d endImage_rescale f 0.1 0.1 0.1 }
 { name newBody d newBody f 0.1 0.1 0.1 }
 
+{ name level00_0 d level00_0_dr n level00_0_n f 0.1 0.1 0.1 }
+{ name level00_1 d level00_1_dr n level00_1_n f 0.1 0.1 0.1 }
+{ name level00_2 d level00_2_dr n level00_2_n f 0.1 0.1 0.1 }
+{ name level00_3 d level00_3_dr n level00_3_n f 0.1 0.1 0.1 }
+{ name level00_4 d level00_4_dr n level00_4_n f 0.1 0.1 0.1 }
+{ name level00_5 d level00_5_dr n level00_5_n f 0.1 0.1 0.1 }
+{ name level00_6 d level00_6_dr n level00_6_n f 0.1 0.1 0.1 }
+{ name level00_7 d level00_7_dr n level00_7_n f 0.1 0.1 0.1 }
+{ name level00_8 d level00_8_dr n level00_8_n f 0.1 0.1 0.1 }
+{ name level00_9 d level00_9_dr n level00_9_n f 0.1 0.1 0.1 }
+{ name level00_10 d level00_10_dr n level00_10_n f 0.1 0.1 0.1 }
+{ name level00_11 d level00_11_dr n level00_11_n f 0.1 0.1 0.1 }
+{ name level00_12 d level00_12_dr n level00_12_n f 0.1 0.1 0.1 }
+
 #End

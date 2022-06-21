@@ -1,8 +1,14 @@
-Count: 7
-tutorialHouse_ceiling 0,0,0 0,0,0,1 ceilingMat
-tutorialHouse_doorFrame 0,0,0 0,0,0,1 Concrete_Door
-tutorialHouse_fence 0,0,-0.4 0,0,0,1 Wooden_fence
-tutorialHouse_outerFloor 0,0,0 0,0,0,1 outerFloorMat
-tutorialHouse_outerWall 0,0,0 0,0,0,1 outerWallMat
-tutorialHouse_wall 0,0,0 0,0,0,1 wallMat
-tutorialHouse_floor 0,0,0 0,0,0,1 floorMat
+Count: 13
+level00_12 0,0,0 0,0,0,1 level00_12
+level00_11 0,0,0 0,0,0,1 level00_11
+level00_10 0,0,0 0,0,0,1 level00_10
+level00_9 0,0,0 0,0,0,1 level00_9
+level00_8 0,0,0 0,0,0,1 level00_8
+level00_7 0,0,0 0,0,0,1 level00_7
+level00_6 0,0,0 0,0,0,1 level00_6
+level00_5 0,0,0 0,0,0,1 level00_5
+level00_4 0,0,0 0,0,0,1 level00_4
+level00_3 0,0,0 0,0,0,1 level00_3
+level00_2 0,0,0 0,0,0,1 level00_2
+level00_1 0,0,0 0,0,0,1 level00_1
+level00_0 0,0,0 0,0,0,1 level00_0
