@@ -12,7 +12,7 @@
 
 #include "Components.h"
 
-bool TEST_MOUSE_USABLE = false;
+bool TEST_MOUSE_USABLE = true;
 
 void Scene::Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
@@ -28,7 +28,7 @@ void Scene::Init(Framework* pFramework, ID3D12Device* pd3dDevice, ID3D12Graphics
 	*=======================================================================*/
 	if(TEST_MOUSE_USABLE)
 		SetCursorPos(FRAME_BUFFER_WIDTH / 2, FRAME_BUFFER_HEIGHT / 2);	
-
+	ShowCursor(false);
 
 	/*========================================================================
 	* 카메라 설정
@@ -1472,9 +1472,9 @@ void Scene::BuildObject()
 		trigEvent->AddEvent(triggerOn);
 
 
-		vector<Object*>* temp2 = new vector<Object*>;
-		EventInfo i = EventInfo(EVENT::VICTORY, temp2);
-		trigEvent->AddEvent(i);
+		//vector<Object*>* temp2 = new vector<Object*>;
+		//EventInfo i = EventInfo(EVENT::VICTORY, temp2);
+		//trigEvent->AddEvent(i);
 
 		m_vecObject.push_back(trig);
 	}

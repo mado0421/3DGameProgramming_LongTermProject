@@ -5,7 +5,7 @@
 #pragma comment(lib, "d3d12.lib")
 #pragma comment(lib, "dxgi.lib")
 
-#define DEBUG
+//#define DEBUG
 
 #ifdef DEBUG
 #ifdef UNICODE
